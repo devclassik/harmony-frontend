@@ -1,0 +1,64 @@
+<div
+  class="fixed inset-0 bg-[#7f7f7f7b] bg-opacity-50 flex justify-center items-center z-50"
+  (click)="onOverlayClick($event)"
+  >
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Image (if provided) -->
+    <img
+      *ngIf="imageUrl"
+      [src]="imageUrl"
+      alt="Modal Image"
+      class="modal-image"
+    />
+
+    <!-- Title -->
+    <h2 class="modal-title">{{ title }}</h2>
+
+    <!-- Text -->
+    <p class="modal-text">{{ text }}</p>
+
+    <!-- Buttons -->
+    <div class="modal-buttons">
+      <button
+        class="modal-button"
+        [style.backgroundColor]="noButtonColor"
+        (click)="onConfirm(false)"
+      >
+        {{ noButtonText }}
+      </button>
+      <button
+        class="modal-button"
+        [style.backgroundColor]="yesButtonColor"
+        (click)="onConfirm(true)"
+      >
+        {{ yesButtonText }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<app-confirm-modal
+  *ngIf="showModal"
+  [title]="modalConfig.title"
+  [text]="modalConfig.text"
+  [imageUrl]="modalConfig.imageUrl"
+  [yesButtonText]="modalConfig.yesButtonText"
+  [noButtonText]="modalConfig.noButtonText"
+  [yesButtonColor]="modalConfig.yesButtonColor"
+  [noButtonColor]="modalConfig.noButtonColor"
+  (confirmed)="onModalConfirm($event)"
+></app-confirm-modal>
+
+
+<app-confirm-modal
+  *ngIf="showModal"
+  [title]="modalConfig.title"
+  [text]="modalConfig.text"
+  [imageUrl]="modalConfig.imageUrl"
+  [yesButtonText]="modalConfig.yesButtonText"
+  [noButtonText]="modalConfig.noButtonText"
+  [yesButtonColor]="modalConfig.yesButtonColor"
+  [noButtonColor]="modalConfig.noButtonColor"
+  (confirmed)="onModalConfirm($event)"
+  (closed)="onModalClose()"
+></app-confirm-modal>
