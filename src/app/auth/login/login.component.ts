@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
@@ -21,7 +22,7 @@ export class LoginComponent {
   ) { }
 
   signUp() {
-    this.router.navigate(['/auth/register']);
+    this.router.navigate(['/auth/sign-up']);
   }
 
   forgotPassword() {

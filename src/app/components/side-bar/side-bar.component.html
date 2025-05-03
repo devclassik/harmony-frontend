@@ -1,8 +1,148 @@
-<div class="sidebar">
-  <h3>Admin Panel</h3>
-  <ul>
-    <li>Dashboard</li>
-    <li>Users</li>
-    <li>Settings</li>
-  </ul>
-</div>
+
+<aside
+  [ngClass]="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full'"
+  class="sidebar fixed left-0 top-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-[#FCFCFC] px-5 duration-300 ease-linear dark:border-gray-100 dark:bg-[#FCFCFC] lg:static lg:translate-x-0"
+>
+  <!-- SIDEBAR HEADER -->
+  <div
+    [ngClass]="sidebarToggle ? 'justify-center' : 'justify-between'"
+    class="sidebar-header flex items-center gap-2 pb-7 pt-8 hover:cursor-pointer"
+  >
+    <a routerLink="/">
+      <span class="logo" [ngClass]="sidebarToggle ? 'hidden' : ''">
+        <img
+          class="dark:hidden"
+          src="/assets/images/harmonyLogo.png"
+          alt="Logo"
+        />
+        <img
+          class="hidden dark:block"
+          src="/assets/images/harmonyLogo.png"
+          alt="Logo"
+        />
+      </span>
+
+      <img
+        class="logo-icon hover:cursor-pointer"
+        [ngClass]="sidebarToggle ? 'lg:block h-8' : 'hidden'"
+        src="/assets/images/harmonyLogo.png"
+        alt="Logo"
+      />
+    </a>
+  </div>
+  <!-- SIDEBAR HEADER -->
+
+  <div
+    class="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear"
+  >
+    <!-- Sidebar Menu -->
+    <nav>
+      <ul class="mb-6 flex flex-col gap-4">
+        <!-- Dashboard -->
+        <li class="menu-item">
+          <a routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer">
+            <mat-icon>dashboard</mat-icon>
+            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Dashboard</span>
+          </a>
+        </li>
+
+        <!-- Employee Record -->
+        <li class="menu-item">
+          <a routerLink="/employee-record" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer">
+            <mat-icon>assignment</mat-icon>
+            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Employee Record</span>
+          </a>
+        </li>
+
+        <!-- Reporting & Analytics -->
+        <li class="menu-item">
+          <a routerLink="/user" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer">
+            <mat-icon>poll</mat-icon>
+            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Reporting & Analytics</span>
+          </a>
+        </li>
+
+        <!-- Employee Management -->
+        <li class="menu-item">
+          <div class="flex flex-col">
+            <button (click)="toggleEmployeeMenu()" class="flex items-center justify-between gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer">
+              <div class="flex items-center gap-2">
+                <mat-icon>people</mat-icon>
+                <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Employee Management</span>
+              </div>
+              <mat-icon>{{ employeeManagement ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+            
+            <div *ngIf="employeeManagement" class="mt-2 ml-4 flex flex-col gap-2 px-4 list-none">
+              <a routerLink="/promotion" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md">Promotion</a>
+              <a routerLink="/discipline" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md">Discipline</a>
+              <a routerLink="/transfer" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md">Transfer</a>
+              <a routerLink="/retirement" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md">Retirement</a>
+              <a routerLink="/retrenchment" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md">Retrenchment</a>
+            </div>
+          </div>
+        </li>
+
+        <!-- Leave Management -->
+        <li class="menu-item">
+          <div class="flex flex-col">
+            <button (click)="toggleLeaveMenu()" class="flex items-center justify-between gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer">
+              <div class="flex items-center gap-2">
+                <mat-icon>event_note</mat-icon>
+                <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Leave Management</span>
+              </div>
+              <mat-icon>{{ leaveManagement ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+            
+            <div *ngIf="leaveManagement" class="mt-2 ml-4 flex flex-col gap-2 px-4 list-none">
+              <a routerLink="/annual-leave" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md">Annual Leave</a>
+              <a routerLink="/leave-of-absence" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md">Leave of Absence</a>
+              <a routerLink="/sick-leave" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md">Sick Leave</a>
+            </div>
+          </div>
+        </li>
+
+        <!-- File Index -->
+        <li class="menu-item">
+          <a routerLink="/file-index" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer">
+            <mat-icon>insert_drive_file</mat-icon>
+            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">File Index</span>
+          </a>
+        </li>
+
+        <!-- Calendar -->
+        <li class="menu-item">
+          <a routerLink="/calendar" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer">
+            <mat-icon>calendar_today</mat-icon>
+            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Calendar</span>
+          </a>
+        </li>
+
+        <!-- Payroll -->
+        <li class="menu-item">
+          <a routerLink="/payroll" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Payroll</span>
+          </a>
+        </li>
+
+        <!-- Settings -->
+        <li class="menu-item">
+          <a routerLink="/settings" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer">
+            <mat-icon>settings</mat-icon>
+            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Settings</span>
+          </a>
+        </li>
+
+        <!-- Logout -->
+        <li class="menu-item mt-auto">
+          <a routerLink="/logout" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer">
+            <mat-icon class="text-red-500">logout</mat-icon>
+            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Logout</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <!-- Sidebar Menu -->
+  </div>
+</aside>

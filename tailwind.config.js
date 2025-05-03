@@ -10,6 +10,8 @@ module.exports = {
         textBlack: "#0F0F0F",
         textLight:"#333333",
         shadeLight:"#7A7A7A",
+        borderLight:"#BCBCBC",
+        sidebarBg:"#FCFCFC",
         borderColor:{
           default: "#BCBCBC",
         }

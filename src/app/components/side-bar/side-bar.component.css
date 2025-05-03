@@ -1,0 +1,15 @@
+.active-link {
+  background-color: #12C16F;
+  color: white;
+}
+
+.menu-item a:hover {
+  background-color: #12C16F;
+  color: white;
+}
+
+.menu-item button:hover {
+  background-color: #12C16F;
+  color: white;
+}
+  

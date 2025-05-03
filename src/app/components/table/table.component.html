@@ -1,0 +1,55 @@
+<div class="flex flex-col bg-[#fcfcfc] border border-[#f2f2f2] rounded-xl p-4">
+
+<div class="flex justify-between items-center mb-4">
+  <h2 class="text-lg font-medium">Employee Records</h2>
+  <a href="#" class="text-green-500 font-medium hover:underline text-sm">View all</a>
+</div>
+
+<table class="w-full border-separate border-spacing-0 my-4">
+  <thead>
+    <tr>
+      <th class="p-4 text-left bg-gray-50 text-[#7a7a7a] font-medium">
+        <input type="checkbox" class="rounded border-gray-300" />
+      </th>
+      <th class="p-4 text-left bg-gray-50 text-[#7a7a7a] font-medium">EMPLOYEE ID</th>
+      <th class="p-4 text-left bg-gray-50 text-[#7a7a7a] font-medium">EMPLOYEE NAME</th>
+      <th class="p-4 text-left bg-gray-50 text-[#7a7a7a] font-medium">ROLE</th>
+      <th class="p-4 text-left bg-gray-50 text-[#7a7a7a] font-medium">STATUS</th>
+      <th class="p-4 text-left bg-gray-50 text-[#7a7a7a] font-medium">ACTION</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let employee of employees" class="hover:bg-gray-50">
+      <td class="p-4">
+        <input type="checkbox" class="rounded border-gray-300" />
+      </td>
+      <td class="p-4">{{ employee.id }}</td>
+      <td class="p-4">
+        <div class="flex items-center">
+          <img [src]="employee.imageUrl" [alt]="employee.name" class="w-10 h-10 rounded-full mr-2">
+          {{ employee.name }}
+        </div>
+      </td>
+      <td class="p-4">{{ employee.role }}</td>
+      <td class="p-4">
+        <span [ngClass]="{
+          'px-3 py-1 rounded-full text-sm': true,
+          'bg-green-50 text-green-700': employee.status === 'Active',
+          'bg-orange-50 text-orange-700': employee.status === 'On leave',
+          'bg-blue-50 text-blue-700': employee.status === 'Retired',
+          'bg-red-50 text-red-700': employee.status === 'On Discipline'
+        }">
+          {{ employee.status }}
+        </span>
+      </td>
+      <td class="p-4">
+        <button class="p-2 rounded-full hover:bg-gray-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+          </svg>
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>

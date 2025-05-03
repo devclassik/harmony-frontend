@@ -6,12 +6,12 @@ import { CustomModalComponent } from '../../components/custom-modal/custom-modal
 
 @Component({
   selector: 'app-sign-up',
+  standalone: true,
   imports: [CommonModule, FormsModule, CustomModalComponent],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css'
 })
 export class SignUpComponent {
-
 
   constructor(private router: Router) { }
 
@@ -49,8 +49,6 @@ export class SignUpComponent {
     //   alert('Invalid credentials. Please try again.');
     // }
   }
-
-
 
   openModal() {
     this.showModal = true;

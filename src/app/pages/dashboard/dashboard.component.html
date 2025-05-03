@@ -1,1 +1,19 @@
-<p>dashboard works!</p>
+<div class="flex flex-col gap-4 p-2">
+  <app-dashboard-greetings></app-dashboard-greetings>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
+  <div class="lg:col-span-6">
+    <app-bar-chart></app-bar-chart>
+  </div>
+  <div class="lg:col-span-4">
+    <app-pie-chart></app-pie-chart>
+  </div>
+</div>
+<div class="p-2">
+  <app-table></app-table>
+</div>
+<div class="p-6">
+  <h2 class="text-2xl font-bold">Dashboard user</h2>
+  <p *ngIf="userRole === 'Admin'">Welcome, Admin! Here is your overview.</p>
+  <p *ngIf="userRole === 'User'">Welcome, User! Here is your dashboard.</p>
+</div>
