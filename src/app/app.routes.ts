@@ -7,7 +7,7 @@ import { LoginComponent } from './auth/login/login.component';
 import { SignUpComponent } from './auth/sign-up/sign-up.component';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
-
+import { EmployeeRecordsComponent } from './pages/employee-records/employee-records.component';
 export const routes: Routes = [
     { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
     {
@@ -26,6 +26,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
         children: [
             { path: 'dashboard', component: DashboardComponent },
+            { path: 'employee-records', component: EmployeeRecordsComponent },
             { path: 'admin', component: DashboardComponent },
             { path: 'user', component: DashboardComponent },
         ]

@@ -1,8 +1,10 @@
 <div class="flex flex-col bg-[#fcfcfc] border border-[#f2f2f2] rounded-xl p-4">
 
 <div class="flex justify-between items-center mb-4">
-  <h2 class="text-lg font-medium">Employee Records</h2>
-  <a href="#" class="text-green-500 font-medium hover:underline text-sm">View all</a>
+  <h2 class="text-lg font-medium">{{ title }}</h2>
+  <a *ngIf="showViewAll" [href]="viewAllLink" class="text-green-500 font-medium hover:underline text-sm">
+    {{ viewAllText }}
+  </a>
 </div>
 
 <table class="w-full border-separate border-spacing-0 my-4">
@@ -19,7 +21,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let employee of employees" class="hover:bg-gray-50">
+    <tr *ngFor="let employee of employees; let i = index" class="hover:bg-gray-50">
       <td class="p-4">
         <input type="checkbox" class="rounded border-gray-300" />
       </td>
@@ -32,22 +34,57 @@
       </td>
       <td class="p-4">{{ employee.role }}</td>
       <td class="p-4">
-        <span [ngClass]="{
-          'px-3 py-1 rounded-full text-sm': true,
-          'bg-green-50 text-green-700': employee.status === 'Active',
-          'bg-orange-50 text-orange-700': employee.status === 'On leave',
-          'bg-blue-50 text-blue-700': employee.status === 'Retired',
-          'bg-red-50 text-red-700': employee.status === 'On Discipline'
-        }">
+        <span
+          [ngClass]="{
+            'flex items-center gap-2 px-3 py-1 rounded-full text-sm w-fit': true,
+            'bg-[#DDFFE0] text-[#049914]': employee.status === 'Active',
+            'bg-[#FEF9EA] text-[#E0A800]': employee.status === 'On leave',
+            'bg-[#E8FAFF] text-[#008FBD]': employee.status === 'Retired',
+            'bg-[#FFDEDE] text-[#DD1212]': employee.status === 'On Discipline'
+          }"
+        >
+          <span
+            class="h-2 w-2 rounded-full"
+            [ngClass]="{
+              'bg-[#049914]': employee.status === 'Active',
+              'bg-[#E0A800]': employee.status === 'On leave',
+              'bg-[#008FBD]': employee.status === 'Retired',
+              'bg-[#DD1212]': employee.status === 'On Discipline'
+            }"
+          ></span>
           {{ employee.status }}
         </span>
       </td>
       <td class="p-4">
-        <button class="p-2 rounded-full hover:bg-gray-100">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-          </svg>
-        </button>
+        <div class="relative">
+          <button 
+            (click)="toggleDropdown(employee, i)"
+            class="p-2 rounded-full cursor-pointer hover:bg-gray-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+            </svg>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div 
+            *ngIf="activeDropdownKey === getDropdownKey(employee, i)"
+            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-100"
+          >
+            <div class="py-1">
+              <button
+                *ngFor="let item of menuItems"
+                (click)="handleAction(item.action, employee)"
+                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
+                </svg>
+                {{ item.label }}
+              </button>
+            </div>
+          </div>
+        </div>
       </td>
     </tr>
   </tbody>

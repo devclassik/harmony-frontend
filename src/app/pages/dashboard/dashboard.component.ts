@@ -6,6 +6,7 @@ import { ComponentsModule } from '../../components/components.module';
 import { PieChartComponent } from '../../components/pie-chart/pie-chart.component';
 import { BarChartComponent } from '../../components/bar-chart/bar-chart.component';
 import { TableComponent } from '../../components/table/table.component';
+import { Employee } from '../../interfaces/employee.interface';
 @Component({
   selector: 'app-dashboard',
   imports: [CommonModule, ComponentsModule, DashboardGreetingsComponent, PieChartComponent, BarChartComponent, TableComponent],
@@ -18,5 +19,23 @@ export class DashboardComponent {
   constructor(private authService: AuthService) {
     this.userRole = this.authService.getUserRole();
   }
+
+  employees: Employee[] = [
+    {
+      id: '124 - 08',
+      name: 'John Adegoke',
+      role: 'Zonal Pastor',
+      status: 'Active',
+      imageUrl: 'assets/svg/profilePix.svg'
+    },
+    {
+      id: '124 - 01',
+      name: 'John Adegoke',
+      role: 'Zonal Pastor',
+      status: 'On leave',
+      imageUrl: 'assets/svg/profilePix.svg'
+    },
+    // ... more employees
+  ];
 
 }

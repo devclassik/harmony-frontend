@@ -10,10 +10,14 @@
   </div>
 </div>
 <div class="p-2">
-  <app-table></app-table>
+  <app-table
+    [title]="'Employee Records'"
+    [viewAllLink]="'employee-records'"
+    [employees]="employees"
+  ></app-table>
 </div>
-<div class="p-6">
+<!-- <div class="p-6">
   <h2 class="text-2xl font-bold">Dashboard user</h2>
   <p *ngIf="userRole === 'Admin'">Welcome, Admin! Here is your overview.</p>
   <p *ngIf="userRole === 'User'">Welcome, User! Here is your dashboard.</p>
-</div>
+</div> -->
