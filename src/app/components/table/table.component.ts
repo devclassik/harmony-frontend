@@ -1,5 +1,6 @@
-import { Component, Input, ElementRef, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Employee } from '../../interfaces/employee.interface';
 
 interface MenuItem {
@@ -8,19 +9,57 @@ interface MenuItem {
   action: string;
 }
 
+interface TableColumn {
+  key: string;
+  label: string;
+  class?: string;
+}
+
+interface FilterTab {
+  label: string;
+  value: string;
+}
+
 @Component({
   selector: 'app-table',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, FormsModule]
 })
 export class TableComponent {
   @Input() employees: Employee[] = [];
-  @Input() title: string = 'Employee Records';
+  @Input() columns: TableColumn[] = [
+    { key: 'id', label: 'EMPLOYEE ID' },
+    { key: 'name', label: 'EMPLOYEE NAME' },
+    { key: 'department', label: 'DEPARTMENT' },
+    { key: 'role', label: 'ROLE' },
+    { key: 'status', label: 'STATUS' },
+    { key: 'action', label: 'ACTION' }
+  ];
+  @Input() showSearch: boolean = true;
+  @Input() searchPlaceholder: string = 'Search';
+  @Input() showFilter: boolean = true;
+  @Input() filterTabs: FilterTab[] = [
+    { label: 'All', value: '' },
+    { label: 'Active', value: 'Active' },
+    { label: 'On leave', value: 'On leave' },
+    { label: 'On discipline', value: 'On Discipline' },
+    { label: 'Retired', value: 'Retired' }
+  ];
+  @Input() activeTab: string = '';
+  @Input() showPagination: boolean = true;
+  @Input() currentPage: number = 1;
+  @Input() totalPages: number = 1;
+  @Input() pageSize: number = 10;
   @Input() showViewAll: boolean = true;
   @Input() viewAllText: string = 'View all';
   @Input() viewAllLink: string = '#';
+
+  @Output() search = new EventEmitter<string>();
+  @Output() filter = new EventEmitter<string>();
+  @Output() pageChange = new EventEmitter<number>();
+  @Output() tabChange = new EventEmitter<string>();
 
   menuItems: MenuItem[] = [
     { label: 'View all', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z', action: 'view' },
@@ -29,6 +68,7 @@ export class TableComponent {
   ];
 
   activeDropdownKey: string | null = null;
+  searchValue: string = '';
 
   constructor(private eRef: ElementRef) {}
 
@@ -42,8 +82,23 @@ export class TableComponent {
   }
 
   handleAction(action: string, employee: Employee): void {
-    console.log(`Action: ${action} for employee: ${employee.name}`);
     this.activeDropdownKey = null;
+    // Emit or handle action as needed
+  }
+
+  onSearchChange(value: string) {
+    this.searchValue = value;
+    this.search.emit(value);
+  }
+
+  onTabChange(tab: FilterTab) {
+    this.tabChange.emit(tab.value);
+  }
+
+  onPageChange(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.pageChange.emit(page);
+    }
   }
 
   @HostListener('document:click', ['$event'])

@@ -4,4 +4,5 @@ export interface Employee {
   role: string;
   status: 'Active' | 'On leave' | 'Retired' | 'On Discipline';
   imageUrl?: string;
+  department?: string;
 } 
