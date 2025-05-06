@@ -11,13 +11,14 @@
 </div>
 <div class="p-2">
   <app-table
-    [title]="'Employee Records'"
+    [tableTitle]="'Employee Records'"
     [viewAllLink]="'employee-records'"
-    [employees]="employees"
+    [tableData]="employees"
     [showViewAll]="true"
     [showSearch]="false"
     [showFilter]="false"
     [showPagination]="false"
+    [showStatusTab]="false"
   ></app-table>
 </div>
 <!-- <div class="p-6">

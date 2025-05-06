@@ -1,0 +1,42 @@
+<div
+  class="fixed inset-0 bg-[#7f7f7f63] flex justify-center items-center z-50"
+  (click)="onOverlayClick()"
+>
+  <div
+    class="bg-white rounded-xl shadow-lg w-full max-w-xs p-6 flex flex-col items-center"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="text-green-600 text-6xl mb-2">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-16 w-16 mx-auto"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="2"
+          fill="white"
+        />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4"
+        />
+      </svg>
+    </div>
+    <h2 class="font-semibold mb-4 text-center">{{ title }}</h2>
+    <button
+      *ngIf="showOkButton"
+      class="w-full bg-green-600 text-white rounded-lg py-2 font-medium transition hover:bg-green-700"
+      (click)="onOk()"
+    >
+      {{ okButtonText }}
+    </button>
+  </div>
+</div>

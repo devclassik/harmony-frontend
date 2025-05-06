@@ -2,7 +2,7 @@
   <div
     class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-4"
   >
-    <h2 class="text-lg font-medium">Employee Records</h2>
+    <h2 class="text-lg font-medium">{{ tableTitle }}</h2>
     <div class="flex gap-2 items-center w-full md:w-auto">
       <div *ngIf="showSearch" class="relative w-full md:w-64">
         <input
@@ -10,7 +10,11 @@
           [placeholder]="searchPlaceholder"
           [ngModel]="searchValue"
           (ngModelChange)="onSearchChange($event)"
-          class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-100 text-sm bg-white"
+          [ngClass]="{
+            'ring-2 ring-green-200 bg-green-50': searchValue,
+            'bg-white': !searchValue
+          }"
+          class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none text-sm"
         />
         <svg
           class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
@@ -23,37 +27,82 @@
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
       </div>
-      <button
-        *ngIf="showFilter"
-        class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm text-gray-700 hover:bg-gray-50"
-      >
-        <svg
-          class="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
+      <div class="relative" *ngIf="showFilter">
+        <button
+          (click)="toggleFilterDropdown()"
+          class="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm text-gray-700 hover:bg-gray-50"
+          [ngClass]="{
+            'bg-green-100 text-green-700': activeFilterTab !== '',
+            'bg-white text-gray-600 hover:bg-gray-100': activeFilterTab === ''
+          }"
+          type="button"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A1 1 0 0013 13.414V19a1 1 0 01-1.447.894l-2-1A1 1 0 019 18v-4.586a1 1 0 00-.293-.707L2.293 6.707A1 1 0 012 6V4z"
-          />
-        </svg>
-        Filter
-      </button>
-      <a *ngIf="showViewAll" [href]="viewAllLink" class="text-green-500 font-medium hover:underline text-sm">{{ viewAllText }}</a>
-
+          <svg
+            class="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A1 1 0 0013 13.414V19a1 1 0 01-1.447.894l-2-1A1 1 0 019 18v-4.586a1 1 0 00-.293-.707L2.293 6.707A1 1 0 012 6V4z"
+            />
+          </svg>
+          Filter
+        </button>
+        <div
+          *ngIf="showFilterDropdown"
+          class="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 border border-gray-100"
+        >
+          <div class="py-1">
+            <button
+              *ngFor="let tab of filterTabs"
+              (click)="onFilterTabClick(tab)"
+              [ngClass]="{
+                'bg-green-100 text-green-700':
+                  activeFilterTab === tab.value && tab.value !== '',
+                'bg-white text-gray-600 hover:bg-gray-100':
+                  activeFilterTab !== tab.value || tab.value === ''
+              }"
+              class="flex items-center gap-2 px-4 py-2 text-sm w-full text-left"
+            >
+              <ng-container *ngIf="tab.icon">
+                <svg
+                  *ngIf="tab.icon.startsWith('M')"
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path [attr.d]="tab.icon" />
+                </svg>
+                <i *ngIf="!tab.icon.startsWith('M')" [class]="tab.icon"></i>
+              </ng-container>
+              {{ tab.label }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <a
+        *ngIf="showViewAll"
+        [href]="viewAllLink"
+        class="text-green-500 font-medium hover:underline text-sm"
+        >{{ viewAllText }}</a
+      >
     </div>
   </div>
 
-  <div class="flex flex-wrap gap-2 mb-2">   
-    <ng-container *ngFor="let tab of filterTabs">
+  <div class="flex flex-wrap gap-2 mb-2" *ngIf="showStatusTab">
+    <ng-container *ngFor="let tab of statusTabs">
       <button
-        (click)="onTabChange(tab)"
+        (click)="onStatusTabClick(tab)"
         [ngClass]="{
-          'bg-green-100 text-green-700': activeTab === tab.value,
-          'bg-gray-100 text-gray-600': activeTab !== tab.value
+          'bg-green-100 text-green-700':
+            activeStatusTab === tab.value && tab.value !== '',
+          'bg-white text-gray-600 hover:bg-gray-100':
+            activeStatusTab !== tab.value || tab.value === ''
         }"
         class="px-4 py-1 rounded-lg text-sm font-medium transition-colors"
       >
@@ -62,24 +111,50 @@
     </ng-container>
   </div>
 
-  <table class="w-full border-separate border-spacing-0 my-4">
+  <table
+    class="w-full border-separate border-spacing-0 my-4 bg-[#ededed]"
+    *ngIf="tableData.length > 0"
+  >
     <thead>
       <tr>
         <th
-          *ngFor="let col of columns"
-          class="p-4 text-left bg-gray-50 text-[#7a7a7a] font-medium"
+          *ngIf="showSelectCheckbox"
+          class="p-4 text-left !text-sm bg-[#F4F5F6] text-[#7a7a7a] font-medium"
+        >
+          <input
+            #selectAllBox
+            type="checkbox"
+            [checked]="isAllSelected()"
+            (change)="toggleSelectAll(selectAllBox.checked)"
+            class="accent-[#049914]"
+          />
+        </th>
+        <th
+          *ngFor="let col of tableHeader"
+          class="p-4 text-left !text-sm bg-[#F4F5F6] text-[#7a7a7a] font-medium"
           [ngClass]="col.class"
         >
           {{ col.label }}
         </th>
-      </tr> 
+      </tr>
     </thead>
     <tbody>
       <tr
-        *ngFor="let employee of employees; let i = index"
-        class="hover:bg-gray-50"
+        *ngFor="let employee of tableData; let i = index"
+        class="bg-white hover:bg-gray-50"
       >
-        <td *ngFor="let col of columns" class="p-4">
+        <td *ngIf="showSelectCheckbox" class="p-4 border-b border-[#ededed]">
+          <input
+            #rowBox
+            type="checkbox"
+            [checked]="isRowSelected(employee)"
+            (change)="toggleRowSelection(employee, rowBox.checked)"
+          />
+        </td>
+        <td
+          *ngFor="let col of tableHeader"
+          class="p-4 border-b border-[#ededed]"
+        >
           <!-- EMPLOYEE ID -->
           <ng-container *ngIf="col.key === 'id'">{{
             employee.id
@@ -158,7 +233,10 @@
                   <button
                     *ngFor="let item of menuItems"
                     (click)="handleAction(item.action, employee)"
-                    class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left hover:rounded-md"
+                    [ngClass]="{
+                      'hover:bg-red-500 ': item.action === 'Delete',
+                    }"
                   >
                     <svg
                       *ngIf="item.action !== 'delete'"
@@ -213,10 +291,21 @@
       </tr>
     </tbody>
   </table>
+  <div *ngIf="!tableData.length" class="py-8 text-center text-gray-400">
+    <ng-container *ngIf="emptyStateTemplate; else defaultEmpty">
+      <ng-container *ngTemplateOutlet="emptyStateTemplate"></ng-container>
+    </ng-container>
+    <ng-template #defaultEmpty>
+      <img
+        [src]="emptyStateImage"
+        alt="Empty State"
+        class="w-16 h-16 mx-auto mb-4"
+      />
+      {{ emptyStateText }}
+    </ng-template>
+  </div>
 
-  <div
-    class="flex flex-col md:flex-row md:items-center md:justify-end gap-2"
-  >
+  <div class="flex flex-col md:flex-row md:items-center md:justify-end gap-2">
     <div
       *ngIf="showPagination"
       class="flex items-center gap-2 justify-center md:justify-end"

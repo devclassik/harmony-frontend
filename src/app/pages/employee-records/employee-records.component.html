@@ -1,2 +1,48 @@
-<p>employee-records works!</p>
-oya now
+<div class="p-2">
+  <app-table
+    [tableTitle]="'Employee Records'"
+    [viewAllLink]="'employee-records'"
+    [tableData]="employees"
+    [showViewAll]="false"
+    [showFilter]="true"
+    [showStatusTab]="true"
+    [statusTabs]="statusTabs"
+    [activeStatusTab]="selectedStatus"
+    (statusTabChange)="onStatusTabChange($event)"
+    [filterTabs]="filterTabs"
+    [activeFilterTab]="selectedFilter"
+    (filterTabChange)="onFilterTabChange($event)"
+    [searchValue]="searchValue"
+    (search)="onSearch($event)"
+    [tableData]="filteredEmployees"
+    [menuItems]="actionButton"
+    (menuAction)="onMenuAction($event)"
+  ></app-table>
+</div>
+
+<app-appraisal
+  [open]="showAppraisal"
+  (closed)="showAppraisal = false"
+  (submitted)="handleAppraisal($event)"
+></app-appraisal>
+
+<app-confirm-prompt
+  *ngIf="showModal"
+  [title]="promptConfig.title"
+  [text]="promptConfig.text"
+  [imageUrl]="promptConfig.imageUrl"
+  [yesButtonText]="promptConfig.yesButtonText"
+  [noButtonText]="promptConfig.noButtonText"
+  (confirmed)="onModalConfirm($event)"
+  (closed)="onModalClose()"
+  [data]="selectedEmployee"
+></app-confirm-prompt>
+
+<app-success-modal
+  *ngIf="successModal"
+  [title]="'Operation Successful!'"
+  [showOkButton]="false"
+  [okButtonText]="'Click Ok'"
+  [okButtonLink]="'/dashboard'"
+  (closed)="successModal = false"
+></app-success-modal>
