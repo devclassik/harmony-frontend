@@ -1,12 +1,16 @@
 <div class="flex flex-col gap-4 p-2">
-  <app-dashboard-greetings></app-dashboard-greetings>
+  <app-dashboard-greetings
+    [userName]="'John 👋🏼'"
+    [showSubText]="true"
+    [subText]="'Here is a brief overview of the employees.'"
+  ></app-dashboard-greetings>
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
   <div class="lg:col-span-6">
     <app-bar-chart></app-bar-chart>
   </div>
   <div class="lg:col-span-4">
-    <app-pie-chart></app-pie-chart>
+    <app-doughnut-chart></app-doughnut-chart>
   </div>
 </div>
 <div class="p-2">

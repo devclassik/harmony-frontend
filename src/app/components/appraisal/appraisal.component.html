@@ -9,7 +9,7 @@
       &times;
     </button>
     <h2 class="text-xl text-[#040404] font-semibold mb-6">Create Appraisal</h2>
-    <hr class="mb-6" />
+    <hr class="text-[#ededed] mb-6" />
     <div class="mb-8">
       <h3 class="font-medium text-[#0f0f0f] mb-4">Appraisal Information</h3>
       <div class="grid grid-cols-2 gap-6">
@@ -31,6 +31,7 @@
             class="w-full border rounded px-3 py-2"
             type="text"
             [(ngModel)]="form.average"
+            readonly
           />
         </div>
         <ng-container *ngFor="let d of form.details; let i = index">
@@ -48,6 +49,7 @@
             <select
               class="w-full border border-green-600 rounded px-3 py-2 ring-0 focus:border-green-600 focus:ring-green-600 selection:bg-green-600 selection:text-white"
               [(ngModel)]="form.details[i].score"
+              (ngModelChange)="calculateAverage()"
             >
               <option value="" disabled selected>Select</option>
               <option *ngFor="let s of scores" [value]="s">{{ s }}</option>

@@ -35,4 +35,20 @@ export class AppraisalComponent {
   onSubmit() {
     this.submitted.emit(this.form);
   }
+
+  calculateAverage() {
+    // Extract scores, convert to numbers, and filter out empty or invalid entries
+    const scores = this.form.details
+      .map(avg => Number(avg.score))
+      .filter(score => !isNaN(score));
+
+    if (scores.length === 0) {
+      this.form.average = '';
+      return;
+    }
+
+    // Calculate average
+    const avg = scores.reduce((sum, val) => sum + val, 0) / scores.length;
+    this.form.average = avg.toFixed(2); // or just avg if you want a number
+  }
 }

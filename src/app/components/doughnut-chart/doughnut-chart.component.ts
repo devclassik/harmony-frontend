@@ -1,35 +1,14 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { ChartOptions } from '../pie-chart/pie-chart.component';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import {
-  ApexNonAxisChartSeries,
-  ApexChart,
-  ApexLegend,
-  ApexResponsive,
-  ApexPlotOptions,
-  ApexStroke,
-  ApexDataLabels
-} from 'ng-apexcharts';
-
-export type ChartOptions = {
-  series: ApexNonAxisChartSeries;
-  chart: ApexChart;
-  labels: string[];
-  colors: string[];
-  legend: ApexLegend;
-  plotOptions: ApexPlotOptions;
-  stroke: ApexStroke;
-  dataLabels: ApexDataLabels;
-  responsive: ApexResponsive[];
-};
-
 @Component({
-  selector: 'app-pie-chart',
-  standalone: true,
+  selector: 'app-doughnut-chart',
   imports: [NgApexchartsModule],
-  templateUrl: './pie-chart.component.html',
-  styleUrl: './pie-chart.component.css'
+  templateUrl: './doughnut-chart.component.html',
+  styleUrl: './doughnut-chart.component.css'
 })
-export class PieChartComponent implements OnInit {
+export class DoughnutChartComponent {
+
   @Input() title: string = 'Staff Demographic';
   @Input() series: number[] = [40, 50, 10];
   @Input() labels: string[] = ['20 - 39', '40 - 59', '60 - 75'];
@@ -38,7 +17,7 @@ export class PieChartComponent implements OnInit {
   chartOptions: ChartOptions = {
     series: this.series,
     chart: {
-      type: 'pie',
+      type: 'donut',
       height: 250,
       animations: {
         enabled: true,
@@ -115,3 +94,4 @@ export class PieChartComponent implements OnInit {
     this.chartOptions.colors = this.colors;
   }
 }
+

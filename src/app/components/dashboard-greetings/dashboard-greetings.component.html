@@ -1,10 +1,10 @@
 <div class="bg-[#fcfcfc] rounded-lg p-4">
   <div>
     <h3 class="text-2xl font-bold text-[#040404]">
-      Hello, {{ userName }} <span>👋🏼</span>
+      Hello, {{ userName }}
     </h3>
-    <p class="text-sm text-[#9b9b9b]">
-      Here is a brief overview of the employees.
+    <p class="text-sm text-[#9b9b9b]" *ngIf="showSubText">
+      {{subText}}
     </p>
   </div>
   <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

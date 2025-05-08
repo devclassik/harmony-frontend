@@ -20,6 +20,12 @@
   ></app-table>
 </div>
 
+<app-employee-details
+  [view]="showEmployeeDetails"
+  (close)="showEmployeeDetails = false"
+  [employee]="selectedEmployeeRecord"
+></app-employee-details>
+
 <app-appraisal
   [open]="showAppraisal"
   (closed)="showAppraisal = false"
@@ -28,11 +34,11 @@
 
 <app-confirm-prompt
   *ngIf="showModal"
-  [title]="promptConfig.title"
-  [text]="promptConfig.text"
-  [imageUrl]="promptConfig.imageUrl"
-  [yesButtonText]="promptConfig.yesButtonText"
-  [noButtonText]="promptConfig.noButtonText"
+  [title]="promptConfig?.title || ''"
+  [text]="promptConfig?.text || ''"
+  [imageUrl]="promptConfig?.imageUrl || null"
+  [yesButtonText]="promptConfig?.yesButtonText || ''"
+  [noButtonText]="promptConfig?.noButtonText || ''"
   (confirmed)="onModalConfirm($event)"
   (closed)="onModalClose()"
   [data]="selectedEmployee"
