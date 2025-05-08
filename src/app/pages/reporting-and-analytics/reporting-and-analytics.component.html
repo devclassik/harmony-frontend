@@ -14,14 +14,25 @@
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
   <div class="lg:col-span-6">
-    <app-bar-chart></app-bar-chart>
+    <app-area-chart
+      title="Disciplinary Actions"
+      [colors]="['#FF4D4D', '#FF6B6B', '#FFE5E5']"
+    ></app-area-chart>
   </div>
   <div class="lg:col-span-4">
     <app-pie-chart
-    title="Document"
-    [series]="[40, 50, 10]"
-    [labels]="['20 - 39', '40 - 59', '60 - 75']"
-    [colors]="['#F6A24E', '#9747FF', '#32D583']"
+      title="Document"
+      [series]="[40, 50, 10]"
+      [labels]="['20 - 39', '40 - 59', '60 - 75']"
+      [colors]="['#F6A24E', '#9747FF', '#32D583']"
     ></app-pie-chart>
+  </div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
+  <div class="lg:col-span-10">
+    <app-area-chart
+      title="Performance"
+      [filterTabs]="filterTabs"
+    ></app-area-chart>
   </div>
 </div>

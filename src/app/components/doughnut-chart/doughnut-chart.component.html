@@ -1,33 +1,35 @@
 <div class="flex flex-col bg-[#fcfcfc] border border-[#f2f2f2] rounded-xl p-4">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-base font-medium text-gray-800">{{ title }}</h3>
-      <div class="relative">
-        <select
-          class="appearance-none bg-transparent border border-gray-200 rounded-lg px-3 py-1.5 pr-8 text-sm text-gray-600"
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-base font-medium text-gray-800">{{ title }}</h3>
+    <div class="relative">
+      <select
+        class="appearance-none bg-transparent border border-gray-200 rounded-lg px-3 py-1.5 pr-8 text-sm text-gray-600"
+        (change)="onSelectChange($event)"
+      >
+        <option>Age range</option>
+        <option>Gender</option>
+        <option>Years of service</option>
+        <option>Location</option>
+      </select>
+      <div
+        class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
+      >
+        <svg
+          class="w-4 h-4 text-gray-400"
+          viewBox="0 0 20 20"
+          fill="currentColor"
         >
-          <option>Age range</option>
-          <option>Gender</option>
-          <option>Years of service</option>
-          <option>Location</option>
-        </select>
-        <div
-          class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
-        >
-          <svg
-            class="w-4 h-4 text-gray-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </div>
+          <path
+            fill-rule="evenodd"
+            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+            clip-rule="evenodd"
+          />
+        </svg>
       </div>
     </div>
-    <div class="flex justify-center h-[300px]">
+  </div>
+  <div class="flex justify-center h-[300px]">
+    <ng-container *ngIf="!showGenderImage">
       <apx-chart
         [series]="chartOptions.series"
         [chart]="chartOptions.chart"
@@ -37,8 +39,26 @@
         [legend]="chartOptions.legend"
         [stroke]="chartOptions.stroke"
         [dataLabels]="chartOptions.dataLabels"
-        [responsive]="chartOptions.responsive">
+        [responsive]="chartOptions.responsive"
+      >
       </apx-chart>
-    </div>
+    </ng-container>
+    <ng-container *ngIf="showGenderImage">
+      <div class="flex w-full h-[220px] items-center justify-center">
+        <img src="assets/svg/gender.svg" alt="Gender Split" class="w-40 h-40 object-contain" />
+        <div class="flex flex-col gap-6 ml-8">
+          <div class="flex items-center gap-2">
+            <img src="assets/svg/male.svg" alt="Male" class="w-6 h-6 rounded-full" />
+            <span class="font-medium text-gray-800">{{ genderData.male }}</span>
+            <span class="text-xs text-gray-500">{{ (genderData.male / (genderData.male + genderData.female) * 100) | number:'1.0-0' }}%</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <img src="assets/svg/female.svg" alt="Female" class="w-6 h-6 rounded-full" />
+            <span class="font-medium text-gray-800">{{ genderData.female }}</span>
+            <span class="text-xs text-gray-500">{{ (genderData.female / (genderData.male + genderData.female) * 100) | number:'1.0-0' }}%</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
   </div>
-  
+</div>
