@@ -35,7 +35,12 @@ export class EmployeeRecordsComponent {
   showAppraisal: boolean = false;
   showEmployeeDetails: boolean = false;
   selectedEmployeeRecord: TableData | null = null;
-
+  selectedFilter: string = '';
+  searchValue: string = '';
+  selectedStatus: string = '';
+  selectedEmployee: TableData | null = null;
+  promptConfig: PromptConfig | null = null;
+  
   tableHeader: TableHeader[] = [
     { key: 'id', label: 'EMPLOYEE ID' },
     { key: 'name', label: 'EMPLOYEE NAME' },
@@ -44,7 +49,7 @@ export class EmployeeRecordsComponent {
     { key: 'status', label: 'STATUS' },
     { key: 'action', label: 'ACTION' },
   ];
-
+  
   employees: TableData[] = [
     {
       id: '124 - 08',
@@ -63,7 +68,7 @@ export class EmployeeRecordsComponent {
       imageUrl: 'assets/svg/profilePix.svg',
     },
   ];
-
+  
   statusTabs: FilterTab[] = [
     { label: 'All', value: '' },
     { label: 'Active', value: 'Active' },
@@ -71,7 +76,7 @@ export class EmployeeRecordsComponent {
     { label: 'On discipline', value: 'On Discipline' },
     { label: 'Retired', value: 'Retired' },
   ];
-
+  
   filterTabs = [
     {
       label: 'All',
@@ -86,7 +91,7 @@ export class EmployeeRecordsComponent {
       icon: 'M5 13l4 4L19 7',
     },
   ];
-
+  
   actionButton: MenuItem[] = [
     { label: 'View', action: 'View', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
     {
@@ -100,24 +105,19 @@ export class EmployeeRecordsComponent {
       icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
     },
   ];
-
-  selectedFilter: string = '';
-  searchValue: string = '';
-  selectedStatus: string = '';
+  
   filteredEmployees: TableData[] = this.employees;
-  selectedEmployee: TableData | null = null;
-  promptConfig: PromptConfig | null = null;
-
+  
   onFilterTabChange(value: string) {
     this.selectedFilter = value;
     this.applyFilters();
   }
-
+  
   onStatusTabChange(value: string) {
     this.selectedStatus = value;
     this.applyFilters();
   }
-
+  
   onSearch(value: string) {
     this.searchValue = value;
     this.applyFilters();
