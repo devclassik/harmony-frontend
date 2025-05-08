@@ -142,7 +142,23 @@ export class DoughnutChartComponent {
         enabled: false
       },
       legend: {
-        show: false
+        show: true,
+        position: 'right',
+        horizontalAlign: 'center',
+        fontSize: '14px',
+        fontFamily: 'Inter, sans-serif',
+        markers: {
+          strokeWidth: 0,
+          offsetX: -4,
+          shape: 'circle'
+        },
+        itemMargin: {
+          horizontal: 15,
+          vertical: 8
+        },
+        formatter: function(seriesName, opts) {
+          return seriesName + ' - ' + opts.w.globals.series[opts.seriesIndex] + '%';
+        }
       },
       plotOptions: {
         ...this.chartOptions.plotOptions,
@@ -150,7 +166,7 @@ export class DoughnutChartComponent {
           ...this.chartOptions.plotOptions?.pie,
           donut: {
             ...this.chartOptions.plotOptions?.pie?.donut,
-            size: '85%',
+            size: '75%',
             labels: {
               show: false
             }

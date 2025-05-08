@@ -9,7 +9,11 @@ import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 import { EmployeeRecordsComponent } from './pages/employee-records/employee-records.component';
 import { ReportingAndAnalyticsComponent } from './pages/reporting-and-analytics/reporting-and-analytics.component';
-
+import { EmployeePromotionComponent } from './pages/employee-promotion/employee-promotion.component';
+import { EmployeeDisciplineComponent } from './pages/employee-discipline/employee-discipline.component';
+import { EmployeeTransferComponent } from './pages/employee-transfer/employee-transfer.component';
+import { EmployeeRetirementComponent } from './pages/employee-retirement/employee-retirement.component';
+import { EmployeeRetrenchmentComponent } from './pages/employee-retrenchment/employee-retrenchment.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
@@ -31,6 +35,11 @@ export const routes: Routes = [
             { path: 'dashboard', component: DashboardComponent },
             { path: 'employee-records', component: EmployeeRecordsComponent },
             { path: 'reporting-and-analytics', component: ReportingAndAnalyticsComponent },
+            { path: 'employee-management/promotion', component: EmployeePromotionComponent },
+            { path: 'employee-management/discipline', component: EmployeeDisciplineComponent },
+            { path: 'employee-management/transfer', component: EmployeeTransferComponent },
+            { path: 'employee-management/retirement', component: EmployeeRetirementComponent },
+            { path: 'employee-management/retrenchment', component: EmployeeRetrenchmentComponent },
             { path: 'admin', component: DashboardComponent },
             { path: 'user', component: DashboardComponent },
         ]

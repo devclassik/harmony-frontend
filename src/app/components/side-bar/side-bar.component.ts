@@ -6,7 +6,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 
 @Component({
@@ -30,6 +30,7 @@ export class SideBarComponent implements OnInit {
   leaveManagement = false;
 
   constructor(private authService: AuthService,
+    private router: Router,
     private el: ElementRef
   ) {
     this.userRole = this.authService.getUserRole();
@@ -83,5 +84,15 @@ export class SideBarComponent implements OnInit {
 
   onSelect(menu: string) {
     this.selected = menu;
+  }
+
+  isEmployeeChildActive(): boolean {
+    return [
+      '/employee-management/promotion',
+      '/employee-management/discipline',
+      '/employee-management/transfer',
+      '/employee-management/retirement',
+      '/employee-management/retrenchment'
+    ].some(path => this.router.isActive(path, false));
   }
 }

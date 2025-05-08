@@ -2,6 +2,10 @@
   background-color: #12C16F;
   color: white;
 }
+.active-link-child {
+  color: #12C16F;
+  
+}
 
 .menu-item a:hover {
   background-color: #12C16F;
