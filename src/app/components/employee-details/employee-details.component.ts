@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, output } from '@angular/core';
 import { TableData } from '../../interfaces/employee.interface';
 
 @Component({
@@ -13,6 +13,11 @@ export class EmployeeDetailsComponent implements OnInit {
   @Input() view = false;
   @Input() employee: TableData  | null = null;
   @Output() close = new EventEmitter<void>();
+  @Input() showButton: boolean = false;
+  @Input() yesButtonText: string= 'Ok';
+  @Input() noButtonText: string= 'Close'
+
+  @Output() confirm = new EventEmitter<any>();
 
   documents: any[] = [];
   pdfModalOpen = false;
@@ -23,8 +28,6 @@ export class EmployeeDetailsComponent implements OnInit {
   ngOnInit() {
 
   }
-
- 
 
   openPdfModal(url: string) {
     this.selectedPdfUrl = url;
@@ -38,5 +41,9 @@ export class EmployeeDetailsComponent implements OnInit {
 
   onClose() {
    this.close.emit();
+  }
+
+  onConfirm(result: boolean){
+    this.confirm.emit(result);
   }
 }

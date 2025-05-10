@@ -365,6 +365,20 @@
           <span class="font-medium text-black">Appraisal History</span>
         </button>
       </div>
+      <div class="flex gap-4 w-1/2 m-auto" *ngIf="showButton">
+        <button
+          class="flex-1 border border-green-600 text-green-600 rounded-lg py-2 font-medium transition hover:bg-green-50 cursor-pointer"
+          (click)="onConfirm(false)"
+        >
+          {{ noButtonText }}
+        </button>
+        <button
+          class="flex-1 bg-green-600 text-white rounded-lg py-2 font-medium transition hover:bg-green-700 cursor-pointer"
+          (click)="onConfirm(true)"
+        >
+          {{ yesButtonText }}
+        </button>
+      </div>
     </div>
   </div>
   <button

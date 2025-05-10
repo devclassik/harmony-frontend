@@ -7,11 +7,23 @@ import {
 } from '../../components/table/table.component';
 import { CommonModule } from '@angular/common';
 import { TableData } from '../../interfaces/employee.interface';
-import { PromptConfig } from '../../components/confirm-prompt/confirm-prompt.component';
+import {
+  ConfirmPromptComponent,
+  PromptConfig,
+} from '../../components/confirm-prompt/confirm-prompt.component';
+import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
+import { SuccessModalComponent } from '../../components/success-modal/success-modal.component';
 
 @Component({
   selector: 'app-employee-promotion',
-  imports: [CommonModule, CommonModule, TableComponent],
+  imports: [
+    CommonModule,
+    CommonModule,
+    TableComponent,
+    EmployeeDetailsComponent,
+    ConfirmPromptComponent,
+    SuccessModalComponent,
+  ],
   templateUrl: './employee-promotion.component.html',
   styleUrl: './employee-promotion.component.css',
 })
@@ -25,6 +37,7 @@ export class EmployeePromotionComponent {
   selectedEmployeeRecord: TableData | null = null;
   promptConfig: PromptConfig | null = null;
   showEmployeeDetails: boolean = false;
+  showAppraisal: boolean = false;
 
   tableHeader: TableHeader[] = [
     { key: 'id', label: 'PROMOTION ID' },
@@ -41,7 +54,7 @@ export class EmployeePromotionComponent {
       name: 'John Adegoke',
       department: 'DSA',
       role: 'Zonal Pastor',
-      status: 'Active',
+      status: 'Approved',
       imageUrl: 'assets/svg/profilePix.svg',
     },
     {
@@ -49,7 +62,7 @@ export class EmployeePromotionComponent {
       name: 'John Adegoke',
       department: 'DSA',
       role: 'Minister',
-      status: 'On leave',
+      status: 'Rejected',
       imageUrl: 'assets/svg/profilePix.svg',
     },
   ];
@@ -108,7 +121,7 @@ export class EmployeePromotionComponent {
           employee.id.toLowerCase().includes(search) ||
           (employee.department &&
             employee.department.toLowerCase().includes(search)) ||
-          employee.role.toLowerCase().includes(search)
+          employee.role?.toLowerCase().includes(search)
       );
     }
     this.filteredEmployees = filtered;
@@ -133,5 +146,38 @@ export class EmployeePromotionComponent {
   ];
   showEmployeeDetailsModal() {
     this.showEmployeeDetails = true;
+  }
+
+  actionToPerform(result: boolean) {
+    if (result) {
+      this.promptConfig = {
+        title: 'Confirm',
+        text: 'Are you sure you want to approve this promotion request',
+        imageUrl: 'assets/svg/profilePix.svg',
+        yesButtonText: 'Yes',
+        noButtonText: 'No',
+      };
+      this.showModal = true;
+    } else {
+      this.promptConfig = {
+        title: 'Confirm',
+        text: 'Are you sure you want to reject this promotion request',
+        imageUrl: 'assets/svg/profilePix.svg',
+        yesButtonText: 'Yes',
+        noButtonText: 'No',
+      };
+      this.showModal = true;
+    }
+  }
+
+  onModalConfirm(confirmed: boolean) {
+    console.log(confirmed);
+    this.showModal = false;
+    this.showAppraisal = false;
+    this.successModal = true;
+  }
+
+  onModalClose() {
+    this.showModal = false;
   }
 }

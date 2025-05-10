@@ -1,1 +1,29 @@
-<p>employee-discipline works!</p>
+<div class="p-2">
+    <app-table
+      [tableTitle]="'Discipline'"
+      [tableHeader]="tableHeader"
+      [tableData]="employees"
+      [showViewAll]="false"
+      [showStatusTab]="false"
+      [activeStatusTab]="selectedStatus"
+      [showFilter]="true"
+      [filterTabs]="filterTabs"
+      [activeFilterTab]="selectedFilter"
+      (filterTabChange)="onFilterTabChange($event)"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="filteredEmployees"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+    ></app-table>
+  </div>
+
+  <app-employee-details
+  [view]="showEmployeeDetails"
+  [showButton]="true"
+  [noButtonText]="'Reject'"
+  [yesButtonText]="'Accept'"
+  (confirm)="actionToPerform($event)"
+  (close)="showEmployeeDetails = false"
+  [employee]="selectedEmployeeRecord"
+></app-employee-details>

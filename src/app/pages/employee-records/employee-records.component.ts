@@ -138,7 +138,7 @@ export class EmployeeRecordsComponent {
           employee.name.toLowerCase().includes(search) ||
           employee.id.toLowerCase().includes(search) ||
           (employee.department && employee.department.toLowerCase().includes(search)) ||
-          employee.role.toLowerCase().includes(search)
+          employee.role?.toLowerCase().includes(search)
       );
     }
     this.filteredEmployees = filtered;
