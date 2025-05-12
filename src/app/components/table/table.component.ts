@@ -49,6 +49,9 @@ export class TableComponent {
   @Input() currentPage: number = 1;
   @Input() totalPages: number = 1;
   @Input() pageSize: number = 10;
+  @Input() showButton: boolean = false;
+  @Input() showButtonText: string = 'Create Incidence';
+  @Input() showButtonIcon: string = '';
   @Input() showViewAll: boolean = true;
   @Input() viewAllText: string = 'View all';
   @Input() viewAllLink: string = '#';
@@ -69,6 +72,7 @@ export class TableComponent {
   @Output() selectionChange = new EventEmitter<string[]>();
   @Output() filterTabChange = new EventEmitter<string>();
   @Output() statusTabChange = new EventEmitter<string>();
+  @Output() showButtonActionClick = new EventEmitter<boolean>();
   @Output() menuAction = new EventEmitter<{ action: string, row: TableData }>();
 
   @Input() menuItems: MenuItem[] = [
@@ -157,5 +161,9 @@ export class TableComponent {
 
   onStatusTabClick(tab: FilterTab) {
     this.statusTabChange.emit(tab.value);
+  }
+
+  onButtonClick(event: boolean){
+    this.showButtonActionClick.emit(event);
   }
 }

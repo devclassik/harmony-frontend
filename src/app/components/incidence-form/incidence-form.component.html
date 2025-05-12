@@ -1,0 +1,196 @@
+<div class="fixed inset-0 z-50 flex justify-end bg-[#7f7f7f63]" *ngIf="open">
+  <div
+    class="bg-white w-full max-w-xl h-full shadow-lg p-8 overflow-y-auto relative animate-slide-in-right"
+  >
+    <button
+      class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl"
+      (click)="onClose()"
+    >
+      &times;
+    </button>
+    <h2 class="text-xl text-[#040404] font-semibold mb-6">{{ formTitle }}</h2>
+    <hr class="text-[#ededed] mb-6" />
+    <div class="mb-8">
+      <h3 class="font-medium text-[#0f0f0f] mb-4">Disciplinary Information</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Custom Dropdown -->
+        <div class="w-full" #dropdownWrapper>
+          <label class="block text-sm mb-1">Select Name</label>
+          <div class="relative w-full">
+            <div
+              class="border border-green-600 rounded px-3 py-2 ring-0 cursor-pointer flex justify-between items-center"
+              (click)="toggleDropdown()"
+            >
+              {{ selectedName || "Select" }}
+              <svg
+                class="w-4 h-4 ml-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+
+            <!-- Dropdown panel -->
+            <div
+              *ngIf="dropdownOpen"
+              class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded"
+            >
+              <div
+                class="flex items-center py-2 px-2 border rounded border-gray-200"
+              >
+                <svg
+                  class="w-4 h-4 text-gray-500 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+                  />
+                </svg>
+                <input
+                  type="text"
+                  [(ngModel)]="searchTerm"
+                  (input)="onSearch(searchTerm)"
+                  placeholder="Search"
+                  class="w-full outline-none text-sm px-2 py-1"
+                />
+              </div>
+
+              <div
+                *ngFor="let name of filteredList"
+                (click)="selectName(name)"
+                class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+              >
+                {{ name }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Select Dropdown -->
+        <div class="w-full">
+          <label class="block text-sm mb-1">Type of discipline</label>
+          <select
+            class="w-full border border-green-600 rounded px-3 py-2 ring-0 focus:border-green-600 focus:ring-green-600 selection:bg-green-600 selection:text-white"
+            [(ngModel)]="form.period"
+          >
+            <option value="" disabled selected>Select</option>
+            <option *ngFor="let period of quarters" [value]="period">
+              {{ period }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-6 mt-4">
+        <div>
+          <label class="block text-sm mb-1">Category of offense</label>
+          <select
+            class="w-full border border-green-600 rounded px-3 py-2 ring-0 focus:border-green-600 focus:ring-green-600 selection:bg-green-600 selection:text-white"
+            [(ngModel)]="form.period"
+          >
+            <option value="" disabled selected>Select</option>
+            <option *ngFor="let period of quarters" [value]="period">
+              {{ period }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Duration of discipline</label>
+          <input
+            class="w-full border border-green-600 rounded px-3 py-2"
+            type="text"
+            [(ngModel)]="form.average"
+          />
+          <div class="flex gap-2 mt-3">
+            <label class="flex items-center gap-1 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                [(ngModel)]="form.period"
+                class="accent-green-600"
+              />
+              Days
+            </label>
+            <label class="flex items-center gap-1 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                [(ngModel)]="form.period"
+                class="accent-green-600"
+              />
+              Weeks
+            </label>
+            <label class="flex items-center gap-1 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                [(ngModel)]="form.period"
+                class="accent-green-600"
+              />
+              Months
+            </label>
+            <label class="flex items-center gap-1 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                [(ngModel)]="form.period"
+                class="accent-green-600"
+              />
+              Years
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <label class="block text-sm mb-1">Reason</label>
+        <input
+          class="w-full border border-green-600 rounded px-3 py-2"
+          type="text"
+          [(ngModel)]="form.average"
+        />
+      </div>
+    </div>
+    <div class="flex justify-center gap-4 mt-8">
+      <button
+        class="border border-green-600 text-green-600 rounded-lg px-8 py-2 font-medium transition hover:bg-green-50"
+        (click)="onClose()"
+      >
+        Cancel
+      </button>
+      <button
+        class="bg-green-600 text-white rounded-lg px-8 py-2 font-medium transition hover:bg-green-700"
+        (click)="onSubmit()"
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+  <button
+    (click)="onClose()"
+    class="absolute right-144 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow flex items-center justify-center border border-gray-200 hover:bg-green-50 z-50"
+    aria-label="Close"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5 text-gray-500"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M9 5l7 7-7 7"
+      />
+    </svg>
+  </button>
+</div>

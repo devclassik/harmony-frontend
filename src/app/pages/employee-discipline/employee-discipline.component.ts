@@ -5,10 +5,11 @@ import { MenuItem, TableComponent, TableHeader } from '../../components/table/ta
 import { TableData } from '../../interfaces/employee.interface';
 import { PromptConfig } from '../../components/confirm-prompt/confirm-prompt.component';
 import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
+import { IncidenceFormComponent } from '../../components/incidence-form/incidence-form.component';
 
 @Component({
   selector: 'app-employee-discipline',
-  imports: [CommonModule, ComponentsModule, TableComponent, EmployeeDetailsComponent],
+  imports: [CommonModule, ComponentsModule, TableComponent, EmployeeDetailsComponent, IncidenceFormComponent],
   templateUrl: './employee-discipline.component.html',
   styleUrl: './employee-discipline.component.css'
 })
@@ -23,6 +24,7 @@ export class EmployeeDisciplineComponent {
   promptConfig: PromptConfig | null = null;
   showEmployeeDetails: boolean = false;
   showAppraisal: boolean = false;
+  showDiscipline: boolean = false;
 
   tableHeader: TableHeader[] = [
     { key: 'id', label: 'DISCIPLINE ID' },
@@ -93,9 +95,9 @@ export class EmployeeDisciplineComponent {
       filtered = filtered.filter(
         (employee) =>
           employee.name.toLowerCase().includes(search) ||
-        employee.id.toLowerCase().includes(search) ||
-        (employee.disciplineType &&
-          employee.disciplineType.toLowerCase().includes(search)) ||
+          employee.id.toLowerCase().includes(search) ||
+          (employee.disciplineType &&
+            employee.disciplineType.toLowerCase().includes(search)) ||
           employee.disciplineDuration?.toLowerCase().includes(search) ||
           employee.offenseCategory?.toLowerCase().includes(search)
       );
@@ -146,4 +148,22 @@ export class EmployeeDisciplineComponent {
       this.showModal = true;
     }
   }
+
+  onShowButtonActionClick(event: boolean) {
+    this.showDiscipline = this.showDiscipline ? false : true;
+  }
+
+  
+  handleDiscipline(form: any) {
+    console.log(form);
+    this.promptConfig = {
+      title: 'Confirm',
+      text: 'Are you sure you want to submit this appraisal?',
+      imageUrl: 'assets/svg/profilePix.svg',
+      yesButtonText: 'Yes',
+      noButtonText: 'No',
+    };
+    this.showModal = true;
+  }
+
 }

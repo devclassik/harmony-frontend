@@ -85,6 +85,18 @@
           </div>
         </div>
       </div>
+      <div class="flex gap-4 " *ngIf="showButton">
+        <button
+          class="flex items-center justify-center px-2 flex-1 bg-green-600 text-white rounded-lg py-2 font-medium transition hover:bg-green-700 cursor-pointer"
+          (click)="onButtonClick(true)"
+        >
+          <span class="flex items-center px-1">
+            <img [src]="showButtonIcon" class="w-4 h-4 text-white" />
+          </span>
+          {{ showButtonText }}
+        </button>
+      </div>
+      
       <a
         *ngIf="showViewAll"
         [href]="viewAllLink"
@@ -184,7 +196,9 @@
 
           <!-- DURATION OF DISCIPLINE -->
           <ng-container *ngIf="col.key === 'disciplineDuration'">{{
-            employee["disciplineDuration"] ? employee["disciplineDuration"] : "-"
+            employee["disciplineDuration"]
+              ? employee["disciplineDuration"]
+              : "-"
           }}</ng-container>
 
           <!-- DEPARTMENT -->
@@ -200,26 +214,37 @@
           <!-- STATUS -->
           <ng-container *ngIf="col.key === 'status'">
             <span
-            [ngClass]="{
-              'flex items-center gap-2 px-3 py-1 rounded-full text-sm w-fit': true,
-              'bg-[#DDFFE0] text-[#049914]': employee.status === 'Active' || employee.status === 'Approved',
-              'bg-[#FEF9EA] text-[#E0A800]': employee.status === 'On leave' || employee.status === 'Pending',
-              'bg-[#E8FAFF] text-[#008FBD]': employee.status === 'Retired',
-              'bg-[#FFDEDE] text-[#DD1212]': employee.status === 'On Discipline' || employee.status === 'Rejected'
-            }"
-          >
-            <span
-              class="h-2 w-2 rounded-full"
               [ngClass]="{
-                'bg-[#049914]': employee.status === 'Active' || employee.status === 'Approved',
-                'bg-[#E0A800]': employee.status === 'On leave' || employee.status === 'Pending',
-                'bg-[#008FBD]': employee.status === 'Retired',
-                'bg-[#DD1212]': employee.status === 'On Discipline' || employee.status === 'Rejected'
+                'flex items-center gap-2 px-3 py-1 rounded-full text-sm w-fit': true,
+                'bg-[#DDFFE0] text-[#049914]':
+                  employee.status === 'Active' ||
+                  employee.status === 'Approved',
+                'bg-[#FEF9EA] text-[#E0A800]':
+                  employee.status === 'On leave' ||
+                  employee.status === 'Pending',
+                'bg-[#E8FAFF] text-[#008FBD]': employee.status === 'Retired',
+                'bg-[#FFDEDE] text-[#DD1212]':
+                  employee.status === 'On Discipline' ||
+                  employee.status === 'Rejected'
               }"
-            ></span>
-            {{ employee.status }}
-          </span>
-          
+            >
+              <span
+                class="h-2 w-2 rounded-full"
+                [ngClass]="{
+                  'bg-[#049914]':
+                    employee.status === 'Active' ||
+                    employee.status === 'Approved',
+                  'bg-[#E0A800]':
+                    employee.status === 'On leave' ||
+                    employee.status === 'Pending',
+                  'bg-[#008FBD]': employee.status === 'Retired',
+                  'bg-[#DD1212]':
+                    employee.status === 'On Discipline' ||
+                    employee.status === 'Rejected'
+                }"
+              ></span>
+              {{ employee.status }}
+            </span>
           </ng-container>
 
           <!-- ACTION -->
