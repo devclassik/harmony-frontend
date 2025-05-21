@@ -211,6 +211,26 @@
             employee.role
           }}</ng-container>
 
+          <!-- RETRENCHMENT TYPE -->
+          <ng-container *ngIf="col.key === 'retrenchmentType'">{{
+            employee.retrenchmentType
+          }}</ng-container>
+
+          <!-- TRANSFER TYPE -->
+          <ng-container *ngIf="col.key === 'transferType'">{{
+            employee.transferType
+          }}</ng-container>
+
+          <!-- REQUEST DATE -->
+          <ng-container *ngIf="col.key === 'requestDate'">{{
+            employee.requestDate
+          }}</ng-container>
+
+          <!-- DESTINATION -->
+          <ng-container *ngIf="col.key === 'destination'">{{
+            employee.destination
+          }}</ng-container>
+
           <!-- STATUS -->
           <ng-container *ngIf="col.key === 'status'">
             <span

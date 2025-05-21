@@ -8,4 +8,8 @@ export interface TableData {
   disciplineType?: 'Suspension' | 'Warning';
   offenseCategory?: string;
   disciplineDuration?: string;
+  transferType?: string;
+  destination?: string;
+  requestDate?: string;
+  retrenchmentType?: string;
 } 

@@ -1,1 +1,52 @@
-<p>employee-retrenchment works!</p>
+<div class="p-2">
+    <app-table
+      [tableTitle]="'Retrenchment'"
+      [tableHeader]="tableHeader"
+      [tableData]="employees"
+      [showViewAll]="false"
+      [showFilter]="true"
+      [showStatusTab]="false"
+      [activeStatusTab]="selectedStatus"
+      (statusTabChange)="onStatusTabChange($event)"
+      [filterTabs]="filterTabs"
+      [activeFilterTab]="selectedFilter"
+      (filterTabChange)="onFilterTabChange($event)"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="filteredEmployees"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+    ></app-table>
+  </div>
+  
+  <app-employee-details
+    [view]="showEmployeeDetails"
+    [showButton]="true"
+    [noButtonText]="'Reject'"
+    [yesButtonText]="'Accept'"
+    (confirm)="actionToPerform($event)"
+    (close)="showEmployeeDetails = false"
+    [employee]="selectedEmployeeRecord"
+  ></app-employee-details>
+  
+  <app-confirm-prompt
+    *ngIf="showModal"
+    [title]="promptConfig?.title || ''"
+    [text]="promptConfig?.text || ''"
+    [imageUrl]="promptConfig?.imageUrl || null"
+    [yesButtonText]="promptConfig?.yesButtonText || ''"
+    [noButtonText]="promptConfig?.noButtonText || ''"
+    (confirmed)="onModalConfirm($event)"
+    (closed)="onModalClose()"
+    [data]="selectedEmployeeRecord"
+  ></app-confirm-prompt>
+  
+  <app-success-modal
+    *ngIf="successModal"
+    [title]="'Operation Successful!'"
+    [showOkButton]="false"
+    [okButtonText]="'Click Ok'"
+    [okButtonLink]="'/dashboard'"
+    (closed)="successModal = false"
+  ></app-success-modal>
+  

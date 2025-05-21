@@ -18,7 +18,6 @@ import { SuccessModalComponent } from '../../components/success-modal/success-mo
   selector: 'app-employee-promotion',
   imports: [
     CommonModule,
-    CommonModule,
     TableComponent,
     EmployeeDetailsComponent,
     ConfirmPromptComponent,
