@@ -2,7 +2,10 @@ import { Component, Input, Output, EventEmitter, ElementRef, HostListener, Templ
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableData } from '../../interfaces/employee.interface';
-import { CalendarComponent } from "../calendar/calendar.component";
+import { FullCalendarModule } from '@fullcalendar/angular';
+import { CalendarOptions } from '@fullcalendar/core'; // useful for typechecking
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction'; // needed for dayClick
 
 export interface MenuItem {
   label: string;
@@ -27,7 +30,7 @@ export interface FilterTab {
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, CalendarComponent]
+  imports: [CommonModule, FormsModule, FullCalendarModule]
 })
 export class TableComponent {
   @Input() tableTitle: string = '';
@@ -187,8 +190,63 @@ export class TableComponent {
     }
   }
 
-    onCalendarDateChange(date: Date) {
-    this.calendarDate = date;
-    // Optionally, filter or fetch data for the new date
+  calendarOptions: CalendarOptions = {
+    //month view
+    initialView: 'dayGridMonth',
+    plugins: [dayGridPlugin, interactionPlugin],
+    // dateClick: (arg) => this.handleDateClick(arg),
+    events: [
+      { title: 'leave 1', date: '2025-05-01' },
+      { title: 'leave 1', editable: true, date: '2025-05-15', backgroundColor: '#12C16F', borderColor: '#12C16F' },
+      { title: 'leave Opemipo', date: '2025-05-20', end: '2025-05-21', editable: true, },
+    ],
+    eventClick: function (info) {
+      alert('Event: ' + info.event.title);
+    }
+    // week view,
+    // plugins: [dayGridPlugin],
+    // initialView: 'dayGridWeek',
+    // headerToolbar: {
+    //   left: 'prev,next',
+    //   center: 'title',
+    //   right: 'dayGridWeek,dayGridDay' // user can switch between the two
+    // }
+
+    //year view
+    // plugins: [dayGridPlugin],
+    // initialView: 'dayGridYear'
+  };
+
+  handleDateClick(arg: DateClickArg) {
+    alert('date click! ' + arg.dateStr)
   }
+//   onDateClick(date: { dateStr: string; }) {
+//     this.modalRef = this.modalService.show(this.viewModal);
+//     this.date = date.dateStr;
+//   }
+  
+// createEvent() {
+//     let newEvent = {
+//       title: this.eventName,
+//       date: this.date
+//     };
+//     this.newEvents.push(newEvent);
+//     this.calendarOptions.events = [...this.newEvents];
+//     this.eventName = "";
+//   }
+
+// handleEventClick(arg){
+//     this.deleteEventTitle = arg.event._def.title;
+//   }
+
+//   deleteEvent(arg){
+//     for (var i = 0; i < this.newEvents.length; i++) {
+//       if (this.newEvents[i].title == this.deleteEventTitle) {
+//         this.newEvents.splice(i, 1);
+//         this.calendarOptions.events=[];
+//         break;
+//       }
+//     }
+//     this.calendarOptions.events = [...this.newEvents];
+//   }
 }

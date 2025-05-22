@@ -151,12 +151,13 @@
     </ng-container>
   </div>
 
-  <app-calendar
-    *ngIf="activeView === 'calendar'"
-    [view]="'Weekly'"
-    [currentDate]="calendarDate"
-    (dateChange)="onCalendarDateChange($event)"
-  ></app-calendar>
+    <!-- *ngIf="activeView === 'calendar'" -->
+  <full-calendar
+
+    [options]="calendarOptions"
+    class="w-full"
+  >
+  </full-calendar>
 
   <table
     class="w-full border-separate border-spacing-0 my-4 bg-[#ededed]"
