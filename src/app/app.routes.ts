@@ -14,6 +14,9 @@ import { EmployeeDisciplineComponent } from './pages/employee-discipline/employe
 import { EmployeeTransferComponent } from './pages/employee-transfer/employee-transfer.component';
 import { EmployeeRetirementComponent } from './pages/employee-retirement/employee-retirement.component';
 import { EmployeeRetrenchmentComponent } from './pages/employee-retrenchment/employee-retrenchment.component';
+import { AnnualLeaveComponent } from './pages/annual-leave/annual-leave.component';
+import { LeaveOfAbsenceComponent } from './pages/leave-of-absence/leave-of-absence.component';
+import { SickLeaveComponent } from './pages/sick-leave/sick-leave.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
@@ -40,6 +43,9 @@ export const routes: Routes = [
             { path: 'employee-management/transfer', component: EmployeeTransferComponent },
             { path: 'employee-management/retirement', component: EmployeeRetirementComponent },
             { path: 'employee-management/retrenchment', component: EmployeeRetrenchmentComponent },
+            { path: 'leave-management/annual-leave', component: AnnualLeaveComponent },
+            { path: 'leave-management/leave-of-absence', component: LeaveOfAbsenceComponent },
+            { path: 'leave-management/sick-leave', component: SickLeaveComponent },
             { path: 'admin', component: DashboardComponent },
             { path: 'user', component: DashboardComponent },
         ]

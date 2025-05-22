@@ -85,7 +85,7 @@
           </div>
         </div>
       </div>
-      <div class="flex gap-4 " *ngIf="showButton">
+      <div class="flex gap-4" *ngIf="showButton">
         <button
           class="flex items-center justify-center px-2 flex-1 bg-green-600 text-white rounded-lg py-2 font-medium transition hover:bg-green-700 cursor-pointer"
           (click)="onButtonClick(true)"
@@ -96,7 +96,35 @@
           {{ showButtonText }}
         </button>
       </div>
-      
+      <div class="flex gap-4" *ngIf="showList">
+        <button
+          class="flex items-center justify-center px-2 flex-1 rounded-lg py-2 font-medium transition cursor-pointer"
+          [ngClass]="{
+            'bg-[#12C16F] text-white': activeView === 'list',
+            'bg-[#dddddd] text-[#12C16F]': activeView !== 'list'
+          }"
+          (click)="toggleListCalendar('list')"
+        >
+          <span class="flex items-center px-1">
+            <img [src]="showListIcon" class="w-4 h-4 text-white" />
+          </span>
+        </button>
+      </div>
+      <div class="flex gap-4" *ngIf="showCalendar">
+        <button
+          class="flex items-center justify-center px-2 flex-1 rounded-lg py-2 font-medium transition cursor-pointer"
+          [ngClass]="{
+            'bg-[#12C16F] text-white': activeView === 'calendar',
+            'bg-[#dddddd] text-[#12C16F]': activeView !== 'calendar'
+          }"
+          (click)="toggleListCalendar('calendar')"
+        >
+          <span class="flex items-center px-1">
+            <img [src]="showCalendarIcon" class="w-4 h-4 text-white" />
+          </span>
+        </button>
+      </div>
+
       <a
         *ngIf="showViewAll"
         [href]="viewAllLink"
@@ -122,6 +150,13 @@
       </button>
     </ng-container>
   </div>
+
+  <app-calendar
+    *ngIf="activeView === 'calendar'"
+    [view]="'Weekly'"
+    [currentDate]="calendarDate"
+    (dateChange)="onCalendarDateChange($event)"
+  ></app-calendar>
 
   <table
     class="w-full border-separate border-spacing-0 my-4 bg-[#ededed]"
@@ -229,6 +264,16 @@
           <!-- DESTINATION -->
           <ng-container *ngIf="col.key === 'destination'">{{
             employee.destination
+          }}</ng-container>
+
+          <!-- START DATE -->
+          <ng-container *ngIf="col.key === 'startDate'">{{
+            employee.startDate
+          }}</ng-container>
+
+          <!-- END DATE -->
+          <ng-container *ngIf="col.key === 'endDate'">{{
+            employee.endDate
           }}</ng-container>
 
           <!-- STATUS -->

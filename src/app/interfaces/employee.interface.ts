@@ -12,4 +12,6 @@ export interface TableData {
   destination?: string;
   requestDate?: string;
   retrenchmentType?: string;
+  startDate?: string;
+  endDate?: string;
 } 

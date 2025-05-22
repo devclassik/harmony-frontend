@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, ElementRef, HostListener, Templ
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableData } from '../../interfaces/employee.interface';
+import { CalendarComponent } from "../calendar/calendar.component";
 
 export interface MenuItem {
   label: string;
@@ -26,7 +27,7 @@ export interface FilterTab {
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, CalendarComponent]
 })
 export class TableComponent {
   @Input() tableTitle: string = '';
@@ -53,6 +54,10 @@ export class TableComponent {
   @Input() showButtonText: string = 'Create Incidence';
   @Input() showButtonIcon: string = '';
   @Input() showViewAll: boolean = true;
+  @Input() showCalendar: boolean = false;
+  @Input() showCalendarIcon: string = '';
+  @Input() showList: boolean = false;
+  @Input() showListIcon: string = '';
   @Input() viewAllText: string = 'View all';
   @Input() viewAllLink: string = '#';
   @Input() emptyStateImage: string = 'assets/svg/emptyState.svg';
@@ -74,6 +79,9 @@ export class TableComponent {
   @Output() statusTabChange = new EventEmitter<string>();
   @Output() showButtonActionClick = new EventEmitter<boolean>();
   @Output() menuAction = new EventEmitter<{ action: string, row: TableData }>();
+  @Output() showListCalendarClick = new EventEmitter<string>();
+  calendarDate: Date = new Date();
+
 
   @Input() menuItems: MenuItem[] = [
     { label: 'View all', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z', action: 'view' },
@@ -83,9 +91,10 @@ export class TableComponent {
 
   activeDropdownKey: string | null = null;
   selectedRows = new Set<string>();
-  showFilterDropdown = false;
+  showFilterDropdown: boolean = false;
+  activeView: string = 'list';
 
-  constructor(private eRef: ElementRef) {}
+  constructor(private eRef: ElementRef) { }
 
   getDropdownKey(employee: TableData, index: number): string {
     return `${employee.id}_${index}`;
@@ -163,7 +172,23 @@ export class TableComponent {
     this.statusTabChange.emit(tab.value);
   }
 
-  onButtonClick(event: boolean){
+  onButtonClick(event: boolean) {
     this.showButtonActionClick.emit(event);
+  }
+
+
+  toggleListCalendar(event: string) {
+    if (event === 'list') {
+      this.activeView = event;
+      this.showListCalendarClick.emit(event);
+    } else {
+      this.activeView = event;
+      this.showListCalendarClick.emit(event);
+    }
+  }
+
+    onCalendarDateChange(date: Date) {
+    this.calendarDate = date;
+    // Optionally, filter or fetch data for the new date
   }
 }

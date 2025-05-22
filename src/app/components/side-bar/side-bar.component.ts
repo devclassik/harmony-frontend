@@ -92,7 +92,15 @@ export class SideBarComponent implements OnInit {
       '/employee-management/discipline',
       '/employee-management/transfer',
       '/employee-management/retirement',
-      '/employee-management/retrenchment'
+      '/employee-management/retrenchment',
+    ].some(path => this.router.isActive(path, false));
+  }
+
+    isEmployeeLeaveChildActive(): boolean {
+    return [
+      '/leave-management/annual-leave',
+      '/leave-management/leave-of-absence',
+      '/leave-management/sick-leave',
     ].some(path => this.router.isActive(path, false));
   }
 }

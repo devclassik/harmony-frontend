@@ -111,10 +111,11 @@
                 routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
-                >
+              >
                 <span
-                class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
-              ></span>Promotion</a
+                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                ></span
+                >Promotion</a
               >
               <a
                 routerLink="employee-management/discipline"
@@ -122,8 +123,9 @@
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
                 ><span
-                class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
-              ></span>Discipline</a
+                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                ></span
+                >Discipline</a
               >
               <a
                 routerLink="employee-management/transfer"
@@ -131,8 +133,9 @@
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
                 ><span
-                class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
-              ></span>Transfer</a
+                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                ></span
+                >Transfer</a
               >
               <a
                 routerLink="employee-management/retirement"
@@ -140,8 +143,9 @@
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
                 ><span
-                class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
-              ></span>Retirement</a
+                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                ></span
+                >Retirement</a
               >
               <a
                 routerLink="employee-management/retrenchment"
@@ -149,8 +153,9 @@
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
                 ><span
-                class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
-              ></span>Retrenchment</a
+                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                ></span
+                >Retrenchment</a
               >
             </div>
           </div>
@@ -162,6 +167,10 @@
             <button
               (click)="toggleLeaveMenu()"
               class="flex items-center justify-between gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer"
+              [ngClass]="{
+                'bg-[#12C16F] text-white': isEmployeeLeaveChildActive(),
+                '': !isEmployeeLeaveChildActive()
+              }"
             >
               <div class="flex items-center gap-2">
                 <mat-icon>event_note</mat-icon>
@@ -179,24 +188,33 @@
               class="mt-2 ml-4 flex flex-col gap-2 px-4 list-none"
             >
               <a
-                routerLink="/annual-leave"
-                routerLinkActive="active-link"
+                routerLink="leave-management/annual-leave"
+                routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                ><span
+                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                ></span
                 >Annual Leave</a
               >
               <a
-                routerLink="/leave-of-absence"
-                routerLinkActive="active-link"
+                routerLink="leave-management/leave-of-absence"
+                routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                ><span
+                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                ></span
                 >Leave of Absence</a
               >
               <a
-                routerLink="/sick-leave"
-                routerLinkActive="active-link"
+                routerLink="leave-management/sick-leave"
+                routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                ><span
+                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                ></span
                 >Sick Leave</a
               >
             </div>

@@ -8,12 +8,11 @@
     >
       &times;
     </button>
-    <h2 class="text-xl text-[#040404] font-semibold mb-6">{{ formTitle }}</h2>
+    <h2 class="text-xl text-[#040404] font-semibold mb-6">Substitution</h2>
     <hr class="text-[#ededed] mb-6" />
     <div class="mb-8">
-      <h3 class="font-medium text-[#0f0f0f] mb-4">Disciplinary Information</h3>
-      <div class="grid grid-cols-2 gap-4">
-        <!-- Custom Dropdown -->
+      <h3 class="font-medium text-[#0f0f0f] mb-4">Substitution Information</h3>
+      <div class="flex flex-col gap-4">
         <div class="w-full" #dropdownWrapper>
           <label class="block text-sm mb-1">Employee Name</label>
           <div class="relative w-full">
@@ -77,85 +76,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Select Dropdown -->
-        <div class="w-full">
-          <label class="block text-sm mb-1">Type of discipline</label>
-          <select
-            class="w-full border border-green-600 rounded px-3 py-2 ring-0 focus:border-green-600 focus:ring-green-600 selection:bg-green-600 selection:text-white"
-            [(ngModel)]="form.period"
-          >
-            <option value="" disabled selected>Select</option>
-            <option *ngFor="let period of quarters" [value]="period">
-              {{ period }}
-            </option>
-          </select>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-6 mt-4">
-        <div>
-          <label class="block text-sm mb-1">Category of offense</label>
-          <select
-            class="w-full border border-green-600 rounded px-3 py-2 ring-0 focus:border-green-600 focus:ring-green-600 selection:bg-green-600 selection:text-white"
-            [(ngModel)]="form.period"
-          >
-            <option value="" disabled selected>Select</option>
-            <option *ngFor="let period of quarters" [value]="period">
-              {{ period }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm mb-1">Duration of discipline</label>
-          <input
-            class="w-full border border-green-600 rounded px-3 py-2"
-            type="text"
-            [(ngModel)]="form.average"
-          />
-          <div class="flex gap-2 mt-3">
-            <label class="flex items-center gap-1 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                [(ngModel)]="form.period"
-                class="accent-green-600"
-              />
-              Days
-            </label>
-            <label class="flex items-center gap-1 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                [(ngModel)]="form.period"
-                class="accent-green-600"
-              />
-              Weeks
-            </label>
-            <label class="flex items-center gap-1 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                [(ngModel)]="form.period"
-                class="accent-green-600"
-              />
-              Months
-            </label>
-            <label class="flex items-center gap-1 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                [(ngModel)]="form.period"
-                class="accent-green-600"
-              />
-              Years
-            </label>
-          </div>
-        </div>
-      </div>
-      <div class="mt-4">
-        <label class="block text-sm mb-1">Reason</label>
-        <input
-          class="w-full border border-green-600 rounded px-3 py-2"
-          type="text"
-          [(ngModel)]="form.average"
-        />
       </div>
     </div>
     <div class="flex justify-center gap-4 mt-8">
