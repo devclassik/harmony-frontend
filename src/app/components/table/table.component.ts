@@ -270,6 +270,19 @@ export class TableComponent {
       title: 'Hello’s event',
       color: { primary: '#1e90ff', secondary: '#D1E8FF' },
     },
+    {
+      title: 'Editable event',
+      // color: colors.yellow,
+      start: new Date(),
+      actions: [
+        {
+          label: '<i class="fas fa-fw fa-pencil-alt"></i>',
+          onClick: ({ event }: { event: CalendarEvent }): void => {
+            console.log('Edit event', event);
+          },
+        },
+      ],
+    },
   ];
 
   dayClicked(day: any): void {
