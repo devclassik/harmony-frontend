@@ -7,6 +7,10 @@ import { CalendarOptions } from '@fullcalendar/core'; // useful for typechecking
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction'; // needed for dayClick
 
+
+import { CalendarEvent, CalendarModule, DateAdapter } from 'angular-calendar';
+import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
+
 export interface MenuItem {
   label: string;
   icon: string;
@@ -30,7 +34,9 @@ export interface FilterTab {
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, FullCalendarModule]
+  imports: [CommonModule, FormsModule, FullCalendarModule,
+    CalendarModule
+  ]
 })
 export class TableComponent {
   @Input() tableTitle: string = '';
@@ -220,33 +226,53 @@ export class TableComponent {
   handleDateClick(arg: DateClickArg) {
     alert('date click! ' + arg.dateStr)
   }
-//   onDateClick(date: { dateStr: string; }) {
-//     this.modalRef = this.modalService.show(this.viewModal);
-//     this.date = date.dateStr;
-//   }
-  
-// createEvent() {
-//     let newEvent = {
-//       title: this.eventName,
-//       date: this.date
-//     };
-//     this.newEvents.push(newEvent);
-//     this.calendarOptions.events = [...this.newEvents];
-//     this.eventName = "";
-//   }
+  //   onDateClick(date: { dateStr: string; }) {
+  //     this.modalRef = this.modalService.show(this.viewModal);
+  //     this.date = date.dateStr;
+  //   }
 
-// handleEventClick(arg){
-//     this.deleteEventTitle = arg.event._def.title;
-//   }
+  // createEvent() {
+  //     let newEvent = {
+  //       title: this.eventName,
+  //       date: this.date
+  //     };
+  //     this.newEvents.push(newEvent);
+  //     this.calendarOptions.events = [...this.newEvents];
+  //     this.eventName = "";
+  //   }
 
-//   deleteEvent(arg){
-//     for (var i = 0; i < this.newEvents.length; i++) {
-//       if (this.newEvents[i].title == this.deleteEventTitle) {
-//         this.newEvents.splice(i, 1);
-//         this.calendarOptions.events=[];
-//         break;
-//       }
-//     }
-//     this.calendarOptions.events = [...this.newEvents];
-//   }
+  // handleEventClick(arg){
+  //     this.deleteEventTitle = arg.event._def.title;
+  //   }
+
+  //   deleteEvent(arg){
+  //     for (var i = 0; i < this.newEvents.length; i++) {
+  //       if (this.newEvents[i].title == this.deleteEventTitle) {
+  //         this.newEvents.splice(i, 1);
+  //         this.calendarOptions.events=[];
+  //         break;
+  //       }
+  //     }
+  //     this.calendarOptions.events = [...this.newEvents];
+  //   }
+
+
+  viewDate: Date = new Date();
+
+  events: CalendarEvent[] = [
+    {
+      start: new Date(),
+      title: 'Today’s event',
+      color: { primary: '#1e90ff', secondary: '#D1E8FF' },
+    },
+    {
+      start: new Date('2025-05-23'),
+      title: 'Hello’s event',
+      color: { primary: '#1e90ff', secondary: '#D1E8FF' },
+    },
+  ];
+
+  dayClicked(day: any): void {
+    console.log('Clicked day:', day.date);
+  }
 }

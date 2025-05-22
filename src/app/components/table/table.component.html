@@ -134,16 +134,24 @@
     </div>
   </div>
 
-  <div class="flex mb-4">
-    <full-calendar
+  <mwl-calendar-month-view
+    *ngIf="activeView === 'calendar'"
+    [viewDate]="viewDate"
+    [events]="events"
+    (dayClicked)="dayClicked($event.day)"
+  >
+  </mwl-calendar-month-view>
+
+  <!-- <div class="flex mb-4">
+  <full-calendar
       *ngIf="activeView === 'calendar'"
       [options]="calendarOptions"
       class="w-full"
     >
     </full-calendar>
-  </div>
+  </div> -->
 
-  <div class="flex flex-wrap gap-2 mb-2" *ngIf="showStatusTab">
+  <div class="flex flex-wrap gap-2 mt-4 mb-2" *ngIf="showStatusTab">
     <ng-container *ngFor="let tab of statusTabs">
       <button
         (click)="onStatusTabClick(tab)"
