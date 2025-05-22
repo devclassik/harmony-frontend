@@ -134,6 +134,15 @@
     </div>
   </div>
 
+  <div class="flex mb-4">
+    <full-calendar
+      *ngIf="activeView === 'calendar'"
+      [options]="calendarOptions"
+      class="w-full"
+    >
+    </full-calendar>
+  </div>
+
   <div class="flex flex-wrap gap-2 mb-2" *ngIf="showStatusTab">
     <ng-container *ngFor="let tab of statusTabs">
       <button
@@ -150,14 +159,6 @@
       </button>
     </ng-container>
   </div>
-
-    <!-- *ngIf="activeView === 'calendar'" -->
-  <full-calendar
-
-    [options]="calendarOptions"
-    class="w-full"
-  >
-  </full-calendar>
 
   <table
     class="w-full border-separate border-spacing-0 my-4 bg-[#ededed]"
