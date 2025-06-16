@@ -276,6 +276,17 @@
             employee.destination
           }}</ng-container>
 
+          <!-- REQUEST TYPE -->
+          <ng-container *ngIf="col.key === 'requestType'">{{
+            employee.requestType
+          }}</ng-container>
+
+          <!-- DURATION -->
+          <ng-container *ngIf="col.key === 'duration'">{{
+            employee.duration
+          }}</ng-container>
+
+
           <!-- START DATE -->
           <ng-container *ngIf="col.key === 'startDate'">{{
             employee.startDate
