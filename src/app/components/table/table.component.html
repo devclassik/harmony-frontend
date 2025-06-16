@@ -143,7 +143,7 @@
   </mwl-calendar-month-view>
 
   <div class="flex mb-4">
-  <full-calendar
+    <full-calendar
       *ngIf="activeView === 'calendar'"
       [options]="calendarOptions"
       class="w-full"
@@ -229,6 +229,11 @@
             </div>
           </ng-container>
 
+          <!-- DOCUMENT NAME -->
+          <ng-container *ngIf="col.key === 'documentName'">
+            {{ employee.documentName }}
+          </ng-container>
+
           <!-- DISCIPLINE TYPE -->
           <ng-container *ngIf="col.key === 'disciplineType'">{{
             employee["disciplineType"] ? employee["disciplineType"] : "-"
@@ -286,7 +291,6 @@
             employee.duration
           }}</ng-container>
 
-
           <!-- START DATE -->
           <ng-container *ngIf="col.key === 'startDate'">{{
             employee.startDate
@@ -295,6 +299,16 @@
           <!-- END DATE -->
           <ng-container *ngIf="col.key === 'endDate'">{{
             employee.endDate
+          }}</ng-container>
+
+          <!-- DATE UPLOADED -->
+          <ng-container *ngIf="col.key === 'date'">{{
+            employee.date
+          }}</ng-container>
+
+          <!-- DATE UPLOADED -->
+          <ng-container *ngIf="col.key === 'documentType'">{{
+            employee.documentType
           }}</ng-container>
 
           <!-- STATUS -->

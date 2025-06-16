@@ -1,19 +1,17 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { ComponentsModule } from '../../components/components.module';
-import { MenuItem, TableComponent, TableHeader } from '../../components/table/table.component';
+import { FilterTab, MenuItem, TableHeader, TableComponent } from '../../components/table/table.component';
 import { TableData } from '../../interfaces/employee.interface';
-import { PromptConfig } from '../../components/confirm-prompt/confirm-prompt.component';
-import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
-import { IncidenceFormComponent } from '../../components/incidence-form/incidence-form.component';
+import { PromptConfig, ConfirmPromptComponent } from '../../components/confirm-prompt/confirm-prompt.component';
+import { SuccessModalComponent } from "../../components/success-modal/success-modal.component";
+import { EmployeeDetailsComponent } from "../../components/employee-details/employee-details.component";
 
 @Component({
-  selector: 'app-employee-discipline',
-  imports: [CommonModule, ComponentsModule, TableComponent, EmployeeDetailsComponent, IncidenceFormComponent],
-  templateUrl: './employee-discipline.component.html',
-  styleUrl: './employee-discipline.component.css'
+  selector: 'app-index-of-file',
+  imports: [SuccessModalComponent, ConfirmPromptComponent, EmployeeDetailsComponent, TableComponent],
+  templateUrl: './index-of-file.component.html',
+  styleUrl: './index-of-file.component.css'
 })
-export class EmployeeDisciplineComponent {
+export class IndexOfFileComponent {
   selectedStatus: string = '';
   selectedFilter: string = '';
   searchValue: string = '';
@@ -24,39 +22,32 @@ export class EmployeeDisciplineComponent {
   promptConfig: PromptConfig | null = null;
   showEmployeeDetails: boolean = false;
   showAppraisal: boolean = false;
-  showDiscipline: boolean = false;
 
   tableHeader: TableHeader[] = [
-    { key: 'id', label: 'DISCIPLINE ID' },
-    { key: 'name', label: 'EMPLOYEE NAME' },
-    { key: 'disciplineType', label: 'TYPE OF DISCIPLINE' },
-    { key: 'offenseCategory', label: 'CATEGORY OF OFFENSE' },
-    { key: 'disciplineDuration', label: 'DURATION OF DISCIPLINE' },
+    { key: 'id', label: 'LEAVE ID' },
+    { key: 'documentName', label: 'DOCUMENT NAME' },
+    { key: 'date', label: 'DATE UPLOADED' },
+    { key: 'documentType', label: 'DOCUMENT TYPE' },
     { key: 'action', label: 'ACTION' },
   ];
 
   employees: TableData[] = [
     {
       id: '124 - 08',
-      name: 'John Adegoke',
-      disciplineType: 'Suspension',
-      offenseCategory: 'lorem',
-      disciplineDuration: '2 Days',
-      imageUrl: 'assets/svg/profilePix.svg',
-
+      documentName: 'John Adegoke',
+      date: '06/5/2025',
+      documentType: 'PDF',
     },
     {
       id: '124 - 01',
-      name: 'John Adegoke',
-      disciplineType: 'Warning',
-      offenseCategory: 'Minister',
-      disciplineDuration: 'Rejected',
-      imageUrl: 'assets/svg/profilePix.svg',
-
+      documentName: 'John Adegoke',
+      date: '06/3/2025',
+      documentType: 'DOCX',
     },
   ];
 
   filteredEmployees: TableData[] = this.employees;
+
 
   filterTabs = [
     {
@@ -64,17 +55,17 @@ export class EmployeeDisciplineComponent {
       value: '',
       icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z',
     },
-    { label: 'Minister', value: 'Minister', icon: 'M5 13l4 4L19 7' },
-    { label: 'Zonal Pastor', value: 'Zonal Pastor', icon: 'M5 13l4 4L19 7' },
-    {
-      label: 'District Pastor',
-      value: 'District Pastor',
-      icon: 'M5 13l4 4L19 7',
-    },
+    { label: 'Sabbatical', value: 'Sabbatical', icon: 'M5 13l4 4L19 7' },
+    { label: 'Personal', value: 'Personal', icon: 'M5 13l4 4L19 7' },
   ];
 
   onFilterTabChange(value: string) {
     this.selectedFilter = value;
+    this.applyFilters();
+  }
+
+  onStatusTabChange(value: string) {
+    this.selectedStatus = value;
     this.applyFilters();
   }
 
@@ -96,10 +87,9 @@ export class EmployeeDisciplineComponent {
         (employee) =>
           employee.name?.toLowerCase().includes(search) ||
           employee.id.toLowerCase().includes(search) ||
-          (employee.disciplineType &&
-            employee.disciplineType.toLowerCase().includes(search)) ||
-          employee.disciplineDuration?.toLowerCase().includes(search) ||
-          employee.offenseCategory?.toLowerCase().includes(search)
+          (employee.department &&
+            employee.department.toLowerCase().includes(search)) ||
+          employee.role?.toLowerCase().includes(search)
       );
     }
     this.filteredEmployees = filtered;
@@ -119,13 +109,12 @@ export class EmployeeDisciplineComponent {
     }
   }
 
-  showEmployeeDetailsModal() {
-    this.showEmployeeDetails = true;
-  }
-
   actionButton: MenuItem[] = [
     { label: 'View', action: 'View', icon: '/public/assets/svg/eyeOpen.svg' },
   ];
+  showEmployeeDetailsModal() {
+    this.showEmployeeDetails = true;
+  }
 
   actionToPerform(result: boolean) {
     if (result) {
@@ -149,21 +138,14 @@ export class EmployeeDisciplineComponent {
     }
   }
 
-  onShowButtonActionClick(event: boolean) {
-    this.showDiscipline = this.showDiscipline ? false : true;
+  onModalConfirm(confirmed: boolean) {
+    console.log(confirmed);
+    this.showModal = false;
+    this.showAppraisal = false;
+    this.successModal = true;
   }
 
-  
-  handleDiscipline(form: any) {
-    console.log(form);
-    this.promptConfig = {
-      title: 'Confirm',
-      text: 'Are you sure you want to submit this appraisal?',
-      imageUrl: 'assets/svg/profilePix.svg',
-      yesButtonText: 'Yes',
-      noButtonText: 'No',
-    };
-    this.showModal = true;
+  onModalClose() {
+    this.showModal = false;
   }
-
 }

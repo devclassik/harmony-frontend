@@ -1,11 +1,13 @@
 <div class="p-2">
   <app-table
-    [tableTitle]="'Sick Leave'"
+    [tableTitle]="'Payroll'"
     [tableHeader]="tableHeader"
     [tableData]="employees"
     [showViewAll]="false"
-    [showFilter]="false"
+    [showFilter]="showFilterTabFromParent"
     [showStatusTab]="true"
+    [showFilter]="true"
+    [filterTabs]="filterTabs"
     [statusTabs]="statusTabs"
     [activeStatusTab]="selectedStatus"
     (statusTabChange)="onStatusTabChange($event)"
@@ -17,7 +19,9 @@
     [tableData]="filteredEmployees"
     [menuItems]="actionButton"
     (menuAction)="onMenuAction($event)"
-
+    [showButton]="true"
+    [showButtonText]="'Upload Payroll'"
+    [showButtonIcon]="'./assets/svg/add.svg'"
   ></app-table>
 </div>
 
@@ -42,6 +46,12 @@
   (closed)="onModalClose()"
   [data]="selectedEmployeeRecord"
 ></app-confirm-prompt>
+
+<app-substitution
+  [open]="showSubstitution"
+  (closed)="showSubstitution = false"
+  (submitted)="handleSubstitution($event)"
+></app-substitution>
 
 <app-success-modal
   *ngIf="successModal"

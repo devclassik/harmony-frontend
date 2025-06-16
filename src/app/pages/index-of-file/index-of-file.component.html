@@ -1,15 +1,12 @@
 <div class="p-2">
   <app-table
-    [tableTitle]="'Sick Leave'"
+    [tableTitle]="'Showing All Document'"
     [tableHeader]="tableHeader"
     [tableData]="employees"
     [showViewAll]="false"
     [showFilter]="false"
-    [showStatusTab]="true"
-    [statusTabs]="statusTabs"
     [activeStatusTab]="selectedStatus"
     (statusTabChange)="onStatusTabChange($event)"
-    [filterTabs]="filterTabs"
     [activeFilterTab]="selectedFilter"
     (filterTabChange)="onFilterTabChange($event)"
     [searchValue]="searchValue"
@@ -17,7 +14,15 @@
     [tableData]="filteredEmployees"
     [menuItems]="actionButton"
     (menuAction)="onMenuAction($event)"
-
+    [showFilter]="true"
+    [filterTabs]="filterTabs"
+    [showButton]="true"
+    [showButtonText]="'Add Document'"
+    [showButtonIcon]="'./assets/svg/add.svg'"
+    [showCalendar]="true"
+    showCalendarIcon="assets/svg/calender2.svg"
+    [showList]="true"
+    showListIcon="assets/svg/list.svg"
   ></app-table>
 </div>
 

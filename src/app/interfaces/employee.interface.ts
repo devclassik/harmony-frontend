@@ -1,6 +1,6 @@
 export interface TableData {
   id: string;
-  name: string;
+  name?: string;
   department?: string;
   role?: string;
   status?: 'Active' | 'On leave' | 'Retired' | 'On Discipline' | 'Approved' | 'Pending' | 'Rejected';
@@ -16,4 +16,7 @@ export interface TableData {
   endDate?: string;
   requestType?: string;
   duration?: string;
+  date?: string;
+  documentType?: string;
+  documentName?: string;
 } 

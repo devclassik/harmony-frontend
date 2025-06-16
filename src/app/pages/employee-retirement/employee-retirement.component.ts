@@ -100,7 +100,7 @@ export class EmployeeRetirementComponent {
       const search = this.searchValue.toLowerCase();
       filtered = filtered.filter(
         (employee) =>
-          employee.name.toLowerCase().includes(search) ||
+          employee.name?.toLowerCase().includes(search) ||
           employee.id.toLowerCase().includes(search) ||
           (employee.transferType &&
             employee.transferType.toLowerCase().includes(search)) ||

@@ -17,6 +17,8 @@ import { EmployeeRetrenchmentComponent } from './pages/employee-retrenchment/emp
 import { AnnualLeaveComponent } from './pages/annual-leave/annual-leave.component';
 import { LeaveOfAbsenceComponent } from './pages/leave-of-absence/leave-of-absence.component';
 import { SickLeaveComponent } from './pages/sick-leave/sick-leave.component';
+import { IndexOfFileComponent } from './pages/index-of-file/index-of-file.component';
+import { PayrollComponent } from './pages/payroll/payroll.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
@@ -46,6 +48,8 @@ export const routes: Routes = [
             { path: 'leave-management/annual-leave', component: AnnualLeaveComponent },
             { path: 'leave-management/leave-of-absence', component: LeaveOfAbsenceComponent },
             { path: 'leave-management/sick-leave', component: SickLeaveComponent },
+            { path: 'file-index', component: IndexOfFileComponent },
+            { path: 'payroll', component: PayrollComponent },
             { path: 'admin', component: DashboardComponent },
             { path: 'user', component: DashboardComponent },
         ]
