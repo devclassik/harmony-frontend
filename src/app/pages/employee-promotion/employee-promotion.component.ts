@@ -50,7 +50,7 @@ export class EmployeePromotionComponent {
   employees: TableData[] = [
     {
       id: '124 - 08',
-      name: 'John Adegoke',
+      name: 'John Adegoke oma',
       department: 'DSA',
       role: 'Zonal Pastor',
       status: 'Approved',
