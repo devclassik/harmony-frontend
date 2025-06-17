@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { authGuard } from './guards/auth.guard';
+import { roleGuard } from './guards/role.guard';
 import { LayoutComponent } from './components/layout/layout.component';
 import { LoginComponent } from './auth/login/login.component';
 import { SignUpComponent } from './auth/sign-up/sign-up.component';
@@ -21,39 +22,95 @@ import { IndexOfFileComponent } from './pages/index-of-file/index-of-file.compon
 import { PayrollComponent } from './pages/payroll/payroll.component';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
-    {
-        path: 'auth',
-        children: [
-            { path: 'login', component: LoginComponent },
-            { path: 'sign-up', component: SignUpComponent },
-            { path: 'forgot-password', component: ForgotPasswordComponent },
-            { path: 'reset-password', component: ResetPasswordComponent },
-            { path: '', redirectTo: 'login', pathMatch: 'full' }
-        ]
-    },
-    {
-        path: '', 
-        component: LayoutComponent,
-        canActivate: [authGuard],
-        children: [
-            { path: 'dashboard', component: DashboardComponent },
-            { path: 'employee-records', component: EmployeeRecordsComponent },
-            { path: 'reporting-and-analytics', component: ReportingAndAnalyticsComponent },
-            { path: 'employee-management/promotion', component: EmployeePromotionComponent },
-            { path: 'employee-management/discipline', component: EmployeeDisciplineComponent },
-            { path: 'employee-management/transfer', component: EmployeeTransferComponent },
-            { path: 'employee-management/retirement', component: EmployeeRetirementComponent },
-            { path: 'employee-management/retrenchment', component: EmployeeRetrenchmentComponent },
-            { path: 'leave-management/annual-leave', component: AnnualLeaveComponent },
-            { path: 'leave-management/leave-of-absence', component: LeaveOfAbsenceComponent },
-            { path: 'leave-management/sick-leave', component: SickLeaveComponent },
-            { path: 'file-index', component: IndexOfFileComponent },
-            { path: 'payroll', component: PayrollComponent },
-            { path: 'admin', component: DashboardComponent },
-            { path: 'user', component: DashboardComponent },
-        ]
-    },
-    { path: '404', component: NotFoundComponent },
-    { path: '**', redirectTo: '404' },
+  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+  {
+    path: 'auth',
+    children: [
+      { path: 'login', component: LoginComponent },
+      { path: 'sign-up', component: SignUpComponent },
+      { path: 'forgot-password', component: ForgotPasswordComponent },
+      { path: 'reset-password', component: ResetPasswordComponent },
+      { path: '', redirectTo: 'login', pathMatch: 'full' },
+    ],
+  },
+  {
+    path: '',
+    component: LayoutComponent,
+    canActivate: [roleGuard],
+    children: [
+      {
+        path: 'dashboard',
+        component: DashboardComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'employee-records',
+        component: EmployeeRecordsComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'reporting-and-analytics',
+        component: ReportingAndAnalyticsComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'employee-management/promotion',
+        component: EmployeePromotionComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'employee-management/discipline',
+        component: EmployeeDisciplineComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'employee-management/transfer',
+        component: EmployeeTransferComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'employee-management/retirement',
+        component: EmployeeRetirementComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'employee-management/retrenchment',
+        component: EmployeeRetrenchmentComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'leave-management/annual-leave',
+        component: AnnualLeaveComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'leave-management/leave-of-absence',
+        component: LeaveOfAbsenceComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'leave-management/sick-leave',
+        component: SickLeaveComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'file-index',
+        component: IndexOfFileComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'payroll',
+        component: PayrollComponent,
+        canActivate: [roleGuard],
+      },
+      {
+        path: 'admin',
+        component: DashboardComponent,
+        canActivate: [roleGuard],
+      },
+      { path: 'user', component: DashboardComponent, canActivate: [roleGuard] },
+    ],
+  },
+  { path: '404', component: NotFoundComponent },
+  { path: '**', redirectTo: '404' },
 ];

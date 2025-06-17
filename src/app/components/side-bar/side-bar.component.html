@@ -38,7 +38,7 @@
     <nav>
       <ul class="mb-6 flex flex-col gap-4">
         <!-- Dashboard -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canAccessMenu('dashboard')">
           <a
             routerLink="/dashboard"
             routerLinkActive="active-link"
@@ -51,7 +51,7 @@
         </li>
 
         <!-- Employee Record -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canAccessMenu('employee-records')">
           <a
             routerLink="/employee-records"
             routerLinkActive="active-link"
@@ -66,7 +66,7 @@
         </li>
 
         <!-- Reporting & Analytics -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canAccessMenu('reporting-analytics')">
           <a
             routerLink="/reporting-and-analytics"
             routerLinkActive="active-link"
@@ -81,7 +81,7 @@
         </li>
 
         <!-- Employee Management -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canAccessEmployeeManagement()">
           <div class="flex flex-col">
             <button
               (click)="toggleEmployeeMenu()"
@@ -162,7 +162,7 @@
         </li>
 
         <!-- Leave Management -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canAccessLeaveManagement()">
           <div class="flex flex-col">
             <button
               (click)="toggleLeaveMenu()"
@@ -222,14 +222,14 @@
         </li>
 
         <!-- File Index -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canAccessMenu('file-index')">
           <a
             routerLink="/file-index"
             routerLinkActive="active-link"
             [routerLinkActiveOptions]="{ exact: true }"
             class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer"
           >
-            <mat-icon>insert_drive_file</mat-icon>
+            <mat-icon>folder</mat-icon>
             <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">File Index</span>
           </a>
         </li>
@@ -248,7 +248,7 @@
         </li>
 
         <!-- Payroll -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canAccessMenu('payroll')">
           <a
             routerLink="/payroll"
             routerLinkActive="active-link"

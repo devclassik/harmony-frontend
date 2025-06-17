@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { DashboardGreetingsComponent } from '../../components/dashboard-greetings/dashboard-greetings.component';

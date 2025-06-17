@@ -9,17 +9,14 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
 })
 export class LoginComponent {
-
   username: string = '';
   password: string = '';
+  errorMessage: string = '';
 
-
-  constructor(private router: Router,
-    private auth: AuthService
-  ) { }
+  constructor(private router: Router, private auth: AuthService) {}
 
   signUp() {
     this.router.navigate(['/auth/sign-up']);
@@ -37,12 +34,18 @@ export class LoginComponent {
 
     console.log('Username:', this.username);
     console.log('Password:', this.password);
-    const res = await this.auth.login(this.username, this.password);
-    if (res && !res.auth) {
-      return false;
-    } else {
+
+    const res = this.auth.login(this.username, this.password);
+
+    // Check if login was successful
+    if (res && typeof res === 'object' && res.auth) {
+      // Success - redirect to dashboard
       this.router.navigate(['/dashboard']);
       return true;
+    } else {
+      // Failed - show error message using same alert pattern
+      alert('Invalid username or password. Please try again.');
+      return false;
     }
   }
 }
