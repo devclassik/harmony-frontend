@@ -18,6 +18,7 @@ export class CustomModalComponent {
 
   @Output() onClose = new EventEmitter<void>();
   @Output() onSubmit = new EventEmitter<string>();
+  @Output() resend = new EventEmitter<string>();
 
   otpCode: string[] = new Array(6).fill('');
 
@@ -40,17 +41,32 @@ export class CustomModalComponent {
     const input = event.target;
     const value = input.value;
 
-    if (value.length === 1) {
-      if (index < this.otpInputs.length - 1) {
-        this.otpInputs.toArray()[index + 1].nativeElement.focus();
+    // Only allow single digits
+    if (value.length > 1) {
+      this.otpCode[index] = value.slice(-1);
+      input.value = value.slice(-1);
+    } else if (value.length === 1) {
+      if (/^\d$/.test(value)) {
+        this.otpCode[index] = value;
+        if (index < this.otpInputs.length - 1) {
+          this.otpInputs.toArray()[index + 1].nativeElement.focus();
+        }
+      } else {
+        this.otpCode[index] = '';
+        input.value = '';
       }
     }
   }
 
   handleBackspace(event: any, index: number): void {
-    if (event.key === 'Backspace' && !event.target.value) {
-      if (index > 0) {
+    if (event.key === 'Backspace') {
+      if (event.target.value) {
+        this.otpCode[index] = '';
+        event.target.value = '';
+      } else if (index > 0) {
         this.otpInputs.toArray()[index - 1].nativeElement.focus();
+        this.otpCode[index - 1] = '';
+        this.otpInputs.toArray()[index - 1].nativeElement.value = '';
       }
     }
   }
@@ -61,10 +77,14 @@ export class CustomModalComponent {
     if (pastedData) {
       const digits = pastedData.split('').slice(0, this.otpInputs.length);
       digits.forEach((digit, index) => {
-        if (this.otpInputs.toArray()[index]) {
-          this.otpInputs.toArray()[index].nativeElement.value = digit;
-        }
+        this.otpCode[index] = digit;
+
+        // if (this.otpInputs.toArray()[index]) {
+        //   this.otpInputs.toArray()[index].nativeElement.value = digit;
+        // }
       });
+      const nextIndex = digits.length < this.otpInputs.length ? digits.length : this.otpInputs.length - 1;
+      this.otpInputs.toArray()[nextIndex].nativeElement.focus();
     }
   }
 }

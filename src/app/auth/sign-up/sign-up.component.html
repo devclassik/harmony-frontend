@@ -13,74 +13,96 @@
     </div>
 
     <div class="w-full text-center lg:text-left px-4">
-      <h3 class="text-2xl lg:text-3xl font-semibold">Welcome to Harmony!</h3>
-      <p class="text-gray-600 pt-2">Sign Up to get started.</p>
+      <h3 class="text-2xl lg:text-3xl font-semibold">Create your account</h3>
+      <p class="text-gray-600 pt-2">Join Harmony today</p>
     </div>
 
     <div class="w-full p-4">
-      <form (ngSubmit)="onSubmit()" class="login-form space-y-4">
-        <div class="form-group flex justify-between space-x-2">
-          <div class="form-group w-full">
-            <label for="username" class="block text-gray-800 text-sm"
-              >First Name</label
-            >
-            <input
-              id="username"
-              type="text"
-              [(ngModel)]="username"
-              name="username"
-              required
-              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-          <div class="form-group w-full">
-            <label for="username" class="block text-text-gray-800 text-sm"
-              >Last Name</label
-            >
-            <input
-              id="username"
-              type="text"
-              [(ngModel)]="username"
-              name="username"
-              required
-              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="username" class="block text-textBlack text-sm"
-            >Email Address</label
+      <form (ngSubmit)="onSubmit()" class="signup-form space-y-4">
+        <!-- First Name -->
+        <div>
+          <label for="firstName" class="block text-gray-800 text-sm"
+            >First Name</label
           >
           <input
-            id="username"
+            id="firstName"
             type="text"
-            [(ngModel)]="username"
-            name="username"
+            [(ngModel)]="form.firstName"
+            name="firstName"
             required
             class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
 
-        <div class="form-group">
-          <label for="password" class="block text-textBlack text-sm"
+        <!-- Last Name -->
+        <div>
+          <label for="lastName" class="block text-gray-800 text-sm"
+            >Last Name</label
+          >
+          <input
+            id="lastName"
+            type="text"
+            [(ngModel)]="form.lastName"
+            name="lastName"
+            required
+            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label for="email" class="block text-gray-800 text-sm">Email</label>
+          <input
+            id="email"
+            type="email"
+            [(ngModel)]="form.email"
+            name="email"
+            required
+            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label for="password" class="block text-gray-800 text-sm"
             >Password</label
           >
           <input
             id="password"
             type="password"
-            [(ngModel)]="password"
+            [(ngModel)]="form.password"
             name="password"
-            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             required
+            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+          <p class="text-gray-500 text-xs mt-1">
+            Password must be at least 6 characters long
+          </p>
+        </div>
+
+        <!-- Confirm Password -->
+        <div>
+          <label for="confirmPassword" class="block text-gray-800 text-sm"
+            >Confirm Password</label
+          >
+          <input
+            id="confirmPassword"
+            type="password"
+            [(ngModel)]="form.confirmPassword"
+            name="confirmPassword"
+            required
+            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
 
+        <!-- Submit Button -->
         <button
           type="submit"
-          class="w-full text-white py-2 rounded-md shadow-md bg-gradient-to-r from-green-500 to-green-700 hover:text-green-500"
-          (click)="openModal()"
+          [disabled]="isLoading"
+          class="w-full text-white py-2 rounded-md shadow-md bg-gradient-to-r from-green-500 to-green-700 hover:text-green-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Sign up
+          <span *ngIf="!isLoading">Create Account</span>
+          <span *ngIf="isLoading">Creating Account...</span>
         </button>
       </form>
     </div>
@@ -91,9 +113,9 @@
         <span class="underline cursor-pointer">Terms of Use</span> and
         <span class="underline cursor-pointer">Privacy Policy</span>
       </p>
-      <p class="pt-5">
+      <p class="pt-5" (click)="login()">
         Already have an account?
-        <span class="text-[#12C16F] cursor-pointer">Login</span>
+        <span class="text-green-500 cursor-pointer">Login</span>
       </p>
     </div>
   </div>
@@ -105,7 +127,7 @@
       <div
         class="absolute top-12 left-1/2 transform -translate-x-1/2 text-white text-lg lg:text-xl text-center font-semibold w-[70%] lg:w-[440px] px-4 py-5"
       >
-        Lorem ipsum dolor sit amet consectetur. Et tempus quam velit amet.
+        Join our community of professionals and streamline your HR processes
       </div>
 
       <div
@@ -137,10 +159,9 @@
           </div>
         </div>
 
-        <!-- Description Text -->
         <p class="text-white text-sm mt-4">
-          Lorem ipsum dolor sit amet consectetur. Diam lectus aliquam felis
-          viverra arcu libero. Vestibulum fames porttitor dapibus tristique.
+          Experience seamless HR management with Harmony. Join thousands of
+          organizations that trust us for their HR needs.
         </p>
       </div>
     </div>
@@ -150,10 +171,8 @@
 <app-custom-modal
   *ngIf="showModal"
   [title]="'Success'"
-  [text]="
-    'A 6-dIGIT OTP was sent to johnadeks***@***.com. Provide the code sent to your email to complete your verification.'
-  "
-  [showOtp]="showOtpBox"
+  [text]="modalText"
+  [showOtp]="showOtp"
   [buttonText]="'Submit'"
   [subText]="'Didn\'t get an OTP? Resend'"
   (onClose)="closeModal()"

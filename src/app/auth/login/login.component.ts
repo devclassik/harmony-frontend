@@ -12,12 +12,13 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-
   username: string = '';
   password: string = '';
+  errorMessage: string = '';
+  isLoading: boolean = false;
 
-
-  constructor(private router: Router,
+  constructor(
+    private router: Router,
     private auth: AuthService
   ) { }
 
@@ -29,20 +30,30 @@ export class LoginComponent {
     this.router.navigate(['/auth/forgot-password']);
   }
 
-  async onSubmit(): Promise<boolean> {
+  onSubmit() {
     if (!this.username || !this.password) {
-      alert('Please enter your username and password.');
-      return false;
+      this.errorMessage = 'Please enter your username and password.';
+      return;
     }
 
-    console.log('Username:', this.username);
-    console.log('Password:', this.password);
-    const res = await this.auth.login(this.username, this.password);
-    if (res && !res.auth) {
-      return false;
-    } else {
-      this.router.navigate(['/dashboard']);
-      return true;
-    }
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.auth.login(this.username, this.password).subscribe({
+      next: (response) => {
+        if (response.auth) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.errorMessage = 'Invalid username or password.';
+        }
+      },
+      error: (error) => {
+        this.errorMessage = 'An error occurred. Please try again.';
+        console.error('Login error:', error);
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
   }
 }
