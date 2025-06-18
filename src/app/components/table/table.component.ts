@@ -67,6 +67,7 @@ export class TableComponent {
   @Input() showButton: boolean = false;
   @Input() showButtonText: string = 'Create Incidence';
   @Input() showButtonIcon: string = '';
+  @Input() showButtonStyle: string = 'bg-green-600 hover:bg-green-700';
   @Input() showViewAll: boolean = true;
   @Input() showCalendar: boolean = false;
   @Input() showCalendarIcon: string = '';

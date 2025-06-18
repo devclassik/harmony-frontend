@@ -87,7 +87,8 @@
       </div>
       <div class="flex gap-4" *ngIf="showButton">
         <button
-          class="flex items-center justify-center px-2 flex-1 bg-green-600 text-white rounded-lg py-2 font-medium transition hover:bg-green-700 cursor-pointer"
+          class="flex items-center justify-center px-2 flex-1 text-white rounded-lg py-2 font-medium transition cursor-pointer"
+          [ngClass]="showButtonStyle"
           (click)="onButtonClick(true)"
         >
           <span class="flex items-center px-1">
