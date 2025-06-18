@@ -53,8 +53,6 @@ export class TableComponent {
     { key: 'role', label: 'ROLE' },
     { key: 'status', label: 'STATUS' },
     { key: 'action', label: 'ACTION' },
-    { key: 'startDate', label: 'START DATE' },
-    { key: 'endDate', label: 'END DATE' },
   ];
   @Input() showSearch: boolean = true;
   @Input() searchPlaceholder: string = 'Search';
