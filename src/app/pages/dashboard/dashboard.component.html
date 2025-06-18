@@ -1,23 +1,136 @@
-<div class="flex flex-col gap-4 p-2">
-  <app-dashboard-greetings
-    [userName]="'John 👋🏼'"
-    [showSubText]="true"
-    [subText]="'Here is a brief overview of the employees.'"
-  ></app-dashboard-greetings>
-</div>
-<div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
-  <div class="lg:col-span-6">
-    <app-bar-chart></app-bar-chart>
+<!-- Admin Dashboard View -->
+<div *ngIf="userRole !== 'user'">
+  <div class="flex flex-col gap-4 p-2">
+    <app-dashboard-greetings
+      [userName]="'John 👋🏼'"
+      [showSubText]="true"
+      [subText]="'Here is a brief overview of the employees.'"
+    ></app-dashboard-greetings>
   </div>
-  <div class="lg:col-span-4">
-    <app-doughnut-chart></app-doughnut-chart>
+  <div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
+    <div class="lg:col-span-6">
+      <app-bar-chart></app-bar-chart>
+    </div>
+    <div class="lg:col-span-4">
+      <app-doughnut-chart></app-doughnut-chart>
+    </div>
+  </div>
+  <div class="p-2">
+    <app-table
+      [tableTitle]="'Employee Records'"
+      [viewAllLink]="'employee-records'"
+      [tableData]="employees"
+      [showViewAll]="true"
+      [showSearch]="false"
+      [showFilter]="false"
+      [showPagination]="false"
+      [showStatusTab]="false"
+    ></app-table>
   </div>
 </div>
-<div class="p-2">
+
+<!-- User Dashboard View -->
+<div *ngIf="userRole === 'user'" class="p-8 bg-white min-h-screen">
+  <!-- Greeting Section -->
+  <div class="mb-12">
+    <h1 class="text-3xl font-semibold text-gray-900 mb-3">Hello, John 👋</h1>
+    <p class="text-gray-500 text-base">
+      Here is a brief summary of your employment.
+    </p>
+  </div>
+
+  <!-- Employee Information Section -->
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-8">
+      Employee Information
+    </h2>
+
+    <!-- Divider Line -->
+    <div class="border-b border-gray-200 mb-8"></div>
+
+    <div class="flex justify-between items-start">
+      <!-- Profile Section -->
+      <div class="flex-shrink-0 text-center">
+        <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 mb-4">
+          <img
+            [src]="employeeInfo.profileImage"
+            [alt]="employeeInfo.preferredName"
+            class="w-full h-full object-cover"
+          />
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-1">
+          {{ employeeInfo.preferredName }}
+        </h3>
+        <p class="text-sm text-gray-600 mb-3">{{ employeeInfo.title }}</p>
+        <span
+          class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200"
+        >
+          • {{ employeeInfo.status }}
+        </span>
+      </div>
+
+      <!-- Left Column Details -->
+      <div class="space-y-6">
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-2">Employee ID</p>
+          <p class="text-sm text-gray-900 font-medium">124-08</p>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-2">Legal First Name</p>
+          <p class="text-sm text-gray-900 font-medium">
+            {{ employeeInfo.firstName }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-2">Legal Last Name</p>
+          <p class="text-sm text-gray-900 font-medium">
+            {{ employeeInfo.lastName }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-2">Gender</p>
+          <p class="text-sm text-gray-900 font-medium">
+            {{ employeeInfo.gender }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Column Details -->
+      <div class="space-y-6">
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-2">Title</p>
+          <p class="text-sm text-gray-900 font-medium">Mr.</p>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-2">
+            Legal Middle Name
+          </p>
+          <p class="text-sm text-gray-900 font-medium">
+            {{ employeeInfo.middleName }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-gray-500 mb-2">
+            Preferred Name of Correspondence
+          </p>
+          <p class="text-sm text-gray-900 font-medium">
+            {{ employeeInfo.preferredName }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <app-table
-    [tableTitle]="'Employee Records'"
-    [viewAllLink]="'employee-records'"
-    [tableData]="employees"
+    [tableTitle]="'Leave Requests'"
+    [viewAllLink]="'leave-records'"
+    [tableData]="leaveRequests"
+    [tableHeader]="leaveRequestsHeader"
     [showViewAll]="true"
     [showSearch]="false"
     [showFilter]="false"
@@ -25,8 +138,3 @@
     [showStatusTab]="false"
   ></app-table>
 </div>
-<!-- <div class="p-6">
-  <h2 class="text-2xl font-bold">Dashboard user</h2>
-  <p *ngIf="userRole === 'Admin'">Welcome, Admin! Here is your overview.</p>
-  <p *ngIf="userRole === 'User'">Welcome, User! Here is your dashboard.</p>
-</div> -->

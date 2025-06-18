@@ -8,6 +8,7 @@ import { BarChartComponent } from '../../components/bar-chart/bar-chart.componen
 import { TableComponent } from '../../components/table/table.component';
 import { TableData } from '../../interfaces/employee.interface';
 import { DoughnutChartComponent } from '../../components/doughnut-chart/doughnut-chart.component';
+
 @Component({
   selector: 'app-dashboard',
   imports: [
@@ -23,10 +24,25 @@ import { DoughnutChartComponent } from '../../components/doughnut-chart/doughnut
 })
 export class DashboardComponent {
   userRole: string | null;
+  currentUser: any;
 
   constructor(private authService: AuthService) {
     this.userRole = this.authService.getUserRole();
+    this.currentUser = this.authService.getCurrentUser();
   }
+
+  // Mock employee data for user dashboard
+  employeeInfo = {
+    id: '24-08',
+    firstName: 'John',
+    lastName: 'Adegoke',
+    middleName: 'Tobi',
+    title: 'Church Worker',
+    preferredName: 'John Adegoke',
+    gender: 'Male',
+    profileImage: 'assets/svg/profilePix.svg',
+    status: 'Active',
+  };
 
   employees: TableData[] = [
     {
@@ -44,5 +60,47 @@ export class DashboardComponent {
       imageUrl: 'assets/svg/profilePix.svg',
     },
     // ... more employees
+  ];
+
+  // Mock leave requests data
+  leaveRequests: TableData[] = [
+    {
+      id: 'LR-001',
+      startDate: '2024-01-15',
+      endDate: '2024-01-25',
+      status: 'Approved',
+    },
+    {
+      id: 'LR-002',
+      startDate: '2024-02-10',
+      endDate: '2024-02-12',
+      status: 'Pending',
+    },
+    {
+      id: 'LR-003',
+      startDate: '2024-03-05',
+      endDate: '2024-03-08',
+      status: 'Rejected',
+    },
+    {
+      id: 'LR-004',
+      startDate: '2024-04-01',
+      endDate: '2024-06-01',
+      status: 'Approved',
+    },
+    {
+      id: 'LR-005',
+      startDate: '2024-02-28',
+      endDate: '2024-03-01',
+      status: 'Pending',
+    },
+  ];
+
+  // Leave requests table header configuration
+  leaveRequestsHeader = [
+    { key: 'id', label: 'LEAVE ID' },
+    { key: 'startDate', label: 'START DATE' },
+    { key: 'endDate', label: 'END DATE' },
+    { key: 'status', label: 'STATUS' },
   ];
 }
