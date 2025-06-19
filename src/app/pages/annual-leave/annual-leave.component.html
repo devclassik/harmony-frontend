@@ -1,29 +1,77 @@
-<div class="p-2">
-  <app-table
-    [tableTitle]="'Annual Leave'"
-    [tableHeader]="tableHeader"
-    [tableData]="employees"
-    [showViewAll]="false"
-    [showFilter]="showFilterTabFromParent"
-    [showStatusTab]="true"
-    [statusTabs]="statusTabs"
-    [activeStatusTab]="selectedStatus"
-    (statusTabChange)="onStatusTabChange($event)"
-    [filterTabs]="filterTabs"
-    [activeFilterTab]="selectedFilter"
-    (filterTabChange)="onFilterTabChange($event)"
-    [searchValue]="searchValue"
-    (search)="onSearch($event)"
-    [tableData]="filteredEmployees"
-    [menuItems]="actionButton"
-    (menuAction)="onMenuAction($event)"
-    [showCalendar]="true"
-    showCalendarIcon="assets/svg/calender2.svg"
-    [showList]="true"
-    showListIcon="assets/svg/list.svg"
-    (showListCalendarClick)="onShowListClick($event)"
-  ></app-table>
+<div *ngIf="userRole !== 'user'">
+  <div class="p-2">
+    <app-table
+      [tableTitle]="'Annual Leave'"
+      [tableHeader]="tableHeader"
+      [tableData]="employees"
+      [showViewAll]="false"
+      [showFilter]="showFilterTabFromParent"
+      [showStatusTab]="true"
+      [statusTabs]="statusTabs"
+      [activeStatusTab]="selectedStatus"
+      (statusTabChange)="onStatusTabChange($event)"
+      [filterTabs]="filterTabs"
+      [activeFilterTab]="selectedFilter"
+      (filterTabChange)="onFilterTabChange($event)"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="filteredEmployees"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+      [showCalendar]="true"
+      showCalendarIcon="assets/svg/calender2.svg"
+      [showList]="true"
+      showListIcon="assets/svg/list.svg"
+      (showListCalendarClick)="onShowListClick($event)"
+    ></app-table>
+  </div>
 </div>
+
+<div *ngIf="userRole === 'user'">
+  <div class="p-2">
+    <app-table
+      [tableTitle]="'Annual Leave'"
+      [tableHeader]="leaveRequestsHeader"
+      [tableData]="leaveRequests"
+      [showViewAll]="false"
+      [showFilter]="showFilterTabFromParent"
+      [showStatusTab]="true"
+      [statusTabs]="statusTabs"
+      [activeStatusTab]="selectedStatus"
+      (statusTabChange)="onStatusTabChange($event)"
+      [filterTabs]="filterTabs"
+      [activeFilterTab]="selectedFilter"
+      (filterTabChange)="onFilterTabChange($event)"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="filteredLeaveRequests"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+      [showCalendar]="false"
+      [showButton]="true"
+      showButtonText="Create Request"
+      showButtonIcon="assets/svg/add.svg"
+      showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+      (showButtonActionClick)="onCreateLeaveRequest()"
+      [showList]="false"
+    ></app-table>
+  </div>
+</div>
+
+<app-create-leave-request
+  [show]="showCreateLeaveRequest"
+  (close)="showCreateLeaveRequest = false"
+  (submitted)="onCreateLeaveRequestSubmitted($event)"
+></app-create-leave-request>
+
+<app-leave-details
+  [view]="showAnnualLeaveDetails"
+  [leaveData]="selectedLeaveData"
+  [title]="'Annual Leave Details'"
+  [leaveType]="'Annual Leave'"
+  [totalLeaveDays]="30"
+  (close)="showAnnualLeaveDetails = false"
+></app-leave-details>
 
 <app-employee-details
   [view]="showEmployeeDetails"

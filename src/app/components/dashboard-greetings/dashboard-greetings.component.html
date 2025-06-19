@@ -1,39 +1,40 @@
 <div class="bg-[#fcfcfc] rounded-lg p-4">
   <div>
-    <h3 class="text-2xl font-bold text-[#040404]">
-      Hello, {{ userName }}
-    </h3>
+    <h3 class="text-2xl font-bold text-[#040404]">Hello, {{ userName }}</h3>
     <p class="text-sm text-[#9b9b9b]" *ngIf="showSubText">
-      {{subText}}
+      {{ subText }}
     </p>
   </div>
-  <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <app-metric 
-      title="Total Employees" 
-      [value]="250" 
-      [changePercentage]="10" 
-      bgColor="#7301E2" 
+  <div
+    class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+    *ngIf="showMetrics"
+  >
+    <app-metric
+      title="Total Employees"
+      [value]="250"
+      [changePercentage]="10"
+      bgColor="#7301E2"
       iconPath="assets/svg/group.svg"
     />
-    <app-metric 
-      title="Active Employees" 
-      [value]="200" 
-      [changePercentage]="10" 
-      bgColor="#12C16F" 
-      iconPath="assets/svg/profileAccept.svg" 
+    <app-metric
+      title="Active Employees"
+      [value]="200"
+      [changePercentage]="10"
+      bgColor="#12C16F"
+      iconPath="assets/svg/profileAccept.svg"
     />
-    <app-metric 
-      title="On Leave Employees" 
-      [value]="250" 
-      [changePercentage]="10" 
-      bgColor="#E0A800" 
+    <app-metric
+      title="On Leave Employees"
+      [value]="250"
+      [changePercentage]="10"
+      bgColor="#E0A800"
       iconPath="assets/svg/delete.svg"
     />
-    <app-metric 
-      title="On Discipline Employees" 
-      [value]="25" 
-      [changePercentage]="10" 
-      bgColor="#DD1212" 
+    <app-metric
+      title="On Discipline Employees"
+      [value]="25"
+      [changePercentage]="10"
+      bgColor="#DD1212"
       iconPath="assets/svg/delete.svg"
     />
   </div>

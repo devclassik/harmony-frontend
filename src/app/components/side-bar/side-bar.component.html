@@ -51,7 +51,7 @@
         </li>
 
         <!-- Employee Record -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canViewEmployeeRecords()">
           <a
             routerLink="/employee-records"
             routerLinkActive="active-link"
@@ -66,7 +66,7 @@
         </li>
 
         <!-- Reporting & Analytics -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canViewReportingAnalytics()">
           <a
             routerLink="/reporting-and-analytics"
             routerLinkActive="active-link"
@@ -81,7 +81,7 @@
         </li>
 
         <!-- Employee Management -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canViewEmployeeManagement()">
           <div class="flex flex-col">
             <button
               (click)="toggleEmployeeMenu()"
@@ -111,8 +111,7 @@
                 routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
-              >
-                <span
+                ><span
                   class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
                 ></span
                 >Promotion</a
@@ -162,7 +161,7 @@
         </li>
 
         <!-- Leave Management -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canViewLeaveManagement()">
           <div class="flex flex-col">
             <button
               (click)="toggleLeaveMenu()"
@@ -222,7 +221,7 @@
         </li>
 
         <!-- File Index -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canViewFileIndex()">
           <a
             routerLink="/file-index"
             routerLinkActive="active-link"
@@ -235,7 +234,7 @@
         </li>
 
         <!-- Calendar -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canViewCalendar()">
           <a
             routerLink="/calendar"
             routerLinkActive="active-link"
@@ -248,7 +247,7 @@
         </li>
 
         <!-- Payroll -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canViewPayroll()">
           <a
             routerLink="/payroll"
             routerLinkActive="active-link"
@@ -261,7 +260,7 @@
         </li>
 
         <!-- Settings -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canViewSettings()">
           <a
             routerLink="/settings"
             routerLinkActive="active-link"

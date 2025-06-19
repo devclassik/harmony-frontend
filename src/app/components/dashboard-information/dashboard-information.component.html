@@ -1,0 +1,85 @@
+<div class="bg-[#fcfcfc] rounded-lg p-6 mb-8">
+  <h2 class="text-lg font-semibold text-gray-900 mb-8">
+    {{ title }}
+  </h2>
+
+  <!-- Divider Line -->
+  <div class="border-b border-gray-200 mb-8"></div>
+
+  <div class="flex justify-between items-start">
+    <!-- Profile Section -->
+    <div class="flex-shrink-0 text-center">
+      <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 mb-4">
+        <img
+          [src]="employeeData.profileImage"
+          [alt]="employeeData.preferredName"
+          class="w-full h-full object-cover"
+        />
+      </div>
+      <h3 class="text-lg font-semibold text-gray-900 mb-1">
+        {{ employeeData.preferredName }}
+      </h3>
+      <p class="text-sm text-[#9B9B9B] mb-3">{{ employeeData.title }}</p>
+      <span
+        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200"
+      >
+        • {{ employeeData.status }}
+      </span>
+    </div>
+
+    <!-- Left Column Details -->
+    <div class="space-y-6">
+      <div>
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">Employee ID</p>
+        <p class="text-base text-[#000000] font-medium">
+          {{ employeeData.id }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">Legal First Name</p>
+        <p class="text-base text-[#000000] font-medium">
+          {{ employeeData.firstName }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">Legal Last Name</p>
+        <p class="text-base text-[#000000] font-medium">
+          {{ employeeData.lastName }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">Gender</p>
+        <p class="text-base text-[#000000] font-medium">
+          {{ employeeData.gender }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column Details -->
+    <div class="space-y-6">
+      <div>
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">Title</p>
+        <p class="text-base text-[#000000] font-medium">{{ personalTitle }}</p>
+      </div>
+
+      <div>
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">Legal Middle Name</p>
+        <p class="text-base text-[#000000] font-medium">
+          {{ employeeData.middleName }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">
+          Preferred Name of Correspondence
+        </p>
+        <p class="text-base text-[#000000] font-medium">
+          {{ employeeData.preferredName }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,12 @@
-import { Component, Input, Output, EventEmitter, ElementRef, HostListener, TemplateRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ElementRef,
+  HostListener,
+  TemplateRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableData } from '../../interfaces/employee.interface';
@@ -6,7 +14,6 @@ import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions } from '@fullcalendar/core'; // useful for typechecking
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction'; // needed for dayClick
-
 
 import { CalendarEvent, CalendarModule, DateAdapter } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
@@ -34,9 +41,7 @@ export interface FilterTab {
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, FullCalendarModule,
-    CalendarModule
-  ]
+  imports: [CommonModule, FormsModule, FullCalendarModule, CalendarModule],
 })
 export class TableComponent {
   @Input() tableTitle: string = '';
@@ -47,7 +52,7 @@ export class TableComponent {
     { key: 'department', label: 'DEPARTMENT' },
     { key: 'role', label: 'ROLE' },
     { key: 'status', label: 'STATUS' },
-    { key: 'action', label: 'ACTION' }
+    { key: 'action', label: 'ACTION' },
   ];
   @Input() showSearch: boolean = true;
   @Input() searchPlaceholder: string = 'Search';
@@ -62,6 +67,7 @@ export class TableComponent {
   @Input() showButton: boolean = false;
   @Input() showButtonText: string = 'Create Incidence';
   @Input() showButtonIcon: string = '';
+  @Input() showButtonStyle: string = 'bg-green-600 hover:bg-green-700';
   @Input() showViewAll: boolean = true;
   @Input() showCalendar: boolean = false;
   @Input() showCalendarIcon: string = '';
@@ -87,15 +93,26 @@ export class TableComponent {
   @Output() filterTabChange = new EventEmitter<string>();
   @Output() statusTabChange = new EventEmitter<string>();
   @Output() showButtonActionClick = new EventEmitter<boolean>();
-  @Output() menuAction = new EventEmitter<{ action: string, row: TableData }>();
+  @Output() menuAction = new EventEmitter<{ action: string; row: TableData }>();
   @Output() showListCalendarClick = new EventEmitter<string>();
   calendarDate: Date = new Date();
 
-
   @Input() menuItems: MenuItem[] = [
-    { label: 'View all', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z', action: 'view' },
-    { label: 'Approve', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', action: 'approve' },
-    { label: 'Delete', icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16', action: 'delete' }
+    {
+      label: 'View all',
+      icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+      action: 'view',
+    },
+    {
+      label: 'Approve',
+      icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+      action: 'approve',
+    },
+    {
+      label: 'Delete',
+      icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
+      action: 'delete',
+    },
   ];
 
   activeDropdownKey: string | null = null;
@@ -103,7 +120,7 @@ export class TableComponent {
   showFilterDropdown: boolean = false;
   activeView: string = 'list';
 
-  constructor(private eRef: ElementRef) { }
+  constructor(private eRef: ElementRef) {}
 
   getDropdownKey(employee: TableData, index: number): string {
     return `${employee.id}_${index}`;
@@ -134,14 +151,23 @@ export class TableComponent {
   }
 
   isAllSelected(): boolean {
-    return this.tableData.length > 0 && this.tableData.every(emp => this.selectedRows.has((emp as Record<string, any>)[this.rowIdKey]));
+    return (
+      this.tableData.length > 0 &&
+      this.tableData.every((emp) =>
+        this.selectedRows.has((emp as Record<string, any>)[this.rowIdKey])
+      )
+    );
   }
 
   toggleSelectAll(checked: boolean) {
     if (checked) {
-      this.tableData.forEach(emp => this.selectedRows.add((emp as Record<string, any>)[this.rowIdKey]));
+      this.tableData.forEach((emp) =>
+        this.selectedRows.add((emp as Record<string, any>)[this.rowIdKey])
+      );
     } else {
-      this.tableData.forEach(emp => this.selectedRows.delete((emp as Record<string, any>)[this.rowIdKey]));
+      this.tableData.forEach((emp) =>
+        this.selectedRows.delete((emp as Record<string, any>)[this.rowIdKey])
+      );
     }
     this.selectionChange.emit(Array.from(this.selectedRows));
   }
@@ -185,7 +211,6 @@ export class TableComponent {
     this.showButtonActionClick.emit(event);
   }
 
-
   toggleListCalendar(event: string) {
     if (event === 'list') {
       this.activeView = event;
@@ -203,12 +228,23 @@ export class TableComponent {
     // dateClick: (arg) => this.handleDateClick(arg),
     events: [
       { title: 'leave 1', date: '2025-05-01' },
-      { title: 'leave 1', editable: true, date: '2025-05-15', backgroundColor: '#12C16F', borderColor: '#12C16F' },
-      { title: 'leave Opemipo', date: '2025-05-20', end: '2025-05-21', editable: true, },
+      {
+        title: 'leave 1',
+        editable: true,
+        date: '2025-05-15',
+        backgroundColor: '#12C16F',
+        borderColor: '#12C16F',
+      },
+      {
+        title: 'leave Opemipo',
+        date: '2025-05-20',
+        end: '2025-05-21',
+        editable: true,
+      },
     ],
     eventClick: function (info) {
       alert('Event: ' + info.event.title);
-    }
+    },
     // week view,
     // plugins: [dayGridPlugin],
     // initialView: 'dayGridWeek',
@@ -224,7 +260,7 @@ export class TableComponent {
   };
 
   handleDateClick(arg: DateClickArg) {
-    alert('date click! ' + arg.dateStr)
+    alert('date click! ' + arg.dateStr);
   }
   //   onDateClick(date: { dateStr: string; }) {
   //     this.modalRef = this.modalService.show(this.viewModal);
@@ -255,7 +291,6 @@ export class TableComponent {
   //     }
   //     this.calendarOptions.events = [...this.newEvents];
   //   }
-
 
   viewDate: Date = new Date();
 

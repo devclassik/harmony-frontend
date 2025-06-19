@@ -74,15 +74,13 @@ interface VerifyOtpRequest {
 interface VerifyOtpResponse {
   success: boolean;
   message: string;
-  data?: UserData
+  data?: UserData;
 }
 interface ResentOtpRequest {
   email: string;
   otp: string;
 }
-interface ResendOtpResponse {
-
-}
+interface ResendOtpResponse {}
 interface RegisterResponse {
   message?: string;
   status?: string;
@@ -200,7 +198,8 @@ export class AuthService {
           return of({
             success: false,
             message:
-              error.error?.message || 'OTP verification failed. Please try again.',
+              error.error?.message ||
+              'OTP verification failed. Please try again.',
           });
         })
       );
@@ -224,6 +223,21 @@ export class AuthService {
         this.setAuthState(mockToken, mockUser);
         return of({ auth: true, role: mockUser.role });
       }
+
+      // Add mock user with role "user"
+      if (username === 'user' && password === 'qaz') {
+        const mockUser: User = {
+          name: 'Jane S.',
+          fullName: 'Jane Smith',
+          email: 'jane.smith@example.com',
+          role: 'user',
+        };
+        const mockToken = 'mock-jwt-token-user';
+
+        this.setAuthState(mockToken, mockUser);
+        return of({ auth: true, role: mockUser.role });
+      }
+
       return of({ auth: false, role: null });
     }
 
