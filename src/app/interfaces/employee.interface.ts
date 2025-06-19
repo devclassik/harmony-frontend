@@ -23,6 +23,8 @@ export interface TableData {
   endDate?: string;
   requestType?: string;
   duration?: string;
+  location?: string;
+  substitution?: string;
   date?: string;
   documentType?: string;
   documentName?: string;

@@ -111,8 +111,12 @@
                 routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                #promotionLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  [ngClass]="
+                    promotionLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
+                  "
                 ></span
                 >Promotion</a
               >
@@ -121,8 +125,12 @@
                 routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                #disciplineLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  [ngClass]="
+                    disciplineLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
+                  "
                 ></span
                 >Discipline</a
               >
@@ -131,8 +139,12 @@
                 routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                #transferLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  [ngClass]="
+                    transferLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
+                  "
                 ></span
                 >Transfer</a
               >
@@ -141,8 +153,12 @@
                 routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                #retirementLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  [ngClass]="
+                    retirementLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
+                  "
                 ></span
                 >Retirement</a
               >
@@ -151,8 +167,12 @@
                 routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                #retrenchmentLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  [ngClass]="
+                    retrenchmentLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
+                  "
                 ></span
                 >Retrenchment</a
               >
@@ -191,8 +211,12 @@
                 routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                #annualLeaveLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  [ngClass]="
+                    annualLeaveLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
+                  "
                 ></span
                 >Annual Leave</a
               >
@@ -201,8 +225,12 @@
                 routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                #leaveOfAbsenceLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  [ngClass]="
+                    leaveOfAbsenceLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
+                  "
                 ></span
                 >Leave of Absence</a
               >
@@ -211,8 +239,12 @@
                 routerLinkActive="active-link-child"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="py-1 px-2 hover:bg-[#12C16F] hover:text-white rounded-md"
+                #sickLeaveLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 bg-[#12C16F] rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  [ngClass]="
+                    sickLeaveLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
+                  "
                 ></span
                 >Sick Leave</a
               >

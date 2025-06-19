@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ConfirmPromptComponent } from '../confirm-prompt/confirm-prompt.component';
 
 @Component({
   selector: 'app-create-leave-request',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmPromptComponent],
   templateUrl: './create-leave-request.component.html',
 })
 export class CreateLeaveRequestComponent {
@@ -31,11 +32,13 @@ export class CreateLeaveRequestComponent {
     }
   }
 
-  onConfirmSubmit() {
-    this.submitted.emit(this.formData);
+  onConfirmSubmit(confirmed: boolean) {
+    if (confirmed) {
+      this.submitted.emit(this.formData);
+      this.resetForm();
+      this.close.emit();
+    }
     this.showConfirmModal = false;
-    this.resetForm();
-    this.close.emit();
   }
 
   onConfirmCancel() {

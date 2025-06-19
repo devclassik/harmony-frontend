@@ -121,8 +121,16 @@
       >
         <div class="border border-[#EDEDED] rounded-lg p-4">
           <div class="space-y-4">
-            <!-- Start Date and End Date in grid -->
-            <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+            <!-- Request Type and Start Date on same line (for Leave of Absence) -->
+            <div *ngIf="showRequestType" class="grid grid-cols-2 gap-x-8">
+              <!-- Request Type -->
+              <div>
+                <div class="text-xs text-gray-400 mb-1">Request Type</div>
+                <div class="font-medium text-gray-900">
+                  {{ leaveData.requestType }}
+                </div>
+              </div>
+
               <!-- Start Date -->
               <div>
                 <div class="text-xs text-gray-400 mb-1">Start Date</div>
@@ -130,51 +138,154 @@
                   {{ leaveData.startDate }}
                 </div>
               </div>
+            </div>
 
-              <!-- End Date -->
+            <!-- Duration and Location on same line (for Leave of Absence) -->
+            <div *ngIf="showRequestType" class="grid grid-cols-2 gap-x-8">
+              <!-- Duration -->
               <div>
-                <div class="text-xs text-gray-400 mb-1">End Date</div>
+                <div class="text-xs text-gray-400 mb-1">Duration</div>
                 <div class="font-medium text-gray-900">
-                  {{ leaveData.endDate }}
+                  {{ leaveData.duration }}
+                </div>
+              </div>
+
+              <!-- Location -->
+              <div>
+                <div class="text-xs text-gray-400 mb-1">Location</div>
+                <div class="font-medium text-gray-900">
+                  {{ leaveData.location || "Osborne" }}
                 </div>
               </div>
             </div>
 
-            <!-- Reason -->
-            <div>
-              <div class="text-xs text-gray-400 mb-1">Reason</div>
-              <div class="font-medium text-gray-900">
-                I am requesting {{ leaveType.toLowerCase() }} to take time for
-                rest, personal renewal, and to spend quality time with family.
-                This period of leave will provide an opportunity for [him/her]
-                to recharge and return to [his/her] duties with renewed energy
-                and focus.
+            <!-- Annual Leave Layout (when NOT Leave of Absence) -->
+            <div *ngIf="!showRequestType">
+              <!-- Start Date and Duration -->
+              <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                <!-- Start Date -->
+                <div>
+                  <div class="text-xs text-gray-400 mb-1">Start Date</div>
+                  <div class="font-medium text-gray-900">
+                    {{ leaveData.startDate }}
+                  </div>
+                </div>
+
+                <!-- Duration -->
+                <div *ngIf="showDuration">
+                  <div class="text-xs text-gray-400 mb-1">Duration</div>
+                  <div class="font-medium text-gray-900">
+                    {{ leaveData.duration }}
+                  </div>
+                </div>
+
+                <!-- End Date (if needed) -->
+                <div *ngIf="showEndDate && !showDuration">
+                  <div class="text-xs text-gray-400 mb-1">End Date</div>
+                  <div class="font-medium text-gray-900">
+                    {{ leaveData.endDate }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reason (for sick leave - moved after start date/duration) -->
+              <div class="mt-4">
+                <div class="text-xs text-gray-400 mb-1">Reason</div>
+                <div class="font-medium text-gray-900">
+                  I am requesting {{ leaveType.toLowerCase() }} to take time for
+                  rest, personal renewal, and to spend quality time with family.
+                  This period of leave will provide an opportunity for [him/her]
+                  to recharge and return to [his/her] duties with renewed energy
+                  and focus.
+                </div>
+              </div>
+
+              <!-- Substitution and Status -->
+              <div
+                class="grid gap-x-8 mt-4"
+                [ngClass]="showSubstitution ? 'grid-cols-2' : 'grid-cols-1'"
+              >
+                <!-- Substitution -->
+                <div *ngIf="showSubstitution">
+                  <div class="text-xs text-gray-400 mb-1">Substitution</div>
+                  <div class="font-medium text-gray-900">
+                    {{ leaveData.substitution || "N/A" }}
+                  </div>
+                </div>
+
+                <!-- Status -->
+                <div>
+                  <div class="text-xs text-gray-400 mb-1">Status</div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                    [ngClass]="{
+                      'bg-green-100 text-green-700':
+                        leaveData.status === 'Approved',
+                      'bg-yellow-100 text-yellow-700':
+                        leaveData.status === 'Pending',
+                      'bg-red-100 text-red-700': leaveData.status === 'Rejected'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-green-500': leaveData.status === 'Approved',
+                        'bg-yellow-500': leaveData.status === 'Pending',
+                        'bg-red-500': leaveData.status === 'Rejected'
+                      }"
+                    ></span>
+                    {{ leaveData.status }}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <!-- Status -->
-            <div>
-              <div class="text-xs text-gray-400 mb-1">Status</div>
-              <span
-                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
-                [ngClass]="{
-                  'bg-green-100 text-green-700':
-                    leaveData.status === 'Approved',
-                  'bg-yellow-100 text-yellow-700':
-                    leaveData.status === 'Pending',
-                  'bg-red-100 text-red-700': leaveData.status === 'Rejected'
-                }"
-              >
+            <!-- Reason (for both types) -->
+            <div *ngIf="showRequestType">
+              <div class="text-xs text-gray-400 mb-1">Reason</div>
+              <div class="font-medium text-gray-900">
+                Unfortunately, a close family member has recently encountered
+                significant health issues, requiring my immediate and ongoing
+                support. Given the circumstances, I need to prioritize their
+                care and assist with medical appointments and other necessary
+                arrangements.
+              </div>
+            </div>
+
+            <!-- Substitution and Status on same line (for Leave of Absence) - MOVED BELOW REASON -->
+            <div *ngIf="showRequestType" class="grid grid-cols-2 gap-x-8 mt-4">
+              <!-- Substitution -->
+              <div>
+                <div class="text-xs text-gray-400 mb-1">Substitution</div>
+                <div class="font-medium text-gray-900">
+                  {{ leaveData.substitution || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Status -->
+              <div>
+                <div class="text-xs text-gray-400 mb-1">Status</div>
                 <span
-                  class="w-2 h-2 rounded-full mr-2"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
                   [ngClass]="{
-                    'bg-green-500': leaveData.status === 'Approved',
-                    'bg-yellow-500': leaveData.status === 'Pending',
-                    'bg-red-500': leaveData.status === 'Rejected'
+                    'bg-green-100 text-green-700':
+                      leaveData.status === 'Approved',
+                    'bg-yellow-100 text-yellow-700':
+                      leaveData.status === 'Pending',
+                    'bg-red-100 text-red-700': leaveData.status === 'Rejected'
                   }"
-                ></span>
-                {{ leaveData.status }}
-              </span>
+                >
+                  <span
+                    class="w-2 h-2 rounded-full mr-2"
+                    [ngClass]="{
+                      'bg-green-500': leaveData.status === 'Approved',
+                      'bg-yellow-500': leaveData.status === 'Pending',
+                      'bg-red-500': leaveData.status === 'Rejected'
+                    }"
+                  ></span>
+                  {{ leaveData.status }}
+                </span>
+              </div>
             </div>
           </div>
         </div>

@@ -97,40 +97,14 @@
   </div>
 </div>
 
-<!-- Confirmation Modal -->
-<div
+<!-- Use Reusable Confirm Prompt Component -->
+<app-confirm-prompt
   *ngIf="showConfirmModal"
-  class="fixed inset-0 bg-[#7f7f7f63] z-60 flex justify-center items-center"
-  (click)="onConfirmCancel()"
->
-  <div
-    class="bg-white rounded-xl shadow-lg w-full max-w-xs p-6 flex flex-col items-center"
-    (click)="$event.stopPropagation()"
-  >
-    <h2 class="text-xl font-semibold mb-2">Confirm</h2>
-    <hr class="w-full text-gray-300 pb-2" />
-    <img
-      src="assets/svg/bouncing-question.svg"
-      alt="Question"
-      class="w-16 h-16 mb-2"
-    />
-
-    <p class="text-gray-500 text-center mb-6 text-sm">
-      Are you sure you want to create this annual leave request?
-    </p>
-    <div class="flex gap-2 w-full">
-      <button
-        class="flex-1 border border-green-600 text-green-600 rounded-lg py-2 font-medium transition hover:bg-green-50"
-        (click)="onConfirmCancel()"
-      >
-        No
-      </button>
-      <button
-        class="flex-1 bg-green-600 text-white rounded-lg py-2 font-medium transition hover:bg-green-700"
-        (click)="onConfirmSubmit()"
-      >
-        Yes
-      </button>
-    </div>
-  </div>
-</div>
+  [title]="'Confirm'"
+  [text]="'Are you sure you want to create this annual leave request?'"
+  [imageUrl]="'assets/svg/bouncing-question.svg'"
+  [yesButtonText]="'Yes'"
+  [noButtonText]="'No'"
+  (confirmed)="onConfirmSubmit($event)"
+  (closed)="onConfirmCancel()"
+></app-confirm-prompt>
