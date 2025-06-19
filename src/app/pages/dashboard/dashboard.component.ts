@@ -2,12 +2,17 @@ import { Component } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { DashboardGreetingsComponent } from '../../components/dashboard-greetings/dashboard-greetings.component';
+import { DashboardInformationComponent } from '../../components/dashboard-information/dashboard-information.component';
 import { ComponentsModule } from '../../components/components.module';
 import { PieChartComponent } from '../../components/pie-chart/pie-chart.component';
 import { BarChartComponent } from '../../components/bar-chart/bar-chart.component';
-import { TableComponent } from '../../components/table/table.component';
-import { TableData } from '../../interfaces/employee.interface';
+import {
+  MenuItem,
+  TableComponent,
+} from '../../components/table/table.component';
+import { TableData, EmployeeInfo } from '../../interfaces/employee.interface';
 import { DoughnutChartComponent } from '../../components/doughnut-chart/doughnut-chart.component';
+import { LeaveDetailsComponent } from '../../components/leave-details/leave-details.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,9 +20,11 @@ import { DoughnutChartComponent } from '../../components/doughnut-chart/doughnut
     CommonModule,
     ComponentsModule,
     DashboardGreetingsComponent,
+    DashboardInformationComponent,
     BarChartComponent,
     TableComponent,
     DoughnutChartComponent,
+    LeaveDetailsComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
@@ -25,6 +32,8 @@ import { DoughnutChartComponent } from '../../components/doughnut-chart/doughnut
 export class DashboardComponent {
   userRole: string | null;
   currentUser: any;
+  showLeaveDetails: boolean = false;
+  selectedLeaveData: TableData | null = null;
 
   constructor(private authService: AuthService) {
     this.userRole = this.authService.getUserRole();
@@ -32,8 +41,8 @@ export class DashboardComponent {
   }
 
   // Mock employee data for user dashboard
-  employeeInfo = {
-    id: '24-08',
+  employeeInfo: EmployeeInfo = {
+    id: '124-08',
     firstName: 'John',
     lastName: 'Adegoke',
     middleName: 'Tobi',
@@ -96,11 +105,29 @@ export class DashboardComponent {
     },
   ];
 
+  actionButton: MenuItem[] = [
+    { label: 'View', action: 'View', icon: '/public/assets/svg/eyeOpen.svg' },
+  ];
+
   // Leave requests table header configuration
   leaveRequestsHeader = [
     { key: 'id', label: 'LEAVE ID' },
     { key: 'startDate', label: 'START DATE' },
     { key: 'endDate', label: 'END DATE' },
     { key: 'status', label: 'STATUS' },
+    { key: 'action', label: 'ACTION' },
   ];
+
+  onMenuAction(event: { action: string; row: TableData }) {
+    console.log(event);
+
+    if (event.action === 'View') {
+      this.showLeaveDetailsModal();
+      this.selectedLeaveData = event.row;
+    }
+  }
+
+  showLeaveDetailsModal() {
+    this.showLeaveDetails = true;
+  }
 }

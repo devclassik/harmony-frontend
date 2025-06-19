@@ -33,98 +33,20 @@
 <div *ngIf="userRole === 'user'" class="p-8 bg-white min-h-screen">
   <!-- Greeting Section -->
   <div class="mb-12">
-    <h1 class="text-3xl font-semibold text-gray-900 mb-3">Hello, John 👋</h1>
-    <p class="text-gray-500 text-base">
-      Here is a brief summary of your employment.
-    </p>
+    <app-dashboard-greetings
+      [userName]="'John 👋'"
+      [showSubText]="true"
+      [subText]="'Here is a brief summary of your employment.'"
+      [showMetrics]="false"
+    ></app-dashboard-greetings>
   </div>
 
   <!-- Employee Information Section -->
-  <div class="mb-8">
-    <h2 class="text-xl font-semibold text-gray-900 mb-8">
-      Employee Information
-    </h2>
-
-    <!-- Divider Line -->
-    <div class="border-b border-gray-200 mb-8"></div>
-
-    <div class="flex justify-between items-start">
-      <!-- Profile Section -->
-      <div class="flex-shrink-0 text-center">
-        <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 mb-4">
-          <img
-            [src]="employeeInfo.profileImage"
-            [alt]="employeeInfo.preferredName"
-            class="w-full h-full object-cover"
-          />
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-1">
-          {{ employeeInfo.preferredName }}
-        </h3>
-        <p class="text-sm text-gray-600 mb-3">{{ employeeInfo.title }}</p>
-        <span
-          class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200"
-        >
-          • {{ employeeInfo.status }}
-        </span>
-      </div>
-
-      <!-- Left Column Details -->
-      <div class="space-y-6">
-        <div>
-          <p class="text-sm font-medium text-gray-500 mb-2">Employee ID</p>
-          <p class="text-sm text-gray-900 font-medium">124-08</p>
-        </div>
-
-        <div>
-          <p class="text-sm font-medium text-gray-500 mb-2">Legal First Name</p>
-          <p class="text-sm text-gray-900 font-medium">
-            {{ employeeInfo.firstName }}
-          </p>
-        </div>
-
-        <div>
-          <p class="text-sm font-medium text-gray-500 mb-2">Legal Last Name</p>
-          <p class="text-sm text-gray-900 font-medium">
-            {{ employeeInfo.lastName }}
-          </p>
-        </div>
-
-        <div>
-          <p class="text-sm font-medium text-gray-500 mb-2">Gender</p>
-          <p class="text-sm text-gray-900 font-medium">
-            {{ employeeInfo.gender }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Right Column Details -->
-      <div class="space-y-6">
-        <div>
-          <p class="text-sm font-medium text-gray-500 mb-2">Title</p>
-          <p class="text-sm text-gray-900 font-medium">Mr.</p>
-        </div>
-
-        <div>
-          <p class="text-sm font-medium text-gray-500 mb-2">
-            Legal Middle Name
-          </p>
-          <p class="text-sm text-gray-900 font-medium">
-            {{ employeeInfo.middleName }}
-          </p>
-        </div>
-
-        <div>
-          <p class="text-sm font-medium text-gray-500 mb-2">
-            Preferred Name of Correspondence
-          </p>
-          <p class="text-sm text-gray-900 font-medium">
-            {{ employeeInfo.preferredName }}
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+  <app-dashboard-information
+    [title]="'Employee Information'"
+    [employeeData]="employeeInfo"
+    [personalTitle]="'Mr.'"
+  ></app-dashboard-information>
 
   <app-table
     [tableTitle]="'Leave Requests'"
@@ -132,9 +54,21 @@
     [tableData]="leaveRequests"
     [tableHeader]="leaveRequestsHeader"
     [showViewAll]="true"
+    [menuItems]="actionButton"
+    (menuAction)="onMenuAction($event)"
     [showSearch]="false"
     [showFilter]="false"
     [showPagination]="false"
     [showStatusTab]="false"
   ></app-table>
 </div>
+
+<!-- Leave Details Modal -->
+<app-leave-details
+  [view]="showLeaveDetails"
+  [leaveData]="selectedLeaveData"
+  [title]="'Leave Request Details'"
+  [leaveType]="'Leave'"
+  [totalLeaveDays]="30"
+  (close)="showLeaveDetails = false"
+></app-leave-details>

@@ -11,7 +11,7 @@
 
     <!-- Header -->
     <div class="flex items-center gap-2 mb-6">
-      <h2 class="text-xl font-semibold text-gray-900">Annual Leave</h2>
+      <h2 class="text-xl font-semibold text-gray-900">{{ title }}</h2>
     </div>
 
     <div class="border-b border-gray-200 mb-8"></div>
@@ -33,7 +33,7 @@
           />
         </svg>
         <span class="text-lg font-semibold"
-          >{{ totalLeaveDays }} Days of Annual Leave</span
+          >{{ totalLeaveDays }} Days of {{ leaveType }}</span
         >
       </div>
       <p class="text-[#353535] font-medium ml-7">
@@ -41,22 +41,37 @@
       </p>
     </div>
 
-    <!-- Annual Leave History Section -->
+    <!-- Leave History Section -->
     <div class="employee-section mb-4">
       <button
         class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
-        (click)="toggleHistory()"
+        (click)="
+          openSection === 'leaveHistory'
+            ? (openSection = null)
+            : (openSection = 'leaveHistory')
+        "
       >
-        <img
-          src="assets/svg/down2.svg"
+        <svg
           class="w-5 h-5 mr-2 transition-transform duration-200"
-          [class.rotate-180]="isHistoryExpanded"
-          alt="Toggle"
-        />
-        <span class="font-medium text-black">Annual Leave History</span>
+          [ngClass]="{ 'rotate-180': openSection === 'leaveHistory' }"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+        <span class="font-medium text-black">{{ leaveType }} History</span>
       </button>
 
-      <div *ngIf="isHistoryExpanded" class="mt-4 bg-white p-6 animate-fade-in">
+      <div
+        *ngIf="openSection === 'leaveHistory'"
+        class="mt-4 bg-white p-6 animate-fade-in"
+      >
         <div class="bg-gray-50 rounded-lg p-4">
           <p class="text-sm text-gray-600 mb-2">Previous Leave Records</p>
           <div class="space-y-2">
@@ -73,22 +88,37 @@
       </div>
     </div>
 
-    <!-- Annual Leave Request Section -->
+    <!-- Leave Request Section -->
     <div class="employee-section mb-6">
       <button
         class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
-        (click)="toggleRequest()"
+        (click)="
+          openSection === 'leaveRequest'
+            ? (openSection = null)
+            : (openSection = 'leaveRequest')
+        "
       >
-        <img
-          src="assets/svg/down2.svg"
+        <svg
           class="w-5 h-5 mr-2 transition-transform duration-200"
-          [class.rotate-180]="isHistoryExpanded"
-          alt="Toggle"
-        />
-        <span class="font-medium text-black">Annual Leave Request</span>
+          [ngClass]="{ 'rotate-180': openSection === 'leaveRequest' }"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+        <span class="font-medium text-black">{{ leaveType }} Request</span>
       </button>
 
-      <div *ngIf="isRequestExpanded" class="mt-4 bg-white p-6 animate-fade-in">
+      <div
+        *ngIf="openSection === 'leaveRequest'"
+        class="mt-4 bg-white p-6 animate-fade-in"
+      >
         <div class="border border-[#EDEDED] rounded-lg p-4">
           <div class="space-y-4">
             <!-- Start Date and End Date in grid -->
@@ -114,10 +144,11 @@
             <div>
               <div class="text-xs text-gray-400 mb-1">Reason</div>
               <div class="font-medium text-gray-900">
-                I am requesting annual leave to take time for rest, personal
-                renewal, and to spend quality time with family. This period of
-                leave will provide an opportunity for [him/her] to recharge and
-                return to [his/her] duties with renewed energy and focus.
+                I am requesting {{ leaveType.toLowerCase() }} to take time for
+                rest, personal renewal, and to spend quality time with family.
+                This period of leave will provide an opportunity for [him/her]
+                to recharge and return to [his/her] duties with renewed energy
+                and focus.
               </div>
             </div>
 
@@ -173,7 +204,7 @@
               <!-- Document Details -->
               <div class="flex-1 min-w-0">
                 <div class="text-sm font-medium text-gray-900 truncate">
-                  Annual Leave_Approval
+                  {{ leaveType }}_Approval
                 </div>
                 <div class="text-xs text-gray-500 mt-1">
                   PDF Document • 245 KB

@@ -2,20 +2,21 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-annual-leave-details',
+  selector: 'app-leave-details',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './annual-leave-details.component.html',
-  styleUrl: './annual-leave-details.component.css',
+  templateUrl: './leave-details.component.html',
+  styleUrl: './leave-details.component.css',
 })
-export class AnnualLeaveDetailsComponent {
+export class LeaveDetailsComponent {
   @Input() view: boolean = false;
   @Input() leaveData: any = {};
+  @Input() title: string = 'Leave Details';
+  @Input() leaveType: string = 'Leave';
+  @Input() totalLeaveDays: number = 30;
   @Output() close = new EventEmitter<void>();
 
-  totalLeaveDays = 30;
-  isHistoryExpanded = false;
-  isRequestExpanded = false;
+  openSection: string | null = null;
 
   get daysRemaining(): number {
     // Calculate days remaining based on leave data
@@ -43,13 +44,5 @@ export class AnnualLeaveDetailsComponent {
 
   onClose() {
     this.close.emit();
-  }
-
-  toggleHistory() {
-    this.isHistoryExpanded = !this.isHistoryExpanded;
-  }
-
-  toggleRequest() {
-    this.isRequestExpanded = !this.isRequestExpanded;
   }
 }

@@ -28,3 +28,15 @@ export interface TableData {
   documentName?: string;
   reason?: string;
 }
+
+export interface EmployeeInfo {
+  id: string;
+  firstName: string;
+  lastName: string;
+  middleName: string;
+  title: string;
+  preferredName: string;
+  gender: string;
+  profileImage: string;
+  status: 'Active' | 'On leave' | 'Retired' | 'On Discipline';
+}

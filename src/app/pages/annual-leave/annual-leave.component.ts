@@ -15,7 +15,7 @@ import { SuccessModalComponent } from '../../components/success-modal/success-mo
 import { TableData } from '../../interfaces/employee.interface';
 import { SubstitutionComponent } from '../../components/substitution/substitution.component';
 import { AuthService } from '../../services/auth.service';
-import { AnnualLeaveDetailsComponent } from '../../components/annual-leave-details/annual-leave-details.component';
+import { LeaveDetailsComponent } from '../../components/leave-details/leave-details.component';
 import { CreateLeaveRequestComponent } from '../../components/create-leave-request/create-leave-request.component';
 
 @Component({
@@ -27,7 +27,7 @@ import { CreateLeaveRequestComponent } from '../../components/create-leave-reque
     ConfirmPromptComponent,
     SuccessModalComponent,
     SubstitutionComponent,
-    AnnualLeaveDetailsComponent,
+    LeaveDetailsComponent,
     CreateLeaveRequestComponent,
   ],
   templateUrl: './annual-leave.component.html',

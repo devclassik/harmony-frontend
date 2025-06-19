@@ -64,11 +64,14 @@
   (submitted)="onCreateLeaveRequestSubmitted($event)"
 ></app-create-leave-request>
 
-<app-annual-leave-details
+<app-leave-details
   [view]="showAnnualLeaveDetails"
   [leaveData]="selectedLeaveData"
+  [title]="'Annual Leave Details'"
+  [leaveType]="'Annual Leave'"
+  [totalLeaveDays]="30"
   (close)="showAnnualLeaveDetails = false"
-></app-annual-leave-details>
+></app-leave-details>
 
 <app-employee-details
   [view]="showEmployeeDetails"
