@@ -19,6 +19,9 @@ export class LeaveDetailsComponent {
   @Input() showLocation: boolean = false;
   @Input() showEndDate: boolean = true;
   @Input() showSubstitution: boolean = true;
+  @Input() showAttendees: boolean = false;
+  @Input() showDocuments: boolean = false;
+  @Input() isCampMeeting: boolean = false;
   @Output() close = new EventEmitter<void>();
 
   openSection: string | null = null;
@@ -76,5 +79,16 @@ export class LeaveDetailsComponent {
 
   onClose() {
     this.close.emit();
+  }
+
+  downloadDocument(doc: any) {
+    const content = `Document: ${doc.documentName}\nSize: ${doc.size}\nDate: ${doc.date}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = doc.documentName;
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
 }

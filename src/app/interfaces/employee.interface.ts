@@ -29,6 +29,16 @@ export interface TableData {
   documentType?: string;
   documentName?: string;
   reason?: string;
+  // Notification properties
+  isRead?: boolean;
+  type?: string;
+  message?: string;
+  targetUser?: string;
+  timestamp?: string;
+  user?: {
+    name: string;
+    image: string;
+  };
 }
 
 export interface EmployeeInfo {

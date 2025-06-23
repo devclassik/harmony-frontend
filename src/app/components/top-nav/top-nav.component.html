@@ -1,6 +1,4 @@
-<header
-  class="sticky top-0 flex w-full border-gray-200 bg-white lg:border-b"
->
+<header class="sticky top-0 flex w-full border-gray-200 bg-white lg:border-b">
   <div
     class="flex grow flex-col items-center justify-between lg:flex-row lg:px-6"
   >
@@ -110,7 +108,7 @@
       </button>
 
       <div class="text-gray-500 px-4">
-        <h3>Admin</h3>
+        <h3>{{ pageTitle }}</h3>
       </div>
 
       <div class="hidden lg:block">
@@ -158,10 +156,10 @@
     >
       <div class="2xsm:gap-3 flex items-center gap-2">
         <!-- Notification Menu Area -->
-        <div class="relative" (clickOutside)="closeDropdown()">
+        <div class="relative">
           <button
             class="hover:text-dark-900 relative flex h-10 w-10 items-center justify-center rounded-full border border-[#f4f5f6] bg-white text-black transition-colors hover:bg-gray-100 hover:text-gray-700 hover:cursor-pointer"
-            (click)="markMessagesAsRead()"
+            (click)="navigateToInbox()"
           >
             <span
               [ngClass]="{ hidden: !messages, flex: messages }"
@@ -189,10 +187,10 @@
           </button>
         </div>
 
-        <div class="relative" (clickOutside)="closeDropdown()">
+        <div class="relative">
           <button
             class="hover:text-dark-900 relative flex h-10 w-10 items-center justify-center rounded-full border border-[#f4f5f6] bg-white text-black transition-colors hover:bg-gray-100 hover:text-gray-700 hover:cursor-pointer"
-            (click)="toggleDropdown(); markNotificationsAsRead()"
+            (click)="navigateToNotifications()"
           >
             <span
               [ngClass]="{ hidden: !notifying, flex: notifying }"
@@ -218,87 +216,14 @@
               />
             </svg>
           </button>
-          <!-- Notification Dropdown -->
-           <div *ngIf="dropdownOpen" class="bg-red-500">
-             {{dropdownOpen}}
-           </div>
-          <div
-            *ngIf="dropdownOpen"
-            class="z-99999 shadow-theme-lg dark:bg-gray-dark absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 sm:w-[361px] lg:right-0"
-          >
-            <div
-              class="mb-3 flex items-center justify-between border-b border-gray-100 pb-3"
-            >
-              <h5
-                class="text-lg font-semibold text-gray-800 dark:text-white/90"
-              >
-                Notification
-              </h5>
-              <button (click)="closeDropdown()" class="text-gray-500">
-                <svg
-                  class="fill-current"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
-                    fill=""
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <!-- Notification List -->
-            <ul class="custom-scrollbar flex h-auto flex-col overflow-y-auto">
-              <li *ngFor="let notification of notifications">
-                <a
-                  class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
-                  href="#"
-                >
-                  <div class="flex items-center gap-3">
-                    <img
-                      [src]="notification.user.image"
-                      [alt]="notification.user.name"
-                      class="h-10 w-10 rounded-full"
-                    />
-                    <div class="flex flex-col">
-                      <span
-                        class="text-sm font-medium text-gray-800 dark:text-white/90"
-                        >{{ notification.user.name }}</span
-                      >
-                      <span class="text-xs text-gray-500 dark:text-gray-400">{{
-                        notification.message
-                      }}</span>
-                      <span class="text-xs text-gray-400 dark:text-gray-500">{{
-                        notification.time
-                      }}</span>
-                    </div>
-                  </div>
-                </a>
-              </li>
-            </ul>
-
-            <a
-              routerLink="/notifications"
-              class="text-theme-sm shadow-theme-xs mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-            >
-              View All Notifications
-            </a>
-          </div>
         </div>
         <div class="flex items-center gap-2 text-[#dddddd]">|</div>
 
         <!-- User Area -->
-        <div class="relative">
-          <a
-            class="flex items-center text-gray-700 dark:text-gray-400"
-            routerLink="/settings"
-            (click)="$event.preventDefault(); toggleDropdown()"
+        <div class="relative" (clickOutside)="closeUserDropdown()">
+          <button
+            class="flex items-center text-gray-700 dark:text-gray-400 hover:cursor-pointer"
+            (click)="toggleUserDropdown()"
           >
             <span class="mr-3 h-11 w-11 overflow-hidden rounded-full">
               <img src="./assets/svg/profilePix.svg" alt="User" />
@@ -313,7 +238,7 @@
             </div>
 
             <svg
-              [ngClass]="{ 'rotate-180': dropdownOpen }"
+              [ngClass]="{ 'rotate-180': userDropdownOpen }"
               class="stroke-gray-500 dark:stroke-gray-400"
               width="18"
               height="20"
@@ -329,10 +254,42 @@
                 stroke-linejoin="round"
               />
             </svg>
-          </a>
+          </button>
 
+          <!-- User Dropdown Menu -->
+          <div
+            *ngIf="userDropdownOpen"
+            class="z-99999 shadow-theme-lg absolute -right-[120px] mt-[17px] flex w-[200px] flex-col rounded-2xl border border-gray-200 bg-white p-3 lg:right-0"
+          >
+            <div class="flex flex-col gap-2">
+              <button
+                routerLink="/profile"
+                (click)="closeUserDropdown()"
+                class="flex items-center gap-3 rounded-lg p-3 text-left hover:bg-gray-100"
+              >
+                <svg class="fill-current w-5 h-5" viewBox="0 0 24 24">
+                  <path
+                    d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7.07,18.28C7.5,17.38 10.12,16.5 12,16.5C13.88,16.5 16.5,17.38 16.93,18.28C15.57,19.36 13.86,20 12,20C10.14,20 8.43,19.36 7.07,18.28M18.36,16.83C16.93,15.09 13.46,14.5 12,14.5C10.54,14.5 7.07,15.09 5.64,16.83C4.62,15.5 4,13.82 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,13.82 19.38,15.5 18.36,16.83M12,6C10.06,6 8.5,7.56 8.5,9.5C8.5,11.44 10.06,13 12,13C13.94,13 15.5,11.44 15.5,9.5C15.5,7.56 13.94,6 12,6M12,11A1.5,1.5 0 0,1 10.5,9.5A1.5,1.5 0 0,1 12,8A1.5,1.5 0 0,1 13.5,9.5A1.5,1.5 0 0,1 12,11Z"
+                  />
+                </svg>
+                <span>Profile</span>
+              </button>
+              <hr class="border-gray-200" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </header>
+
+<!-- Logout Confirmation Modal -->
+<app-confirm-prompt
+  *ngIf="showLogoutConfirm"
+  title="Confirm Logout"
+  text="Are you sure you want to logout? You will be redirected to the login page."
+  yesButtonText="Yes, Logout"
+  noButtonText="Cancel"
+  (confirmed)="onLogoutConfirmed()"
+  (closed)="onLogoutCancelled()"
+></app-confirm-prompt>

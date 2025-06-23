@@ -1,0 +1,23 @@
+/* Notifications Component Styles */
+.notification-item:hover {
+  background-color: #f9fafb;
+}
+
+.pagination-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+.pagination-button.active {
+  background-color: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.filter-dropdown {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}

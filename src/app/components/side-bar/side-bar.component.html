@@ -31,11 +31,12 @@
   </div>
   <!-- SIDEBAR HEADER -->
 
+  <!-- Main Menu Section -->
   <div
-    class="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear"
+    class="no-scrollbar flex flex-col flex-1 overflow-y-auto duration-300 ease-linear"
   >
     <!-- Sidebar Menu -->
-    <nav>
+    <nav class="flex-1">
       <ul class="mb-6 flex flex-col gap-4">
         <!-- Dashboard -->
         <li class="menu-item">
@@ -265,6 +266,21 @@
           </a>
         </li>
 
+        <!-- Camp Meeting -->
+        <li class="menu-item" *ngIf="canViewCampMeeting()">
+          <a
+            routerLink="/camp-meeting"
+            routerLinkActive="active-link"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer"
+          >
+            <mat-icon>event</mat-icon>
+            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+              >Camp Meeting</span
+            >
+          </a>
+        </li>
+
         <!-- Calendar -->
         <li class="menu-item" *ngIf="canViewCalendar()">
           <a
@@ -303,21 +319,32 @@
             <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Settings</span>
           </a>
         </li>
-
-        <!-- Logout -->
-        <li class="menu-item mt-auto">
-          <a
-            routerLink="/logout"
-            routerLinkActive="active-link"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer"
-          >
-            <mat-icon class="text-red-500">logout</mat-icon>
-            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Logout</span>
-          </a>
-        </li>
       </ul>
     </nav>
     <!-- Sidebar Menu -->
   </div>
+
+  <!-- Footer Section with Logout -->
+  <div class="border-t border-gray-200 pt-4 pb-4">
+    <button
+      (click)="logout()"
+      class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-red-50 hover:text-red-600 cursor-pointer w-full text-left transition-colors"
+    >
+      <mat-icon class="text-red-500">logout</mat-icon>
+      <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''" class="text-red-600"
+        >Logout</span
+      >
+    </button>
+  </div>
 </aside>
+
+<!-- Logout Confirmation Modal -->
+<app-confirm-prompt
+  *ngIf="showLogoutConfirm"
+  title="Confirm Logout"
+  text="Are you sure you want to logout? You will be redirected to the login page."
+  yesButtonText="Yes, Logout"
+  noButtonText="Cancel"
+  (confirmed)="onLogoutConfirmed()"
+  (closed)="onLogoutCancelled()"
+></app-confirm-prompt>

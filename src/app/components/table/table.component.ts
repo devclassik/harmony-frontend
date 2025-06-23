@@ -6,11 +6,17 @@ import {
   ElementRef,
   HostListener,
   TemplateRef,
+  OnInit,
+  OnChanges,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableData } from '../../interfaces/employee.interface';
-import { FullCalendarModule } from '@fullcalendar/angular';
+import {
+  FullCalendarModule,
+  FullCalendarComponent,
+} from '@fullcalendar/angular';
 import { CalendarOptions } from '@fullcalendar/core'; // useful for typechecking
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction'; // needed for dayClick
@@ -43,7 +49,9 @@ export interface FilterTab {
   standalone: true,
   imports: [CommonModule, FormsModule, FullCalendarModule, CalendarModule],
 })
-export class TableComponent {
+export class TableComponent implements OnInit, OnChanges {
+  @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
+
   @Input() tableTitle: string = '';
   @Input() tableData: TableData[] = [];
   @Input() tableHeader: TableHeader[] = [
@@ -73,6 +81,9 @@ export class TableComponent {
   @Input() showCalendarIcon: string = '';
   @Input() showList: boolean = false;
   @Input() showListIcon: string = '';
+  @Input() showCard: boolean = false;
+  @Input() showCardIcon: string = '';
+  @Input() currentView: 'table' | 'card' | 'calendar' | 'list' = 'table';
   @Input() viewAllText: string = 'View all';
   @Input() viewAllLink: string = '#';
   @Input() emptyStateImage: string = 'assets/svg/emptyState.svg';
@@ -84,6 +95,8 @@ export class TableComponent {
   @Input() activeFilterTab: string = '';
   @Input() searchValue: string = '';
   @Input() activeStatusTab: string = '';
+  @Input() calendarEvents: any[] = [];
+  @Input() customEventClick: ((info: any) => void) | null = null;
 
   @Output() search = new EventEmitter<string>();
   @Output() filter = new EventEmitter<string>();
@@ -95,6 +108,7 @@ export class TableComponent {
   @Output() showButtonActionClick = new EventEmitter<boolean>();
   @Output() menuAction = new EventEmitter<{ action: string; row: TableData }>();
   @Output() showListCalendarClick = new EventEmitter<string>();
+  @Output() viewChange = new EventEmitter<string>();
   calendarDate: Date = new Date();
 
   @Input() menuItems: MenuItem[] = [
@@ -118,9 +132,59 @@ export class TableComponent {
   activeDropdownKey: string | null = null;
   selectedRows = new Set<string>();
   showFilterDropdown: boolean = false;
-  activeView: string = 'list';
+  activeView: string = 'table';
 
   constructor(private eRef: ElementRef) {}
+
+  ngOnInit() {
+    // Synchronize activeView with currentView input
+    this.activeView = this.currentView === 'table' ? 'list' : this.currentView;
+
+    // Set calendar events with a small delay to ensure component is ready
+    setTimeout(() => {
+      this.updateCalendarEvents();
+    }, 100);
+  }
+
+  ngOnChanges() {
+    // Update activeView when currentView input changes
+    this.activeView = this.currentView === 'table' ? 'list' : this.currentView;
+
+    // Update calendar events when calendarEvents input changes
+    this.updateCalendarEvents();
+  }
+
+  private updateCalendarEvents() {
+    let eventsToSet: any[] = [];
+
+    if (this.calendarEvents && this.calendarEvents.length > 0) {
+      eventsToSet = this.calendarEvents;
+    } else {
+      // Default events if no custom events provided
+      eventsToSet = [
+        {
+          id: 'default-1',
+          title: 'leave 1',
+          date: '2025-05-01',
+          backgroundColor: '#12C16F',
+          borderColor: '#12C16F',
+        },
+        {
+          id: 'default-2',
+          title: 'leave 2',
+          date: '2025-05-15',
+          backgroundColor: '#12C16F',
+          borderColor: '#12C16F',
+        },
+      ];
+    }
+
+    // Update the events in the existing calendar options
+    this.calendarOptions = {
+      ...this.calendarOptions,
+      events: eventsToSet,
+    };
+  }
 
   getDropdownKey(employee: TableData, index: number): string {
     return `${employee.id}_${index}`;
@@ -214,109 +278,153 @@ export class TableComponent {
   toggleListCalendar(event: string) {
     if (event === 'list') {
       this.activeView = event;
-      this.showListCalendarClick.emit(event);
+      this.currentView = 'list';
+      this.viewChange.emit('list');
+    } else if (event === 'card') {
+      this.activeView = event;
+      this.currentView = 'card';
+      this.viewChange.emit('card');
     } else {
       this.activeView = event;
-      this.showListCalendarClick.emit(event);
+      this.currentView = 'calendar';
+      this.viewChange.emit('calendar');
     }
+  }
+
+  // Enhanced view switching for table, card, calendar, and list
+  switchView(viewType: 'table' | 'card' | 'calendar' | 'list') {
+    this.currentView = viewType;
+    this.activeView = viewType === 'table' ? 'list' : viewType;
+    this.viewChange.emit(viewType);
+  }
+
+  // Helper methods for card view styling
+  getFileTypeClass(fileType: string): string {
+    switch (fileType.toUpperCase()) {
+      case 'PDF':
+        return 'bg-red-100 text-red-800';
+      case 'DOC':
+      case 'DOCX':
+        return 'bg-blue-100 text-blue-800';
+      case 'XLS':
+      case 'XLSX':
+        return 'bg-green-100 text-green-800';
+      case 'JPG':
+      case 'JPEG':
+      case 'PNG':
+        return 'bg-purple-100 text-purple-800';
+      case 'MP4':
+      case 'AVI':
+      case 'MOV':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  getFileIconClass(fileType: string): string {
+    switch (fileType.toUpperCase()) {
+      case 'PDF':
+        return 'bg-red-500';
+      case 'DOC':
+      case 'DOCX':
+        return 'bg-blue-500';
+      case 'XLS':
+      case 'XLSX':
+        return 'bg-green-500';
+      case 'JPG':
+      case 'JPEG':
+      case 'PNG':
+        return 'bg-purple-500';
+      case 'MP4':
+      case 'AVI':
+      case 'MOV':
+        return 'bg-orange-500';
+      default:
+        return 'bg-gray-500';
+    }
+  }
+
+  // Card dropdown management
+  activeCardDropdownKey: string | null = null;
+
+  getCardDropdownKey(employee: TableData, index: number): string {
+    return `card_${employee.id}_${index}`;
+  }
+
+  toggleCardDropdown(employee: TableData, index: number): void {
+    const key = this.getCardDropdownKey(employee, index);
+    this.activeCardDropdownKey =
+      this.activeCardDropdownKey === key ? null : key;
+  }
+
+  handleCardAction(action: string, employee: TableData): void {
+    this.activeCardDropdownKey = null;
+    this.menuAction.emit({ action, row: employee });
   }
 
   calendarOptions: CalendarOptions = {
     //month view
     initialView: 'dayGridMonth',
     plugins: [dayGridPlugin, interactionPlugin],
-    // dateClick: (arg) => this.handleDateClick(arg),
     events: [
-      { title: 'leave 1', date: '2025-05-01' },
       {
-        title: 'leave 1',
-        editable: true,
-        date: '2025-05-15',
-        backgroundColor: '#12C16F',
-        borderColor: '#12C16F',
+        id: 'test-1',
+        title: 'Test Event 1',
+        date: '2025-06-15',
+        backgroundColor: '#10b981',
+        borderColor: '#10b981',
+        textColor: '#ffffff',
       },
       {
-        title: 'leave Opemipo',
-        date: '2025-05-20',
-        end: '2025-05-21',
-        editable: true,
+        id: 'test-2',
+        title: 'Test Event 2',
+        date: '2025-06-25',
+        backgroundColor: '#10b981',
+        borderColor: '#10b981',
+        textColor: '#ffffff',
       },
     ],
-    eventClick: function (info) {
-      alert('Event: ' + info.event.title);
+    eventClick: (info) => this.handleCalendarEventClick(info),
+    height: 600,
+    contentHeight: 600,
+    aspectRatio: 1.35,
+    dayMaxEvents: 3,
+    moreLinkClick: 'popover',
+    eventDisplay: 'block',
+    displayEventTime: false,
+    fixedWeekCount: true,
+    showNonCurrentDates: true,
+    dayHeaders: true,
+    dayHeaderFormat: { weekday: 'short' },
+    expandRows: true,
+    headerToolbar: {
+      left: 'prev,next',
+      center: 'title',
+      right: '',
     },
-    // week view,
-    // plugins: [dayGridPlugin],
-    // initialView: 'dayGridWeek',
-    // headerToolbar: {
-    //   left: 'prev,next',
-    //   center: 'title',
-    //   right: 'dayGridWeek,dayGridDay' // user can switch between the two
-    // }
-
-    //year view
-    // plugins: [dayGridPlugin],
-    // initialView: 'dayGridYear'
   };
 
-  handleDateClick(arg: DateClickArg) {
-    alert('date click! ' + arg.dateStr);
+  handleCalendarEventClick(info: any) {
+    if (this.customEventClick) {
+      this.customEventClick(info);
+    } else {
+      alert('Event: ' + info.event.title);
+    }
   }
-  //   onDateClick(date: { dateStr: string; }) {
-  //     this.modalRef = this.modalService.show(this.viewModal);
-  //     this.date = date.dateStr;
-  //   }
-
-  // createEvent() {
-  //     let newEvent = {
-  //       title: this.eventName,
-  //       date: this.date
-  //     };
-  //     this.newEvents.push(newEvent);
-  //     this.calendarOptions.events = [...this.newEvents];
-  //     this.eventName = "";
-  //   }
-
-  // handleEventClick(arg){
-  //     this.deleteEventTitle = arg.event._def.title;
-  //   }
-
-  //   deleteEvent(arg){
-  //     for (var i = 0; i < this.newEvents.length; i++) {
-  //       if (this.newEvents[i].title == this.deleteEventTitle) {
-  //         this.newEvents.splice(i, 1);
-  //         this.calendarOptions.events=[];
-  //         break;
-  //       }
-  //     }
-  //     this.calendarOptions.events = [...this.newEvents];
-  //   }
 
   viewDate: Date = new Date();
 
   events: CalendarEvent[] = [
     {
-      start: new Date(),
-      title: 'Today’s event',
-      color: { primary: '#1e90ff', secondary: '#D1E8FF' },
+      start: new Date('2025-06-15'),
+      title: 'Pre Camp Meeting',
+      color: { primary: '#10b981', secondary: '#D1E8FF' },
     },
     {
-      start: new Date('2025-05-23'),
-      title: 'Hello’s event',
-      color: { primary: '#1e90ff', secondary: '#D1E8FF' },
-    },
-    {
-      title: 'Editable event',
-      // color: colors.yellow,
-      start: new Date(),
-      actions: [
-        {
-          label: '<i class="fas fa-fw fa-pencil-alt"></i>',
-          onClick: ({ event }: { event: CalendarEvent }): void => {
-            console.log('Edit event', event);
-          },
-        },
-      ],
+      start: new Date('2025-06-25'),
+      title: 'Camp Meeting Coordination',
+      color: { primary: '#10b981', secondary: '#D1E8FF' },
     },
   ];
 

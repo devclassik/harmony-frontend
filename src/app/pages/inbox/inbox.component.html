@@ -1,0 +1,370 @@
+<div class="flex h-screen bg-gray-50">
+  <!-- Left Sidebar - Inbox List -->
+  <div class="w-96 bg-white border-r border-gray-200 flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+      <div class="flex items-center gap-2">
+        <h1 class="text-xl font-semibold text-gray-900">Inbox</h1>
+        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full"
+          >{{ getUnreadCount() }} Unread</span
+        >
+      </div>
+      <div class="relative" (clickOutside)="showFilterDropdown = false">
+        <button
+          class="text-gray-400 hover:text-gray-600 p-1"
+          (click)="toggleFilterDropdown()"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polygon
+              points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"
+            ></polygon>
+          </svg>
+        </button>
+
+        <!-- Filter Dropdown -->
+        <div
+          *ngIf="showFilterDropdown"
+          class="absolute right-0 mt-2 w-32 bg-white rounded-lg border border-gray-200 shadow-lg z-50"
+        >
+          <div class="py-1">
+            <button
+              class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+              [class.bg-blue-50]="currentFilter === 'all'"
+              [class.text-blue-600]="currentFilter === 'all'"
+              (click)="selectFilter('all')"
+            >
+              All
+            </button>
+            <button
+              class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+              [class.bg-blue-50]="currentFilter === 'unread'"
+              [class.text-blue-600]="currentFilter === 'unread'"
+              (click)="selectFilter('unread')"
+            >
+              Unread
+            </button>
+            <button
+              class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+              [class.bg-blue-50]="currentFilter === 'recent'"
+              [class.text-blue-600]="currentFilter === 'recent'"
+              (click)="selectFilter('recent')"
+            >
+              Recent
+            </button>
+            <button
+              class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+              [class.bg-blue-50]="currentFilter === 'oldest'"
+              [class.text-blue-600]="currentFilter === 'oldest'"
+              (click)="selectFilter('oldest')"
+            >
+              Oldest
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="p-4 border-b border-gray-100">
+      <div class="relative">
+        <svg
+          class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input
+          type="text"
+          placeholder="Search"
+          class="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Inbox List -->
+    <div class="flex-1 overflow-y-auto">
+      <div
+        *ngFor="let item of filteredItems"
+        class="flex items-start gap-3 p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer"
+        [class.bg-blue-50]="selectedItem === item.id"
+        (click)="selectItem(item.id)"
+      >
+        <div class="flex items-center gap-3 flex-1">
+          <div
+            class="w-2 h-2 rounded-full flex-shrink-0"
+            [class.bg-green-500]="!item.isRead"
+            [class.bg-transparent]="item.isRead"
+          ></div>
+          <img
+            [src]="item.profileImage"
+            [alt]="item.sender"
+            class="w-10 h-10 rounded-full flex-shrink-0"
+          />
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-medium text-gray-900 text-sm">{{
+                item.sender
+              }}</span>
+              <span class="text-xs text-gray-500">{{ item.time }}</span>
+            </div>
+            <p class="font-medium text-gray-900 text-sm mb-1">
+              {{ item.subject }}
+            </p>
+            <p class="text-xs text-gray-600 line-clamp-2">{{ item.preview }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side - Message Content -->
+  <div class="flex-1 flex flex-col">
+    <div *ngIf="!selectedItem" class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <div
+          class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            class="text-gray-400"
+          >
+            <path
+              d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+            ></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          Select an item to read
+        </h3>
+        <p class="text-sm text-gray-500">Nothing is selected.</p>
+      </div>
+    </div>
+
+    <div *ngIf="selectedItem" class="flex-1 flex flex-col">
+      <!-- Message Header -->
+      <div class="border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <button class="p-2 hover:bg-gray-100 rounded-lg" (click)="goBack()">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+            <h2 class="text-xl font-semibold text-gray-900">
+              {{ getSelectedItemTitle() }}
+            </h2>
+          </div>
+          <div class="flex items-center gap-4 text-sm text-gray-500">
+            <span
+              >{{ getSelectedItemIndex() }} of {{ filteredItems.length }}</span
+            >
+            <div class="flex items-center gap-1">
+              <button
+                class="p-1 hover:bg-gray-100 rounded"
+                [disabled]="!hasPrevious()"
+                (click)="selectPrevious()"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+              <button
+                class="p-1 hover:bg-gray-100 rounded"
+                [disabled]="!hasNext()"
+                (click)="selectNext()"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message Content -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="max-w-4xl mx-auto p-6">
+          <!-- Sender Info -->
+          <div class="flex items-start gap-4 mb-6">
+            <img
+              [src]="getSelectedItem()?.profileImage"
+              [alt]="getSelectedItem()?.sender"
+              class="w-12 h-12 rounded-full flex-shrink-0"
+            />
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="font-semibold text-gray-900">
+                  {{ getSelectedItem()?.sender }}
+                </h3>
+                <span class="text-sm text-gray-500">admin&#64;weca.org</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-gray-500">
+                <span>To: Me</span>
+                <span>•</span>
+                <span
+                  >{{ getSelectedItem()?.time }} {{ getCurrentDate() }}</span
+                >
+              </div>
+            </div>
+            <button class="p-2 hover:bg-gray-100 rounded-lg">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zM12 13a1 1 0 110-2 1 1 0 010 2zM12 20a1 1 0 110-2 1 1 0 010 2z"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Message Body -->
+          <div class="mb-6">
+            <p class="text-gray-900 leading-relaxed">Hi John,</p>
+            <br />
+            <div class="prose prose-gray max-w-none">
+              <p>{{ getSelectedItemContent() }}</p>
+              <br />
+              <p>Thanks and best regards,<br />HR Admin.</p>
+            </div>
+          </div>
+
+          <!-- Attachments Section -->
+          <div *ngIf="hasAttachments()" class="border-t border-gray-200 pt-6">
+            <h4 class="text-lg font-semibold text-gray-900 mb-4">
+              Attachments
+            </h4>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div
+                *ngFor="let attachment of getAttachments()"
+                class="border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors"
+              >
+                <!-- Document Preview -->
+                <div
+                  class="aspect-[4/5] bg-gray-50 rounded-lg mb-2 flex items-center justify-center max-w-[120px] mx-auto"
+                >
+                  <div class="text-center">
+                    <div
+                      class="w-8 h-10 mx-auto mb-1 bg-red-500 rounded flex items-center justify-center"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="white"
+                      >
+                        <path
+                          d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                        />
+                      </svg>
+                    </div>
+                    <div class="text-xs text-gray-600">PDF</div>
+                  </div>
+                </div>
+
+                <!-- Document Info -->
+                <div class="space-y-1">
+                  <h5 class="font-medium text-gray-900 text-xs truncate">
+                    {{ attachment.name }}
+                  </h5>
+                  <div class="text-xs text-gray-500 mb-2">
+                    {{ attachment.size }}
+                  </div>
+                  <div class="flex items-center justify-center gap-1">
+                    <button
+                      class="flex items-center gap-1 px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded"
+                      (click)="viewAttachment(attachment)"
+                    >
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                        />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                      <span>View</span>
+                    </button>
+                    <button
+                      class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50 rounded"
+                      (click)="downloadAttachment(attachment)"
+                    >
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7,10 12,15 17,10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                      <span>Download</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Document Viewer Modal -->
+<app-document-viewer
+  [isVisible]="showDocumentPreview"
+  [document]="selectedDocumentData"
+  (close)="closeDocumentPreview()"
+  (download)="onDocumentDownload($event)"
+></app-document-viewer>

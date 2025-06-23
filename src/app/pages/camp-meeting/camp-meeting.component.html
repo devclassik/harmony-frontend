@@ -1,0 +1,46 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="mb-8 rounded-lg bg-white p-6 shadow-sm">
+      <h1 class="text-2xl font-semibold text-gray-900">Camp Meeting</h1>
+      <p class="text-gray-600">View and manage camp meeting schedules</p>
+    </div>
+
+    <!-- Calendar Container -->
+    <div class="rounded-lg bg-white p-6 shadow-sm">
+      <app-table
+        [tableTitle]="'Camp Meeting Calendar'"
+        [currentView]="'calendar'"
+        [showSearch]="false"
+        [showFilter]="false"
+        [showStatusTab]="false"
+        [showPagination]="false"
+        [showButton]="false"
+        [showViewAll]="false"
+        [showSelectCheckbox]="false"
+        [tableData]="[]"
+        [calendarEvents]="campMeetingCalendarEvents"
+        [customEventClick]="handleCalendarEventClick"
+        (menuAction)="onTableMenuAction($event)"
+      ></app-table>
+    </div>
+  </div>
+
+  <!-- Camp Meeting Details using Leave Details Component -->
+  <app-leave-details
+    [view]="showSlideIn"
+    [leaveData]="getMeetingAsLeaveData()"
+    [title]="'Pre Campmeeting Information'"
+    [leaveType]="'Camp Meeting'"
+    [totalLeaveDays]="0"
+    [showRequestType]="false"
+    [showDuration]="false"
+    [showLocation]="false"
+    [showEndDate]="false"
+    [showSubstitution]="false"
+    [showAttendees]="true"
+    [showDocuments]="true"
+    [isCampMeeting]="true"
+    (close)="onSlideInClose()"
+  ></app-leave-details>
+</div>
