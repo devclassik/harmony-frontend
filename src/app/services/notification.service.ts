@@ -56,7 +56,6 @@ export class NotificationService {
 
     const totalUnreadCount = unreadInboxCount + unreadNotificationsCount;
 
-
     this.unreadCountSubject.next(totalUnreadCount);
 
     // Save to localStorage whenever items change
