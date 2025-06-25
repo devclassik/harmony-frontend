@@ -1,19 +1,70 @@
-.active-link {
-  background-color: #12C16F;
-  color: white;
-}
-.active-link-child {
-  color: #12C16F;
-  
+/* Default styling for menu items - gray color for icons and text */
+.menu-item a,
+.menu-item button {
+  color: #9b9b9b;
 }
 
-.menu-item a:hover {
-  background-color: #12C16F;
+.menu-item a mat-icon,
+.menu-item button mat-icon {
+  color: #9b9b9b;
+}
+
+/* Active state - should behave like hover (green background, white text/icons) */
+.active-link {
+  background-color: #12c16f !important;
+  color: white !important;
+}
+
+.active-link mat-icon {
+  color: white !important;
+}
+
+/* Parent menu with active children - green background with white text/icons */
+.menu-item button.bg-\[#12C16F\] {
+  background-color: #12c16f !important;
+  color: white !important;
+}
+
+.menu-item button.bg-\[#12C16F\] mat-icon {
+  color: white !important;
+}
+
+/* Alternative selector for parent menus with active children */
+.menu-item button[class*="bg-[#12C16F]"] {
+  background-color: #12c16f !important;
+  color: white !important;
+}
+
+.menu-item button[class*="bg-[#12C16F]"] mat-icon {
+  color: white !important;
+}
+
+/* Sub-menu active state - green text and dots, no background */
+.active-link-child {
+  color: #12c16f !important;
+}
+
+/* Sub-menu hover state - only green text, no background */
+.menu-item .ml-4 a:hover {
+  background-color: transparent !important;
+  color: #12c16f !important;
+}
+
+/* Main menu hover state */
+.menu-item a:hover:not(.ml-4 a) {
+  background-color: #12c16f;
+  color: white;
+}
+
+.menu-item a:hover:not(.ml-4 a) mat-icon {
   color: white;
 }
 
 .menu-item button:hover {
-  background-color: #12C16F;
+  background-color: #12c16f;
   color: white;
 }
-  
+
+.menu-item button:hover mat-icon {
+  color: white;
+}
