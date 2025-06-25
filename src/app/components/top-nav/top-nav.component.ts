@@ -10,7 +10,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 import { AuthService } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
+import {
+  NotificationService,
+  NotificationItem,
+} from '../../services/notification.service';
 import { ConfirmPromptComponent } from '../confirm-prompt/confirm-prompt.component';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
@@ -36,6 +39,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
   notifying = false;
   messages = false;
   showLogoutConfirm = false;
+  showNotificationDropdown = false;
 
   @Output() sidebarToggleEvent = new EventEmitter<void>();
 
@@ -46,6 +50,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
   pageTitle = '';
 
   private subscriptions: Subscription[] = [];
+  notifications: NotificationItem[] = [];
 
   constructor(
     private authService: AuthService,
@@ -57,6 +62,9 @@ export class TopNavComponent implements OnInit, OnDestroy {
     this.loadUserInfo();
     this.trackRouteChanges();
     this.updatePageTitle();
+
+    // Load notifications on init
+    this.loadRecentNotifications();
 
     // Subscribe to unread inbox count for mail icon
     this.subscriptions.push(
@@ -177,15 +185,41 @@ export class TopNavComponent implements OnInit, OnDestroy {
     this.notifying = false;
   }
 
-  navigateToInbox() {
-    this.router.navigate(['/inbox']);
+  toggleNotificationDropdown() {
+    this.showNotificationDropdown = !this.showNotificationDropdown;
+  }
+
+  closeNotificationDropdown() {
+    this.showNotificationDropdown = false;
+  }
+
+  loadRecentNotifications() {
+    this.subscriptions.push(
+      this.notificationService.getNotifications().subscribe((notifications) => {
+        this.notifications = notifications;
+      })
+    );
+  }
+
+  getRecentNotifications() {
+    // Return only the first 5 notifications for the dropdown
+    return this.notifications.slice(0, 5);
+  }
+
+  getUnreadNotificationsCount(): number {
+    return this.notifications.filter((n) => !n.isRead).length;
+  }
+
+  markNotificationAsRead(notificationId: number) {
+    this.notificationService.markNotificationAsRead(notificationId);
   }
 
   navigateToNotifications() {
+    this.closeNotificationDropdown();
     this.router.navigate(['/notifications']);
   }
 
-  markMessagesAsRead() {
+  navigateToInbox() {
     this.router.navigate(['/inbox']);
   }
 }

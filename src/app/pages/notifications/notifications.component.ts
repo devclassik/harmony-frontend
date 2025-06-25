@@ -1,36 +1,35 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  TableComponent,
-  TableHeader,
-} from '../../components/table/table.component';
+import { FormsModule } from '@angular/forms';
+import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 import {
   NotificationService,
   NotificationItem,
 } from '../../services/notification.service';
-import { TableData } from '../../interfaces/employee.interface';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, TableComponent],
+  imports: [CommonModule, FormsModule, ClickOutsideDirective],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.css',
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
   notifications: NotificationItem[] = [];
-  tableData: TableData[] = [];
-  filteredTableData: TableData[] = [];
+  filteredNotifications: NotificationItem[] = [];
   currentPage: number = 1;
   pageSize: number = 10;
   totalPages: number = 1;
   searchTerm: string = '';
-  showFilterDropdown: boolean = false;
   currentFilter: 'all' | 'unread' | 'recent' = 'all';
+  showFilterDropdown: boolean = false;
 
-  // Table configuration
-  tableHeaders: TableHeader[] = []; // Not needed for list view
+  filterTabs = [
+    { label: 'All', value: 'all' },
+    { label: 'Unread', value: 'unread' },
+    { label: 'Recent', value: 'recent' },
+  ];
 
   private subscriptions: Subscription[] = [];
 
@@ -45,38 +44,24 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   loadNotifications() {
-    // Subscribe to notifications from the service
     this.subscriptions.push(
       this.notificationService.getNotifications().subscribe((notifications) => {
         this.notifications = notifications;
-        this.convertToTableData();
         this.applyFilter();
       })
     );
   }
 
-  convertToTableData() {
-    this.tableData = this.notifications.map((notification) => ({
-      id: notification.id.toString(),
-      name: notification.user.name,
-      imageUrl: notification.user.image,
-      type: notification.type,
-      message: notification.message,
-      targetUser: notification.targetUser,
-      timestamp: notification.timestamp,
-      isRead: notification.isRead,
-      user: notification.user,
-    }));
-  }
-
   applyFilter() {
-    let filtered = [...this.tableData];
+    let filtered = [...this.notifications];
 
     // Apply search filter
     if (this.searchTerm) {
       filtered = filtered.filter(
         (item) =>
-          item.name?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          item.user.name
+            ?.toLowerCase()
+            .includes(this.searchTerm.toLowerCase()) ||
           item.type?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
           item.targetUser?.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
@@ -88,31 +73,35 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         filtered = filtered.filter((item) => !item.isRead);
         break;
       case 'recent':
-        filtered = filtered.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+        filtered = filtered.sort((a, b) => b.id - a.id);
         break;
       default:
         // 'all' - no additional filtering
         break;
     }
 
-    this.filteredTableData = filtered;
-    this.totalPages = Math.ceil(this.filteredTableData.length / this.pageSize);
+    this.filteredNotifications = filtered;
+    this.totalPages = Math.ceil(
+      this.filteredNotifications.length / this.pageSize
+    );
     this.currentPage = 1; // Reset to first page when filtering
   }
 
-  getPaginatedData(): TableData[] {
+  get paginatedNotifications(): NotificationItem[] {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    return this.filteredTableData.slice(startIndex, endIndex);
+    return this.filteredNotifications.slice(startIndex, endIndex);
   }
 
-  onSearch(searchValue: string) {
-    this.searchTerm = searchValue;
+  onSearch(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.searchTerm = target.value;
     this.applyFilter();
   }
 
   onFilterChange(filter: string) {
     this.currentFilter = filter as 'all' | 'unread' | 'recent';
+    this.showFilterDropdown = false; // Close dropdown after selection
     this.applyFilter();
   }
 
@@ -122,23 +111,19 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onMenuAction(event: { action: string; row: TableData }) {
-    if (event.action === 'markAsRead') {
-      this.markAsRead(parseInt(event.row.id));
-    }
+  toggleFilter() {
+    this.showFilterDropdown = !this.showFilterDropdown;
+  }
+
+  closeFilterDropdown() {
+    this.showFilterDropdown = false;
   }
 
   markAsRead(notificationId: number) {
-    // Use the service to mark as read, which will automatically update the unread count
     this.notificationService.markNotificationAsRead(notificationId);
   }
 
   getUnreadCount(): number {
     return this.notifications.filter((n) => !n.isRead).length;
-  }
-
-  // Override the table data to return paginated data
-  get paginatedTableData(): TableData[] {
-    return this.getPaginatedData();
   }
 }

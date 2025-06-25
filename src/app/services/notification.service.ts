@@ -36,6 +36,10 @@ export class NotificationService {
   private unreadCountSubject = new BehaviorSubject<number>(0);
 
   constructor() {
+    // Clear localStorage for testing - remove this in production
+    localStorage.removeItem(this.NOTIFICATIONS_STORAGE_KEY);
+    localStorage.removeItem(this.INBOX_STORAGE_KEY);
+
     // Load data from localStorage or use default mock data
     this.loadInboxItems();
     this.loadNotifications();
@@ -145,65 +149,101 @@ export class NotificationService {
       {
         id: 2,
         user: {
-          name: 'Jane Adesanya',
+          name: 'Michael Johnson',
           image: './assets/svg/profilePix.svg',
         },
-        type: 'Promotion Request',
-        message: 'submitted a promotion request to',
+        type: 'Leave Request',
+        message: 'submitted a leave request for approval to',
         targetUser: 'John Adegoke',
-        timestamp: '26-07-2024',
+        timestamp: '27-07-2024',
         isRead: false,
       },
       {
         id: 3,
         user: {
-          name: 'Jane Adesanya',
+          name: 'Sarah Williams',
           image: './assets/svg/profilePix.svg',
         },
-        type: 'Promotion Request',
-        message: 'submitted a promotion request to',
+        type: 'Transfer Request',
+        message: 'submitted a transfer request to',
         targetUser: 'John Adegoke',
-        timestamp: '26-07-2024',
+        timestamp: '25-07-2024',
         isRead: false,
       },
       {
         id: 4,
         user: {
-          name: 'Jane Adesanya',
+          name: 'David Brown',
           image: './assets/svg/profilePix.svg',
         },
-        type: 'Promotion Request',
-        message: 'submitted a promotion request to',
+        type: 'Sick Leave Request',
+        message: 'submitted a sick leave request to',
         targetUser: 'John Adegoke',
-        timestamp: '26-07-2024',
+        timestamp: '28-07-2024',
         isRead: false,
       },
       {
         id: 5,
         user: {
-          name: 'Jane Adesanya',
+          name: 'Emily Davis',
           image: './assets/svg/profilePix.svg',
         },
-        type: 'Promotion Request',
-        message: 'submitted a promotion request to',
+        type: 'Annual Leave Request',
+        message: 'submitted an annual leave request to',
         targetUser: 'John Adegoke',
-        timestamp: '26-07-2024',
-        isRead: true,
+        timestamp: '29-07-2024',
+        isRead: false,
       },
       {
         id: 6,
         user: {
-          name: 'Jane Adesanya',
+          name: 'Robert Wilson',
           image: './assets/svg/profilePix.svg',
         },
-        type: 'Promotion Request',
-        message: 'submitted a promotion request to',
+        type: 'Overtime Request',
+        message: 'submitted an overtime request to',
         targetUser: 'John Adegoke',
-        timestamp: '26-07-2024',
-        isRead: true,
+        timestamp: '30-07-2024',
+        isRead: false,
       },
       {
         id: 7,
+        user: {
+          name: 'Lisa Anderson',
+          image: './assets/svg/profilePix.svg',
+        },
+        type: 'Training Request',
+        message: 'submitted a training request to',
+        targetUser: 'John Adegoke',
+        timestamp: '31-07-2024',
+        isRead: false,
+      },
+      {
+        id: 8,
+        user: {
+          name: 'James Taylor',
+          image: './assets/svg/profilePix.svg',
+        },
+        type: 'Disciplinary Appeal',
+        message: 'submitted a disciplinary appeal to',
+        targetUser: 'John Adegoke',
+        timestamp: '01-08-2024',
+        isRead: false,
+      },
+      {
+        id: 9,
+        user: {
+          name: 'Maria Garcia',
+          image: './assets/svg/profilePix.svg',
+        },
+        type: 'Accommodation Request',
+        message: 'submitted an accommodation request to',
+        targetUser: 'John Adegoke',
+        timestamp: '02-08-2024',
+        isRead: false,
+      },
+      {
+        id: 10,
         user: {
           name: 'Jane Adesanya',
           image: './assets/svg/profilePix.svg',

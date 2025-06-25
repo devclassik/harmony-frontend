@@ -13,6 +13,7 @@ import {
 import { TableData, EmployeeInfo } from '../../interfaces/employee.interface';
 import { DoughnutChartComponent } from '../../components/doughnut-chart/doughnut-chart.component';
 import { LeaveDetailsComponent } from '../../components/leave-details/leave-details.component';
+import { WelcomeScreenAnimationComponent } from '../../components/welcome-screen-animation/welcome-screen-animation.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,6 +26,7 @@ import { LeaveDetailsComponent } from '../../components/leave-details/leave-deta
     TableComponent,
     DoughnutChartComponent,
     LeaveDetailsComponent,
+    WelcomeScreenAnimationComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
@@ -34,10 +36,31 @@ export class DashboardComponent {
   currentUser: any;
   showLeaveDetails: boolean = false;
   selectedLeaveData: TableData | null = null;
+  showWelcomeAnimation: boolean = false;
 
   constructor(private authService: AuthService) {
     this.userRole = this.authService.getUserRole();
     this.currentUser = this.authService.getCurrentUser();
+
+    // Show welcome animation for user role only
+    if (this.userRole === 'user') {
+      this.showWelcomeAnimation = true;
+    }
+  }
+
+  // Get user's name from auth service
+  getUserName(): string {
+    if (this.currentUser && this.currentUser.fullName) {
+      return this.currentUser.fullName;
+    } else if (this.currentUser && this.currentUser.name) {
+      return this.currentUser.name;
+    }
+    return 'User';
+  }
+
+  // Method to close welcome animation
+  onWelcomeAnimationClose() {
+    this.showWelcomeAnimation = false;
   }
 
   // Mock employee data for user dashboard
