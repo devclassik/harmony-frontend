@@ -1,4 +1,4 @@
-<div class="flex flex-col h-screen bg-gray-50">
+<div class="flex flex-col">
   <!-- Header -->
   <div class="bg-white border-b border-gray-200 px-6 py-4">
     <div class="flex items-center justify-between">
@@ -84,7 +84,7 @@
   </div>
 
   <!-- Content -->
-  <div class="flex-1 px-6 py-6">
+  <div class="flex-1 px-6 py-6 rounded-lg mt-2 border border-gray-200">
     <!-- Notifications Grid -->
     <div class="space-y-4">
       <div
@@ -93,21 +93,18 @@
         (click)="markAsRead(notification.id)"
       >
         <div class="flex items-start gap-4">
-          <!-- Unread Indicator -->
           <div
             class="w-2 h-2 rounded-full mt-2 flex-shrink-0"
             [class.bg-green-500]="!notification.isRead"
             [class.bg-transparent]="notification.isRead"
           ></div>
 
-          <!-- Profile Image -->
           <img
             [src]="notification.user.image"
             [alt]="notification.user.name"
             class="w-12 h-12 rounded-full flex-shrink-0"
           />
 
-          <!-- Content -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-1 text-sm">
