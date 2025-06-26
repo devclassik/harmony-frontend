@@ -40,7 +40,7 @@
   </div>
 
   <!-- User Dashboard View -->
-  <div *ngIf="userRole === 'user'" class="p-8 bg-white min-h-screen">
+  <div *ngIf="userRole === 'user'" class="py-4 bg-white min-h-screen">
     <!-- Greeting Section -->
 
     <app-dashboard-greetings
@@ -51,11 +51,13 @@
     ></app-dashboard-greetings>
 
     <!-- Employee Information Section -->
-    <app-dashboard-information
-      [title]="'Employee Information'"
-      [employeeData]="employeeInfo"
-      [personalTitle]="'Mr.'"
-    ></app-dashboard-information>
+    <div class="py-4">
+      <app-dashboard-information
+        [title]="'Employee Information'"
+        [employeeData]="employeeInfo"
+        [personalTitle]="'Mr.'"
+      ></app-dashboard-information>
+    </div>
 
     <app-table
       [tableTitle]="'Leave Requests'"
