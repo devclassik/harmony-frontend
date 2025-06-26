@@ -24,6 +24,7 @@ import { PayrollComponent } from './pages/payroll/payroll.component';
 import { CampMeetingComponent } from './pages/camp-meeting/camp-meeting.component';
 import { InboxComponent } from './pages/inbox/inbox.component';
 import { NotificationsComponent } from './pages/notifications/notifications.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
@@ -59,6 +60,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
+      {
+        path: 'profile',
+        component: ProfileComponent,
+        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+      },
       {
         path: 'employee-records',
         component: EmployeeRecordsComponent,

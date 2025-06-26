@@ -28,7 +28,6 @@ import { ConfirmPromptComponent } from '../confirm-prompt/confirm-prompt.compone
     ConfirmPromptComponent,
   ],
   templateUrl: './side-bar.component.html',
-  styleUrl: './side-bar.component.css',
 })
 export class SideBarComponent implements OnInit {
   @Input() sidebarToggle = false;
