@@ -5,33 +5,23 @@
   </div>
 
   <div class="mx-6 mb-2 flex-1" style="height: calc(100vh - 140px)">
-    <div
-      class="bg-white rounded-lg w-full h-full flex items-center justify-center"
+    <app-table
+      [tableData]="[]"
+      [emptyStateImage]="emptyStateImage"
+      [emptyStateText]="emptyStateText"
+      [showButton]="true"
+      [showButtonText]="showButtonText"
+      [showButtonIcon]="showButtonIcon"
+      [showButtonStyle]="showButtonStyle"
+      [showSearch]="false"
+      [showFilter]="false"
+      [showStatusTab]="false"
+      [showPagination]="false"
+      [showViewAll]="false"
+      [currentView]="'table'"
+      (showButtonActionClick)="onButtonClick($event)"
+      class="h-full"
     >
-      <!-- Centered Content Container -->
-      <div class="flex flex-col items-center text-center">
-        <!-- Sad Face Icon -->
-        <div class="mb-2">
-          <img
-            src="assets/animations/profile.gif"
-            alt="Profile Icon"
-            class="w-32 h-32"
-          />
-        </div>
-
-        <!-- Message -->
-        <h2 class="text-base font-medium text-gray-500 mb-8">
-          No Data Currently Available
-        </h2>
-
-        <!-- Create Profile Button -->
-        <button
-          (click)="onCreateProfile()"
-          class="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F] text-white font-medium px-8 py-3 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#12C16F] focus:ring-offset-2"
-        >
-          Create Profile
-        </button>
-      </div>
-    </div>
+    </app-table>
   </div>
 </div>

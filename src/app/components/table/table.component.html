@@ -462,7 +462,7 @@
   >
     <div
       *ngFor="let item of tableData; let i = index"
-      class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6"
+      class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer"
     >
       <!-- Document Preview -->
       <div
@@ -498,7 +498,7 @@
           </span>
           <div class="relative">
             <button
-              class="text-gray-400 hover:text-gray-500 p-1 rounded-full hover:bg-gray-100"
+              class="text-gray-400 hover:text-gray-500 p-1 rounded-full hover:bg-gray-100 cursor-pointer"
               (click)="toggleCardDropdown(item, i)"
             >
               <svg
@@ -521,7 +521,7 @@
                 <button
                   *ngFor="let menuItem of menuItems"
                   (click)="handleCardAction(menuItem.action, item)"
-                  class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left cursor-pointer"
                 >
                   <svg
                     width="14"
@@ -640,7 +640,9 @@
     </ng-template>
   </div>
 
-  <div class="flex flex-col md:flex-row md:items-center md:justify-end gap-2">
+  <div
+    class="flex flex-col md:flex-row md:items-center md:justify-end gap-2 mt-6"
+  >
     <div
       *ngIf="showPagination"
       class="flex items-center gap-2 justify-center md:justify-end"

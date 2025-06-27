@@ -141,7 +141,8 @@ export class NotificationService {
           image: './assets/svg/profilePix.svg',
         },
         type: 'Promotion Request',
-        message: 'submitted a promotion request to',
+        message:
+          'submitted a promotion request with detailed explanation about career progression, achievements over the past three years, additional responsibilities taken on, and reasons for requesting advancement in the company hierarchy to',
         targetUser: 'John Adegoke',
         timestamp: '26-07-2024',
         isRead: false,

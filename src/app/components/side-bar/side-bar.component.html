@@ -1,6 +1,8 @@
 <aside
-  [ngClass]="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full'"
-  class="sidebar fixed left-0 top-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-[#FCFCFC] px-5 duration-300 ease-linear dark:border-gray-100 dark:bg-[#FCFCFC] lg:static lg:translate-x-0"
+  [ngClass]="sidebarToggle ? 'translate-x-0 lg:w-[80px]' : '-translate-x-full'"
+  class="sidebar fixed left-0 top-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-[#FCFCFC] duration-300 ease-linear dark:border-gray-100 dark:bg-[#FCFCFC] lg:static lg:translate-x-0"
+  [class.px-5]="!sidebarToggle"
+  [class.px-2]="sidebarToggle"
 >
   <!-- SIDEBAR HEADER -->
   <div
@@ -22,8 +24,8 @@
       </span>
 
       <img
-        class="logo-icon hover:cursor-pointer"
-        [ngClass]="sidebarToggle ? 'lg:block h-8' : 'hidden'"
+        class="logo-icon hover:cursor-pointer object-contain"
+        [ngClass]="sidebarToggle ? 'lg:block h-14 w-14 p-1' : 'hidden'"
         src="/assets/images/harmonyLogo.png"
         alt="Logo"
       />
@@ -37,17 +39,29 @@
   >
     <!-- Sidebar Menu -->
     <nav class="flex-1">
-      <ul class="mb-6 flex flex-col gap-4">
+      <ul class="mb-6 flex flex-col gap-2">
         <!-- Dashboard -->
         <li class="menu-item">
           <a
             routerLink="/dashboard"
             routerLinkActive="bg-[#12C16F] text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400"
+            [matTooltip]="sidebarToggle ? 'Dashboard' : ''"
+            [matTooltipPosition]="'right'"
+            [class]="
+              sidebarToggle
+                ? 'flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+                : 'flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+            "
           >
-            <mat-icon class="text-gray-400">dashboard</mat-icon>
-            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Dashboard</span>
+            <mat-icon [class]="sidebarToggle ? 'text-xl' : 'text-lg'"
+              >dashboard</mat-icon
+            >
+            <span
+              [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+              class="font-medium"
+              >Dashboard</span
+            >
           </a>
         </li>
 
@@ -57,10 +71,20 @@
             routerLink="/employee-records"
             routerLinkActive="bg-[#12C16F] text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400"
+            [matTooltip]="sidebarToggle ? 'Employee Record' : ''"
+            [matTooltipPosition]="'right'"
+            [class]="
+              sidebarToggle
+                ? 'flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+                : 'flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+            "
           >
-            <mat-icon class="text-gray-400">assignment</mat-icon>
-            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+            <mat-icon [class]="sidebarToggle ? 'text-xl' : 'text-lg'"
+              >assignment</mat-icon
+            >
+            <span
+              [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+              class="font-medium"
               >Employee Record</span
             >
           </a>
@@ -72,10 +96,20 @@
             routerLink="/reporting-and-analytics"
             routerLinkActive="bg-[#12C16F] text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400"
+            [matTooltip]="sidebarToggle ? 'Reporting & Analytics' : ''"
+            [matTooltipPosition]="'right'"
+            [class]="
+              sidebarToggle
+                ? 'flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+                : 'flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+            "
           >
-            <mat-icon class="text-gray-400">poll</mat-icon>
-            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+            <mat-icon [class]="sidebarToggle ? 'text-xl' : 'text-lg'"
+              >poll</mat-icon
+            >
+            <span
+              [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+              class="font-medium"
               >Reporting & Analytics</span
             >
           </a>
@@ -83,28 +117,28 @@
 
         <!-- Employee Management -->
         <li class="menu-item" *ngIf="canViewEmployeeManagement()">
-          <div class="flex flex-col">
+          <div *ngIf="!sidebarToggle" class="flex flex-col">
             <button
               (click)="toggleEmployeeMenu()"
-              class="flex items-center justify-between gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer"
+              class="flex items-center justify-between gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer transition-all duration-200"
               [ngClass]="{
                 'bg-[#12C16F] text-white': isEmployeeChildActive(),
                 'text-gray-400': !isEmployeeChildActive()
               }"
             >
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-3">
                 <mat-icon
+                  class="text-lg"
                   [ngClass]="{
                     'text-white': isEmployeeChildActive(),
                     'text-gray-400': !isEmployeeChildActive()
                   }"
                   >people</mat-icon
                 >
-                <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
-                  >Employee Management</span
-                >
+                <span class="font-medium">Employee Management</span>
               </div>
               <mat-icon
+                class="text-lg"
                 [ngClass]="{
                   'text-white': isEmployeeChildActive(),
                   'text-gray-400': !isEmployeeChildActive()
@@ -123,14 +157,14 @@
                 routerLink="employee-management/promotion"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
-                class="py-1 px-2 hover:text-[#12C16F] rounded-md"
+                class="py-2 px-3 hover:text-[#12C16F] rounded-lg transition-colors duration-200"
                 [ngClass]="{
                   'text-[#12C16F]': promotionLink.isActive,
                   'text-gray-400': !promotionLink.isActive
                 }"
                 #promotionLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-3"
                   [ngClass]="
                     promotionLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
                   "
@@ -141,14 +175,14 @@
                 routerLink="employee-management/discipline"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
-                class="py-1 px-2 hover:text-[#12C16F] rounded-md"
+                class="py-2 px-3 hover:text-[#12C16F] rounded-lg transition-colors duration-200"
                 [ngClass]="{
                   'text-[#12C16F]': disciplineLink.isActive,
                   'text-gray-400': !disciplineLink.isActive
                 }"
                 #disciplineLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-3"
                   [ngClass]="
                     disciplineLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
                   "
@@ -159,14 +193,14 @@
                 routerLink="employee-management/transfer"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
-                class="py-1 px-2 hover:text-[#12C16F] rounded-md"
+                class="py-2 px-3 hover:text-[#12C16F] rounded-lg transition-colors duration-200"
                 [ngClass]="{
                   'text-[#12C16F]': transferLink.isActive,
                   'text-gray-400': !transferLink.isActive
                 }"
                 #transferLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-3"
                   [ngClass]="
                     transferLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
                   "
@@ -177,14 +211,14 @@
                 routerLink="employee-management/retirement"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
-                class="py-1 px-2 hover:text-[#12C16F] rounded-md"
+                class="py-2 px-3 hover:text-[#12C16F] rounded-lg transition-colors duration-200"
                 [ngClass]="{
                   'text-[#12C16F]': retirementLink.isActive,
                   'text-gray-400': !retirementLink.isActive
                 }"
                 #retirementLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-3"
                   [ngClass]="
                     retirementLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
                   "
@@ -195,14 +229,14 @@
                 routerLink="employee-management/retrenchment"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
-                class="py-1 px-2 hover:text-[#12C16F] rounded-md"
+                class="py-2 px-3 hover:text-[#12C16F] rounded-lg transition-colors duration-200"
                 [ngClass]="{
                   'text-[#12C16F]': retrenchmentLink.isActive,
                   'text-gray-400': !retrenchmentLink.isActive
                 }"
                 #retrenchmentLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-3"
                   [ngClass]="
                     retrenchmentLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
                   "
@@ -211,32 +245,47 @@
               >
             </div>
           </div>
+
+          <!-- Collapsed state - just show icon with tooltip -->
+          <div
+            *ngIf="sidebarToggle"
+            class="flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200"
+            [ngClass]="{
+              'bg-[#12C16F] text-white': isEmployeeChildActive(),
+              'text-gray-400': !isEmployeeChildActive()
+            }"
+            [matTooltip]="'Employee Management'"
+            [matTooltipPosition]="'right'"
+            (click)="toggleEmployeeMenu()"
+          >
+            <mat-icon class="text-xl">people</mat-icon>
+          </div>
         </li>
 
         <!-- Leave Management -->
         <li class="menu-item" *ngIf="canViewLeaveManagement()">
-          <div class="flex flex-col">
+          <div *ngIf="!sidebarToggle" class="flex flex-col">
             <button
               (click)="toggleLeaveMenu()"
-              class="flex items-center justify-between gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer"
+              class="flex items-center justify-between gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer transition-all duration-200"
               [ngClass]="{
                 'bg-[#12C16F] text-white': isEmployeeLeaveChildActive(),
                 'text-gray-400': !isEmployeeLeaveChildActive()
               }"
             >
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-3">
                 <mat-icon
+                  class="text-lg"
                   [ngClass]="{
                     'text-white': isEmployeeLeaveChildActive(),
                     'text-gray-400': !isEmployeeLeaveChildActive()
                   }"
                   >event_note</mat-icon
                 >
-                <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
-                  >Leave Management</span
-                >
+                <span class="font-medium">Leave Management</span>
               </div>
               <mat-icon
+                class="text-lg"
                 [ngClass]="{
                   'text-white': isEmployeeLeaveChildActive(),
                   'text-gray-400': !isEmployeeLeaveChildActive()
@@ -253,14 +302,14 @@
                 routerLink="leave-management/annual-leave"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
-                class="py-1 px-2 hover:text-[#12C16F] rounded-md"
+                class="py-2 px-3 hover:text-[#12C16F] rounded-lg transition-colors duration-200"
                 [ngClass]="{
                   'text-[#12C16F]': annualLeaveLink.isActive,
                   'text-gray-400': !annualLeaveLink.isActive
                 }"
                 #annualLeaveLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-3"
                   [ngClass]="
                     annualLeaveLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
                   "
@@ -271,14 +320,14 @@
                 routerLink="leave-management/leave-of-absence"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
-                class="py-1 px-2 hover:text-[#12C16F] rounded-md"
+                class="py-2 px-3 hover:text-[#12C16F] rounded-lg transition-colors duration-200"
                 [ngClass]="{
                   'text-[#12C16F]': leaveOfAbsenceLink.isActive,
                   'text-gray-400': !leaveOfAbsenceLink.isActive
                 }"
                 #leaveOfAbsenceLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-3"
                   [ngClass]="
                     leaveOfAbsenceLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
                   "
@@ -289,14 +338,14 @@
                 routerLink="leave-management/sick-leave"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
-                class="py-1 px-2 hover:text-[#12C16F] rounded-md"
+                class="py-2 px-3 hover:text-[#12C16F] rounded-lg transition-colors duration-200"
                 [ngClass]="{
                   'text-[#12C16F]': sickLeaveLink.isActive,
                   'text-gray-400': !sickLeaveLink.isActive
                 }"
                 #sickLeaveLink="routerLinkActive"
                 ><span
-                  class="inline-block w-2 h-2 rounded-full mr-2"
+                  class="inline-block w-2 h-2 rounded-full mr-3"
                   [ngClass]="
                     sickLeaveLink.isActive ? 'bg-[#12C16F]' : 'bg-gray-400'
                   "
@@ -304,6 +353,21 @@
                 >Sick Leave</a
               >
             </div>
+          </div>
+
+          <!-- Collapsed state - just show icon with tooltip -->
+          <div
+            *ngIf="sidebarToggle"
+            class="flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200"
+            [ngClass]="{
+              'bg-[#12C16F] text-white': isEmployeeLeaveChildActive(),
+              'text-gray-400': !isEmployeeLeaveChildActive()
+            }"
+            [matTooltip]="'Leave Management'"
+            [matTooltipPosition]="'right'"
+            (click)="toggleLeaveMenu()"
+          >
+            <mat-icon class="text-xl">event_note</mat-icon>
           </div>
         </li>
 
@@ -313,10 +377,22 @@
             routerLink="/file-index"
             routerLinkActive="bg-[#12C16F] text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400"
+            [matTooltip]="sidebarToggle ? 'File Index' : ''"
+            [matTooltipPosition]="'right'"
+            [class]="
+              sidebarToggle
+                ? 'flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+                : 'flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+            "
           >
-            <mat-icon class="text-gray-400">insert_drive_file</mat-icon>
-            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">File Index</span>
+            <mat-icon [class]="sidebarToggle ? 'text-xl' : 'text-lg'"
+              >insert_drive_file</mat-icon
+            >
+            <span
+              [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+              class="font-medium"
+              >File Index</span
+            >
           </a>
         </li>
 
@@ -326,10 +402,20 @@
             routerLink="/camp-meeting"
             routerLinkActive="bg-[#12C16F] text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400"
+            [matTooltip]="sidebarToggle ? 'Camp Meeting' : ''"
+            [matTooltipPosition]="'right'"
+            [class]="
+              sidebarToggle
+                ? 'flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+                : 'flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+            "
           >
-            <mat-icon class="text-gray-400">event</mat-icon>
-            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+            <mat-icon [class]="sidebarToggle ? 'text-xl' : 'text-lg'"
+              >event</mat-icon
+            >
+            <span
+              [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+              class="font-medium"
               >Camp Meeting</span
             >
           </a>
@@ -341,10 +427,22 @@
             routerLink="/calendar"
             routerLinkActive="bg-[#12C16F] text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400"
+            [matTooltip]="sidebarToggle ? 'Calendar' : ''"
+            [matTooltipPosition]="'right'"
+            [class]="
+              sidebarToggle
+                ? 'flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+                : 'flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+            "
           >
-            <mat-icon class="text-gray-400">calendar_today</mat-icon>
-            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Calendar</span>
+            <mat-icon [class]="sidebarToggle ? 'text-xl' : 'text-lg'"
+              >calendar_today</mat-icon
+            >
+            <span
+              [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+              class="font-medium"
+              >Calendar</span
+            >
           </a>
         </li>
 
@@ -354,10 +452,22 @@
             routerLink="/payroll"
             routerLinkActive="bg-[#12C16F] text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400"
+            [matTooltip]="sidebarToggle ? 'Payroll' : ''"
+            [matTooltipPosition]="'right'"
+            [class]="
+              sidebarToggle
+                ? 'flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+                : 'flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+            "
           >
-            <mat-icon class="text-gray-400">account_balance_wallet</mat-icon>
-            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Payroll</span>
+            <mat-icon [class]="sidebarToggle ? 'text-xl' : 'text-lg'"
+              >account_balance_wallet</mat-icon
+            >
+            <span
+              [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+              class="font-medium"
+              >Payroll</span
+            >
           </a>
         </li>
 
@@ -367,10 +477,22 @@
             routerLink="/settings"
             routerLinkActive="bg-[#12C16F] text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400"
+            [matTooltip]="sidebarToggle ? 'Settings' : ''"
+            [matTooltipPosition]="'right'"
+            [class]="
+              sidebarToggle
+                ? 'flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+                : 'flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
+            "
           >
-            <mat-icon class="text-gray-400">settings</mat-icon>
-            <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''">Settings</span>
+            <mat-icon [class]="sidebarToggle ? 'text-xl' : 'text-lg'"
+              >settings</mat-icon
+            >
+            <span
+              [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+              class="font-medium"
+              >Settings</span
+            >
           </a>
         </li>
       </ul>
@@ -382,10 +504,23 @@
   <div class="border-t border-gray-200 pt-4 pb-4">
     <button
       (click)="logout()"
-      class="flex items-center gap-2 py-2 px-4 rounded-md hover:bg-red-50 hover:text-red-600 cursor-pointer w-full text-left transition-colors"
+      [matTooltip]="sidebarToggle ? 'Logout' : ''"
+      [matTooltipPosition]="'right'"
+      [class]="
+        sidebarToggle
+          ? 'flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-red-50 hover:text-red-600 cursor-pointer transition-all duration-200'
+          : 'flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-red-50 hover:text-red-600 cursor-pointer w-full text-left transition-all duration-200'
+      "
     >
-      <mat-icon class="text-red-500">logout</mat-icon>
-      <span [ngClass]="sidebarToggle ? 'lg:hidden' : ''" class="text-red-600"
+      <mat-icon
+        [class]="
+          sidebarToggle ? 'text-xl text-red-500' : 'text-lg text-red-500'
+        "
+        >logout</mat-icon
+      >
+      <span
+        [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
+        class="text-red-600 font-medium"
         >Logout</span
       >
     </button>

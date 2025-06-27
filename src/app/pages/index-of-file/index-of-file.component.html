@@ -5,8 +5,8 @@
       <button
         [class]="
           activeTab === 'documents'
-            ? 'text-[#12C16F] border-b-2 border-[#12C16F] pb-2'
-            : 'text-gray-500 pb-2'
+            ? 'text-[#12C16F] border-b-2 border-[#12C16F] pb-2 cursor-pointer'
+            : 'text-gray-500 pb-2 cursor-pointer'
         "
         class="flex items-center gap-2 text-sm font-medium transition-colors"
         (click)="switchToDocuments()"
@@ -21,8 +21,8 @@
       <button
         [class]="
           activeTab === 'training'
-            ? 'text-[#12C16F] border-b-2 border-[#12C16F] pb-2'
-            : 'text-gray-500 pb-2'
+            ? 'text-[#12C16F] border-b-2 border-[#12C16F] pb-2 cursor-pointer'
+            : 'text-gray-500 pb-2 cursor-pointer'
         "
         class="flex items-center gap-2 text-sm font-medium transition-colors"
         (click)="switchToTraining()"
@@ -178,193 +178,32 @@
       [showViewAll]="false"
       [currentPage]="currentPage"
       [totalPages]="totalPages"
+      [currentView]="'table'"
       (menuAction)="onMenuAction($event)"
       (pageChange)="onPageChange($event)"
     ></app-table>
   </div>
 
-  <!-- Card View -->
+  <!-- Card View using Table Component -->
   <div *ngIf="currentView === 'card'">
-    <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6"
-    >
-      <div
-        *ngFor="let item of paginatedEmployees; let i = index"
-        class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6"
-      >
-        <!-- Document Preview -->
-        <div
-          class="mb-4 h-48 bg-gray-100 rounded-lg flex items-center justify-center"
-        >
-          <div class="text-center">
-            <div
-              [class]="getFileIconClass(item.documentType || 'UNKNOWN')"
-              class="w-16 h-16 mx-auto mb-2 rounded-lg flex items-center justify-center"
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
-                <path
-                  d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
-                />
-              </svg>
-            </div>
-            <span class="text-xs text-gray-500">{{ item.documentType }}</span>
-          </div>
-        </div>
-
-        <!-- Document Info -->
-        <div class="space-y-2">
-          <h3 class="font-medium text-gray-900 text-sm">
-            {{ item.documentName }}
-          </h3>
-          <p class="text-xs text-gray-500">{{ item.date }}</p>
-          <div class="flex items-center justify-between pt-2">
-            <span
-              [class]="getFileTypeClass(item.documentType || 'UNKNOWN')"
-              class="px-2 py-1 text-xs font-medium rounded"
-            >
-              {{ item.documentType }}
-            </span>
-            <div class="relative">
-              <button
-                class="text-gray-400 hover:text-gray-500 p-1 rounded-full hover:bg-gray-100"
-                (click)="toggleCardDropdown(item, i)"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path
-                    d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z"
-                  />
-                </svg>
-              </button>
-              <!-- Dropdown Menu -->
-              <div
-                *ngIf="activeCardDropdownKey === getCardDropdownKey(item, i)"
-                class="absolute right-0 top-full mt-1 w-32 bg-white rounded-md shadow-lg z-20 border border-gray-100"
-              >
-                <div class="py-1">
-                  <button
-                    (click)="handleCardAction('View', item)"
-                    class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                  >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path
-                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                      ></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    View
-                  </button>
-                  <button
-                    (click)="handleCardAction('Download', item)"
-                    class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                  >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path
-                        d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
-                      ></path>
-                      <polyline points="7,10 12,15 17,10"></polyline>
-                      <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Download
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pagination for Card View -->
-    <div
-      class="flex flex-col md:flex-row md:items-center md:justify-end gap-2"
-      *ngIf="totalPages > 1"
-    >
-      <div class="flex items-center gap-2 justify-center md:justify-end">
-        <button
-          (click)="onPageChange(currentPage - 1)"
-          [disabled]="currentPage === 1"
-          class="px-2 py-1 rounded border border-gray-200 bg-white text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          &laquo;
-        </button>
-        <ng-container
-          *ngFor="let page of [].constructor(totalPages); let p = index"
-        >
-          <button
-            (click)="onPageChange(p + 1)"
-            [ngClass]="{
-              'bg-green-500 text-white': currentPage === p + 1,
-              'bg-white text-gray-700': currentPage !== p + 1
-            }"
-            class="px-2 py-1 rounded border border-gray-200 hover:bg-gray-50"
-          >
-            {{ p + 1 }}
-          </button>
-        </ng-container>
-        <button
-          (click)="onPageChange(currentPage + 1)"
-          [disabled]="currentPage === totalPages"
-          class="px-2 py-1 rounded border border-gray-200 bg-white text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          &raquo;
-        </button>
-      </div>
-    </div>
+    <app-table
+      [tableHeader]="tableHeader"
+      [tableData]="paginatedEmployees"
+      [menuItems]="actionButton"
+      [showFilter]="false"
+      [showSearch]="false"
+      [showPagination]="true"
+      [showViewAll]="false"
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      [currentView]="'card'"
+      (menuAction)="onMenuAction($event)"
+      (pageChange)="onPageChange($event)"
+    ></app-table>
   </div>
 </div>
 
-<!-- Modals remain the same -->
-<app-employee-details
-  [view]="showEmployeeDetails"
-  [showButton]="true"
-  [noButtonText]="'Reject'"
-  [yesButtonText]="'Accept'"
-  (confirm)="actionToPerform($event)"
-  (close)="showEmployeeDetails = false"
-  [employee]="selectedEmployeeRecord"
-></app-employee-details>
-
-<app-confirm-prompt
-  *ngIf="showModal"
-  [title]="promptConfig?.title || ''"
-  [text]="promptConfig?.text || ''"
-  [imageUrl]="promptConfig?.imageUrl || null"
-  [yesButtonText]="promptConfig?.yesButtonText || ''"
-  [noButtonText]="promptConfig?.noButtonText || ''"
-  (confirmed)="onModalConfirm($event)"
-  (closed)="onModalClose()"
-  [data]="selectedEmployeeRecord"
-></app-confirm-prompt>
-
-<app-success-modal
-  *ngIf="successModal"
-  [title]="'Operation Successful!'"
-  [showOkButton]="false"
-  [okButtonText]="'Click Ok'"
-  [okButtonLink]="'/dashboard'"
-  (closed)="successModal = false"
-></app-success-modal>
-
-<!-- Document Viewer Modal -->
+<!-- Document Viewer Modal - Only modal needed for document/file component -->
 <app-document-viewer
   [isVisible]="showDocumentViewer"
   [document]="selectedDocument"

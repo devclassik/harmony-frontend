@@ -3,7 +3,30 @@
 >
   <div class="flex grow items-center justify-between">
     <!-- Page Title -->
-    <div>
+    <div class="flex items-center gap-4">
+      <!-- Sidebar Toggle Button -->
+      <button
+        (click)="toggleSidebar()"
+        class="flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+        aria-label="Toggle sidebar"
+      >
+        <svg
+          class="fill-current"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M3 5C3 4.44772 3.44772 4 4 4H16C16.5523 4 17 4.44772 17 5C17 5.55228 16.5523 6 16 6H4C3.44772 6 3 5.55228 3 5ZM3 10C3 9.44772 3.44772 9 4 9H16C16.5523 9 17 9.44772 17 10C17 10.5523 16.5523 11 16 11H4C3.44772 11 3 10.5523 3 10ZM4 14C3.44772 14 3 14.4477 3 15C3 15.5523 3.44772 16 4 16H16C16.5523 16 17 15.5523 17 15C17 14.4477 16.5523 14 16 14H4Z"
+            fill=""
+          />
+        </svg>
+      </button>
+
       <h1 class="text-2xl font-bold text-black">{{ pageTitle }}</h1>
     </div>
 
@@ -42,7 +65,7 @@
       <!-- Notification Icon -->
       <div class="relative">
         <button
-          class="relative flex h-10 w-10 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 transition-colors"
+          class="relative flex h-10 w-10 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
           (click)="navigateToInbox()"
         >
           <span
@@ -74,7 +97,7 @@
       <!-- Bell Notification -->
       <div class="relative">
         <button
-          class="relative flex h-10 w-10 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 transition-colors"
+          class="relative flex h-10 w-10 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
           (click)="toggleNotificationDropdown()"
         >
           <span
@@ -168,9 +191,34 @@
                       <span class="font-medium">{{
                         notification.user.name
                       }}</span>
-                      <span> {{ notification.message }} </span>
-                      <span class="font-medium text-gray-900">
-                        {{ notification.targetUser }}.
+                      <span>
+                        <ng-container *ngIf="shouldShowTruncated(notification)">
+                          {{ getTruncatedMessage(notification) }}
+                          <button
+                            (click)="
+                              toggleNotificationExpansion(notification.id);
+                              $event.stopPropagation()
+                            "
+                            class="text-green-600 hover:text-green-700 font-medium ml-1"
+                          >
+                            View more
+                          </button>
+                        </ng-container>
+                        <ng-container
+                          *ngIf="!shouldShowTruncated(notification)"
+                        >
+                          {{ getFullMessage(notification) }}
+                          <button
+                            *ngIf="isNotificationExpanded(notification.id)"
+                            (click)="
+                              toggleNotificationExpansion(notification.id);
+                              $event.stopPropagation()
+                            "
+                            class="text-green-600 hover:text-green-700 font-medium ml-1"
+                          >
+                            View less
+                          </button>
+                        </ng-container>
                       </span>
                     </div>
                   </div>

@@ -59,8 +59,14 @@ export class SideBarComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent): void {
-    if (!this.el.nativeElement.contains(event.target)) {
-      this.sidebarToggle = false;
+    // Only handle click outside on mobile screens (below lg breakpoint)
+    // On desktop, the sidebar should only be toggled by the toggle button
+    if (window.innerWidth < 1024) {
+      // lg breakpoint in Tailwind is 1024px
+      const target = event.target as Element;
+      if (!this.el.nativeElement.contains(target)) {
+        this.sidebarToggle = false;
+      }
     }
   }
 

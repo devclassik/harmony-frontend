@@ -52,6 +52,10 @@ export class TopNavComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   notifications: NotificationItem[] = [];
 
+  // Notification truncation properties
+  expandedNotifications: Set<number> = new Set();
+  readonly MAX_MESSAGE_LENGTH = 100;
+
   constructor(
     private authService: AuthService,
     private router: Router,
@@ -221,5 +225,38 @@ export class TopNavComponent implements OnInit, OnDestroy {
 
   navigateToInbox() {
     this.router.navigate(['/inbox']);
+  }
+
+  // Notification message truncation methods
+  getFullMessage(notification: NotificationItem): string {
+    return `${notification.message} ${notification.targetUser}`;
+  }
+
+  shouldShowTruncated(notification: NotificationItem): boolean {
+    const fullMessage = this.getFullMessage(notification);
+    return (
+      fullMessage.length > this.MAX_MESSAGE_LENGTH &&
+      !this.expandedNotifications.has(notification.id)
+    );
+  }
+
+  getTruncatedMessage(notification: NotificationItem): string {
+    const fullMessage = this.getFullMessage(notification);
+    if (fullMessage.length <= this.MAX_MESSAGE_LENGTH) {
+      return fullMessage;
+    }
+    return fullMessage.substring(0, this.MAX_MESSAGE_LENGTH) + '...';
+  }
+
+  toggleNotificationExpansion(notificationId: number): void {
+    if (this.expandedNotifications.has(notificationId)) {
+      this.expandedNotifications.delete(notificationId);
+    } else {
+      this.expandedNotifications.add(notificationId);
+    }
+  }
+
+  isNotificationExpanded(notificationId: number): boolean {
+    return this.expandedNotifications.has(notificationId);
   }
 }

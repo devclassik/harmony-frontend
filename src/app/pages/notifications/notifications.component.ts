@@ -24,6 +24,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   currentFilter: 'all' | 'unread' | 'recent' = 'all';
   showFilterDropdown: boolean = false;
+  expandedNotifications: Set<number> = new Set(); // Track which notifications are expanded
 
   filterTabs = [
     { label: 'All', value: 'all' },
@@ -125,5 +126,29 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   getUnreadCount(): number {
     return this.notifications.filter((n) => !n.isRead).length;
+  }
+
+  // Method to get truncated message
+  getTruncatedMessage(message: string): string {
+    return message.length > 100 ? message.substring(0, 100) + '...' : message;
+  }
+
+  // Method to check if message needs truncation
+  shouldShowViewMore(message: string): boolean {
+    return message.length > 100;
+  }
+
+  // Method to toggle expanded state
+  toggleMessageExpansion(notificationId: number): void {
+    if (this.expandedNotifications.has(notificationId)) {
+      this.expandedNotifications.delete(notificationId);
+    } else {
+      this.expandedNotifications.add(notificationId);
+    }
+  }
+
+  // Method to check if notification is expanded
+  isNotificationExpanded(notificationId: number): boolean {
+    return this.expandedNotifications.has(notificationId);
   }
 }

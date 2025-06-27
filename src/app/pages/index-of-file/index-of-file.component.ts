@@ -6,25 +6,12 @@ import {
   TableComponent,
 } from '../../components/table/table.component';
 import { TableData } from '../../interfaces/employee.interface';
-import {
-  PromptConfig,
-  ConfirmPromptComponent,
-} from '../../components/confirm-prompt/confirm-prompt.component';
-import { SuccessModalComponent } from '../../components/success-modal/success-modal.component';
-import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
 import { DocumentViewerComponent } from '../../components/document-viewer/document-viewer.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-index-of-file',
-  imports: [
-    CommonModule,
-    SuccessModalComponent,
-    ConfirmPromptComponent,
-    EmployeeDetailsComponent,
-    TableComponent,
-    DocumentViewerComponent,
-  ],
+  imports: [CommonModule, TableComponent, DocumentViewerComponent],
   templateUrl: './index-of-file.component.html',
   styleUrl: './index-of-file.component.css',
 })
@@ -32,13 +19,6 @@ export class IndexOfFileComponent {
   selectedStatus: string = '';
   selectedFilter: string = '';
   searchValue: string = '';
-  showModal: boolean = false;
-  successModal: boolean = false;
-  selectedEmployee: TableData | null = null;
-  selectedEmployeeRecord: TableData | null = null;
-  promptConfig: PromptConfig | null = null;
-  showEmployeeDetails: boolean = false;
-  showAppraisal: boolean = false;
 
   // Document viewer properties
   showDocumentViewer: boolean = false;
@@ -201,6 +181,18 @@ export class IndexOfFileComponent {
       date: '06-10-2024',
       documentType: 'MP4',
     },
+    {
+      id: 'TR-445129',
+      documentName: 'Data Privacy Training',
+      date: '06-09-2024',
+      documentType: 'PDF',
+    },
+    {
+      id: 'TR-445130',
+      documentName: 'Emergency Procedures',
+      date: '06-08-2024',
+      documentType: 'DOC',
+    },
   ];
 
   employees: TableData[] = this.documentsData;
@@ -338,47 +330,7 @@ export class IndexOfFileComponent {
 
     if (event.action === 'View') {
       this.viewDocument(event.row);
-    } else {
-      // Handle other actions if needed
-      this.selectedEmployeeRecord = event.row;
     }
-  }
-
-  showEmployeeDetailsModal() {
-    this.showEmployeeDetails = true;
-  }
-
-  actionToPerform(result: boolean) {
-    if (result) {
-      this.promptConfig = {
-        title: 'Confirm',
-        text: 'Are you sure you want to approve this document request',
-        imageUrl: 'assets/svg/profilePix.svg',
-        yesButtonText: 'Yes',
-        noButtonText: 'No',
-      };
-      this.showModal = true;
-    } else {
-      this.promptConfig = {
-        title: 'Confirm',
-        text: 'Are you sure you want to reject this document request',
-        imageUrl: 'assets/svg/profilePix.svg',
-        yesButtonText: 'Yes',
-        noButtonText: 'No',
-      };
-      this.showModal = true;
-    }
-  }
-
-  onModalConfirm(confirmed: boolean) {
-    console.log(confirmed);
-    this.showModal = false;
-    this.showAppraisal = false;
-    this.successModal = true;
-  }
-
-  onModalClose() {
-    this.showModal = false;
   }
 
   // Dropdown management methods for custom table
@@ -528,14 +480,14 @@ export class IndexOfFileComponent {
 
   // Alternative method for API-based downloads
   downloadDocumentFromAPI(doc: TableData): void {
-    // This method would be used if you have a backend API endpoint for downloads
+    // Example implementation for API-based downloads
     const downloadUrl = `/api/documents/${doc.id}/download`;
 
-    // Using fetch for API calls
     fetch(downloadUrl, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${this.getAuthToken()}`, // If authentication is required
+        Authorization: `Bearer ${this.getAuthToken()}`,
+        'Content-Type': 'application/json',
       },
     })
       .then((response) => {
@@ -545,7 +497,7 @@ export class IndexOfFileComponent {
         return response.blob();
       })
       .then((blob) => {
-        // Create blob URL and download
+        // Create blob URL and trigger download
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -553,23 +505,20 @@ export class IndexOfFileComponent {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
-        // Clean up the blob URL
         window.URL.revokeObjectURL(url);
       })
       .catch((error) => {
         console.error('Download error:', error);
-        alert('Failed to download the file. Please try again.');
+        alert('Failed to download the document. Please try again.');
       });
   }
 
   private getAuthToken(): string {
     // Get authentication token from your auth service
-    // return this.authService.getToken();
+    // This is just a placeholder implementation
     return localStorage.getItem('authToken') || '';
   }
 
-  // Helper methods for styling
   getFileTypeClass(fileType: string): string {
     switch (fileType.toUpperCase()) {
       case 'PDF':
@@ -585,9 +534,7 @@ export class IndexOfFileComponent {
       case 'PNG':
         return 'bg-purple-100 text-purple-800';
       case 'MP4':
-      case 'AVI':
-      case 'MOV':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -596,35 +543,29 @@ export class IndexOfFileComponent {
   getFileIconClass(fileType: string): string {
     switch (fileType.toUpperCase()) {
       case 'PDF':
-        return 'bg-red-500';
+        return 'text-red-600';
       case 'DOC':
       case 'DOCX':
-        return 'bg-blue-500';
+        return 'text-blue-600';
       case 'XLS':
       case 'XLSX':
-        return 'bg-green-500';
+        return 'text-green-600';
       case 'JPG':
       case 'JPEG':
       case 'PNG':
-        return 'bg-purple-500';
+        return 'text-purple-600';
       case 'MP4':
-      case 'AVI':
-      case 'MOV':
-        return 'bg-orange-500';
+        return 'text-yellow-600';
       default:
-        return 'bg-gray-500';
+        return 'text-gray-600';
     }
   }
 
-  // Handle view change from table component
   onViewChange(viewType: string): void {
-    this.currentView = viewType as 'table' | 'card';
     if (viewType === 'table') {
-      this.pageSize = 10;
+      this.switchToTableView();
     } else if (viewType === 'card') {
-      this.pageSize = 12;
+      this.switchToCardView();
     }
-    this.currentPage = 1;
-    this.applyFilters();
   }
 }

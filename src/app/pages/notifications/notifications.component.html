@@ -1,6 +1,6 @@
 <div class="flex flex-col">
   <!-- Header -->
-  <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 rounded-t-lg ">
+  <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 rounded-t-lg">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <h1 class="text-2xl font-semibold text-gray-900">Notifications</h1>
@@ -117,12 +117,33 @@
               </div>
             </div>
 
-            <div class="flex items-center gap-1 text-sm text-gray-600 mt-1">
+            <div class="text-sm text-gray-600 mt-1">
               <span class="font-medium">{{ notification.user.name }}</span>
-              <span>{{ notification.message }}</span>
+              <span>
+                {{
+                  isNotificationExpanded(notification.id)
+                    ? notification.message
+                    : getTruncatedMessage(notification.message)
+                }}
+              </span>
               <span class="font-medium text-gray-900">
                 {{ notification.targetUser }}.
               </span>
+              <!-- View More/Less Button -->
+              <button
+                *ngIf="shouldShowViewMore(notification.message)"
+                (click)="
+                  toggleMessageExpansion(notification.id);
+                  $event.stopPropagation()
+                "
+                class="text-green-600 hover:text-green-700 text-xs font-medium underline ml-1"
+              >
+                {{
+                  isNotificationExpanded(notification.id)
+                    ? "View less"
+                    : "View more"
+                }}
+              </button>
             </div>
           </div>
         </div>
