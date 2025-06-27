@@ -1,0 +1,184 @@
+<div class="flex flex-col">
+  <!-- Header -->
+  <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 rounded-t-lg">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-semibold text-gray-900">Notifications</h1>
+        <span
+          class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full"
+          *ngIf="getUnreadCount() > 0"
+        >
+          {{ getUnreadCount() }}
+        </span>
+      </div>
+
+      <!-- Search and Filter -->
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <svg
+            class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch($event)"
+            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent w-64"
+          />
+        </div>
+
+        <div class="relative">
+          <button
+            class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            (click)="toggleFilter()"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 20.414A1 1 0 018 19.414V14.5a1 1 0 00-.293-.707L1.293 7.379A1 1 0 011 6.672V4z"
+              />
+            </svg>
+            Filter
+          </button>
+
+          <!-- Filter Dropdown -->
+          <div
+            *ngIf="showFilterDropdown"
+            class="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+            appClickOutside
+            (clickOutside)="closeFilterDropdown()"
+          >
+            <div class="py-2">
+              <button
+                *ngFor="let tab of filterTabs"
+                (click)="onFilterChange(tab.value)"
+                class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                [class.text-green-600]="currentFilter === tab.value"
+                [class.font-medium]="currentFilter === tab.value"
+                [class.text-gray-700]="currentFilter !== tab.value"
+              >
+                {{ tab.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 px-6 py-6 rounded-lg mt-2 border border-gray-200">
+    <!-- Notifications Grid -->
+    <div class="space-y-4">
+      <div
+        *ngFor="let notification of paginatedNotifications; let i = index"
+        class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+        (click)="markAsRead(notification.id)"
+      >
+        <div class="flex items-start gap-4">
+          <div
+            class="w-2 h-2 rounded-full mt-2 flex-shrink-0"
+            [class.bg-green-500]="!notification.isRead"
+            [class.bg-transparent]="notification.isRead"
+          ></div>
+
+          <img
+            [src]="notification.user.image"
+            [alt]="notification.user.name"
+            class="w-12 h-12 rounded-full flex-shrink-0"
+          />
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1 text-sm">
+                <span class="font-semibold text-gray-900">
+                  {{ notification.type }}
+                </span>
+              </div>
+              <div class="text-xs text-gray-500">
+                {{ notification.timestamp }}
+              </div>
+            </div>
+
+            <div class="text-sm text-gray-600 mt-1">
+              <span class="font-medium">{{ notification.user.name }}</span>
+              <span>
+                {{
+                  isNotificationExpanded(notification.id)
+                    ? notification.message
+                    : getTruncatedMessage(notification.message)
+                }}
+              </span>
+              <span class="font-medium text-gray-900">
+                {{ notification.targetUser }}.
+              </span>
+              <!-- View More/Less Button -->
+              <button
+                *ngIf="shouldShowViewMore(notification.message)"
+                (click)="
+                  toggleMessageExpansion(notification.id);
+                  $event.stopPropagation()
+                "
+                class="text-green-600 hover:text-green-700 text-xs font-medium underline ml-1"
+              >
+                {{
+                  isNotificationExpanded(notification.id)
+                    ? "View less"
+                    : "View more"
+                }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="paginatedNotifications.length === 0" class="text-center py-12">
+      <div class="text-gray-400 text-lg">No notifications found.</div>
+    </div>
+
+    <!-- Pagination -->
+    <div
+      *ngIf="totalPages > 1"
+      class="flex items-center justify-center gap-2 mt-8"
+    >
+      <button
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+      >
+        Previous
+      </button>
+
+      <span class="px-4 py-2 text-sm text-gray-600">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
+
+      <button
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Page Header -->
+  <div class="px-6 py-6">
+    <h1 class="text-xl font-semibold text-gray-900">{{ userName }}</h1>
+  </div>
+
+  <div class="mx-6 mb-2 flex-1" style="height: calc(100vh - 140px)">
+    <app-table
+      [tableData]="[]"
+      [emptyStateImage]="emptyStateImage"
+      [emptyStateText]="emptyStateText"
+      [showButton]="true"
+      [showButtonText]="showButtonText"
+      [showButtonIcon]="showButtonIcon"
+      [showButtonStyle]="showButtonStyle"
+      [showSearch]="false"
+      [showFilter]="false"
+      [showStatusTab]="false"
+      [showPagination]="false"
+      [showViewAll]="false"
+      [currentView]="'table'"
+      (showButtonActionClick)="onButtonClick($event)"
+      class="h-full"
+    >
+    </app-table>
+  </div>
+</div>

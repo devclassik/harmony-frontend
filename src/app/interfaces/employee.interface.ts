@@ -23,10 +23,22 @@ export interface TableData {
   endDate?: string;
   requestType?: string;
   duration?: string;
+  location?: string;
+  substitution?: string;
   date?: string;
   documentType?: string;
   documentName?: string;
   reason?: string;
+  // Notification properties
+  isRead?: boolean;
+  type?: string;
+  message?: string;
+  targetUser?: string;
+  timestamp?: string;
+  user?: {
+    name: string;
+    image: string;
+  };
 }
 
 export interface EmployeeInfo {

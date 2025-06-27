@@ -1,4 +1,10 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  Input,
+} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -7,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterModule } from '@angular/router';
+import { ConfirmPromptComponent } from '../confirm-prompt/confirm-prompt.component';
 
 @Component({
   selector: 'app-side-bar',
@@ -18,14 +25,15 @@ import { Router, RouterModule } from '@angular/router';
     MatIconModule,
     MatTooltipModule,
     RouterModule,
+    ConfirmPromptComponent,
   ],
   templateUrl: './side-bar.component.html',
-  styleUrl: './side-bar.component.css',
 })
 export class SideBarComponent implements OnInit {
-  sidebarToggle = false;
+  @Input() sidebarToggle = false;
   selected = 'Dashboard';
   page: string = '';
+  showLogoutConfirm = false;
 
   userRole: string | null;
 
@@ -51,8 +59,14 @@ export class SideBarComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent): void {
-    if (!this.el.nativeElement.contains(event.target)) {
-      this.sidebarToggle = false;
+    // Only handle click outside on mobile screens (below lg breakpoint)
+    // On desktop, the sidebar should only be toggled by the toggle button
+    if (window.innerWidth < 1024) {
+      // lg breakpoint in Tailwind is 1024px
+      const target = event.target as Element;
+      if (!this.el.nativeElement.contains(target)) {
+        this.sidebarToggle = false;
+      }
     }
   }
 
@@ -66,7 +80,16 @@ export class SideBarComponent implements OnInit {
   }
 
   logout() {
+    this.showLogoutConfirm = true;
+  }
+
+  onLogoutConfirmed() {
     this.authService.logout();
+    this.showLogoutConfirm = false;
+  }
+
+  onLogoutCancelled() {
+    this.showLogoutConfirm = false;
   }
 
   toggleSettingsMenu() {
@@ -139,5 +162,9 @@ export class SideBarComponent implements OnInit {
 
   canViewSettings(): boolean {
     return ['admin', 'hr', 'manager'].includes(this.userRole || '');
+  }
+
+  canViewCampMeeting(): boolean {
+    return ['user'].includes(this.userRole || '');
   }
 }

@@ -1,0 +1,17 @@
+/* Square checkbox styling */
+input[type="radio"].square-checkbox {
+  appearance: none;
+  border-radius: 0 !important;
+  position: relative;
+}
+
+input[type="radio"].square-checkbox:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+}

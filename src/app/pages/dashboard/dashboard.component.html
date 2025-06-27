@@ -1,66 +1,78 @@
-<!-- Admin Dashboard View -->
-<div *ngIf="userRole !== 'user'">
-  <div class="flex flex-col gap-4 p-2">
-    <app-dashboard-greetings
-      [userName]="'John 👋🏼'"
-      [showSubText]="true"
-      [subText]="'Here is a brief overview of the employees.'"
-    ></app-dashboard-greetings>
-  </div>
-  <div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
-    <div class="lg:col-span-6">
-      <app-bar-chart></app-bar-chart>
-    </div>
-    <div class="lg:col-span-4">
-      <app-doughnut-chart></app-doughnut-chart>
-    </div>
-  </div>
-  <div class="p-2">
-    <app-table
-      [tableTitle]="'Employee Records'"
-      [viewAllLink]="'employee-records'"
-      [tableData]="employees"
-      [showViewAll]="true"
-      [showSearch]="false"
-      [showFilter]="false"
-      [showPagination]="false"
-      [showStatusTab]="false"
-    ></app-table>
-  </div>
-</div>
+<!-- Welcome Screen Animation -->
+<app-welcome-screen-animation
+  [show]="showWelcomeAnimation"
+  [userName]="getUserName()"
+  (close)="onWelcomeAnimationClose()"
+>
+</app-welcome-screen-animation>
 
-<!-- User Dashboard View -->
-<div *ngIf="userRole === 'user'" class="p-8 bg-white min-h-screen">
-  <!-- Greeting Section -->
-  <div class="mb-12">
+<!-- Dashboard Content -->
+<div>
+  <!-- Admin Dashboard View -->
+  <div *ngIf="userRole !== 'user'">
+    <div class="flex flex-col gap-4 p-2">
+      <app-dashboard-greetings
+        [userName]="'John 👋🏼'"
+        [showSubText]="true"
+        [subText]="'Here is a brief overview of the employees.'"
+      ></app-dashboard-greetings>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
+      <div class="lg:col-span-6">
+        <app-bar-chart></app-bar-chart>
+      </div>
+      <div class="lg:col-span-4">
+        <app-doughnut-chart></app-doughnut-chart>
+      </div>
+    </div>
+    <div class="p-2">
+      <app-table
+        [tableTitle]="'Employee Records'"
+        [viewAllLink]="'employee-records'"
+        [tableData]="employees"
+        [showViewAll]="true"
+        [showSearch]="false"
+        [showFilter]="false"
+        [showPagination]="false"
+        [showStatusTab]="false"
+      ></app-table>
+    </div>
+  </div>
+
+  <!-- User Dashboard View -->
+  <div *ngIf="userRole === 'user'" class="py-4 bg-white min-h-screen">
+    <!-- Greeting Section -->
+
     <app-dashboard-greetings
-      [userName]="'John 👋'"
+      [userName]="getUserName()"
       [showSubText]="true"
       [subText]="'Here is a brief summary of your employment.'"
       [showMetrics]="false"
     ></app-dashboard-greetings>
+
+    <!-- Employee Information Section -->
+    <div class="py-4">
+      <app-dashboard-information
+        [title]="'Employee Information'"
+        [employeeData]="employeeInfo"
+        [personalTitle]="'Mr.'"
+      ></app-dashboard-information>
+    </div>
+
+    <app-table
+      [tableTitle]="'Leave Requests'"
+      [viewAllLink]="'leave-records'"
+      [tableData]="leaveRequests"
+      [tableHeader]="leaveRequestsHeader"
+      [showViewAll]="true"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+      [showSearch]="false"
+      [showFilter]="false"
+      [showPagination]="true"
+      [showStatusTab]="false"
+    ></app-table>
   </div>
-
-  <!-- Employee Information Section -->
-  <app-dashboard-information
-    [title]="'Employee Information'"
-    [employeeData]="employeeInfo"
-    [personalTitle]="'Mr.'"
-  ></app-dashboard-information>
-
-  <app-table
-    [tableTitle]="'Leave Requests'"
-    [viewAllLink]="'leave-records'"
-    [tableData]="leaveRequests"
-    [tableHeader]="leaveRequestsHeader"
-    [showViewAll]="true"
-    [menuItems]="actionButton"
-    (menuAction)="onMenuAction($event)"
-    [showSearch]="false"
-    [showFilter]="false"
-    [showPagination]="false"
-    [showStatusTab]="false"
-  ></app-table>
 </div>
 
 <!-- Leave Details Modal -->

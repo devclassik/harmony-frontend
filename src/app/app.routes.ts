@@ -21,6 +21,10 @@ import { LeaveOfAbsenceComponent } from './pages/leave-of-absence/leave-of-absen
 import { SickLeaveComponent } from './pages/sick-leave/sick-leave.component';
 import { IndexOfFileComponent } from './pages/index-of-file/index-of-file.component';
 import { PayrollComponent } from './pages/payroll/payroll.component';
+import { CampMeetingComponent } from './pages/camp-meeting/camp-meeting.component';
+import { InboxComponent } from './pages/inbox/inbox.component';
+import { NotificationsComponent } from './pages/notifications/notifications.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
@@ -56,6 +60,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
+      {
+        path: 'profile',
+        component: ProfileComponent,
+        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+      },
       {
         path: 'employee-records',
         component: EmployeeRecordsComponent,
@@ -115,6 +124,21 @@ export const routes: Routes = [
         path: 'payroll',
         component: PayrollComponent,
         canActivate: [roleGuard(['admin', 'hr'])],
+      },
+      {
+        path: 'camp-meeting',
+        component: CampMeetingComponent,
+        canActivate: [roleGuard(['user', 'admin', 'manager'])],
+      },
+      {
+        path: 'inbox',
+        component: InboxComponent,
+        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+      },
+      {
+        path: 'notifications',
+        component: NotificationsComponent,
+        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
       },
       {
         path: 'admin',

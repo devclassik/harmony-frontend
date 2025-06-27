@@ -1,24 +1,56 @@
-<div class="p-2">
-  <app-table
-    [tableTitle]="'Sick Leave'"
-    [tableHeader]="tableHeader"
-    [tableData]="employees"
-    [showViewAll]="false"
-    [showFilter]="false"
-    [showStatusTab]="true"
-    [statusTabs]="statusTabs"
-    [activeStatusTab]="selectedStatus"
-    (statusTabChange)="onStatusTabChange($event)"
-    [filterTabs]="filterTabs"
-    [activeFilterTab]="selectedFilter"
-    (filterTabChange)="onFilterTabChange($event)"
-    [searchValue]="searchValue"
-    (search)="onSearch($event)"
-    [tableData]="filteredEmployees"
-    [menuItems]="actionButton"
-    (menuAction)="onMenuAction($event)"
+<div *ngIf="userRole !== 'user'">
+  <div class="p-2">
+    <app-table
+      [tableTitle]="'Sick Leave'"
+      [tableHeader]="tableHeader"
+      [tableData]="employees"
+      [showViewAll]="false"
+      [showFilter]="false"
+      [showStatusTab]="true"
+      [statusTabs]="statusTabs"
+      [activeStatusTab]="selectedStatus"
+      (statusTabChange)="onStatusTabChange($event)"
+      [filterTabs]="filterTabs"
+      [activeFilterTab]="selectedFilter"
+      (filterTabChange)="onFilterTabChange($event)"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="filteredEmployees"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+    ></app-table>
+  </div>
+</div>
 
-  ></app-table>
+<div *ngIf="userRole === 'user'">
+  <div class="p-2">
+    <app-table
+      [tableTitle]="'Sick Leave'"
+      [tableHeader]="sickLeaveRequestsHeader"
+      [tableData]="sickLeaveRequests"
+      [showViewAll]="false"
+      [showFilter]="showFilterTabFromParent"
+      [showStatusTab]="true"
+      [statusTabs]="statusTabs"
+      [activeStatusTab]="selectedStatus"
+      (statusTabChange)="onStatusTabChange($event)"
+      [filterTabs]="filterTabs"
+      [activeFilterTab]="selectedFilter"
+      (filterTabChange)="onFilterTabChange($event)"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="filteredSickLeaveRequests"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+      [showCalendar]="false"
+      [showButton]="true"
+      showButtonText="Create Request"
+      showButtonIcon="assets/svg/add.svg"
+      showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+      (showButtonActionClick)="openCreateRequest()"
+      [showList]="false"
+    ></app-table>
+  </div>
 </div>
 
 <app-employee-details
@@ -51,3 +83,29 @@
   [okButtonLink]="'/dashboard'"
   (closed)="successModal = false"
 ></app-success-modal>
+
+<!-- Sick Leave Details Modal -->
+<app-leave-details
+  [view]="showSickLeaveDetails"
+  [leaveData]="selectedSickLeaveData"
+  [title]="'Sick Leave'"
+  [leaveType]="'Sick Leave'"
+  [totalLeaveDays]="30"
+  [showRequestType]="false"
+  [showDuration]="true"
+  [showLocation]="false"
+  [showEndDate]="true"
+  [showSubstitution]="true"
+  (close)="showSickLeaveDetails = false"
+></app-leave-details>
+
+<!-- Create Sick Leave Request Modal -->
+<app-create-leave-of-absence
+  [show]="showCreateRequest"
+  [title]="'Create Sick Leave Request'"
+  [subtitle]="'Sick Leave Information'"
+  [reasonPlaceholder]="'Enter your reason for sick leave...'"
+  [confirmText]="'Are you sure you want to create this sick leave request?'"
+  (close)="showCreateRequest = false"
+  (submitted)="onCreateRequestSubmitted($event)"
+></app-create-leave-of-absence>

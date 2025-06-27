@@ -8,10 +8,9 @@ import { CommonModule } from '@angular/common';
   selector: 'app-doughnut-chart',
   imports: [NgApexchartsModule, CommonModule],
   templateUrl: './doughnut-chart.component.html',
-  styleUrl: './doughnut-chart.component.css'
+  styleUrl: './doughnut-chart.component.css',
 })
 export class DoughnutChartComponent {
-
   @Input() title: string = 'Staff Demographic';
   @Input() series: number[] = [40, 50, 10];
   @Input() labels: string[] = ['20 - 39', '40 - 59', '60 - 75'];
@@ -20,7 +19,7 @@ export class DoughnutChartComponent {
   showGenderImage: boolean = false;
   genderData = {
     male: 45,
-    female: 55
+    female: 55,
   };
 
   chartOptions: ChartOptions = {
@@ -32,14 +31,14 @@ export class DoughnutChartComponent {
         enabled: true,
         dynamicAnimation: {
           enabled: true,
-          speed: 350
-        }
-      }
+          speed: 350,
+        },
+      },
     },
     labels: this.labels,
     colors: this.colors,
     stroke: {
-      show: false
+      show: false,
     },
     plotOptions: {
       pie: {
@@ -47,16 +46,16 @@ export class DoughnutChartComponent {
           size: '50%',
           background: 'transparent',
           labels: {
-            show: false
-          }
+            show: false,
+          },
         },
         customScale: 1,
         offsetX: 0,
         offsetY: 0,
         dataLabels: {
-          offset: 0
-        }
-      }
+          offset: 0,
+        },
+      },
     },
     legend: {
       position: 'right',
@@ -66,27 +65,31 @@ export class DoughnutChartComponent {
       markers: {
         strokeWidth: 0,
         offsetX: -4,
-        shape: 'circle'
+        shape: 'circle',
       },
       itemMargin: {
         horizontal: 15,
-        vertical: 8
+        vertical: 8,
       },
-      formatter: function(seriesName, opts) {
-        return seriesName + ' - ' + opts.w.globals.series[opts.seriesIndex] + '%';
-      }
+      formatter: function (seriesName, opts) {
+        return (
+          seriesName + ' - ' + opts.w.globals.series[opts.seriesIndex] + '%'
+        );
+      },
     },
     dataLabels: {
-      enabled: false
+      enabled: false,
     },
-    responsive: [{
-      breakpoint: 480,
-      options: {
-        legend: {
-          position: 'bottom'
-        }
-      }
-    }]
+    responsive: [
+      {
+        breakpoint: 480,
+        options: {
+          legend: {
+            position: 'bottom',
+          },
+        },
+      },
+    ],
   };
 
   constructor(private cdr: ChangeDetectorRef) {}
@@ -108,8 +111,8 @@ export class DoughnutChartComponent {
   onSelectChange(event: Event) {
     const select = event.target as HTMLSelectElement;
     console.log(select.value);
-    
-    switch(select.value) {
+
+    switch (select.value) {
       case 'Age range':
         this.showGenderImage = false;
         this.updateToDonutChart();
@@ -133,13 +136,13 @@ export class DoughnutChartComponent {
       ...this.chartOptions,
       chart: {
         ...this.chartOptions.chart,
-        type: 'donut'
+        type: 'donut',
       },
       stroke: {
-        show: false
+        show: false,
       },
       dataLabels: {
-        enabled: false
+        enabled: false,
       },
       legend: {
         show: true,
@@ -150,15 +153,17 @@ export class DoughnutChartComponent {
         markers: {
           strokeWidth: 0,
           offsetX: -4,
-          shape: 'circle'
+          shape: 'circle',
         },
         itemMargin: {
           horizontal: 15,
-          vertical: 8
+          vertical: 8,
         },
-        formatter: function(seriesName, opts) {
-          return seriesName + ' - ' + opts.w.globals.series[opts.seriesIndex] + '%';
-        }
+        formatter: function (seriesName, opts) {
+          return (
+            seriesName + ' - ' + opts.w.globals.series[opts.seriesIndex] + '%'
+          );
+        },
       },
       plotOptions: {
         ...this.chartOptions.plotOptions,
@@ -168,11 +173,11 @@ export class DoughnutChartComponent {
             ...this.chartOptions.plotOptions?.pie?.donut,
             size: '75%',
             labels: {
-              show: false
-            }
-          }
-        }
-      }
+              show: false,
+            },
+          },
+        },
+      },
     };
     this.cdr.detectChanges();
   }
@@ -185,8 +190,8 @@ export class DoughnutChartComponent {
       colors: ['#3B82F6', '#EC4899'],
       chart: {
         ...this.chartOptions.chart,
-        type: 'donut'
-      }
+        type: 'donut',
+      },
     };
     this.cdr.detectChanges();
   }
@@ -196,15 +201,15 @@ export class DoughnutChartComponent {
       ...this.chartOptions,
       chart: {
         ...this.chartOptions.chart,
-        type: 'pie'
+        type: 'pie',
       },
       stroke: {
         show: true,
         width: 2,
-        colors: ['#fff']
+        colors: ['#fff'],
       },
       dataLabels: {
-        enabled: false
+        enabled: false,
       },
       legend: {
         show: true,
@@ -215,15 +220,17 @@ export class DoughnutChartComponent {
         markers: {
           strokeWidth: 0,
           offsetX: -4,
-          shape: 'circle'
+          shape: 'circle',
         },
         itemMargin: {
           horizontal: 15,
-          vertical: 8
+          vertical: 8,
         },
-        formatter: function(seriesName, opts) {
-          return seriesName + ' - ' + opts.w.globals.series[opts.seriesIndex] + '%';
-        }
+        formatter: function (seriesName, opts) {
+          return (
+            seriesName + ' - ' + opts.w.globals.series[opts.seriesIndex] + '%'
+          );
+        },
       },
       plotOptions: {
         ...this.chartOptions.plotOptions,
@@ -232,13 +239,12 @@ export class DoughnutChartComponent {
           donut: {
             ...this.chartOptions.plotOptions?.pie?.donut,
             labels: {
-              show: false
-            }
-          }
-        }
-      }
+              show: false,
+            },
+          },
+        },
+      },
     };
     this.cdr.detectChanges();
   }
 }
-
