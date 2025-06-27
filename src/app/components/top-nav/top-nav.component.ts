@@ -54,7 +54,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
 
   // Notification truncation properties
   expandedNotifications: Set<number> = new Set();
-  readonly MAX_MESSAGE_LENGTH = 100;
+  readonly MAX_MESSAGE_LENGTH = 50;
 
   constructor(
     private authService: AuthService,

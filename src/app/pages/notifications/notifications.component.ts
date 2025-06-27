@@ -26,6 +26,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   showFilterDropdown: boolean = false;
   expandedNotifications: Set<number> = new Set(); // Track which notifications are expanded
 
+  maxMessageLength: number = 20; // Maximum length for message truncation
+
   filterTabs = [
     { label: 'All', value: 'all' },
     { label: 'Unread', value: 'unread' },
@@ -130,12 +132,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   // Method to get truncated message
   getTruncatedMessage(message: string): string {
-    return message.length > 100 ? message.substring(0, 100) + '...' : message;
+    return message.length > this.maxMessageLength ? message.substring(0, this.maxMessageLength) + '...' : message;
   }
 
   // Method to check if message needs truncation
   shouldShowViewMore(message: string): boolean {
-    return message.length > 100;
+    return message.length > this.maxMessageLength;
   }
 
   // Method to toggle expanded state
