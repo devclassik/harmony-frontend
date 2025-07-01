@@ -74,13 +74,32 @@ export class AlertService {
    * @param message The message to display
    * @param options Optional configuration for the alert
    */
-  showAlert(
-    type: AlertType,
-    message: string,
-    options: AlertOptions = {}
-  ) {
-    const { autoClose = false, autoCloseTime = 5000 } = options;
-    
+  showAlert(type: AlertType, message: string, options: AlertOptions = {}) {
+    // Set default auto-close behavior based on alert type
+    const getDefaultAutoClose = (alertType: AlertType): boolean => {
+      return true; // Auto-close is now default for all types
+    };
+
+    const getDefaultAutoCloseTime = (alertType: AlertType): number => {
+      switch (alertType) {
+        case 'success':
+          return 4000; // Success messages can close faster
+        case 'info':
+          return 5000; // Info messages need moderate time
+        case 'warning':
+          return 6000; // Warnings need more time to read
+        case 'error':
+          return 7000; // Errors need the most time to read
+        default:
+          return 5000;
+      }
+    };
+
+    const {
+      autoClose = getDefaultAutoClose(type),
+      autoCloseTime = getDefaultAutoCloseTime(type),
+    } = options;
+
     const newAlert: Alert = {
       id: Date.now(),
       type,
@@ -88,7 +107,7 @@ export class AlertService {
       autoClose,
       autoCloseTime,
     };
-    
+
     const currentAlerts = this.alertsSubject.value;
     this.alertsSubject.next([...currentAlerts, newAlert]);
   }
@@ -107,5 +126,34 @@ export class AlertService {
    */
   clearAll() {
     this.alertsSubject.next([]);
+  }
+
+  // Convenience methods for manual dismissal alerts
+  /**
+   * Show a success alert that requires manual dismissal
+   */
+  successManual(message: string) {
+    this.showAlert('success', message, { autoClose: false });
+  }
+
+  /**
+   * Show an error alert that requires manual dismissal
+   */
+  errorManual(message: string) {
+    this.showAlert('error', message, { autoClose: false });
+  }
+
+  /**
+   * Show a warning alert that requires manual dismissal
+   */
+  warningManual(message: string) {
+    this.showAlert('warning', message, { autoClose: false });
+  }
+
+  /**
+   * Show an info alert that requires manual dismissal
+   */
+  infoManual(message: string) {
+    this.showAlert('info', message, { autoClose: false });
   }
 }

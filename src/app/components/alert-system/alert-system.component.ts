@@ -28,7 +28,7 @@ export class AlertSystemComponent implements OnInit, OnDestroy {
   }
 
   showSuccessAlert() {
-    this.alertService.success('Operation successful!', { autoClose: true });
+    this.alertService.success('Operation successful!');
   }
 
   showErrorAlert() {
@@ -40,7 +40,11 @@ export class AlertSystemComponent implements OnInit, OnDestroy {
   }
 
   showInfoAlert() {
-    this.alertService.info('This is an informational message.', { autoClose: true });
+    this.alertService.info('This is an informational message.');
+  }
+
+  showManualAlert() {
+    this.alertService.errorManual('This alert requires manual dismissal.');
   }
 
   closeAlert(id: number) {
