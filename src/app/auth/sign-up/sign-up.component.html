@@ -8,7 +8,7 @@
       <img
         src="/assets/images/harmonyLogo.png"
         alt="Harmony Logo"
-        class="w-[150px] h-14"
+        class="h-14 object-contain"
       />
     </div>
 
@@ -67,14 +67,33 @@
           <label for="password" class="block text-gray-800 text-sm"
             >Password</label
           >
-          <input
-            id="password"
-            type="password"
-            [(ngModel)]="form.password"
-            name="password"
-            required
-            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
+          <div class="relative">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="form.password"
+              name="password"
+              required
+              class="w-full p-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center"
+              (click)="togglePasswordVisibility()"
+            >
+              <mat-icon
+                *ngIf="!showPassword"
+                class="text-gray-400 hover:text-gray-600 cursor-pointer"
+                >visibility</mat-icon
+              >
+
+              <mat-icon
+                *ngIf="showPassword"
+                class="text-gray-400 hover:text-gray-600 cursor-pointer"
+                >visibility_off</mat-icon
+              >
+            </button>
+          </div>
           <p class="text-gray-500 text-xs mt-1">
             Password must be at least 6 characters long
           </p>
@@ -85,21 +104,40 @@
           <label for="confirmPassword" class="block text-gray-800 text-sm"
             >Confirm Password</label
           >
-          <input
-            id="confirmPassword"
-            type="password"
-            [(ngModel)]="form.confirmPassword"
-            name="confirmPassword"
-            required
-            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
+          <div class="relative">
+            <input
+              id="confirmPassword"
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              [(ngModel)]="form.confirmPassword"
+              name="confirmPassword"
+              required
+              class="w-full p-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center"
+              (click)="toggleConfirmPasswordVisibility()"
+            >
+              <mat-icon
+                *ngIf="!showConfirmPassword"
+                class="text-gray-400 hover:text-gray-600 cursor-pointer"
+                >visibility</mat-icon
+              >
+
+              <mat-icon
+                *ngIf="showConfirmPassword"
+                class="text-gray-400 hover:text-gray-600 cursor-pointer"
+                >visibility_off</mat-icon
+              >
+            </button>
+          </div>
         </div>
 
         <!-- Submit Button -->
         <button
           type="submit"
           [disabled]="isLoading"
-          class="w-full text-white py-2 rounded-md shadow-md bg-gradient-to-r from-green-500 to-green-700 hover:text-green-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full text-white py-2 rounded-md shadow-md bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
           <span *ngIf="!isLoading">Create Account</span>
           <span *ngIf="isLoading">Creating Account...</span>
@@ -170,11 +208,27 @@
 
 <app-custom-modal
   *ngIf="showModal"
-  [title]="'Success'"
+  [title]="'Email Verification'"
   [text]="modalText"
   [showOtp]="showOtp"
-  [buttonText]="'Submit'"
+  [buttonText]="isLoading ? 'Verifying...' : 'Verify'"
   [subText]="'Didn\'t get an OTP? Resend'"
+  [isLoading]="isLoading"
   (onClose)="closeModal()"
   (onSubmit)="handleSubmit($event)"
+  (resend)="resendOtp()"
 ></app-custom-modal>
+
+<!-- Loading Overlay -->
+<app-loading-overlay
+  [isVisible]="isLoading && !showModal"
+  title="Creating your account..."
+  message="Please wait while we set up your Harmony account."
+></app-loading-overlay>
+
+<!-- OTP Verification Loading Overlay -->
+<app-loading-overlay
+  [isVisible]="isLoading && showModal"
+  title="Verifying your email..."
+  message="Please wait while we confirm your email address."
+></app-loading-overlay>

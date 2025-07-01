@@ -2,9 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { CustomModalComponent } from "../../components/custom-modal/custom-modal.component";
+import { MatIconModule } from '@angular/material/icon';
+
+import { CustomModalComponent } from '../../components/custom-modal/custom-modal.component';
 import { AlertService } from '../../services/alert.service';
+import { RegisterResponse, VerifyOtpResponse } from '../../dto';
+import { AuthService } from '../../services/auth.service';
+import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 
 interface SignUpForm {
   firstName: string;
@@ -17,9 +21,15 @@ interface SignUpForm {
 @Component({
   selector: 'app-sign-up',
   standalone: true,
-  imports: [CommonModule, FormsModule, CustomModalComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CustomModalComponent,
+    MatIconModule,
+    LoadingOverlayComponent,
+  ],
   templateUrl: './sign-up.component.html',
-  styleUrl: './sign-up.component.css'
+  styleUrl: './sign-up.component.css',
 })
 export class SignUpComponent {
   form: SignUpForm = {
@@ -27,22 +37,32 @@ export class SignUpComponent {
     lastName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   };
 
   showModal: boolean = false;
   showOtp: boolean = false;
   modalText: string = '';
   isLoading: boolean = false;
+  showPassword: boolean = false;
+  showConfirmPassword: boolean = false;
 
   constructor(
     private router: Router,
     private auth: AuthService,
     private alertService: AlertService
-  ) { }
+  ) {}
 
   login() {
     this.router.navigate(['/auth/login']);
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   onSubmit() {
@@ -83,33 +103,43 @@ export class SignUpComponent {
       return;
     }
 
-    this.auth.register({
-      firstName: this.form.firstName,
-      lastName: this.form.lastName,
-      email: this.form.email,
-      password: this.form.password
-    }).subscribe({
-      next: (response) => {
-        console.log(response);
-        if (response.data) {
-          // this.router.navigate(['/auth/login'], {
-          //   queryParams: { registered: 'true' }
-          // });
-        } else {
-          this.showModal = true;
-          this.showOtp = true;
-          // this.modalText = `A 6-dIGIT OTP was sent to ${response.data?.email}. Provide the code sent to your email to complete your verification`;
-          this.alertService.error(response.message || 'Registration failed. Please try again.');
-        }
-      },
-      error: (error) => {
-        this.alertService.error(error.error?.message || 'An error occurred during registration.');
-        console.error('Registration error:', error);
-      },
-      complete: () => {
-        this.isLoading = false;
-      }
-    });
+    this.auth
+      .register({
+        firstName: this.form.firstName,
+        lastName: this.form.lastName,
+        email: this.form.email,
+        password: this.form.password,
+      })
+      .subscribe({
+        next: (response: RegisterResponse) => {
+          console.log('Registration response:', response);
+
+          // Check if registration was successful
+          if (response.status === 'success' || response.data) {
+            // Registration successful - show OTP modal
+            this.showModal = true;
+            this.showOtp = true;
+            this.modalText = `A 6-digit OTP was sent to ${this.form.email}. Please provide the code sent to your email to complete your verification.`;
+            this.alertService.success(
+              'Registration successful! Please check your email for the OTP code.'
+            );
+          } else {
+            // Registration failed
+            this.alertService.error(
+              response.message || 'Registration failed. Please try again.'
+            );
+          }
+        },
+        error: (error: any) => {
+          this.alertService.error(
+            error.error?.message || 'An error occurred during registration.'
+          );
+          console.error('Registration error:', error);
+        },
+        complete: () => {
+          this.isLoading = false;
+        },
+      });
   }
 
   closeModal() {
@@ -118,30 +148,83 @@ export class SignUpComponent {
   }
 
   handleSubmit(event: any) {
+    this.isLoading = true;
 
-    this.auth.verifyOtp({
-      email: this.form.email,
-      otp: event
-    }).subscribe({
-      next: (response) => {
-        console.log({response});
-        if (response.data) {
-          this.router.navigate(['/auth/login'], {
-            queryParams: { registered: 'true' }
-          });
-          this.showModal = false;
-          this.showOtp = false;
-        } else {
-          this.alertService.error(response.message || 'Verification failed. Please try again.');
-        }
-      },
-      error: (error) => {
-        this.alertService.error(error.error?.message || 'An error occurred during OTP verification.');
-        console.error('verify OTP error:', error);
-      },
-      complete: () => {
-        this.isLoading = false;
-      }
-    });
+    this.auth
+      .verifyOtp({
+        email: this.form.email,
+        otp: event,
+      })
+      .subscribe({
+        next: (response: VerifyOtpResponse) => {
+          console.log('OTP verification response:', response);
+
+          // Check if OTP verification was successful
+          if (response.success || response.data) {
+            // OTP verification successful
+            this.alertService.success(
+              'Email verification successful! You can now login.'
+            );
+            this.showModal = false;
+            this.showOtp = false;
+
+            // Navigate to login page with success message
+            this.router.navigate(['/auth/login'], {
+              queryParams: { registered: 'true', verified: 'true' },
+            });
+          } else {
+            // OTP verification failed
+            this.alertService.error(
+              response.message || 'Verification failed. Please try again.'
+            );
+          }
+        },
+        error: (error: any) => {
+          this.alertService.error(
+            error.error?.message || 'An error occurred during OTP verification.'
+          );
+          console.error('Verify OTP error:', error);
+        },
+        complete: () => {
+          this.isLoading = false;
+        },
+      });
+  }
+
+  resendOtp() {
+    if (!this.form.email) {
+      this.alertService.error('Email is required to resend OTP.');
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.auth
+      .register({
+        firstName: this.form.firstName,
+        lastName: this.form.lastName,
+        email: this.form.email,
+        password: this.form.password,
+      })
+      .subscribe({
+        next: (response: RegisterResponse) => {
+          if (response.status === 'success' || response.data) {
+            this.alertService.success('OTP has been resent to your email.');
+          } else {
+            this.alertService.error(
+              response.message || 'Failed to resend OTP. Please try again.'
+            );
+          }
+        },
+        error: (error: any) => {
+          this.alertService.error(
+            error.error?.message || 'An error occurred while resending OTP.'
+          );
+          console.error('Resend OTP error:', error);
+        },
+        complete: () => {
+          this.isLoading = false;
+        },
+      });
   }
 }

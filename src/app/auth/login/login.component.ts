@@ -3,11 +3,19 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { AlertService } from '../../services/alert.service';
+import { MatIconModule } from '@angular/material/icon';
+import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+
+interface LoginResponse {
+  auth: boolean;
+  role: string | null;
+}
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatIconModule, LoadingOverlayComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
@@ -16,8 +24,13 @@ export class LoginComponent {
   password: string = '';
   errorMessage: string = '';
   isLoading: boolean = false;
+  showPassword: boolean = false;
 
-  constructor(private router: Router, private auth: AuthService) {}
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+    private alertService: AlertService
+  ) {}
 
   signUp() {
     this.router.navigate(['/auth/sign-up']);
@@ -27,9 +40,14 @@ export class LoginComponent {
     this.router.navigate(['/auth/forgot-password']);
   }
 
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
   onSubmit() {
     if (!this.email || !this.password) {
       this.errorMessage = 'Please enter your email and password.';
+      this.alertService.error('Please enter your email and password.');
       return;
     }
 
@@ -37,15 +55,26 @@ export class LoginComponent {
     this.errorMessage = '';
 
     this.auth.login(this.email, this.password).subscribe({
-      next: (response) => {
+      next: (response: LoginResponse) => {
         if (response.auth) {
-          this.router.navigate(['/dashboard']);
+          // Successful login
+          this.alertService.success('Login successful! Welcome back.');
+          // Navigate after a short delay to show the success alert
+          setTimeout(() => {
+            this.router.navigate(['/dashboard']);
+          }, 1000);
         } else {
           this.errorMessage = 'Invalid email or password.';
+          this.alertService.error(
+            'Invalid email or password. Please try again.'
+          );
         }
       },
-      error: (error) => {
-        this.errorMessage = 'An error occurred. Please try again.';
+      error: (error: any) => {
+        const errorMsg =
+          error?.error?.message || 'An error occurred. Please try again.';
+        this.errorMessage = errorMsg;
+        this.alertService.error(errorMsg);
         console.error('Login error:', error);
       },
       complete: () => {
