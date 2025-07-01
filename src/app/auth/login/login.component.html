@@ -20,14 +20,12 @@
     <div class="w-full p-4">
       <form (ngSubmit)="onSubmit()" class="login-form space-y-4">
         <div>
-          <label for="username" class="block text-gray-800 text-sm"
-            >Email</label
-          >
+          <label for="email" class="block text-gray-800 text-sm">Email</label>
           <input
-            id="username"
+            id="email"
             type="text"
-            [(ngModel)]="username"
-            name="username"
+            [(ngModel)]="email"
+            name="email"
             required
             class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />

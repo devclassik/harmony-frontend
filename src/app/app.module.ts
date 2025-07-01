@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CalendarModule, CalendarUtils, DateAdapter } from 'angular-calendar';
@@ -14,8 +15,7 @@ import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
       provide: DateAdapter,
       useFactory: adapterFactory,
     }),
-    
+    ReactiveFormsModule,
   ],
-
 })
-export class AppModule { }
+export class AppModule {}
