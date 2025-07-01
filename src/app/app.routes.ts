@@ -25,6 +25,7 @@ import { CampMeetingComponent } from './pages/camp-meeting/camp-meeting.componen
 import { InboxComponent } from './pages/inbox/inbox.component';
 import { NotificationsComponent } from './pages/notifications/notifications.component';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { ProfileCreateComponent } from './pages/profile-create/profile-create.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
@@ -63,6 +64,11 @@ export const routes: Routes = [
       {
         path: 'profile',
         component: ProfileComponent,
+        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+      },
+      {
+        path: 'profile/create',
+        component: ProfileCreateComponent,
         canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
       },
       {

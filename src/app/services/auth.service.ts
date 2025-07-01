@@ -206,12 +206,12 @@ export class AuthService {
   }
 
   login(
-    username: string,
+    email: string,
     password: string
   ): Observable<{ auth: boolean; role: string | null }> {
     // For development, use mock login
     if (environment.production === false) {
-      if (username === 'admin' && password === 'qaz') {
+      if (email === 'admin' && password === 'qaz') {
         const mockUser: User = {
           name: 'John D.',
           fullName: 'John Doe',
@@ -225,7 +225,7 @@ export class AuthService {
       }
 
       // Add mock user with role "user"
-      if (username === 'user' && password === 'qaz') {
+      if (email === 'user' && password === 'qaz') {
         const mockUser: User = {
           name: 'Jane S.',
           fullName: 'Jane Smith',
@@ -243,10 +243,13 @@ export class AuthService {
 
     // For production, use actual API
     return this.http
-      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, {
-        username,
-        password,
-      })
+      .post<LoginResponse>(
+        `${environment.apiUrl}${environment.routes.auth.login}`,
+        {
+          email,
+          password,
+        }
+      )
       .pipe(
         map((response) => {
           this.setAuthState(response.token, response.user);

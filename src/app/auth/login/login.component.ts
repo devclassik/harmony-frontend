@@ -9,18 +9,15 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
 })
 export class LoginComponent {
-  username: string = '';
+  email: string = '';
   password: string = '';
   errorMessage: string = '';
   isLoading: boolean = false;
 
-  constructor(
-    private router: Router,
-    private auth: AuthService
-  ) { }
+  constructor(private router: Router, private auth: AuthService) {}
 
   signUp() {
     this.router.navigate(['/auth/sign-up']);
@@ -31,20 +28,20 @@ export class LoginComponent {
   }
 
   onSubmit() {
-    if (!this.username || !this.password) {
-      this.errorMessage = 'Please enter your username and password.';
+    if (!this.email || !this.password) {
+      this.errorMessage = 'Please enter your email and password.';
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.auth.login(this.username, this.password).subscribe({
+    this.auth.login(this.email, this.password).subscribe({
       next: (response) => {
         if (response.auth) {
           this.router.navigate(['/dashboard']);
         } else {
-          this.errorMessage = 'Invalid username or password.';
+          this.errorMessage = 'Invalid email or password.';
         }
       },
       error: (error) => {
@@ -53,7 +50,7 @@ export class LoginComponent {
       },
       complete: () => {
         this.isLoading = false;
-      }
+      },
     });
   }
 }
