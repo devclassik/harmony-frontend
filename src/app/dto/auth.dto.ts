@@ -48,3 +48,49 @@ export interface DataResponse {
   user: UserOTP;
   token: string;
 }
+
+// Password Reset DTOs
+export interface PasswordResetInitiateRequest {
+  email: string;
+}
+
+export interface PasswordResetInitiateResponse {
+  status: string;
+  message: string;
+  data?: any;
+}
+
+export interface PasswordResetVerifyRequest {
+  email: string;
+  otp: string;
+}
+
+export interface PasswordResetVerifyResponse {
+  status: string;
+  message: string;
+  success?: boolean;
+  data?: any;
+}
+
+export interface PasswordResetResendRequest {
+  email: string;
+}
+
+export interface PasswordResetResendResponse {
+  status: string;
+  message: string;
+  data?: any;
+}
+
+export interface PasswordResetFinalizeRequest {
+  email: string;
+  otp: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface PasswordResetFinalizeResponse {
+  status: string;
+  message: string;
+  data?: any;
+}

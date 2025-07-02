@@ -222,13 +222,13 @@
 <!-- Loading Overlay -->
 <app-loading-overlay
   [isVisible]="isLoading && !showModal"
-  title="Creating your account..."
-  message="Please wait while we set up your Harmony account."
+  [title]="getLoadingMessage().title"
+  [message]="getLoadingMessage().message"
 ></app-loading-overlay>
 
 <!-- OTP Verification Loading Overlay -->
 <app-loading-overlay
   [isVisible]="isLoading && showModal"
-  title="Verifying your email..."
-  message="Please wait while we confirm your email address."
+  [title]="getLoadingMessage().title"
+  [message]="getLoadingMessage().message"
 ></app-loading-overlay>

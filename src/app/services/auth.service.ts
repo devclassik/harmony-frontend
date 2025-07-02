@@ -12,8 +12,10 @@ import {
   RegisterResponse,
   VerifyOtpRequest,
   VerifyOtpResponse,
-  ResentOtpRequest,
-  ResendOtpResponse,
+  PasswordResetInitiateResponse,
+  PasswordResetVerifyResponse,
+  PasswordResetResendResponse,
+  PasswordResetFinalizeResponse,
 } from '../dto';
 
 @Injectable({
@@ -152,5 +154,51 @@ export class AuthService {
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userFullName');
     this.currentUser = null;
+  }
+
+  // Password Reset Methods
+  initiatePasswordReset(
+    email: string
+  ): Observable<PasswordResetInitiateResponse> {
+    return this.http.post<PasswordResetInitiateResponse>(
+      `${environment.apiUrl}${environment.routes.auth.passwordReset.initiate}`,
+      { email }
+    );
+  }
+
+  verifyPasswordResetOtp(
+    email: string,
+    otp: string
+  ): Observable<PasswordResetVerifyResponse> {
+    return this.http.post<PasswordResetVerifyResponse>(
+      `${environment.apiUrl}${environment.routes.auth.passwordReset.verify}`,
+      { email, otp }
+    );
+  }
+
+  resendPasswordResetOtp(
+    email: string
+  ): Observable<PasswordResetResendResponse> {
+    return this.http.post<PasswordResetResendResponse>(
+      `${environment.apiUrl}${environment.routes.auth.passwordReset.resendOtp}`,
+      { email }
+    );
+  }
+
+  finalizePasswordReset(
+    email: string,
+    otp: string,
+    newPassword: string,
+    confirmPassword: string
+  ): Observable<PasswordResetFinalizeResponse> {
+    return this.http.post<PasswordResetFinalizeResponse>(
+      `${environment.apiUrl}${environment.routes.auth.passwordReset.finalize}`,
+      {
+        email,
+        otp,
+        newPassword,
+        confirmPassword,
+      }
+    );
   }
 }

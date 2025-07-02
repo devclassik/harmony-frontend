@@ -46,6 +46,7 @@ export class SignUpComponent {
   isLoading: boolean = false;
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
+  currentOperation: 'register' | 'verify' | 'resend' | null = null;
 
   constructor(
     private router: Router,
@@ -67,6 +68,7 @@ export class SignUpComponent {
 
   onSubmit() {
     this.isLoading = true;
+    this.currentOperation = 'register';
 
     // Validate form
     if (
@@ -77,6 +79,7 @@ export class SignUpComponent {
       !this.form.confirmPassword
     ) {
       this.isLoading = false;
+      this.currentOperation = null;
       this.alertService.error('Please fill all the input.');
       return;
     }
@@ -85,6 +88,7 @@ export class SignUpComponent {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.form.email)) {
       this.isLoading = false;
+      this.currentOperation = null;
       this.alertService.error('Please enter a valid email address.');
       return;
     }
@@ -92,6 +96,7 @@ export class SignUpComponent {
     // Validate password match
     if (this.form.password !== this.form.confirmPassword) {
       this.isLoading = false;
+      this.currentOperation = null;
       this.alertService.error('Passwords do not match.');
       return;
     }
@@ -99,6 +104,7 @@ export class SignUpComponent {
     // Validate password strength
     if (this.form.password.length < 6) {
       this.isLoading = false;
+      this.currentOperation = null;
       this.alertService.error('Password must be at least 6 characters long.');
       return;
     }
@@ -138,6 +144,7 @@ export class SignUpComponent {
         },
         complete: () => {
           this.isLoading = false;
+          this.currentOperation = null;
         },
       });
   }
@@ -149,6 +156,7 @@ export class SignUpComponent {
 
   handleSubmit(event: any) {
     this.isLoading = true;
+    this.currentOperation = 'verify';
 
     this.auth
       .verifyOtp({
@@ -187,6 +195,7 @@ export class SignUpComponent {
         },
         complete: () => {
           this.isLoading = false;
+          this.currentOperation = null;
         },
       });
   }
@@ -198,6 +207,7 @@ export class SignUpComponent {
     }
 
     this.isLoading = true;
+    this.currentOperation = 'resend';
 
     this.auth
       .register({
@@ -224,7 +234,33 @@ export class SignUpComponent {
         },
         complete: () => {
           this.isLoading = false;
+          this.currentOperation = null;
         },
       });
+  }
+
+  getLoadingMessage(): { title: string; message: string } {
+    switch (this.currentOperation) {
+      case 'register':
+        return {
+          title: 'Creating your account...',
+          message: 'Please wait while we set up your Harmony account.',
+        };
+      case 'verify':
+        return {
+          title: 'Verifying your email...',
+          message: 'Please wait while we confirm your email address.',
+        };
+      case 'resend':
+        return {
+          title: 'Resending verification code...',
+          message: 'Please wait while we send a new code to your email.',
+        };
+      default:
+        return {
+          title: 'Please wait...',
+          message: 'Processing your request.',
+        };
+    }
   }
 }

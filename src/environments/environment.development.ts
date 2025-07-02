@@ -10,6 +10,12 @@ export const environment = {
       refresh: '/auth/refresh-token',
       forgotPassword: '/auth/forgot-password',
       resetPassword: '/auth/reset-password',
+      passwordReset: {
+        initiate: '/auth/password-reset/initiate',
+        verify: '/auth/password-reset/verify',
+        resendOtp: '/auth/resend-otp/password-reset',
+        finalize: '/auth/password-reset/finalize',
+      },
     },
     users: {
       getAll: '/users',
