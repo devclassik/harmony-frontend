@@ -6,6 +6,7 @@ import {
   Input,
 } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
+import { PermissionService } from '../../services/permission.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -44,6 +45,7 @@ export class SideBarComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private permissionService: PermissionService,
     private router: Router,
     private el: ElementRef
   ) {
@@ -131,40 +133,102 @@ export class SideBarComponent implements OnInit {
     ].some((path) => this.router.isActive(path, false));
   }
 
-  // Role-based visibility methods
+  // Permission-based visibility methods using PermissionService
+  canViewDashboard(): boolean {
+    return this.permissionService.canViewDashboard();
+  }
+
   canViewEmployeeRecords(): boolean {
-    return ['admin', 'hr'].includes(this.userRole || '');
+    return this.permissionService.canViewEmployeeRecords();
   }
 
   canViewReportingAnalytics(): boolean {
-    return ['admin', 'hr', 'manager'].includes(this.userRole || '');
+    return this.permissionService.canViewReports();
   }
 
   canViewEmployeeManagement(): boolean {
-    return ['admin', 'hr'].includes(this.userRole || '');
+    return this.permissionService.canViewEmployeeManagement();
   }
 
   canViewLeaveManagement(): boolean {
-    return ['admin', 'hr', 'manager', 'user'].includes(this.userRole || '');
+    return this.permissionService.canViewLeaveManagement();
   }
 
   canViewFileIndex(): boolean {
-    return ['admin', 'hr', 'user'].includes(this.userRole || '');
+    return this.permissionService.canViewDocuments();
   }
 
   canViewPayroll(): boolean {
-    return ['admin', 'hr'].includes(this.userRole || '');
+    return this.permissionService.canViewPayroll();
   }
 
   canViewCalendar(): boolean {
-    return ['admin', 'hr', 'manager'].includes(this.userRole || '');
+    return this.permissionService.canViewMeeting();
   }
 
   canViewSettings(): boolean {
-    return ['admin', 'hr', 'manager'].includes(this.userRole || '');
+    return (
+      this.permissionService.canViewOrganization() ||
+      this.permissionService.canViewDepartments() ||
+      this.permissionService.canViewPermissions()
+    );
   }
 
   canViewCampMeeting(): boolean {
-    return ['user'].includes(this.userRole || '');
+    return this.permissionService.canViewMeeting();
+  }
+
+  canViewNotifications(): boolean {
+    return this.permissionService.canViewNotifications();
+  }
+
+  canViewAccommodation(): boolean {
+    return this.permissionService.canViewAccommodation();
+  }
+
+  // Individual employee management permissions
+  canViewPromotion(): boolean {
+    return this.permissionService.canAccess('Promotion');
+  }
+
+  canViewTransfer(): boolean {
+    return this.permissionService.canAccess('Transfer');
+  }
+
+  canViewRetirement(): boolean {
+    return this.permissionService.canAccess('Retirement');
+  }
+
+  canViewRetrenchment(): boolean {
+    return this.permissionService.canAccess('Retrenchment');
+  }
+
+  canViewDiscipline(): boolean {
+    return this.permissionService.canAccess('Discipline');
+  }
+
+  // Action-based permissions for components that need create/edit/delete
+  canCreateEmployee(): boolean {
+    return this.permissionService.hasPermission('Employee', 'create');
+  }
+
+  canEditEmployee(): boolean {
+    return this.permissionService.hasPermission('Employee', 'edit');
+  }
+
+  canDeleteEmployee(): boolean {
+    return this.permissionService.hasPermission('Employee', 'delete');
+  }
+
+  canCreateLeave(): boolean {
+    return this.permissionService.hasPermission('Leave', 'create');
+  }
+
+  canEditLeave(): boolean {
+    return this.permissionService.hasPermission('Leave', 'edit');
+  }
+
+  canDeleteLeave(): boolean {
+    return this.permissionService.hasPermission('Leave', 'delete');
   }
 }

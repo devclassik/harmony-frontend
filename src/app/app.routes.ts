@@ -3,7 +3,7 @@ import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
-import { roleGuard } from './guards/role.guard';
+import { permissionGuard } from './guards/permission.guard';
 import { LayoutComponent } from './components/layout/layout.component';
 import { LoginComponent } from './auth/login/login.component';
 import { SignUpComponent } from './auth/sign-up/sign-up.component';
@@ -60,101 +60,105 @@ export const routes: Routes = [
     component: LayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
+      {
+        path: 'dashboard',
+        component: DashboardComponent,
+        canActivate: [permissionGuard('Dashboard')],
+      },
       {
         path: 'profile',
         component: ProfileComponent,
-        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+        canActivate: [authGuard], // Profile access for all authenticated users
       },
       {
         path: 'profile/create',
         component: ProfileCreateComponent,
-        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+        canActivate: [authGuard], // Profile creation for all authenticated users
       },
       {
         path: 'employee-records',
         component: EmployeeRecordsComponent,
-        canActivate: [roleGuard(['admin', 'hr'])],
+        canActivate: [permissionGuard('Employee')],
       },
       {
         path: 'reporting-and-analytics',
         component: ReportingAndAnalyticsComponent,
-        canActivate: [roleGuard(['admin', 'hr', 'manager'])],
+        canActivate: [permissionGuard('Report')],
       },
       {
         path: 'employee-management/promotion',
         component: EmployeePromotionComponent,
-        canActivate: [roleGuard(['admin', 'hr'])],
+        canActivate: [permissionGuard('Promotion')],
       },
       {
         path: 'employee-management/discipline',
         component: EmployeeDisciplineComponent,
-        canActivate: [roleGuard(['admin', 'hr'])],
+        canActivate: [permissionGuard('Discipline')],
       },
       {
         path: 'employee-management/transfer',
         component: EmployeeTransferComponent,
-        canActivate: [roleGuard(['admin', 'hr'])],
+        canActivate: [permissionGuard('Transfer')],
       },
       {
         path: 'employee-management/retirement',
         component: EmployeeRetirementComponent,
-        canActivate: [roleGuard(['admin', 'hr'])],
+        canActivate: [permissionGuard('Retirement')],
       },
       {
         path: 'employee-management/retrenchment',
         component: EmployeeRetrenchmentComponent,
-        canActivate: [roleGuard(['admin', 'hr'])],
+        canActivate: [permissionGuard('Retrenchment')],
       },
       {
         path: 'leave-management/annual-leave',
         component: AnnualLeaveComponent,
-        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+        canActivate: [permissionGuard('Leave')],
       },
       {
         path: 'leave-management/leave-of-absence',
         component: LeaveOfAbsenceComponent,
-        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+        canActivate: [permissionGuard('Leave')],
       },
       {
         path: 'leave-management/sick-leave',
         component: SickLeaveComponent,
-        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+        canActivate: [permissionGuard('Leave')],
       },
       {
         path: 'file-index',
         component: IndexOfFileComponent,
-        canActivate: [roleGuard(['admin', 'hr', 'user'])],
+        canActivate: [permissionGuard('Document')],
       },
       {
         path: 'payroll',
         component: PayrollComponent,
-        canActivate: [roleGuard(['admin', 'hr'])],
+        canActivate: [permissionGuard('Payroll')],
       },
       {
         path: 'camp-meeting',
         component: CampMeetingComponent,
-        canActivate: [roleGuard(['user', 'admin', 'manager'])],
+        canActivate: [permissionGuard('Meeting')],
       },
       {
         path: 'inbox',
         component: InboxComponent,
-        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+        canActivate: [authGuard], // Inbox access for all authenticated users
       },
       {
         path: 'notifications',
         component: NotificationsComponent,
-        canActivate: [roleGuard(['admin', 'hr', 'manager', 'user'])],
+        canActivate: [permissionGuard('Notification')],
       },
       {
         path: 'admin',
         component: DashboardComponent,
-        canActivate: [roleGuard(['admin'])],
+        canActivate: [permissionGuard('Dashboard')],
       },
       {
         path: 'user',
         component: DashboardComponent,
-        canActivate: [roleGuard(['user'])],
+        canActivate: [permissionGuard('Dashboard')],
       },
     ],
   },
