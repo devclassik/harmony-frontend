@@ -109,7 +109,8 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     const token = localStorage.getItem('token');
-    return !!token;
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    return !!token && isLoggedIn;
   }
 
   getUserRole(): string | null {
@@ -174,6 +175,7 @@ export class AuthService {
     localStorage.setItem('userRole', user.role);
     localStorage.setItem('userEmail', user.email);
     localStorage.setItem('userFullName', user.fullName);
+    localStorage.setItem('isLoggedIn', isLoggedIn.toString());
     localStorage.setItem('roleId', role.id.toString());
     localStorage.setItem('permissions', JSON.stringify(role.permissions));
 
@@ -186,9 +188,10 @@ export class AuthService {
     const userRole = localStorage.getItem('userRole');
     const userEmail = localStorage.getItem('userEmail');
     const userFullName = localStorage.getItem('userFullName');
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const permissionsStr = localStorage.getItem('permissions');
 
-    if (token && userRole && userEmail && userFullName) {
+    if (token && userRole && userEmail && userFullName && isLoggedIn) {
       this.currentUser = {
         name: userFullName.split(' ')[0] || 'User',
         fullName: userFullName,
@@ -212,6 +215,7 @@ export class AuthService {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userFullName');
+    localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('roleId');
     localStorage.removeItem('permissions');
     this.currentUser = null;
