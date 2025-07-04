@@ -16,6 +16,8 @@ import {
   PasswordResetVerifyResponse,
   PasswordResetResendResponse,
   PasswordResetFinalizeResponse,
+  Permission,
+  UserRole,
 } from '../dto';
 
 @Injectable({
@@ -23,6 +25,7 @@ import {
 })
 export class AuthService {
   private currentUser: User | null = null;
+  private currentPermissions: Permission[] = [];
 
   constructor(private router: Router, private http: HttpClient) {
     this.loadAuthState();
@@ -79,13 +82,18 @@ export class AuthService {
       )
       .pipe(
         map((response) => {
-          const user = this.mapEmployeeToUser(
-            response.data.employee,
-            response.data.email,
-            response.data.role.name
-          );
-          this.setAuthState(response.data.token, user);
-          return { auth: true, role: response.data.role.name };
+          if (response.status === 'success' && response.data) {
+            const { data } = response;
+            const user = this.mapEmployeeToUser(
+              data.employee,
+              data.email,
+              data.role.name
+            );
+            this.setAuthState(data.token, user, data.role, data.isLoggedIn);
+            return { auth: true, role: data.role.name };
+          } else {
+            return { auth: false, role: null };
+          }
         }),
         catchError((error) => {
           console.error('Login error:', error);
@@ -100,7 +108,9 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    return !!token && isLoggedIn;
   }
 
   getUserRole(): string | null {
@@ -109,6 +119,37 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     return this.currentUser;
+  }
+
+  getPermissions(): Permission[] {
+    return this.currentPermissions;
+  }
+
+  hasPermission(
+    feature: string,
+    action: 'view' | 'create' | 'edit' | 'delete'
+  ): boolean {
+    const permission = this.currentPermissions.find(
+      (p) => p.feature === feature
+    );
+    if (!permission) return false;
+
+    switch (action) {
+      case 'view':
+        return permission.canView;
+      case 'create':
+        return permission.canCreate;
+      case 'edit':
+        return permission.canEdit;
+      case 'delete':
+        return permission.canDelete;
+      default:
+        return false;
+    }
+  }
+
+  canAccessFeature(feature: string): boolean {
+    return this.hasPermission(feature, 'view');
   }
 
   private mapEmployeeToUser(
@@ -124,12 +165,22 @@ export class AuthService {
     };
   }
 
-  private setAuthState(token: string, user: User): void {
+  private setAuthState(
+    token: string,
+    user: User,
+    role: UserRole,
+    isLoggedIn: boolean
+  ): void {
     localStorage.setItem('token', token);
     localStorage.setItem('userRole', user.role);
     localStorage.setItem('userEmail', user.email);
     localStorage.setItem('userFullName', user.fullName);
+    localStorage.setItem('isLoggedIn', isLoggedIn.toString());
+    localStorage.setItem('roleId', role.id.toString());
+    localStorage.setItem('permissions', JSON.stringify(role.permissions));
+
     this.currentUser = user;
+    this.currentPermissions = role.permissions;
   }
 
   private loadAuthState(): void {
@@ -137,14 +188,25 @@ export class AuthService {
     const userRole = localStorage.getItem('userRole');
     const userEmail = localStorage.getItem('userEmail');
     const userFullName = localStorage.getItem('userFullName');
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const permissionsStr = localStorage.getItem('permissions');
 
-    if (token && userRole && userEmail && userFullName) {
+    if (token && userRole && userEmail && userFullName && isLoggedIn) {
       this.currentUser = {
         name: userFullName.split(' ')[0] || 'User',
         fullName: userFullName,
         email: userEmail,
         role: userRole,
       };
+
+      if (permissionsStr) {
+        try {
+          this.currentPermissions = JSON.parse(permissionsStr);
+        } catch (error) {
+          console.error('Error parsing permissions from localStorage:', error);
+          this.currentPermissions = [];
+        }
+      }
     }
   }
 
@@ -153,7 +215,11 @@ export class AuthService {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userFullName');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('roleId');
+    localStorage.removeItem('permissions');
     this.currentUser = null;
+    this.currentPermissions = [];
   }
 
   // Password Reset Methods

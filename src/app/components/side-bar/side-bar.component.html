@@ -41,7 +41,7 @@
     <nav class="flex-1">
       <ul class="mb-6 flex flex-col gap-2">
         <!-- Dashboard -->
-        <li class="menu-item">
+        <li class="menu-item" *ngIf="canViewDashboard()">
           <a
             routerLink="/dashboard"
             routerLinkActive="bg-[#12C16F] text-white"
@@ -154,6 +154,7 @@
               class="mt-2 ml-4 flex flex-col gap-2 px-4 list-none"
             >
               <a
+                *ngIf="canViewPromotion()"
                 routerLink="employee-management/promotion"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
@@ -172,6 +173,7 @@
                 >Promotion</a
               >
               <a
+                *ngIf="canViewDiscipline()"
                 routerLink="employee-management/discipline"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
@@ -190,6 +192,7 @@
                 >Discipline</a
               >
               <a
+                *ngIf="canViewTransfer()"
                 routerLink="employee-management/transfer"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
@@ -208,6 +211,7 @@
                 >Transfer</a
               >
               <a
+                *ngIf="canViewRetirement()"
                 routerLink="employee-management/retirement"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
@@ -226,6 +230,7 @@
                 >Retirement</a
               >
               <a
+                *ngIf="canViewRetrenchment()"
                 routerLink="employee-management/retrenchment"
                 routerLinkActive="router-active"
                 [routerLinkActiveOptions]="{ exact: true }"
