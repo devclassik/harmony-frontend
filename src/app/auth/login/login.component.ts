@@ -56,7 +56,7 @@ export class LoginComponent {
         // Navigate after a short delay to show the success alert
         setTimeout(() => {
           this.router.navigate(['/dashboard']);
-        }, 1000);
+        }, 500);
       },
       error: (error: any) => {
         const errorMsg =

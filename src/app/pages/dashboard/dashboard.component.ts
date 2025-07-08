@@ -139,6 +139,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Get worker's name from employee data or auth service
   getWorkerName(): string {
     // Use employee data if available
+    console.log(this.employeeData); // Debug log
+    
     if (this.employeeData) {
       const preferredName =
         this.employeeData.profferedName ||

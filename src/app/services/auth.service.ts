@@ -113,7 +113,7 @@ export class AuthService {
     return !!token && isLoggedIn;
   }
 
-  getWorkerRole(): string | null {
+  getWorkerRole(): string | null {    
     return localStorage.getItem('workerRole');
   }
 
