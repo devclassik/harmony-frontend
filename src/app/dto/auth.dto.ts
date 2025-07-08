@@ -17,7 +17,7 @@ export interface RegisterRequest {
   lastName: string;
   email: string;
   password: string;
-  role?: string;
+  roleId?: number;
 }
 
 export interface RegisterResponse {
