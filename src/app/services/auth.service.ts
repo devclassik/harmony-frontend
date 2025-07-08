@@ -5,7 +5,7 @@ import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import {
-  User,
+  Worker,
   Employee,
   LoginResponse,
   RegisterRequest,
@@ -17,14 +17,14 @@ import {
   PasswordResetResendResponse,
   PasswordResetFinalizeResponse,
   Permission,
-  UserRole,
+  WorkerRole,
 } from '../dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private currentUser: User | null = null;
+  private currentWorker: Worker | null = null;
   private currentPermissions: Permission[] = [];
 
   constructor(private router: Router, private http: HttpClient) {
@@ -68,10 +68,7 @@ export class AuthService {
       );
   }
 
-  login(
-    email: string,
-    password: string
-  ): Observable<{ auth: boolean; role: string | null }> {
+  login(email: string, password: string): Observable<void> {
     return this.http
       .post<LoginResponse>(
         `${environment.apiUrl}${environment.routes.auth.login}`,
@@ -84,20 +81,23 @@ export class AuthService {
         map((response) => {
           if (response.status === 'success' && response.data) {
             const { data } = response;
-            const user = this.mapEmployeeToUser(
+            const worker = this.mapEmployeeToWorker(
               data.employee,
               data.email,
               data.role.name
             );
-            this.setAuthState(data.token, user, data.role, data.isLoggedIn);
-            return { auth: true, role: data.role.name };
+            this.setAuthState(data.token, worker, data.role, data.isLoggedIn);
+            return; // Success - return void
           } else {
-            return { auth: false, role: null };
+            throw new Error('Login failed: Invalid credentials');
           }
         }),
         catchError((error) => {
           console.error('Login error:', error);
-          return of({ auth: false, role: null });
+          const errorMessage =
+            error?.error?.message ||
+            'Login failed: Please check your credentials';
+          throw new Error(errorMessage);
         })
       );
   }
@@ -113,12 +113,12 @@ export class AuthService {
     return !!token && isLoggedIn;
   }
 
-  getUserRole(): string | null {
-    return localStorage.getItem('userRole');
+  getWorkerRole(): string | null {
+    return localStorage.getItem('workerRole');
   }
 
-  getCurrentUser(): User | null {
-    return this.currentUser;
+  getCurrentWorker(): Worker | null {
+    return this.currentWorker;
   }
 
   getPermissions(): Permission[] {
@@ -152,51 +152,51 @@ export class AuthService {
     return this.hasPermission(feature, 'view');
   }
 
-  private mapEmployeeToUser(
+  private mapEmployeeToWorker(
     employee: Employee,
     email: string,
     roleName: string
-  ): User {
+  ): Worker {
     return {
       name: employee.profferedName || employee.firstName,
       fullName: `${employee.firstName} ${employee.lastName}`,
       email: email,
-      role: roleName,
+      role: roleName.toLowerCase(),
     };
   }
 
   private setAuthState(
     token: string,
-    user: User,
-    role: UserRole,
+    worker: Worker,
+    role: WorkerRole,
     isLoggedIn: boolean
   ): void {
     localStorage.setItem('token', token);
-    localStorage.setItem('userRole', user.role);
-    localStorage.setItem('userEmail', user.email);
-    localStorage.setItem('userFullName', user.fullName);
+    localStorage.setItem('workerRole', worker.role.toLowerCase());
+    localStorage.setItem('workerEmail', worker.email);
+    localStorage.setItem('workerFullName', worker.fullName);
     localStorage.setItem('isLoggedIn', isLoggedIn.toString());
     localStorage.setItem('roleId', role.id.toString());
     localStorage.setItem('permissions', JSON.stringify(role.permissions));
 
-    this.currentUser = user;
+    this.currentWorker = { ...worker, role: worker.role.toLowerCase() };
     this.currentPermissions = role.permissions;
   }
 
   private loadAuthState(): void {
     const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('userRole');
-    const userEmail = localStorage.getItem('userEmail');
-    const userFullName = localStorage.getItem('userFullName');
+    const workerRole = localStorage.getItem('workerRole');
+    const workerEmail = localStorage.getItem('workerEmail');
+    const workerFullName = localStorage.getItem('workerFullName');
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const permissionsStr = localStorage.getItem('permissions');
 
-    if (token && userRole && userEmail && userFullName && isLoggedIn) {
-      this.currentUser = {
-        name: userFullName.split(' ')[0] || 'User',
-        fullName: userFullName,
-        email: userEmail,
-        role: userRole,
+    if (token && workerRole && workerEmail && workerFullName && isLoggedIn) {
+      this.currentWorker = {
+        name: workerFullName.split(' ')[0] || 'Worker',
+        fullName: workerFullName,
+        email: workerEmail,
+        role: workerRole,
       };
 
       if (permissionsStr) {
@@ -212,13 +212,13 @@ export class AuthService {
 
   private clearAuthState(): void {
     localStorage.removeItem('token');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userFullName');
+    localStorage.removeItem('workerRole');
+    localStorage.removeItem('workerEmail');
+    localStorage.removeItem('workerFullName');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('roleId');
     localStorage.removeItem('permissions');
-    this.currentUser = null;
+    this.currentWorker = null;
     this.currentPermissions = [];
   }
 

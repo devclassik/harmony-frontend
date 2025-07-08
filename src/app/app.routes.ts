@@ -26,6 +26,7 @@ import { InboxComponent } from './pages/inbox/inbox.component';
 import { NotificationsComponent } from './pages/notifications/notifications.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ProfileCreateComponent } from './pages/profile-create/profile-create.component';
+import { ProfileViewComponent } from './pages/profile-view/profile-view.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
@@ -74,6 +75,11 @@ export const routes: Routes = [
         path: 'profile/create',
         component: ProfileCreateComponent,
         canActivate: [authGuard], // Profile creation for all authenticated users
+      },
+      {
+        path: 'profile-view',
+        component: ProfileViewComponent,
+        canActivate: [authGuard], // Profile view for all authenticated users
       },
       {
         path: 'employee-records',

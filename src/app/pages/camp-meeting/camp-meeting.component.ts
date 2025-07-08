@@ -126,8 +126,8 @@ export class CampMeetingComponent implements OnInit {
   };
 
   constructor(private authService: AuthService) {
-    this.userRole = this.authService.getUserRole();
-    this.currentUser = this.authService.getCurrentUser();
+    this.userRole = this.authService.getWorkerRole();
+    this.currentUser = this.authService.getCurrentWorker();
   }
 
   ngOnInit() {

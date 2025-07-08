@@ -1,8 +1,9 @@
 <!-- Welcome Screen Animation Overlay -->
 <div
   *ngIf="show"
-  class="fixed inset-0 z-40"
+  class="fixed inset-0 z-40 cursor-pointer"
   style="background-color: rgba(0, 0, 0, 0.1)"
+  (click)="onOverlayClick($event)"
 >
   <!-- Arrow pointing UP to profile picture in navbar -->
   <div class="absolute top-12 right-16 z-50">

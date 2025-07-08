@@ -1,4 +1,4 @@
-<div *ngIf="userRole !== 'user'">
+<div *ngIf="userRole?.toLowerCase() !== 'worker'">
   <div class="p-2">
     <app-table
       [tableTitle]="'Leave of Absence'"
@@ -23,7 +23,7 @@
   </div>
 </div>
 
-<div *ngIf="userRole === 'user'">
+<div *ngIf="userRole?.toLowerCase() === 'worker'">
   <div class="p-2">
     <app-table
       [tableTitle]="'Leave of Absence'"

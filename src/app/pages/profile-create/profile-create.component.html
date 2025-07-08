@@ -1,5 +1,16 @@
 <div class="min-h-screen bg-gray-50 w-full px-6">
-  <!-- Header with back arrow and Create Profile (on gray background) -->
+  <!-- Loading Overlay -->
+  <app-loading-overlay
+    [isVisible]="isSubmitting"
+    [title]="isEditMode ? 'Updating Profile' : 'Creating Profile'"
+    [message]="
+      isEditMode
+        ? 'Saving your profile changes...'
+        : 'Creating your new profile...'
+    "
+  ></app-loading-overlay>
+
+  <!-- Header with back arrow and Create/Edit Profile (on gray background) -->
   <div class="flex items-center pt-8 pb-2">
     <button
       (click)="goBack()"
@@ -8,7 +19,9 @@
     >
       <span class="material-icons text-2xl cursor-pointer">arrow_back</span>
     </button>
-    <h2 class="text-lg font-semibold text-gray-900">Create Profile</h2>
+    <h2 class="text-lg font-semibold text-gray-900">
+      {{ isEditMode ? "Edit Profile" : "Create Profile" }}
+    </h2>
   </div>
 
   <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="space-y-8">
@@ -2111,7 +2124,7 @@
             : 'bg-gray-300 text-gray-500 cursor-not-allowed')
         "
       >
-        Submit
+        {{ isEditMode ? "Update Profile" : "Submit" }}
       </button>
     </div>
   </form>

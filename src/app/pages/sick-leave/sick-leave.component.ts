@@ -49,7 +49,7 @@ export class SickLeaveComponent {
   selectedSickLeaveData: TableData | null = null;
 
   constructor(private authService: AuthService) {
-    this.userRole = this.authService.getUserRole();
+    this.userRole = this.authService.getWorkerRole();
   }
 
   tableHeader: TableHeader[] = [
@@ -183,7 +183,7 @@ export class SickLeaveComponent {
     console.log(event);
 
     if (event.action === 'View') {
-      if (this.userRole === 'user') {
+      if (this.userRole?.toLowerCase() === 'worker') {
         this.showSickLeaveDetailsModal();
         this.selectedSickLeaveData = event.row;
       } else {

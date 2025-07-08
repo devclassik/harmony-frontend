@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
+import { EmployeeService } from '../../services/employee.service';
 import { CommonModule } from '@angular/common';
 import { DashboardGreetingsComponent } from '../../components/dashboard-greetings/dashboard-greetings.component';
 import { DashboardInformationComponent } from '../../components/dashboard-information/dashboard-information.component';
@@ -14,6 +15,9 @@ import { TableData, EmployeeInfo } from '../../interfaces/employee.interface';
 import { DoughnutChartComponent } from '../../components/doughnut-chart/doughnut-chart.component';
 import { LeaveDetailsComponent } from '../../components/leave-details/leave-details.component';
 import { WelcomeScreenAnimationComponent } from '../../components/welcome-screen-animation/welcome-screen-animation.component';
+import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+import { EmployeeDetails } from '../../dto/employee.dto';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,35 +31,128 @@ import { WelcomeScreenAnimationComponent } from '../../components/welcome-screen
     DoughnutChartComponent,
     LeaveDetailsComponent,
     WelcomeScreenAnimationComponent,
+    LoadingOverlayComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
-export class DashboardComponent {
-  userRole: string | null;
-  currentUser: any;
+export class DashboardComponent implements OnInit, OnDestroy {
+  workerRole: string | null;
+  currentWorker: any;
   showLeaveDetails: boolean = false;
   selectedLeaveData: TableData | null = null;
   showWelcomeAnimation: boolean = false;
+  isLoadingProfile: boolean = false;
+  employeeData: EmployeeDetails | null = null;
 
-  constructor(private authService: AuthService) {
-    this.userRole = this.authService.getUserRole();
-    this.currentUser = this.authService.getCurrentUser();
+  private subscriptions: Subscription[] = [];
 
-    // Show welcome animation for user role only
-    if (this.userRole === 'user') {
-      this.showWelcomeAnimation = true;
+  constructor(
+    private authService: AuthService,
+    private employeeService: EmployeeService
+  ) {
+    this.workerRole = this.authService.getWorkerRole();
+    this.currentWorker = this.authService.getCurrentWorker();
+  }
+
+  ngOnInit() {
+    // Load employee profile and check if animation should be shown
+    if (this.workerRole?.toLowerCase() === 'worker') {
+      this.loadEmployeeProfile();
     }
   }
 
-  // Get user's name from auth service
-  getUserName(): string {
-    if (this.currentUser && this.currentUser.fullName) {
-      return this.currentUser.fullName;
-    } else if (this.currentUser && this.currentUser.name) {
-      return this.currentUser.name;
+  ngOnDestroy() {
+    // Clean up subscriptions
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
+  private loadEmployeeProfile() {
+    this.isLoadingProfile = true;
+
+    // ======= TEMPORARY TESTING OVERRIDE - REMOVE BEFORE PRODUCTION =======
+    // For testing with ehikioyaandrew042@gmail.com, use employee ID 18
+    let employeeId = 18; // Default for testing
+
+    if (this.currentWorker?.email === 'ehikioyaandrew042@gmail.com') {
+      employeeId = 18;
     }
-    return 'User';
+    // ======= END TEMPORARY TESTING OVERRIDE =======
+
+    const profileSub = this.employeeService
+      .getEmployeeById(employeeId)
+      .subscribe({
+        next: (response) => {
+          this.isLoadingProfile = false;
+          if (response.status === 'success' && response.data) {
+            this.employeeData = response.data;
+            this.updateEmployeeInfo();
+
+            // Check if profile is complete and show animation if not
+            const isComplete = this.employeeService.isProfileComplete(
+              response.data
+            );
+            this.showWelcomeAnimation = !isComplete;
+          }
+        },
+        error: (error) => {
+          this.isLoadingProfile = false;
+          console.error('Error loading employee profile:', error);
+          // Show animation if there's an error loading profile (assume incomplete)
+          this.showWelcomeAnimation = true;
+        },
+      });
+
+    this.subscriptions.push(profileSub);
+  }
+
+  private updateEmployeeInfo() {
+    if (this.employeeData) {
+      console.log('Employee photoUrl from API:', this.employeeData.photoUrl); // Debug log
+
+      this.employeeInfo = {
+        id: this.employeeData.employeeId,
+        firstName: this.employeeData.firstName,
+        lastName: this.employeeData.lastName,
+        middleName: this.employeeData.middleName || 'Not specified',
+        title: this.employeeData.title || 'Not specified',
+        preferredName:
+          this.employeeData.profferedName ||
+          `${this.employeeData.firstName} ${this.employeeData.lastName}`,
+        gender: this.employeeData.gender || 'Not specified',
+        profileImage: this.employeeData.photoUrl || 'assets/svg/gender.svg',
+        status:
+          (this.employeeData.employeeStatus as
+            | 'Active'
+            | 'On leave'
+            | 'Retired'
+            | 'On Discipline') || 'Active',
+      };
+
+      console.log(
+        'Updated employeeInfo profileImage:',
+        this.employeeInfo.profileImage
+      ); // Debug log
+    }
+  }
+
+  // Get worker's name from employee data or auth service
+  getWorkerName(): string {
+    // Use employee data if available
+    if (this.employeeData) {
+      const preferredName =
+        this.employeeData.profferedName ||
+        `${this.employeeData.firstName} ${this.employeeData.lastName}`;
+      return preferredName;
+    }
+
+    // Fallback to auth service
+    if (this.currentWorker && this.currentWorker.fullName) {
+      return this.currentWorker.fullName;
+    } else if (this.currentWorker && this.currentWorker.name) {
+      return this.currentWorker.name;
+    }
+    return 'Worker';
   }
 
   // Method to close welcome animation
@@ -63,18 +160,8 @@ export class DashboardComponent {
     this.showWelcomeAnimation = false;
   }
 
-  // Mock employee data for user dashboard
-  employeeInfo: EmployeeInfo = {
-    id: '124-08',
-    firstName: 'John',
-    lastName: 'Adegoke',
-    middleName: 'Tobi',
-    title: 'Church Worker',
-    preferredName: 'John Adegoke',
-    gender: 'Male',
-    profileImage: 'assets/svg/profilePix.svg',
-    status: 'Active',
-  };
+  // Employee data from API - will be populated after API call
+  employeeInfo: EmployeeInfo | null = null;
 
   employees: TableData[] = [
     {
@@ -82,14 +169,14 @@ export class DashboardComponent {
       name: 'John Adegoke',
       role: 'Zonal Pastor',
       status: 'Active',
-      imageUrl: 'assets/svg/profilePix.svg',
+      imageUrl: 'assets/svg/gender.svg',
     },
     {
       id: '124 - 01',
       name: 'John Adegoke',
       role: 'Zonal Pastor',
       status: 'On leave',
-      imageUrl: 'assets/svg/profilePix.svg',
+      imageUrl: 'assets/svg/gender.svg',
     },
     // ... more employees
   ];

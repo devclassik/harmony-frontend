@@ -10,18 +10,18 @@ export const permissionGuard = (
     const router = inject(Router);
     const authService = inject(AuthService);
 
-    // Check if user is logged in
+    // Check if worker is logged in
     if (!authService.isLoggedIn()) {
       router.navigate(['/auth/login']);
       return false;
     }
 
-    // Check if user has the required permission
+    // Check if worker has the required permission
     if (authService.hasPermission(requiredFeature, requiredAction)) {
       return true;
     }
 
-    // If user doesn't have permission, redirect to dashboard with error message
+    // If worker doesn't have permission, redirect to dashboard with error message
     router.navigate(['/dashboard'], {
       queryParams: {
         error: 'You do not have permission to access this feature',

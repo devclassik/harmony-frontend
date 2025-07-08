@@ -49,7 +49,7 @@ export class SideBarComponent implements OnInit {
     private router: Router,
     private el: ElementRef
   ) {
-    this.userRole = this.authService.getUserRole();
+    this.userRole = this.authService.getWorkerRole();
   }
 
   ngOnInit() {

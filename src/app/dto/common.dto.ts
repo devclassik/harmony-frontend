@@ -25,7 +25,7 @@ export interface Permission {
   deletedAt: string | null;
 }
 
-export interface UserRole {
+export interface WorkerRole {
   id: number;
   name: string;
   createdAt: string;
