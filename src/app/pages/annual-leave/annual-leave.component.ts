@@ -52,7 +52,7 @@ export class AnnualLeaveComponent {
   showFilterTabFromParent: boolean = false;
 
   constructor(private authService: AuthService) {
-    this.userRole = this.authService.getUserRole();
+    this.userRole = this.authService.getWorkerRole();
   }
 
   tableHeader: TableHeader[] = [

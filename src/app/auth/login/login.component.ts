@@ -7,11 +7,6 @@ import { AlertService } from '../../services/alert.service';
 import { MatIconModule } from '@angular/material/icon';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 
-interface LoginResponse {
-  auth: boolean;
-  role: string | null;
-}
-
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -55,24 +50,17 @@ export class LoginComponent {
     this.errorMessage = '';
 
     this.auth.login(this.email, this.password).subscribe({
-      next: (response: LoginResponse) => {
-        if (response.auth) {
-          // Successful login
-          this.alertService.success('Login successful! Welcome back.');
-          // Navigate after a short delay to show the success alert
-          setTimeout(() => {
-            this.router.navigate(['/dashboard']);
-          }, 1000);
-        } else {
-          this.errorMessage = 'Invalid email or password.';
-          this.alertService.error(
-            'Invalid email or password. Please try again.'
-          );
-        }
+      next: () => {
+        // Successful login
+        this.alertService.success('Login successful! Welcome back.');
+        // Navigate after a short delay to show the success alert
+        setTimeout(() => {
+          this.router.navigate(['/dashboard']);
+        }, 1000);
       },
       error: (error: any) => {
         const errorMsg =
-          error?.error?.message || 'An error occurred. Please try again.';
+          error?.message || 'An error occurred. Please try again.';
         this.errorMessage = errorMsg;
         this.alertService.error(errorMsg);
         console.error('Login error:', error);

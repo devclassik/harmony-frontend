@@ -13,13 +13,13 @@ export interface InboxItem {
 
 export interface NotificationItem {
   id: number;
-  user: {
+  worker: {
     name: string;
     image: string;
   };
   type: string;
   message: string;
-  targetUser: string;
+  targetWorker: string;
   timestamp: string;
   isRead: boolean;
 }
@@ -136,122 +136,122 @@ export class NotificationService {
     return [
       {
         id: 1,
-        user: {
+        worker: {
           name: 'Jane Adesanya',
           image: './assets/svg/profilePix.svg',
         },
         type: 'Promotion Request',
         message:
           'submitted a promotion request with detailed explanation about career progression, achievements over the past three years, additional responsibilities taken on, and reasons for requesting advancement in the company hierarchy to',
-        targetUser: 'John Adegoke',
+        targetWorker: 'John Adegoke',
         timestamp: '26-07-2024',
         isRead: false,
       },
       {
         id: 2,
-        user: {
+        worker: {
           name: 'Michael Johnson',
           image: './assets/svg/profilePix.svg',
         },
         type: 'Leave Request',
         message: 'submitted a leave request for approval to',
-        targetUser: 'John Adegoke',
+        targetWorker: 'John Adegoke',
         timestamp: '27-07-2024',
         isRead: false,
       },
       {
         id: 3,
-        user: {
+        worker: {
           name: 'Sarah Williams',
           image: './assets/svg/profilePix.svg',
         },
         type: 'Transfer Request',
         message: 'submitted a transfer request to',
-        targetUser: 'John Adegoke',
+        targetWorker: 'John Adegoke',
         timestamp: '25-07-2024',
         isRead: false,
       },
       {
         id: 4,
-        user: {
+        worker: {
           name: 'David Brown',
           image: './assets/svg/profilePix.svg',
         },
         type: 'Sick Leave Request',
         message: 'submitted a sick leave request to',
-        targetUser: 'John Adegoke',
+        targetWorker: 'John Adegoke',
         timestamp: '28-07-2024',
         isRead: false,
       },
       {
         id: 5,
-        user: {
+        worker: {
           name: 'Emily Davis',
           image: './assets/svg/profilePix.svg',
         },
         type: 'Annual Leave Request',
         message: 'submitted an annual leave request to',
-        targetUser: 'John Adegoke',
+        targetWorker: 'John Adegoke',
         timestamp: '29-07-2024',
         isRead: false,
       },
       {
         id: 6,
-        user: {
+        worker: {
           name: 'Robert Wilson',
           image: './assets/svg/profilePix.svg',
         },
         type: 'Overtime Request',
         message: 'submitted an overtime request to',
-        targetUser: 'John Adegoke',
+        targetWorker: 'John Adegoke',
         timestamp: '30-07-2024',
         isRead: false,
       },
       {
         id: 7,
-        user: {
+        worker: {
           name: 'Lisa Anderson',
           image: './assets/svg/profilePix.svg',
         },
         type: 'Training Request',
         message: 'submitted a training request to',
-        targetUser: 'John Adegoke',
+        targetWorker: 'John Adegoke',
         timestamp: '31-07-2024',
         isRead: false,
       },
       {
         id: 8,
-        user: {
+        worker: {
           name: 'James Taylor',
           image: './assets/svg/profilePix.svg',
         },
         type: 'Disciplinary Appeal',
         message: 'submitted a disciplinary appeal to',
-        targetUser: 'John Adegoke',
+        targetWorker: 'John Adegoke',
         timestamp: '01-08-2024',
         isRead: false,
       },
       {
         id: 9,
-        user: {
+        worker: {
           name: 'Maria Garcia',
           image: './assets/svg/profilePix.svg',
         },
         type: 'Accommodation Request',
         message: 'submitted an accommodation request to',
-        targetUser: 'John Adegoke',
+        targetWorker: 'John Adegoke',
         timestamp: '02-08-2024',
         isRead: false,
       },
       {
         id: 10,
-        user: {
+        worker: {
           name: 'Jane Adesanya',
           image: './assets/svg/profilePix.svg',
         },
         type: 'Promotion Request',
         message: 'submitted a promotion request to',
-        targetUser: 'John Adegoke',
+        targetWorker: 'John Adegoke',
         timestamp: '26-07-2024',
         isRead: true,
       },

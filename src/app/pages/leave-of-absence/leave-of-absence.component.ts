@@ -53,7 +53,7 @@ export class LeaveOfAbsenceComponent {
   showFilterTabFromParent: boolean = false;
 
   constructor(private authService: AuthService) {
-    this.userRole = this.authService.getUserRole();
+    this.userRole = this.authService.getWorkerRole();
   }
 
   tableHeader: TableHeader[] = [
@@ -201,7 +201,7 @@ export class LeaveOfAbsenceComponent {
     console.log(event);
 
     if (event.action === 'View') {
-      if (this.userRole === 'user') {
+      if (this.userRole?.toLowerCase() === 'worker') {
         this.showLeaveDetailsModal();
         this.selectedLeaveData = event.row;
       } else {

@@ -63,7 +63,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.loadUserInfo();
+    this.loadWorkerInfo();
     this.trackRouteChanges();
     this.updatePageTitle();
 
@@ -91,17 +91,17 @@ export class TopNavComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
-  loadUserInfo() {
-    const currentUser = this.authService.getCurrentUser();
-    const userRole = this.authService.getUserRole();
+  loadWorkerInfo() {
+    const currentWorker = this.authService.getCurrentWorker();
+    const workerRole = this.authService.getWorkerRole();
 
-    if (currentUser) {
-      this.userName = currentUser.name || 'User';
-      this.userFullName = currentUser.fullName || 'User';
-      this.userEmail = currentUser.email || '';
+    if (currentWorker) {
+      this.userName = currentWorker.name || 'Worker';
+      this.userFullName = currentWorker.fullName || 'Worker';
+      this.userEmail = currentWorker.email || '';
     }
 
-    this.role = this.formatRole(userRole || 'user');
+    this.role = this.formatRole(workerRole || 'worker');
   }
 
   formatRole(role: string): string {
@@ -229,7 +229,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
 
   // Notification message truncation methods
   getFullMessage(notification: NotificationItem): string {
-    return `${notification.message} ${notification.targetUser}`;
+    return `${notification.message} ${notification.targetWorker}`;
   }
 
   shouldShowTruncated(notification: NotificationItem): boolean {

@@ -1,7 +1,7 @@
 <!-- Welcome Screen Animation -->
 <app-welcome-screen-animation
   [show]="showWelcomeAnimation"
-  [userName]="getUserName()"
+  [userName]="getWorkerName()"
   (close)="onWelcomeAnimationClose()"
 >
 </app-welcome-screen-animation>
@@ -9,7 +9,7 @@
 <!-- Dashboard Content -->
 <div>
   <!-- Admin Dashboard View -->
-  <div *ngIf="userRole !== 'user'">
+  <div *ngIf="workerRole?.toLowerCase() !== 'worker'">
     <div class="flex flex-col gap-4 p-2">
       <app-dashboard-greetings
         [userName]="'John 👋🏼'"
@@ -39,48 +39,60 @@
     </div>
   </div>
 
-  <!-- User Dashboard View -->
-  <div *ngIf="userRole === 'user'" class="py-4 bg-white min-h-screen">
-    <!-- Greeting Section -->
+  <!-- Worker Dashboard View -->
+  <div
+    *ngIf="workerRole?.toLowerCase() === 'worker'"
+    class="py-4 bg-white min-h-screen"
+  >
+    <!-- Loading Overlay -->
+    <app-loading-overlay
+      [isVisible]="isLoadingProfile"
+      title="Loading Dashboard"
+      message="Fetching your employee data and dashboard information..."
+    ></app-loading-overlay>
 
-    <app-dashboard-greetings
-      [userName]="getUserName()"
-      [showSubText]="true"
-      [subText]="'Here is a brief summary of your employment.'"
-      [showMetrics]="false"
-    ></app-dashboard-greetings>
+    <!-- Main Content -->
+    <div *ngIf="!isLoadingProfile">
+      <!-- Greeting Section -->
+      <app-dashboard-greetings
+        [userName]="getWorkerName()"
+        [showSubText]="true"
+        [subText]="'Here is a brief summary of your employment.'"
+        [showMetrics]="false"
+      ></app-dashboard-greetings>
 
-    <!-- Employee Information Section -->
-    <div class="py-4">
-      <app-dashboard-information
-        [title]="'Employee Information'"
-        [employeeData]="employeeInfo"
-        [personalTitle]="'Mr.'"
-      ></app-dashboard-information>
+      <!-- Employee Information Section -->
+      <div class="py-4" *ngIf="employeeInfo">
+        <app-dashboard-information
+          [title]="'Employee Information'"
+          [employeeData]="employeeInfo"
+          [personalTitle]="employeeInfo.title"
+        ></app-dashboard-information>
+      </div>
+
+      <app-table
+        [tableTitle]="'Leave Requests'"
+        [viewAllLink]="'leave-records'"
+        [tableData]="leaveRequests"
+        [tableHeader]="leaveRequestsHeader"
+        [showViewAll]="true"
+        [menuItems]="actionButton"
+        (menuAction)="onMenuAction($event)"
+        [showSearch]="false"
+        [showFilter]="false"
+        [showPagination]="true"
+        [showStatusTab]="false"
+      ></app-table>
     </div>
-
-    <app-table
-      [tableTitle]="'Leave Requests'"
-      [viewAllLink]="'leave-records'"
-      [tableData]="leaveRequests"
-      [tableHeader]="leaveRequestsHeader"
-      [showViewAll]="true"
-      [menuItems]="actionButton"
-      (menuAction)="onMenuAction($event)"
-      [showSearch]="false"
-      [showFilter]="false"
-      [showPagination]="true"
-      [showStatusTab]="false"
-    ></app-table>
   </div>
-</div>
 
-<!-- Leave Details Modal -->
-<app-leave-details
-  [view]="showLeaveDetails"
-  [leaveData]="selectedLeaveData"
-  [title]="'Leave Request Details'"
-  [leaveType]="'Leave'"
-  [totalLeaveDays]="30"
-  (close)="showLeaveDetails = false"
-></app-leave-details>
+  <!-- Leave Details Modal -->
+  <app-leave-details
+    [view]="showLeaveDetails"
+    [leaveData]="selectedLeaveData"
+    [title]="'Leave Request Details'"
+    [leaveType]="'Leave'"
+    [totalLeaveDays]="30"
+    (close)="showLeaveDetails = false"
+  ></app-leave-details>
+</div>

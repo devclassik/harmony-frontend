@@ -6,3 +6,6 @@ export * from './user.dto';
 
 // Auth DTOs
 export * from './auth.dto';
+
+// Employee DTOs
+export * from './employee.dto';

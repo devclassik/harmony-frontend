@@ -33,9 +33,9 @@ export interface TableData {
   isRead?: boolean;
   type?: string;
   message?: string;
-  targetUser?: string;
+  targetWorker?: string;
   timestamp?: string;
-  user?: {
+  worker?: {
     name: string;
     image: string;
   };

@@ -100,8 +100,8 @@
           ></div>
 
           <img
-            [src]="notification.user.image"
-            [alt]="notification.user.name"
+            [src]="notification.worker.image"
+            [alt]="notification.worker.name"
             class="w-12 h-12 rounded-full flex-shrink-0"
           />
 
@@ -118,7 +118,7 @@
             </div>
 
             <div class="text-sm text-gray-600 mt-1">
-              <span class="font-medium">{{ notification.user.name }}</span>
+              <span class="font-medium">{{ notification.worker.name }}</span>
               <span>
                 {{
                   isNotificationExpanded(notification.id)
@@ -127,7 +127,7 @@
                 }}
               </span>
               <span class="font-medium text-gray-900">
-                {{ notification.targetUser }}.
+                {{ notification.targetWorker }}.
               </span>
               <!-- View More/Less Button -->
               <button

@@ -8,7 +8,7 @@ export class PermissionService {
   constructor(private authService: AuthService) {}
 
   /**
-   * Check if user has permission for a specific feature and action
+   * Check if worker has permission for a specific feature and action
    */
   hasPermission(
     feature: string,
@@ -18,21 +18,21 @@ export class PermissionService {
   }
 
   /**
-   * Check if user can access a feature (view permission)
+   * Check if worker can access a feature (view permission)
    */
   canAccess(feature: string): boolean {
     return this.authService.canAccessFeature(feature);
   }
 
   /**
-   * Get all permissions for the current user
+   * Get all permissions for the current worker
    */
   getAllPermissions() {
     return this.authService.getPermissions();
   }
 
   /**
-   * Check if user can view any employee management features
+   * Check if worker can view any employee management features
    */
   canViewEmployeeManagement(): boolean {
     return (
@@ -46,91 +46,91 @@ export class PermissionService {
   }
 
   /**
-   * Check if user can view any leave management features
+   * Check if worker can view any leave management features
    */
   canViewLeaveManagement(): boolean {
     return this.canAccess('Leave');
   }
 
   /**
-   * Check if user can view reports
+   * Check if worker can view reports
    */
   canViewReports(): boolean {
     return this.canAccess('Report');
   }
 
   /**
-   * Check if user can view dashboard
+   * Check if worker can view dashboard
    */
   canViewDashboard(): boolean {
     return this.canAccess('Dashboard');
   }
 
   /**
-   * Check if user can view employee records
+   * Check if worker can view employee records
    */
   canViewEmployeeRecords(): boolean {
     return this.canAccess('Employee');
   }
 
   /**
-   * Check if user can view payroll
+   * Check if worker can view payroll
    */
   canViewPayroll(): boolean {
     return this.canAccess('Payroll');
   }
 
   /**
-   * Check if user can view accommodations
+   * Check if worker can view accommodations
    */
   canViewAccommodation(): boolean {
     return this.canAccess('Accommodation');
   }
 
   /**
-   * Check if user can view meetings
+   * Check if worker can view meetings
    */
   canViewMeeting(): boolean {
     return this.canAccess('Meeting');
   }
 
   /**
-   * Check if user can view documents
+   * Check if worker can view documents
    */
   canViewDocuments(): boolean {
     return this.canAccess('Document');
   }
 
   /**
-   * Check if user can view notifications
+   * Check if worker can view notifications
    */
   canViewNotifications(): boolean {
     return this.canAccess('Notification');
   }
 
   /**
-   * Check if user can view email templates
+   * Check if worker can view email templates
    */
   canViewEmailTemplates(): boolean {
     return this.canAccess('EmailTemplate');
   }
 
   /**
-   * Check if user can view departments
+   * Check if worker can view departments
    */
   canViewDepartments(): boolean {
     return this.canAccess('Department');
   }
 
   /**
-   * Check if user can view organization settings
+   * Check if worker can view organization settings
    */
   canViewOrganization(): boolean {
     return this.canAccess('Organization');
   }
 
   /**
-   * Check if user can view permissions
+   * Check if worker can view permissions
    */
   canViewPermissions(): boolean {
     return this.canAccess('Permission');
@@ -147,7 +147,7 @@ export class PermissionService {
   }
 
   /**
-   * Check if user has all specified permissions
+   * Check if worker has all specified permissions
    */
   hasAllPermissions(
     features: string[],
@@ -157,14 +157,14 @@ export class PermissionService {
   }
 
   /**
-   * Get user's role name
+   * Get worker's role name
    */
-  getUserRole(): string | null {
-    return this.authService.getUserRole();
+  getWorkerRole(): string | null {
+    return this.authService.getWorkerRole();
   }
 
   /**
-   * Check if user is logged in
+   * Check if worker is logged in
    */
   isLoggedIn(): boolean {
     return this.authService.isLoggedIn();

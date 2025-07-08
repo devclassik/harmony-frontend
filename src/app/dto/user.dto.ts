@@ -1,6 +1,6 @@
-import { Department, UserRole } from './common.dto';
+import { Department, WorkerRole } from './common.dto';
 
-export interface User {
+export interface Worker {
   name: string;
   fullName: string;
   email: string;
@@ -38,7 +38,7 @@ export interface Employee {
   departments: Department[];
 }
 
-export interface UserData {
+export interface WorkerData {
   email: string;
   role: {
     id: number;
@@ -80,7 +80,7 @@ export interface UserData {
   isLoggedIn: boolean;
 }
 
-export interface UserOTP {
+export interface WorkerOTP {
   id: number;
   email: string;
   password?: string;
@@ -92,5 +92,5 @@ export interface UserOTP {
   updatedAt: string;
   deletedAt: string | null;
   employee: Employee;
-  role: UserRole;
+  role: WorkerRole;
 }

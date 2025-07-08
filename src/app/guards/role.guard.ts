@@ -4,9 +4,9 @@ import { Router, type CanActivateFn } from '@angular/router';
 export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
   return (route, state) => {
     const router = inject(Router);
-    const userRole = localStorage.getItem('userRole');
+    const workerRole = localStorage.getItem('workerRole');
 
-    if (userRole && allowedRoles.includes(userRole)) {
+    if (workerRole && allowedRoles.includes(workerRole)) {
       return true;
     }
 
@@ -14,4 +14,4 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
     router.navigate(['/unauthorized']);
     return false;
   };
-}; 
+};

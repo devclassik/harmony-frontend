@@ -25,6 +25,14 @@ export const environment = {
       delete: 'users/{id}',
       profile: 'users/profile',
     },
+    employees: {
+      getAll: '/employees',
+      getById: '/employee/{id}',
+      create: '/employees',
+      update: '/employee/{id}',
+      delete: '/employee/{id}',
+      profile: '/employee/profile',
+    },
     posts: {
       getAll: 'posts',
       getById: 'posts/{id}',

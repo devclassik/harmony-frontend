@@ -1,12 +1,12 @@
-import { ApiResponse, UserRole } from './common.dto';
-import { Employee, UserData, UserOTP } from './user.dto';
+import { ApiResponse, WorkerRole } from './common.dto';
+import { Employee, WorkerData, WorkerOTP } from './user.dto';
 
 export interface LoginResponseData {
   email: string;
   isEmailVerified: boolean;
   isLoggedIn: boolean;
   employee: Employee;
-  role: UserRole;
+  role: WorkerRole;
   token: string;
 }
 
@@ -34,7 +34,7 @@ export interface VerifyOtpRequest {
 export interface VerifyOtpResponse {
   success: boolean;
   message: string;
-  data?: UserData;
+  data?: WorkerData;
 }
 
 export interface ResentOtpRequest {
@@ -45,7 +45,7 @@ export interface ResentOtpRequest {
 export interface ResendOtpResponse {}
 
 export interface DataResponse {
-  user: UserOTP;
+  worker: WorkerOTP;
   token: string;
 }
 

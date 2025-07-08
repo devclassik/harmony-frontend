@@ -590,9 +590,11 @@
           <!-- Profile Image -->
           <img
             [src]="
-              item.imageUrl || item.user?.image || './assets/svg/profilePix.svg'
+              item.imageUrl ||
+              item.worker?.image ||
+              './assets/svg/profilePix.svg'
             "
-            [alt]="item.name || item.user?.name"
+            [alt]="item.name || item.worker?.name"
             class="w-10 h-10 rounded-full flex-shrink-0"
           />
 
@@ -605,11 +607,11 @@
             </div>
             <div class="flex items-center gap-1 text-sm text-gray-600 mt-1">
               <span class="font-medium">{{
-                item.name || item.user?.name
+                item.name || item.worker?.name
               }}</span>
               <span>{{ item.message || "has submitted a request" }}</span>
-              <span class="font-medium text-gray-900" *ngIf="item.targetUser">
-                {{ item.targetUser }}
+              <span class="font-medium text-gray-900" *ngIf="item.targetWorker">
+                {{ item.targetWorker }}
               </span>
             </div>
           </div>

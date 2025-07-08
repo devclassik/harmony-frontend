@@ -62,11 +62,13 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     if (this.searchTerm) {
       filtered = filtered.filter(
         (item) =>
-          item.user.name
+          item.worker.name
             ?.toLowerCase()
             .includes(this.searchTerm.toLowerCase()) ||
           item.type?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          item.targetUser?.toLowerCase().includes(this.searchTerm.toLowerCase())
+          item.targetWorker
+            ?.toLowerCase()
+            .includes(this.searchTerm.toLowerCase())
       );
     }
 
@@ -132,7 +134,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   // Method to get truncated message
   getTruncatedMessage(message: string): string {
-    return message.length > this.maxMessageLength ? message.substring(0, this.maxMessageLength) + '...' : message;
+    return message.length > this.maxMessageLength
+      ? message.substring(0, this.maxMessageLength) + '...'
+      : message;
   }
 
   // Method to check if message needs truncation
