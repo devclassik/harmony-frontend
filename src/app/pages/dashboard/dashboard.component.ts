@@ -70,14 +70,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private loadEmployeeProfile() {
     this.isLoadingProfile = true;
 
-    // ======= TEMPORARY TESTING OVERRIDE - REMOVE BEFORE PRODUCTION =======
-    // For testing with ehikioyaandrew042@gmail.com, use employee ID 18
-    let employeeId = 18; // Default for testing
+    // Get employee ID from the current worker data
+    const employeeId = this.authService.getCurrentEmployeeId();
 
-    if (this.currentWorker?.email === 'ehikioyaandrew042@gmail.com') {
-      employeeId = 18;
+    if (!employeeId) {
+      this.isLoadingProfile = false;
+      console.error('No employee ID available for current worker');
+      // Show animation if there's no employee ID (assume incomplete)
+      this.showWelcomeAnimation = true;
+      return;
     }
-    // ======= END TEMPORARY TESTING OVERRIDE =======
 
     const profileSub = this.employeeService
       .getEmployeeById(employeeId)

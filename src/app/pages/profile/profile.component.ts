@@ -47,12 +47,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private loadEmployeeProfile() {
     this.isLoadingProfile = true;
 
-    // ======= TEMPORARY TESTING OVERRIDE - REMOVE BEFORE PRODUCTION =======
-    let employeeId = 18;
-    if (this.currentWorker?.email === 'ehikioyaandrew042@gmail.com') {
-      employeeId = 18;
+    // Get employee ID from the current worker data
+    const employeeId = this.authService.getCurrentEmployeeId();
+
+    if (!employeeId) {
+      this.isLoadingProfile = false;
+      console.error('No employee ID available for current worker');
+      this.employeeData = null;
+      return;
     }
-    // ======= END TEMPORARY TESTING OVERRIDE =======
 
     const profileSub = this.employeeService
       .getEmployeeById(employeeId)
