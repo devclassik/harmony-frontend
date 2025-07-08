@@ -22,6 +22,7 @@ import {
 import { EmployeeDetails, UpdateEmployeeRequest } from '../../dto/employee.dto';
 import { EmployeeService } from '../../services/employee.service';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-profile-create',
@@ -57,7 +58,8 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     private router: Router,
     private validationService: FormValidationService,
     private fileUploadService: FileUploadService,
-    private employeeService: EmployeeService
+    private employeeService: EmployeeService,
+    private authService: AuthService
   ) {
     this.profileForm = this.createForm();
   }
@@ -303,9 +305,15 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
 
     const updateData: UpdateEmployeeRequest = this.mapFormToUpdateRequest();
 
-    // ======= TEMPORARY TESTING OVERRIDE - REMOVE BEFORE PRODUCTION =======
-    const employeeId = 18; // Using the same ID as in dashboard
-    // ======= END TEMPORARY TESTING OVERRIDE =======
+    // Get employee ID from the current worker data
+    const employeeId = this.authService.getCurrentEmployeeId();
+
+    if (!employeeId) {
+      console.error('No employee ID available for current worker');
+      this.isSubmitting = false;
+      alert('Error: No employee ID available for update');
+      return;
+    }
 
     this.employeeService.updateEmployee(employeeId, updateData).subscribe({
       next: (response) => {

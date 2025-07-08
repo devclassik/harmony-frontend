@@ -86,7 +86,13 @@ export class AuthService {
               data.email,
               data.role.name
             );
-            this.setAuthState(data.token, worker, data.role, data.isLoggedIn);
+            this.setAuthState(
+              data.token,
+              worker,
+              data.role,
+              data.isLoggedIn,
+              data.employee
+            );
             return; // Success - return void
           } else {
             throw new Error('Login failed: Invalid credentials');
@@ -169,7 +175,8 @@ export class AuthService {
     token: string,
     worker: Worker,
     role: WorkerRole,
-    isLoggedIn: boolean
+    isLoggedIn: boolean,
+    employee: Employee
   ): void {
     localStorage.setItem('token', token);
     localStorage.setItem('workerRole', worker.role.toLowerCase());
@@ -178,6 +185,7 @@ export class AuthService {
     localStorage.setItem('isLoggedIn', isLoggedIn.toString());
     localStorage.setItem('roleId', role.id.toString());
     localStorage.setItem('permissions', JSON.stringify(role.permissions));
+    localStorage.setItem('employeeId', employee.id.toString());
 
     this.currentWorker = { ...worker, role: worker.role.toLowerCase() };
     this.currentPermissions = role.permissions;
@@ -218,8 +226,14 @@ export class AuthService {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('roleId');
     localStorage.removeItem('permissions');
+    localStorage.removeItem('employeeId');
     this.currentWorker = null;
     this.currentPermissions = [];
+  }
+
+  getCurrentEmployeeId(): number | null {
+    const employeeId = localStorage.getItem('employeeId');
+    return employeeId ? parseInt(employeeId, 10) : null;
   }
 
   // Password Reset Methods
