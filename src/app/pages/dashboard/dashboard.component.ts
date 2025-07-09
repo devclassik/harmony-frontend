@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { EmployeeService } from '../../services/employee.service';
+import { LeaveService } from '../../services/leave.service';
+import { AlertService } from '../../services/alert.service';
 import { CommonModule } from '@angular/common';
 import { DashboardGreetingsComponent } from '../../components/dashboard-greetings/dashboard-greetings.component';
 import { DashboardInformationComponent } from '../../components/dashboard-information/dashboard-information.component';
@@ -18,6 +20,7 @@ import { WelcomeScreenAnimationComponent } from '../../components/welcome-screen
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,26 +42,35 @@ import { Subscription } from 'rxjs';
 export class DashboardComponent implements OnInit, OnDestroy {
   workerRole: string | null;
   currentWorker: any;
+  currentEmployeeId: number | null;
   showLeaveDetails: boolean = false;
   selectedLeaveData: TableData | null = null;
   showWelcomeAnimation: boolean = false;
   isLoadingProfile: boolean = false;
+  isLoadingLeaveRequests: boolean = false;
   employeeData: EmployeeDetails | null = null;
+  workerName: string = 'Worker';
 
   private subscriptions: Subscription[] = [];
 
   constructor(
     private authService: AuthService,
-    private employeeService: EmployeeService
+    private employeeService: EmployeeService,
+    private leaveService: LeaveService,
+    private alertService: AlertService
   ) {
     this.workerRole = this.authService.getWorkerRole();
     this.currentWorker = this.authService.getCurrentWorker();
+    this.currentEmployeeId = this.authService.getCurrentEmployeeId();
+    // Initialize worker name from auth service
+    this.updateWorkerName();
   }
 
   ngOnInit() {
     // Load employee profile and check if animation should be shown
     if (this.workerRole?.toLowerCase() === 'worker') {
       this.loadEmployeeProfile();
+      this.loadLeaveRequests();
     }
   }
 
@@ -135,33 +147,77 @@ export class DashboardComponent implements OnInit, OnDestroy {
         'Updated employeeInfo profileImage:',
         this.employeeInfo.profileImage
       ); // Debug log
+
+      // Update worker name when employee data is available
+      this.updateWorkerName();
     }
   }
 
-  // Get worker's name from employee data or auth service
-  getWorkerName(): string {
-    // Use employee data if available
-    console.log(this.employeeData); // Debug log
-    
+  // Update worker name property (called only when data actually changes)
+  private updateWorkerName(): void {
     if (this.employeeData) {
-      const preferredName =
+      console.log('Employee data loaded:', this.employeeData); // This will log only once when data is actually loaded
+
+      this.workerName =
         this.employeeData.profferedName ||
         `${this.employeeData.firstName} ${this.employeeData.lastName}`;
-      return preferredName;
-    }
-
-    // Fallback to auth service
-    if (this.currentWorker && this.currentWorker.fullName) {
-      return this.currentWorker.fullName;
+    } else if (this.currentWorker && this.currentWorker.fullName) {
+      this.workerName = this.currentWorker.fullName;
     } else if (this.currentWorker && this.currentWorker.name) {
-      return this.currentWorker.name;
+      this.workerName = this.currentWorker.name;
+    } else {
+      this.workerName = 'Worker';
     }
-    return 'Worker';
   }
 
   // Method to close welcome animation
   onWelcomeAnimationClose() {
     this.showWelcomeAnimation = false;
+  }
+
+  // Load leave requests from API
+  loadLeaveRequests() {
+    this.isLoadingLeaveRequests = true;
+
+    const leaveSub = this.leaveService
+      .getAnnualLeaves()
+      .pipe(
+        finalize(() => {
+          this.isLoadingLeaveRequests = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.status === 'success' && response.data) {
+            let leaves = response.data;
+
+            // Filter by employee ID if not admin
+            if (
+              this.workerRole?.toLowerCase() !== 'admin' &&
+              this.currentEmployeeId
+            ) {
+              leaves = this.leaveService.filterLeavesByEmployee(
+                leaves,
+                this.currentEmployeeId
+              );
+            }
+
+            // Store raw leave data for details transformation
+            this.rawLeaveData = leaves;
+
+            // Transform API data to table format
+            this.leaveRequests = this.leaveService.transformToTableData(leaves);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading leave requests:', error);
+          this.alertService.error(
+            'Failed to load leave requests. Please try again.'
+          );
+        },
+      });
+
+    this.subscriptions.push(leaveSub);
   }
 
   // Employee data from API - will be populated after API call
@@ -185,39 +241,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // ... more employees
   ];
 
-  // Mock leave requests data
-  leaveRequests: TableData[] = [
-    {
-      id: 'LR-001',
-      startDate: '2024-01-15',
-      endDate: '2024-01-25',
-      status: 'Approved',
-    },
-    {
-      id: 'LR-002',
-      startDate: '2024-02-10',
-      endDate: '2024-02-12',
-      status: 'Pending',
-    },
-    {
-      id: 'LR-003',
-      startDate: '2024-03-05',
-      endDate: '2024-03-08',
-      status: 'Rejected',
-    },
-    {
-      id: 'LR-004',
-      startDate: '2024-04-01',
-      endDate: '2024-06-01',
-      status: 'Approved',
-    },
-    {
-      id: 'LR-005',
-      startDate: '2024-02-28',
-      endDate: '2024-03-01',
-      status: 'Pending',
-    },
-  ];
+  // Real leave requests data - will be populated from API
+  leaveRequests: TableData[] = [];
+  // Store raw leave data for details transformation
+  rawLeaveData: any[] = [];
 
   actionButton: MenuItem[] = [
     { label: 'View', action: 'View', icon: '/public/assets/svg/eyeOpen.svg' },
@@ -236,12 +263,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
     console.log(event);
 
     if (event.action === 'View') {
+      // Find the raw leave data for this row
+      const rawLeave = this.rawLeaveData.find(
+        (leave) => leave.id.toString() === event.row.id
+      );
+
+      if (rawLeave) {
+        // Transform the leave data for the details component
+        this.selectedLeaveData = this.leaveService.transformForLeaveDetails(
+          rawLeave,
+          this.rawLeaveData
+        );
+      } else {
+        // Fallback to table data if raw data not found
+        this.selectedLeaveData = event.row;
+      }
+
       this.showLeaveDetailsModal();
-      this.selectedLeaveData = event.row;
     }
   }
 
   showLeaveDetailsModal() {
     this.showLeaveDetails = true;
+  }
+
+  onCloseLeaveDetails() {
+    this.showLeaveDetails = false;
+    this.selectedLeaveData = null;
   }
 }

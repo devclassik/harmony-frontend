@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { ApiService } from './api.service';
+import {
+  NotificationResponse,
+  MessageResponse,
+  NotificationItem as ApiNotificationItem,
+  MessageItem as ApiMessageItem,
+} from '../dto/notification.dto';
+import { map } from 'rxjs/operators';
 
 export interface InboxItem {
   id: number;
@@ -7,6 +15,7 @@ export interface InboxItem {
   profileImage: string;
   subject: string;
   preview: string;
+  message: string;
   time: string;
   isRead: boolean;
 }
@@ -28,21 +37,14 @@ export interface NotificationItem {
   providedIn: 'root',
 })
 export class NotificationService {
-  private readonly INBOX_STORAGE_KEY = 'harmony_inbox_items';
-  private readonly NOTIFICATIONS_STORAGE_KEY = 'harmony_notifications';
-
   private inboxItemsSubject = new BehaviorSubject<InboxItem[]>([]);
   private notificationsSubject = new BehaviorSubject<NotificationItem[]>([]);
   private unreadCountSubject = new BehaviorSubject<number>(0);
 
-  constructor() {
-    // Clear localStorage for testing - remove this in production
-    localStorage.removeItem(this.NOTIFICATIONS_STORAGE_KEY);
-    localStorage.removeItem(this.INBOX_STORAGE_KEY);
-
-    // Load data from localStorage or use default mock data
-    this.loadInboxItems();
-    this.loadNotifications();
+  constructor(private apiService: ApiService) {
+    // Load data from API
+    this.loadInboxItemsFromApi();
+    this.loadNotificationsFromApi();
 
     // Update unread count whenever inbox items or notifications change
     this.inboxItemsSubject.subscribe(() => this.updateUnreadCount());
@@ -61,10 +63,6 @@ export class NotificationService {
     const totalUnreadCount = unreadInboxCount + unreadNotificationsCount;
 
     this.unreadCountSubject.next(totalUnreadCount);
-
-    // Save to localStorage whenever items change
-    this.saveInboxItems(inboxItems);
-    this.saveNotifications(notifications);
   }
 
   private getDefaultInboxItems(): InboxItem[] {
@@ -76,6 +74,8 @@ export class NotificationService {
         subject: 'Promotion Approved',
         preview:
           'The promotion request placed by your head of department on the 25th of July for the position of so...',
+        message:
+          'The promotion request placed by your head of department on the 25th of July for the position of zonal pastor was approved by the admin. Please find attached your promotion letter.',
         time: '1:45PM',
         isRead: false,
       },
@@ -86,6 +86,8 @@ export class NotificationService {
         subject: 'Accommodation Assigned',
         preview:
           'Your accommodation request has been processed and approved. You have been assigned to Building A...',
+        message:
+          'Your accommodation request has been processed and approved. You have been assigned to Building A, Room 204. The accommodation includes all necessary amenities and utilities. Please report to the accommodation office to collect your keys and complete the check-in process.',
         time: '1:45PM',
         isRead: false,
       },
@@ -96,6 +98,8 @@ export class NotificationService {
         subject: 'May Paystub',
         preview:
           'Your May 2024 paystub is now available for download. This includes your salary, allowances...',
+        message:
+          'Your May 2024 paystub is now available for download. This includes your salary, allowances, and deductions for the month. Please review the document and contact payroll if you have any questions or discrepancies.',
         time: '1:45PM',
         isRead: false,
       },
@@ -106,6 +110,8 @@ export class NotificationService {
         subject: 'Accommodation Assigned',
         preview:
           'Your accommodation request has been processed and approved. You have been assigned to Building B...',
+        message:
+          'Your accommodation request has been processed and approved. You have been assigned to Building B, Room 105. The accommodation includes all necessary amenities and utilities. Please report to the accommodation office to collect your keys and complete the check-in process.',
         time: '1:45PM',
         isRead: false,
       },
@@ -116,6 +122,8 @@ export class NotificationService {
         subject: 'Promotion Approved',
         preview:
           'The promotion request placed by your head of department on the 20th of July for the position of so...',
+        message:
+          'The promotion request placed by your head of department on the 20th of July for the position of Team Lead was approved by the admin. Please find attached your promotion letter.',
         time: '1:45PM',
         isRead: false,
       },
@@ -126,6 +134,8 @@ export class NotificationService {
         subject: 'Promotion Approved',
         preview:
           'The promotion request placed by your head of department on the 18th of July for the position of so...',
+        message:
+          'The promotion request placed by your head of department on the 18th of July for the position of Project Manager was approved by the admin. Please find attached your promotion letter.',
         time: '1:45PM',
         isRead: false,
       },
@@ -258,61 +268,76 @@ export class NotificationService {
     ];
   }
 
-  private loadInboxItems(): void {
-    try {
-      const savedItems = localStorage.getItem(this.INBOX_STORAGE_KEY);
-      if (savedItems) {
-        const items = JSON.parse(savedItems);
-        this.inboxItemsSubject.next(items);
-      } else {
-        // First time loading, use default data
-        const defaultItems = this.getDefaultInboxItems();
-        this.inboxItemsSubject.next(defaultItems);
-      }
-    } catch (error) {
-      console.error('Error loading inbox items from localStorage:', error);
-      // Fallback to default items
-      const defaultItems = this.getDefaultInboxItems();
-      this.inboxItemsSubject.next(defaultItems);
-    }
+  private loadInboxItemsFromApi(): void {
+    this.apiService.get<MessageResponse>('/message').subscribe({
+      next: (response) => {
+        const inboxItems = this.mapApiMessagesToInboxItems(response.data);
+        this.inboxItemsSubject.next(inboxItems);
+      },
+      error: (error) => {
+        console.error('Error loading inbox items:', error);
+        // Fallback to default data or handle error appropriately
+        this.inboxItemsSubject.next(this.getDefaultInboxItems());
+      },
+    });
   }
 
-  private loadNotifications(): void {
-    try {
-      const savedItems = localStorage.getItem(this.NOTIFICATIONS_STORAGE_KEY);
-      if (savedItems) {
-        const items = JSON.parse(savedItems);
-        this.notificationsSubject.next(items);
-      } else {
-        // First time loading, use default data
-        const defaultItems = this.getDefaultNotifications();
-        this.notificationsSubject.next(defaultItems);
-      }
-    } catch (error) {
-      console.error('Error loading notifications from localStorage:', error);
-      // Fallback to default items
-      const defaultItems = this.getDefaultNotifications();
-      this.notificationsSubject.next(defaultItems);
-    }
+  private loadNotificationsFromApi(): void {
+    this.apiService.get<NotificationResponse>('/notification').subscribe({
+      next: (response) => {
+        const notifications = this.mapApiNotificationsToNotificationItems(
+          response.data
+        );
+        this.notificationsSubject.next(notifications);
+      },
+      error: (error) => {
+        console.error('Error loading notifications:', error);
+        // Fallback to default data or handle error appropriately
+        this.notificationsSubject.next(this.getDefaultNotifications());
+      },
+    });
   }
 
-  private saveInboxItems(items: InboxItem[]): void {
-    try {
-      localStorage.setItem(this.INBOX_STORAGE_KEY, JSON.stringify(items));
-    } catch (error) {
-      console.error('Error saving inbox items to localStorage:', error);
-    }
+  private mapApiMessagesToInboxItems(
+    apiMessages: ApiMessageItem[]
+  ): InboxItem[] {
+    return apiMessages.map((message) => ({
+      id: message.id,
+      sender: `${message.actionBy.firstName} ${message.actionBy.lastName}`,
+      profileImage: message.actionBy.photoUrl || './assets/svg/profilePix.svg',
+      subject: message.title || 'No Subject',
+      preview:
+        message.message.length > 100
+          ? message.message.substring(0, 100) + '...'
+          : message.message,
+      message: message.message,
+      time: new Date(message.createdAt).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      }),
+      isRead: message.isRead,
+    }));
   }
 
-  private saveNotifications(items: NotificationItem[]): void {
-    try {
-      localStorage.setItem(
-        this.NOTIFICATIONS_STORAGE_KEY,
-        JSON.stringify(items)
-      );
-    } catch (error) {
-      console.error('Error saving notifications to localStorage:', error);
-    }
+  private mapApiNotificationsToNotificationItems(
+    apiNotifications: ApiNotificationItem[]
+  ): NotificationItem[] {
+    return apiNotifications.map((notification) => ({
+      id: notification.id,
+      worker: {
+        name: `${notification.actionBy.firstName} ${notification.actionBy.lastName}`,
+        image: notification.actionBy.photoUrl || './assets/svg/profilePix.svg',
+      },
+      type: notification.title || notification.feature,
+      message: notification.message,
+      targetWorker:
+        notification.actionTo.length > 0
+          ? `${notification.actionTo[0].firstName} ${notification.actionTo[0].lastName}`
+          : 'Unknown',
+      timestamp: new Date(notification.createdAt).toLocaleDateString('en-GB'),
+      isRead: notification.isRead,
+    }));
   }
 
   // Inbox methods
@@ -347,39 +372,27 @@ export class NotificationService {
   }
 
   getUnreadInboxCount(): Observable<number> {
-    return new Observable((observer) => {
-      this.inboxItemsSubject.subscribe((items) => {
-        const unreadCount = items.filter((item) => !item.isRead).length;
-        observer.next(unreadCount);
-      });
-    });
+    return this.inboxItemsSubject
+      .asObservable()
+      .pipe(map((items) => items.filter((item) => !item.isRead).length));
   }
 
   getUnreadNotificationsCount(): Observable<number> {
-    return new Observable((observer) => {
-      this.notificationsSubject.subscribe((items) => {
-        const unreadCount = items.filter((item) => !item.isRead).length;
-        observer.next(unreadCount);
-      });
-    });
+    return this.notificationsSubject
+      .asObservable()
+      .pipe(map((items) => items.filter((item) => !item.isRead).length));
   }
 
   hasUnreadMessages(): Observable<boolean> {
-    return new Observable((observer) => {
-      this.unreadCountSubject.subscribe((count) => {
-        observer.next(count > 0);
-      });
-    });
+    return this.getUnreadCount().pipe(map((count) => count > 0));
   }
 
-  // Method to reset items (for testing purposes)
-  resetInboxItems(): void {
-    const defaultItems = this.getDefaultInboxItems();
-    this.inboxItemsSubject.next(defaultItems);
+  // Methods to refresh data from API
+  refreshInboxItems(): void {
+    this.loadInboxItemsFromApi();
   }
 
-  resetNotifications(): void {
-    const defaultItems = this.getDefaultNotifications();
-    this.notificationsSubject.next(defaultItems);
+  refreshNotifications(): void {
+    this.loadNotificationsFromApi();
   }
 }

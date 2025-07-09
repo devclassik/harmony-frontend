@@ -23,6 +23,7 @@ import { EmployeeDetails, UpdateEmployeeRequest } from '../../dto/employee.dto';
 import { EmployeeService } from '../../services/employee.service';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 import { AuthService } from '../../services/auth.service';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-profile-create',
@@ -59,7 +60,8 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     private validationService: FormValidationService,
     private fileUploadService: FileUploadService,
     private employeeService: EmployeeService,
-    private authService: AuthService
+    private authService: AuthService,
+    private alertService: AlertService
   ) {
     this.profileForm = this.createForm();
   }
@@ -234,22 +236,19 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       ],
       cityTown: ['', [Validators.required]],
       stateProvince: ['', [Validators.required]],
-      country: ['', [Validators.required]],
-      zipCode: [
-        '',
-        [Validators.required, Validators.pattern(/^\d{5}(-\d{4})?$/)],
-      ],
+      country: ['Nigeria', [Validators.required]],
+      zipCode: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
       mailingAddress: ['', [Validators.maxLength(200)]],
       cityTown2: [''],
       stateProvince2: [''],
-      country2: [''],
-      zipCode2: ['', [Validators.pattern(/^\d{5}(-\d{4})?$/)]],
+      country2: ['Nigeria'],
+      zipCode2: ['', [Validators.pattern(/^\d{6}$/)]],
       primaryPhone: [
         '',
-        [Validators.required, Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)],
+        [Validators.required, Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)],
       ],
       primaryPhoneType: [''],
-      alternatePhone: ['', [Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)]],
+      alternatePhone: ['', [Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)]],
       alternatePhoneType: [''],
       emailAddress: [
         '',
@@ -311,7 +310,7 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     if (!employeeId) {
       console.error('No employee ID available for current worker');
       this.isSubmitting = false;
-      alert('Error: No employee ID available for update');
+      this.alertService.error('Error: No employee ID available for update');
       return;
     }
 
@@ -321,17 +320,38 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
         if (response.status === 'success') {
           console.log('Profile updated successfully:', response.data);
 
+          // Show success message
+          this.alertService.success('Profile updated successfully!');
+
           // Navigate to profile view component
           this.router.navigate(['/profile-view']);
         } else {
           console.error('Update failed:', response.message);
-          alert('Failed to update profile: ' + response.message);
+          this.alertService.error(
+            'Failed to update profile: ' + response.message
+          );
         }
       },
       error: (error) => {
         this.isSubmitting = false;
         console.error('Error updating profile:', error);
-        alert('Error updating profile. Please try again.');
+
+        // Extract detailed error information
+        let errorMessage = 'Error updating profile. Please try again.';
+        if (error.error) {
+          console.log('Error details:', error.error);
+          if (error.error.message) {
+            errorMessage = `Update failed: ${error.error.message}`;
+          } else if (error.error.errors) {
+            // Handle validation errors
+            const validationErrors = Array.isArray(error.error.errors)
+              ? error.error.errors.join(', ')
+              : JSON.stringify(error.error.errors);
+            errorMessage = `Validation errors: ${validationErrors}`;
+          }
+        }
+
+        this.alertService.error(errorMessage);
       },
     });
   }
@@ -339,60 +359,86 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   private createProfile() {
     // For now, just show alert as create endpoint might be different
     this.isSubmitting = false;
-    alert('Profile creation not implemented yet');
+    this.alertService.info('Profile creation not implemented yet');
   }
 
   private mapFormToUpdateRequest(): UpdateEmployeeRequest {
     const formValue = this.profileForm.value;
 
-    return {
-      firstName: formValue.legalFirstName,
-      lastName: formValue.legalLastName,
-      middleName: formValue.legalMiddleName,
-      title: formValue.title,
-      gender: formValue.gender,
-      profferedName: formValue.profferedName,
-      primaryPhone: formValue.primaryPhone,
-      primaryPhoneType: formValue.primaryPhoneType,
-      altPhone: formValue.alternatePhone,
-      altPhoneType: formValue.alternatePhoneType,
-      dob: formValue.dateOfBirth,
-      altEmail: formValue.emailAddress,
-      maritalStatus: formValue.maritalStatus,
-      everDivorced: formValue.everDivorced === 'true',
+    // Helper function to safely convert to boolean
+    const toBooleanOrUndefined = (value: any): boolean | undefined => {
+      if (value === 'true' || value === true) return true;
+      if (value === 'false' || value === false) return false;
+      return undefined;
+    };
+
+    // Helper function to handle empty strings
+    const cleanValue = (value: any): any => {
+      return value === '' ? undefined : value;
+    };
+
+    const updateData: UpdateEmployeeRequest = {
+      firstName: cleanValue(formValue.legalFirstName),
+      lastName: cleanValue(formValue.legalLastName),
+      middleName: cleanValue(formValue.legalMiddleName),
+      title: cleanValue(formValue.title),
+      gender: cleanValue(formValue.gender),
+      profferedName: cleanValue(formValue.profferedName),
+      primaryPhone: cleanValue(formValue.primaryPhone),
+      primaryPhoneType: cleanValue(formValue.primaryPhoneType),
+      altPhone: cleanValue(formValue.alternatePhone),
+      altPhoneType: cleanValue(formValue.alternatePhoneType),
+      dob: cleanValue(formValue.dateOfBirth),
+      altEmail: cleanValue(formValue.emailAddress),
+      maritalStatus: cleanValue(formValue.maritalStatus),
+      everDivorced: toBooleanOrUndefined(formValue.everDivorced),
       employeeStatus: 'ACTIVE', // Default status
-      beenConvicted: formValue.convictedOfCrime === 'true',
-      hasQuestionableBackground:
-        formValue.integrityQuestionableBackground === 'true',
-      hasBeenInvestigatedForMisconductOrAbuse:
-        formValue.sexualMisconductInvestigation === 'true',
-      homeAddress: formValue.homeAddress,
-      homeCity: formValue.cityTown,
-      homeState: formValue.stateProvince,
-      homeCountry: formValue.country,
-      homeZipCode: formValue.zipCode,
-      mailingAddress: formValue.mailingAddress,
-      mailingCity: formValue.cityTown2,
-      mailingState: formValue.stateProvince2,
-      mailingCountry: formValue.country2,
-      mailingZipCode: formValue.zipCode2,
-      yearSaved: formValue.yearSaved,
-      sanctified: formValue.sanctified === 'true',
-      baptizedWithWater: formValue.baptizedWithHolySpirit === 'true',
-      yearOfWaterBaptism: formValue.yearWaterBaptized,
-      firstYearInChurch: formValue.firstYearInApostolicChurch,
-      isFaithfulInTithing: formValue.areFaithfulInTithing === 'true',
-      firstSermonPastor: formValue.pastor,
-      dateOfFirstSermon: formValue.serviceDate,
-      firstSermonAddress: formValue.serviceLocation,
-      firstSermonCity: formValue.serviceCityTown,
-      firstSermonState: formValue.serviceStateProvince,
-      firstSermonCountry: formValue.serviceCountry,
+      beenConvicted: toBooleanOrUndefined(formValue.convictedOfCrime),
+      hasQuestionableBackground: toBooleanOrUndefined(
+        formValue.integrityQuestionableBackground
+      ),
+      hasBeenInvestigatedForMisconductOrAbuse: toBooleanOrUndefined(
+        formValue.sexualMisconductInvestigation
+      ),
+      homeAddress: cleanValue(formValue.homeAddress),
+      homeCity: cleanValue(formValue.cityTown),
+      homeState: cleanValue(formValue.stateProvince),
+      homeCountry: cleanValue(formValue.country),
+      homeZipCode: cleanValue(formValue.zipCode),
+      mailingAddress: cleanValue(formValue.mailingAddress),
+      mailingCity: cleanValue(formValue.cityTown2),
+      mailingState: cleanValue(formValue.stateProvince2),
+      mailingCountry: cleanValue(formValue.country2),
+      mailingZipCode: cleanValue(formValue.zipCode2),
+      yearSaved: cleanValue(formValue.yearSaved),
+      sanctified: toBooleanOrUndefined(formValue.sanctified),
+      baptizedWithWater: toBooleanOrUndefined(formValue.baptizedWithHolySpirit),
+      yearOfWaterBaptism: cleanValue(formValue.yearWaterBaptized),
+      firstYearInChurch: cleanValue(formValue.firstYearInApostolicChurch),
+      isFaithfulInTithing: toBooleanOrUndefined(formValue.areFaithfulInTithing),
+      firstSermonPastor: cleanValue(formValue.pastor),
+      dateOfFirstSermon: cleanValue(formValue.serviceDate),
+      firstSermonAddress: cleanValue(formValue.serviceLocation),
+      firstSermonCity: cleanValue(formValue.serviceCityTown),
+      firstSermonState: cleanValue(formValue.serviceStateProvince),
+      firstSermonCountry: cleanValue(formValue.serviceCountry),
       previousChurchPositions: formValue.previousPosition
         ? [formValue.previousPosition]
-        : [],
-      // Add other fields as needed
+        : undefined,
     };
+
+    // Remove undefined fields to avoid sending them
+    Object.keys(updateData).forEach((key) => {
+      if (updateData[key as keyof UpdateEmployeeRequest] === undefined) {
+        delete updateData[key as keyof UpdateEmployeeRequest];
+      }
+    });
+
+    // Debug logging
+    console.log('Form values:', formValue);
+    console.log('Mapped update data:', updateData);
+
+    return updateData;
   }
 
   // Validation methods using service

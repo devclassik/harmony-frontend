@@ -1,7 +1,7 @@
 <!-- Welcome Screen Animation -->
 <app-welcome-screen-animation
   [show]="showWelcomeAnimation"
-  [userName]="getWorkerName()"
+  [userName]="workerName"
   (close)="onWelcomeAnimationClose()"
 >
 </app-welcome-screen-animation>
@@ -55,7 +55,7 @@
     <div *ngIf="!isLoadingProfile">
       <!-- Greeting Section -->
       <app-dashboard-greetings
-        [userName]="getWorkerName()"
+        [userName]="workerName"
         [showSubText]="true"
         [subText]="'Here is a brief summary of your employment.'"
         [showMetrics]="false"
@@ -70,19 +70,29 @@
         ></app-dashboard-information>
       </div>
 
-      <app-table
-        [tableTitle]="'Leave Requests'"
-        [viewAllLink]="'leave-management/annual-leave'"
-        [tableData]="leaveRequests"
-        [tableHeader]="leaveRequestsHeader"
-        [showViewAll]="true"
-        [menuItems]="actionButton"
-        (menuAction)="onMenuAction($event)"
-        [showSearch]="false"
-        [showFilter]="false"
-        [showPagination]="true"
-        [showStatusTab]="false"
-      ></app-table>
+      <!-- Leave Requests Table -->
+      <div class="relative">
+        <!-- Loading Overlay for Leave Requests -->
+        <app-loading-overlay
+          [isVisible]="isLoadingLeaveRequests"
+          title="Loading Leave Requests"
+          message="Fetching your leave request data..."
+        ></app-loading-overlay>
+
+        <app-table
+          [tableTitle]="'Leave Requests'"
+          [viewAllLink]="'leave-management/annual-leave'"
+          [tableData]="leaveRequests"
+          [tableHeader]="leaveRequestsHeader"
+          [showViewAll]="true"
+          [menuItems]="actionButton"
+          (menuAction)="onMenuAction($event)"
+          [showSearch]="false"
+          [showFilter]="false"
+          [showPagination]="true"
+          [showStatusTab]="false"
+        ></app-table>
+      </div>
     </div>
   </div>
 
@@ -91,8 +101,9 @@
     [view]="showLeaveDetails"
     [leaveData]="selectedLeaveData"
     [title]="'Leave Request Details'"
-    [leaveType]="'Leave'"
+    [leaveType]="'Annual Leave'"
     [totalLeaveDays]="30"
-    (close)="showLeaveDetails = false"
+    [mode]="'view'"
+    (close)="onCloseLeaveDetails()"
   ></app-leave-details>
 </div>

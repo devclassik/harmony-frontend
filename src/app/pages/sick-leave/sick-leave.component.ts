@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SuccessModalComponent } from '../../components/success-modal/success-modal.component';
 import {
   ConfirmPromptComponent,
@@ -15,7 +15,13 @@ import { TableData } from '../../interfaces/employee.interface';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { LeaveDetailsComponent } from '../../components/leave-details/leave-details.component';
-import { CreateLeaveOfAbsenceComponent } from '../../components/create-leave-of-absence/create-leave-of-absence.component';
+import {
+  LeaveService,
+  CreateSickLeaveRequest,
+} from '../../services/leave.service';
+import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+import { AlertService } from '../../services/alert.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-sick-leave',
@@ -26,12 +32,12 @@ import { CreateLeaveOfAbsenceComponent } from '../../components/create-leave-of-
     TableComponent,
     CommonModule,
     LeaveDetailsComponent,
-    CreateLeaveOfAbsenceComponent,
+    LoadingOverlayComponent,
   ],
   templateUrl: './sick-leave.component.html',
   styleUrl: './sick-leave.component.css',
 })
-export class SickLeaveComponent {
+export class SickLeaveComponent implements OnInit {
   userRole: string | null;
   selectedStatus: string = '';
   selectedFilter: string = '';
@@ -46,10 +52,108 @@ export class SickLeaveComponent {
   showFilterTabFromParent: boolean = false;
   showCreateRequest = false;
   showSickLeaveDetails: boolean = false;
-  selectedSickLeaveData: TableData | null = null;
+  selectedSickLeaveData: any = null;
+  isLoading: boolean = false;
+  isCreating: boolean = false;
+  currentUserId: number | null = null;
+  leaveDetailsMode: 'view' | 'create' = 'view';
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private leaveService: LeaveService,
+    private alertService: AlertService
+  ) {
     this.userRole = this.authService.getWorkerRole();
+    this.currentUserId = this.authService.getCurrentEmployeeId();
+  }
+
+  ngOnInit(): void {
+    this.loadSickLeaves();
+  }
+
+  loadSickLeaves(): void {
+    this.isLoading = true;
+    this.leaveService
+      .getSickLeaves()
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          const allSickLeaves = response.data;
+
+          // Filter leaves based on user role
+          if (this.userRole?.toLowerCase() === 'worker' && this.currentUserId) {
+            // Workers see only their own sick leaves
+            this.sickLeaveRequests = this.transformToTableData(
+              this.leaveService.filterLeavesByEmployee(
+                allSickLeaves,
+                this.currentUserId
+              )
+            );
+          } else {
+            // Admins see all sick leaves
+            this.employees = this.transformToTableData(allSickLeaves);
+          }
+
+          this.applyFilters();
+          this.applySickLeaveFilters();
+        },
+        error: (error) => {
+          console.error('Error loading sick leaves:', error);
+          // You might want to show an error message to the user
+        },
+      });
+  }
+
+  transformToTableData(leaves: any[]): TableData[] {
+    return leaves.map((leave) => {
+      // Calculate end date from start date and duration
+      const startDate = new Date(leave.startDate);
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + (leave.duration - 1)); // -1 because the start date counts as day 1
+
+      return {
+        id: leave.leaveId || leave.id,
+        name: leave.employee
+          ? `${leave.employee.firstName} ${leave.employee.lastName}`
+          : 'N/A',
+        startDate: leave.startDate,
+        endDate: endDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
+        duration: `${leave.duration} ${leave.durationUnit}`,
+        status: this.transformStatus(leave.status) as any,
+        requestType: leave.type,
+        substitution: 'N/A', // This would come from API if available
+        imageUrl: leave.employee?.photoUrl || 'assets/svg/profilePix.svg',
+        // Additional data for details view
+        reason: leave.reason,
+        location: leave.location,
+        leaveNotesUrls: leave.leaveNotesUrls || [],
+        employeeId: leave.employee?.employeeId,
+        // Store original data for detail view
+        originalData: leave,
+      };
+    });
+  }
+
+  // Transform status from API format to display format
+  transformStatus(status: string): string {
+    if (!status) return 'Unknown';
+
+    // Convert from API format (PENDING, APPROVED, REJECTED) to display format
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'Pending';
+      case 'APPROVED':
+        return 'Approved';
+      case 'REJECTED':
+        return 'Rejected';
+      default:
+        // Capitalize first letter for any other status
+        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+    }
   }
 
   tableHeader: TableHeader[] = [
@@ -69,54 +173,11 @@ export class SickLeaveComponent {
     { key: 'action', label: 'ACTION' },
   ];
 
-  employees: TableData[] = [
-    {
-      id: '124 - 08',
-      name: 'John Adegoke',
-      startDate: '06/5/2025',
-      duration: '2 weeks',
-      status: 'Approved',
-      imageUrl: 'assets/svg/profilePix.svg',
-    },
-    {
-      id: '124 - 01',
-      name: 'John Adegoke',
-      startDate: '06/3/2025',
-      duration: '1 month',
-      status: 'Rejected',
-      imageUrl: 'assets/svg/profilePix.svg',
-    },
-  ];
+  employees: TableData[] = [];
+  sickLeaveRequests: TableData[] = [];
 
-  sickLeaveRequests: TableData[] = [
-    {
-      id: 'SL-001',
-      startDate: '2024-06-15',
-      endDate: '2024-06-17',
-      duration: '3 Days',
-      substitution: 'John Doe',
-      status: 'Approved',
-    },
-    {
-      id: 'SL-002',
-      startDate: '2024-07-10',
-      endDate: '2024-07-15',
-      duration: '5 Days',
-      substitution: 'Jane Smith',
-      status: 'Pending',
-    },
-    {
-      id: 'SL-003',
-      startDate: '2024-08-05',
-      endDate: '2024-08-07',
-      duration: '2 Days',
-      substitution: 'Mike Johnson',
-      status: 'Rejected',
-    },
-  ];
-
-  filteredEmployees: TableData[] = this.employees;
-  filteredSickLeaveRequests: TableData[] = this.sickLeaveRequests;
+  filteredEmployees: TableData[] = [];
+  filteredSickLeaveRequests: TableData[] = [];
 
   statusTabs: FilterTab[] = [
     { label: 'All', value: '' },
@@ -185,7 +246,23 @@ export class SickLeaveComponent {
     if (event.action === 'View') {
       if (this.userRole?.toLowerCase() === 'worker') {
         this.showSickLeaveDetailsModal();
-        this.selectedSickLeaveData = event.row;
+
+        // Get the original API data and transform it for the leave-details component
+        const originalData = (event.row as any).originalData;
+        if (originalData) {
+          // Get all leave records from the current data to calculate balance and history
+          const allUserLeaves = this.sickLeaveRequests
+            .map((req) => (req as any).originalData)
+            .filter(Boolean);
+          this.selectedSickLeaveData =
+            this.leaveService.transformForLeaveDetails(
+              originalData,
+              allUserLeaves
+            );
+        } else {
+          // Fallback to the table data if originalData is not available
+          this.selectedSickLeaveData = event.row;
+        }
       } else {
         this.showEmployeeDetailsModal();
         this.selectedEmployeeRecord = event.row;
@@ -234,35 +311,78 @@ export class SickLeaveComponent {
   }
 
   showSickLeaveDetailsModal() {
+    this.leaveDetailsMode = 'view';
     this.showSickLeaveDetails = true;
   }
 
   openCreateRequest() {
+    this.leaveDetailsMode = 'create';
+    this.selectedSickLeaveData = null; // Clear any existing data
     this.showCreateRequest = true;
+  }
+
+  onCloseCreateSickLeaveRequest() {
+    this.showCreateRequest = false;
+    this.leaveDetailsMode = 'view';
+  }
+
+  onCloseSickLeaveDetails() {
+    this.showSickLeaveDetails = false;
+    this.leaveDetailsMode = 'view';
   }
 
   onCreateRequestSubmitted(formData: any) {
     console.log('Sick Leave request submitted:', formData);
 
-    // Generate a new ID
-    const newId = `SL-${String(this.sickLeaveRequests.length + 1).padStart(
-      3,
-      '0'
-    )}`;
+    if (!this.currentUserId) {
+      this.alertService.error(
+        'Unable to determine employee ID. Please try logging in again.'
+      );
+      return;
+    }
 
-    // Add the new request to the beginning of the array
-    const newRequest: TableData = {
-      id: newId,
-      requestType: formData.requestType,
+    // Show loading overlay and close slide panel immediately (like leave of absence)
+    this.isCreating = true;
+    this.showCreateRequest = false;
+    this.leaveDetailsMode = 'view';
+
+    const sickLeaveRequest: CreateSickLeaveRequest = {
       startDate: formData.startDate,
-      endDate: '',
-      duration: formData.duration,
-      location: formData.location,
-      status: 'Pending',
+      duration: formData.duration, // This is already calculated in days
+      durationUnit: 'DAYS', // Always use DAYS since duration is calculated in days
+      reason: formData.reason,
+      location: formData.location || 'Remote',
+      leaveNotesUrls: formData.leaveNotesUrls || [],
+      employeeId: this.currentUserId,
     };
 
-    this.sickLeaveRequests.unshift(newRequest);
-    this.showCreateRequest = false;
+    this.leaveService
+      .createSickLeave(sickLeaveRequest)
+      .pipe(
+        finalize(() => {
+          this.isCreating = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          console.log('Sick leave created successfully:', response);
+          if (response.status === 'success') {
+            // Show success alert
+            this.alertService.success(
+              'Sick leave request created successfully!'
+            );
+
+            // Reload sick leaves to show the new request
+            this.loadSickLeaves();
+          }
+        },
+        error: (error) => {
+          console.error('Error creating sick leave:', error);
+          this.alertService.error(
+            'Failed to create sick leave request. Please try again.'
+          );
+        },
+      });
   }
 
   applySickLeaveFilters() {
