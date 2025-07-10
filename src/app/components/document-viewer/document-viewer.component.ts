@@ -1,5 +1,13 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TableData } from '../../interfaces/employee.interface';
 
 @Component({
@@ -139,7 +147,7 @@ import { TableData } from '../../interfaces/employee.interface';
               <!-- PDF Viewer -->
               <div *ngIf="isPDF()" class="w-full">
                 <iframe
-                  [src]="getDocumentUrl()"
+                  [src]="getSafeDocumentUrl()"
                   class="w-full h-[800px] border-0"
                   title="Document Viewer"
                 ></iframe>
@@ -148,14 +156,17 @@ import { TableData } from '../../interfaces/employee.interface';
               <!-- Image Viewer -->
               <div *ngIf="isImage()" class="p-4">
                 <img
-                  [src]="getDocumentUrl()"
+                  [src]="getSafeDocumentUrl()"
                   [alt]="document?.documentName"
                   class="max-w-full h-auto"
                 />
               </div>
 
-              <!-- Document Preview for other types -->
-              <div *ngIf="!isPDF() && !isImage()" class="p-8 text-center">
+              <!-- Document Preview for other types or when URL is not available -->
+              <div
+                *ngIf="(!isPDF() && !isImage()) || !getDocumentUrl()"
+                class="p-8 text-center"
+              >
                 <div
                   [class]="getFileIconClass(document?.documentType || '')"
                   class="w-24 h-24 mx-auto mb-4 rounded-lg flex items-center justify-center"
@@ -172,14 +183,24 @@ import { TableData } from '../../interfaces/employee.interface';
                 <p class="text-gray-600 mb-4">
                   {{ document?.documentType }} Document
                 </p>
-                <p class="text-sm text-gray-500 mb-6">
+                <p class="text-sm text-gray-500 mb-6" *ngIf="!getDocumentUrl()">
+                  Document URL is not available for preview.
+                </p>
+                <p
+                  class="text-sm text-gray-500 mb-6"
+                  *ngIf="getDocumentUrl() && !isPDF() && !isImage()"
+                >
                   This document type cannot be previewed directly.
                 </p>
                 <button
                   (click)="onDownload()"
                   class="bg-[#12C16F] text-white px-6 py-2 rounded-lg hover:bg-[#0ea860] transition-colors"
+                  [disabled]="!getDocumentUrl()"
+                  [class.opacity-50]="!getDocumentUrl()"
+                  [class.cursor-not-allowed]="!getDocumentUrl()"
                 >
-                  Download to View
+                  <span *ngIf="getDocumentUrl()">Download to View</span>
+                  <span *ngIf="!getDocumentUrl()">URL Not Available</span>
                 </button>
               </div>
             </div>
@@ -215,13 +236,22 @@ import { TableData } from '../../interfaces/employee.interface';
     `,
   ],
 })
-export class DocumentViewerComponent {
+export class DocumentViewerComponent implements OnChanges {
   @Input() isVisible: boolean = false;
   @Input() document: TableData | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() download = new EventEmitter<TableData>();
 
   zoomLevel: number = 100;
+
+  constructor(private sanitizer: DomSanitizer) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['document'] && changes['document'].currentValue) {
+      // Reset zoom when document changes
+      this.zoomLevel = 100;
+    }
+  }
 
   onClose() {
     this.close.emit();
@@ -263,28 +293,22 @@ export class DocumentViewerComponent {
   }
 
   getDocumentUrl(): string {
-    if (!this.document) return '';
-
-    // For demo purposes, we'll use sample URLs
-    // In production, replace with actual document URLs from your backend
-
-    switch (this.document.documentType?.toUpperCase()) {
-      case 'PDF':
-        // For demo, use the HTML sample document to simulate PDF viewing
-        return '/assets/sample-files/sample-document.html';
-      case 'JPG':
-      case 'JPEG':
-        // Use placeholder images for demo
-        return `https://via.placeholder.com/800x600/f0f0f0/333333?text=${encodeURIComponent(
-          this.document.documentName || 'Image'
-        )}`;
-      case 'PNG':
-        return `https://via.placeholder.com/800x600/e8f5e8/2d5a2d?text=${encodeURIComponent(
-          this.document.documentName || 'PNG Image'
-        )}`;
-      default:
-        return '';
+    if (!this.document || !this.document.downloadUrl) {
+      return '';
     }
+
+    // Use the actual download URL from the API response
+    return this.document.downloadUrl;
+  }
+
+  getSafeDocumentUrl(): SafeResourceUrl | string {
+    const url = this.getDocumentUrl();
+    if (!url) {
+      return '';
+    }
+
+    // Sanitize the URL to make it safe for use in resource contexts
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   getFileTypeClass(fileType: string): string {

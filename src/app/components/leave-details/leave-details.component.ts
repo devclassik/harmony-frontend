@@ -5,11 +5,12 @@ import { OnInit } from '@angular/core';
 import { FORM_OPTIONS } from '../../shared/constants/form-options';
 import { FileUploadService } from '../../shared/services/file-upload.service';
 import { finalize } from 'rxjs/operators';
+import { ConfirmPromptComponent } from '../confirm-prompt/confirm-prompt.component';
 
 @Component({
   selector: 'app-leave-details',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmPromptComponent],
   templateUrl: './leave-details.component.html',
   styleUrl: './leave-details.component.css',
 })
@@ -34,6 +35,7 @@ export class LeaveDetailsComponent implements OnInit {
   @Output() submit = new EventEmitter<any>();
 
   openSection: string | null = null;
+  showConfirmModal: boolean = false;
 
   constructor(private fileUploadService: FileUploadService) {}
 
@@ -167,35 +169,61 @@ export class LeaveDetailsComponent implements OnInit {
 
   onSubmit() {
     if (this.isFormValid()) {
-      const calculatedDuration = this.calculateDurationInDays(
-        this.formData.duration.value,
-        this.formData.duration.unit
-      );
-
-      // Get URLs from successfully uploaded files
-      const fileUrls = this.uploadedFiles
-        .filter((file) => file.uploadStatus === 'completed' && file.url)
-        .map((file) => file.url!);
-
-      const submissionData = {
-        requestType: this.formData.requestType,
-        startDate: this.formData.startDate,
-        endDate: this.formData.endDate,
-        durationUnit: this.formData.duration.unit,
-        duration: calculatedDuration,
-        location: this.formData.location,
-        reason: this.formData.reason,
-        leaveNotesUrls: fileUrls,
-      };
-
-      console.log('Submitting leave request:', submissionData);
-      console.log(
-        `Duration: ${this.formData.duration.value} ${this.formData.duration.unit} = ${calculatedDuration} days`
-      );
-      console.log('File URLs:', fileUrls);
-
-      this.submit.emit(submissionData);
+      this.showConfirmModal = true;
     }
+  }
+
+  onConfirmSubmit(confirmed: boolean) {
+    if (confirmed) {
+      this.showConfirmModal = false;
+
+      // Handle submission based on leave type
+      if (this.showEndDate && !this.showDuration) {
+        // Annual leave - use start date, end date, and reason
+        const submissionData = {
+          startDate: this.formData.startDate,
+          endDate: this.formData.endDate,
+          reason: this.formData.reason,
+        };
+        this.submit.emit(submissionData);
+      } else {
+        // Leave of absence or sick leave - use duration, location, etc.
+        const calculatedDuration = this.calculateDurationInDays(
+          this.formData.duration.value,
+          this.formData.duration.unit
+        );
+
+        // Get URLs from successfully uploaded files
+        const fileUrls = this.uploadedFiles
+          .filter((file) => file.uploadStatus === 'completed' && file.url)
+          .map((file) => file.url!);
+
+        const submissionData = {
+          requestType: this.formData.requestType,
+          startDate: this.formData.startDate,
+          endDate: this.formData.endDate,
+          durationUnit: this.formData.duration.unit,
+          duration: calculatedDuration,
+          location: this.formData.location,
+          reason: this.formData.reason,
+          leaveNotesUrls: fileUrls,
+        };
+
+        console.log('Submitting leave request:', submissionData);
+        console.log(
+          `Duration: ${this.formData.duration.value} ${this.formData.duration.unit} = ${calculatedDuration} days`
+        );
+        console.log('File URLs:', fileUrls);
+
+        this.submit.emit(submissionData);
+      }
+    } else {
+      this.showConfirmModal = false;
+    }
+  }
+
+  onConfirmCancel() {
+    this.showConfirmModal = false;
   }
 
   // Calculate duration in days based on the selected unit
@@ -274,13 +302,39 @@ export class LeaveDetailsComponent implements OnInit {
   }
 
   isFormValid(): boolean {
-    return !!(
-      this.formData.requestType &&
-      this.formData.startDate &&
-      this.formData.duration.value &&
-      this.formData.location &&
-      this.formData.reason
-    );
+    // Base validation - always required
+    if (!this.formData.startDate || !this.formData.reason) {
+      return false;
+    }
+
+    // Annual leave validation (uses end date instead of duration)
+    if (this.showEndDate && !this.showDuration) {
+      return !!this.formData.endDate;
+    }
+
+    // Leave of absence/sick leave validation
+    let isValid = true;
+
+    if (this.showRequestType) {
+      isValid = isValid && !!this.formData.requestType;
+    }
+
+    if (this.showDuration) {
+      isValid = isValid && !!this.formData.duration.value;
+    }
+
+    if (this.showLocation) {
+      isValid = isValid && !!this.formData.location;
+    }
+
+    return isValid;
+  }
+
+  get confirmationText(): string {
+    if (this.showEndDate && !this.showDuration) {
+      return `Are you sure you want to create this ${this.leaveType.toLowerCase()} request?`;
+    }
+    return `Are you sure you want to create this ${this.leaveType.toLowerCase()} request?`;
   }
 
   resetForm() {

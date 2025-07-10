@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {
   FilterTab,
   MenuItem,
@@ -7,18 +7,35 @@ import {
 } from '../../components/table/table.component';
 import { TableData } from '../../interfaces/employee.interface';
 import { DocumentViewerComponent } from '../../components/document-viewer/document-viewer.component';
+import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 import { CommonModule } from '@angular/common';
+import {
+  TemplateService,
+  Template,
+  TemplateType,
+} from '../../services/template.service';
+import { AlertService } from '../../services/alert.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-index-of-file',
-  imports: [CommonModule, TableComponent, DocumentViewerComponent],
+  imports: [
+    CommonModule,
+    TableComponent,
+    DocumentViewerComponent,
+    LoadingOverlayComponent,
+  ],
   templateUrl: './index-of-file.component.html',
   styleUrl: './index-of-file.component.css',
 })
-export class IndexOfFileComponent {
+export class IndexOfFileComponent implements OnInit, OnDestroy {
   selectedStatus: string = '';
   selectedFilter: string = '';
   searchValue: string = '';
+
+  // Loading states
+  isLoadingTemplates: boolean = false;
+  isCreatingTemplate: boolean = false;
 
   // Document viewer properties
   showDocumentViewer: boolean = false;
@@ -40,270 +57,213 @@ export class IndexOfFileComponent {
   // Dropdown management for card actions
   activeCardDropdownKey: string | null = null;
 
+  // Subscriptions for cleanup
+  private subscriptions: Subscription[] = [];
+
   tableHeader: TableHeader[] = [
-    { key: 'id', label: 'DOCUMENT ID' },
-    { key: 'documentName', label: 'DOCUMENT NAME' },
+    { key: 'id', label: 'TEMPLATE ID' },
+    { key: 'documentName', label: 'TEMPLATE NAME' },
     { key: 'date', label: 'DATE UPLOADED' },
-    { key: 'documentType', label: 'DOCUMENT TYPE' },
+    { key: 'documentType', label: 'TEMPLATE TYPE' },
     { key: 'action', label: 'ACTION' },
   ];
 
-  // Documents data
-  documentsData: TableData[] = [
-    {
-      id: 'FL-755787',
-      documentName: 'Code of Conduct',
-      date: '06-20-2024',
-      documentType: 'PDF',
-    },
-    {
-      id: 'FL-755788',
-      documentName: 'Standard Operating Procedure',
-      date: '06-20-2024',
-      documentType: 'DOC',
-    },
-    {
-      id: 'FL-755789',
-      documentName: 'Conduct Manual',
-      date: '06-20-2024',
-      documentType: 'JPG',
-    },
-    {
-      id: 'FL-755790',
-      documentName: 'Conduct Manual',
-      date: '06-20-2024',
-      documentType: 'XLS',
-    },
-    {
-      id: 'FL-755791',
-      documentName: 'Code of Conduct',
-      date: '06-20-2024',
-      documentType: 'PDF',
-    },
-    {
-      id: 'FL-755792',
-      documentName: 'Standard Operating Procedure',
-      date: '06-20-2024',
-      documentType: 'DOC',
-    },
-    {
-      id: 'FL-755793',
-      documentName: 'Conduct Manual',
-      date: '06-20-2024',
-      documentType: 'JPG',
-    },
-    {
-      id: 'FL-755794',
-      documentName: 'Conduct Manual',
-      date: '06-20-2024',
-      documentType: 'XLS',
-    },
-    // Add more sample data to test pagination
-    {
-      id: 'FL-755795',
-      documentName: 'Employee Handbook',
-      date: '06-19-2024',
-      documentType: 'PDF',
-    },
-    {
-      id: 'FL-755796',
-      documentName: 'Safety Guidelines',
-      date: '06-18-2024',
-      documentType: 'DOC',
-    },
-    {
-      id: 'FL-755797',
-      documentName: 'Training Manual',
-      date: '06-17-2024',
-      documentType: 'PDF',
-    },
-    {
-      id: 'FL-755798',
-      documentName: 'Company Policies',
-      date: '06-16-2024',
-      documentType: 'XLS',
-    },
-    {
-      id: 'FL-755799',
-      documentName: 'Org Chart',
-      date: '06-15-2024',
-      documentType: 'JPG',
-    },
-    {
-      id: 'FL-755800',
-      documentName: 'Budget Report',
-      date: '06-14-2024',
-      documentType: 'XLS',
-    },
-    {
-      id: 'FL-755801',
-      documentName: 'Meeting Minutes',
-      date: '06-13-2024',
-      documentType: 'DOC',
-    },
-  ];
+  // Template data from API
+  templates: Template[] = [];
+  documentsData: TableData[] = [];
+  trainingData: TableData[] = [];
 
-  // Training data
-  trainingData: TableData[] = [
-    {
-      id: 'TR-445123',
-      documentName: 'Safety Training Module',
-      date: '06-15-2024',
-      documentType: 'PDF',
-    },
-    {
-      id: 'TR-445124',
-      documentName: 'HR Orientation Video',
-      date: '06-14-2024',
-      documentType: 'MP4',
-    },
-    {
-      id: 'TR-445125',
-      documentName: 'Compliance Training',
-      date: '06-13-2024',
-      documentType: 'PDF',
-    },
-    {
-      id: 'TR-445126',
-      documentName: 'Leadership Development',
-      date: '06-12-2024',
-      documentType: 'MP4',
-    },
-    {
-      id: 'TR-445127',
-      documentName: 'Technical Skills Training',
-      date: '06-11-2024',
-      documentType: 'PDF',
-    },
-    {
-      id: 'TR-445128',
-      documentName: 'Customer Service Training',
-      date: '06-10-2024',
-      documentType: 'MP4',
-    },
-    {
-      id: 'TR-445129',
-      documentName: 'Data Privacy Training',
-      date: '06-09-2024',
-      documentType: 'PDF',
-    },
-    {
-      id: 'TR-445130',
-      documentName: 'Emergency Procedures',
-      date: '06-08-2024',
-      documentType: 'DOC',
-    },
-  ];
-
-  employees: TableData[] = this.documentsData;
-  filteredEmployees: TableData[] = this.employees;
+  employees: TableData[] = [];
+  filteredEmployees: TableData[] = [];
   paginatedEmployees: TableData[] = [];
 
   filterTabs: FilterTab[] = [
     { label: 'All', value: '' },
-    { label: 'PDF', value: 'PDF' },
-    { label: 'DOC', value: 'DOC' },
-    { label: 'XLS', value: 'XLS' },
-    { label: 'JPG', value: 'JPG' },
-    { label: 'MP4', value: 'MP4' },
+    { label: 'PDF', value: 'pdf' },
+    { label: 'DOC', value: 'doc' },
+    { label: 'XLS', value: 'xls' },
+    { label: 'JPG', value: 'jpg' },
   ];
 
   actionButton: MenuItem[] = [
-    { label: 'View', action: 'View', icon: '/public/assets/svg/eyeOpen.svg' },
+    { label: 'View', action: 'view', icon: 'assets/svg/eyeOpen.svg' },
+    { label: 'Download', action: 'download', icon: 'assets/svg/download.svg' },
   ];
 
-  constructor() {
-    this.applyFilters();
+  constructor(
+    private templateService: TemplateService,
+    private alertService: AlertService
+  ) {
+    this.updateCurrentData();
   }
 
-  // Tab switching methods
+  ngOnInit() {
+    this.loadTemplates();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
+  loadTemplates() {
+    this.isLoadingTemplates = true;
+
+    const loadSub = this.templateService.getTemplates().subscribe({
+      next: (response) => {
+        this.isLoadingTemplates = false;
+        if (response.status === 'success') {
+          this.templates = response.data;
+          this.transformTemplateData();
+          this.updateCurrentData();
+          this.applyFilters();
+        }
+      },
+      error: (error) => {
+        this.isLoadingTemplates = false;
+        console.error('Error loading templates:', error);
+        this.alertService.error('Failed to load templates. Please try again.');
+      },
+    });
+
+    this.subscriptions.push(loadSub);
+  }
+
+  transformTemplateData() {
+    this.documentsData = this.templates.map((template) => ({
+      id: template.id.toString(),
+      documentName: this.templateService.getTemplateTypeDisplayName(
+        template.type
+      ),
+      date: this.formatDate(template.createdAt),
+      documentType: this.getFileTypeFromUrl(template.downloadUrl),
+      downloadUrl: template.downloadUrl,
+      templateType: template.type,
+    }));
+
+    // For now, keeping training data empty as it's not part of the template API
+    // If you have a separate training API endpoint, you can implement it similarly
+    this.trainingData = [];
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    });
+  }
+
+  getFileTypeFromUrl(url: string): string {
+    const extension = url.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return 'PDF';
+      case 'doc':
+      case 'docx':
+        return 'DOC';
+      case 'xls':
+      case 'xlsx':
+        return 'XLS';
+      case 'jpg':
+      case 'jpeg':
+        return 'JPG';
+      case 'png':
+        return 'PNG';
+      case 'mp4':
+        return 'MP4';
+      default:
+        return 'FILE';
+    }
+  }
+
   switchToDocuments() {
     this.activeTab = 'documents';
-    this.employees = this.documentsData;
-    this.currentPage = 1;
+    this.updateCurrentData();
     this.applyFilters();
   }
 
   switchToTraining() {
     this.activeTab = 'training';
-    this.employees = this.trainingData;
-    this.currentPage = 1;
+    this.updateCurrentData();
     this.applyFilters();
   }
 
-  // View switching methods
+  updateCurrentData() {
+    this.employees =
+      this.activeTab === 'documents' ? this.documentsData : this.trainingData;
+    this.filteredEmployees = this.employees;
+  }
+
   switchToTableView() {
     this.currentView = 'table';
-    this.pageSize = 10; // Different page size for table view
+    this.pageSize = 10;
     this.currentPage = 1;
-    this.applyFilters();
+    this.calculatePagination();
   }
 
   switchToCardView() {
     this.currentView = 'card';
-    this.pageSize = 12; // Different page size for card view
+    this.pageSize = 12;
     this.currentPage = 1;
-    this.applyFilters();
+    this.calculatePagination();
   }
 
-  // Toggle filter dropdown
   toggleFilterDropdown() {
     this.showFilterDropdown = !this.showFilterDropdown;
   }
 
-  // Get current data count
   getCurrentDataCount(): number {
     return this.filteredEmployees.length;
   }
 
-  // Get current tab title
   getCurrentTabTitle(): string {
-    return this.activeTab === 'documents' ? 'Documents' : 'Training';
+    return this.activeTab === 'documents' ? 'Documents' : 'Training Materials';
   }
 
   onFilterTabChange(value: string) {
     this.selectedFilter = value;
-    this.currentPage = 1;
     this.applyFilters();
   }
 
   onStatusTabChange(value: string) {
     this.selectedStatus = value;
-    this.currentPage = 1;
     this.applyFilters();
   }
 
   applyFilters() {
-    let filtered = this.employees;
-    if (this.selectedStatus) {
+    let filtered = [...this.employees];
+
+    // Apply search filter
+    if (this.searchValue.trim()) {
+      const searchTerm = this.searchValue.toLowerCase();
       filtered = filtered.filter(
-        (employee) => employee.status === this.selectedStatus
+        (item) =>
+          item.documentName?.toLowerCase().includes(searchTerm) ||
+          item.id?.toLowerCase().includes(searchTerm) ||
+          item.documentType?.toLowerCase().includes(searchTerm)
       );
     }
-    if (this.selectedFilter) {
+
+    // Apply document type filter
+    if (this.selectedFilter && this.selectedFilter !== '') {
       filtered = filtered.filter(
-        (employee) => employee.documentType === this.selectedFilter
+        (item) =>
+          item.documentType?.toLowerCase() === this.selectedFilter.toLowerCase()
       );
     }
-    if (this.searchValue) {
-      const search = this.searchValue.toLowerCase();
-      filtered = filtered.filter(
-        (employee) =>
-          employee.documentName?.toLowerCase().includes(search) ||
-          employee.id.toLowerCase().includes(search) ||
-          employee.documentType?.toLowerCase().includes(search)
-      );
-    }
+
     this.filteredEmployees = filtered;
+    this.currentPage = 1;
     this.calculatePagination();
   }
 
   calculatePagination() {
     this.totalPages = Math.ceil(this.filteredEmployees.length / this.pageSize);
-    if (this.currentPage > this.totalPages) {
-      this.currentPage = 1;
-    }
+    this.updatePaginatedData();
+  }
 
+  updatePaginatedData() {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     this.paginatedEmployees = this.filteredEmployees.slice(
@@ -313,29 +273,21 @@ export class IndexOfFileComponent {
   }
 
   onPageChange(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.calculatePagination();
-    }
+    this.currentPage = page;
+    this.updatePaginatedData();
   }
 
   onSearch(value: string) {
     this.searchValue = value;
-    this.currentPage = 1;
     this.applyFilters();
   }
 
   onMenuAction(event: { action: string; row: TableData }) {
-    console.log(event);
-
-    if (event.action === 'View') {
-      this.viewDocument(event.row);
-    }
+    this.handleAction(event.action, event.row);
   }
 
-  // Dropdown management methods for custom table
   getDropdownKey(employee: TableData, index: number): string {
-    return `${employee.id}_${index}`;
+    return `${employee.id}-${index}`;
   }
 
   toggleDropdown(employee: TableData, index: number): void {
@@ -344,18 +296,20 @@ export class IndexOfFileComponent {
   }
 
   handleAction(action: string, employee: TableData): void {
-    this.activeDropdownKey = null;
-
-    if (action === 'View') {
-      this.viewDocument(employee);
-    } else {
-      this.onMenuAction({ action, row: employee });
+    switch (action) {
+      case 'view':
+        this.viewDocument(employee);
+        break;
+      case 'download':
+        this.downloadDocument(employee);
+        break;
+      default:
+        console.log('Unknown action:', action);
     }
   }
 
-  // Card dropdown management methods
   getCardDropdownKey(employee: TableData, index: number): string {
-    return `card_${employee.id}_${index}`;
+    return `card-${employee.id}-${index}`;
   }
 
   toggleCardDropdown(employee: TableData, index: number): void {
@@ -365,16 +319,18 @@ export class IndexOfFileComponent {
   }
 
   handleCardAction(action: string, employee: TableData): void {
-    this.activeCardDropdownKey = null;
-
-    if (action === 'View') {
-      this.viewDocument(employee);
-    } else if (action === 'Download') {
-      this.downloadDocument(employee);
+    switch (action) {
+      case 'view':
+        this.viewDocument(employee);
+        break;
+      case 'download':
+        this.downloadDocument(employee);
+        break;
+      default:
+        console.log('Unknown action:', action);
     }
   }
 
-  // Document viewer methods
   viewDocument(document: TableData): void {
     this.selectedDocument = document;
     this.showDocumentViewer = true;
@@ -390,174 +346,52 @@ export class IndexOfFileComponent {
   }
 
   downloadDocument(doc: TableData): void {
-    // Implement download logic here
-    console.log('Downloading document:', doc.documentName);
-
-    // Create a simulated file download
-    // In a real application, you would get the file URL from your backend API
-    const fileUrl = this.getFileUrl(doc);
-
-    if (fileUrl) {
-      // Method 1: Direct download using anchor element
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = this.getFileName(doc);
-      link.target = '_blank';
-
-      // Append to body, click, and remove
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Optional: Show success message
-      console.log(`Downloaded: ${doc.documentName}`);
+    if (doc.downloadUrl) {
+      this.templateService.downloadTemplate(doc.downloadUrl);
     } else {
-      // Handle case where file URL is not available
-      console.error('File URL not available for download');
-      alert('Sorry, this file is not available for download at the moment.');
+      this.alertService.error('Download URL not available for this template.');
     }
-  }
-
-  private getFileUrl(doc: TableData): string | null {
-    // In a real application, this would come from your backend API
-    // For now, we'll simulate file URLs based on document type
-    const baseUrl = '/assets/sample-files/'; // Adjust this to your file storage location
-
-    switch (doc.documentType?.toUpperCase()) {
-      case 'PDF':
-        return `${baseUrl}${doc.id}_${doc.documentName}.pdf`;
-      case 'DOC':
-      case 'DOCX':
-        return `${baseUrl}${doc.id}_${doc.documentName}.docx`;
-      case 'XLS':
-      case 'XLSX':
-        return `${baseUrl}${doc.id}_${doc.documentName}.xlsx`;
-      case 'JPG':
-      case 'JPEG':
-        return `${baseUrl}${doc.id}_${doc.documentName}.jpg`;
-      case 'PNG':
-        return `${baseUrl}${doc.id}_${doc.documentName}.png`;
-      case 'MP4':
-        return `${baseUrl}${doc.id}_${doc.documentName}.mp4`;
-      default:
-        // For unknown file types, try a generic approach
-        return `${baseUrl}${doc.id}_${doc.documentName}`;
-    }
-  }
-
-  private getFileName(doc: TableData): string {
-    // Generate a proper filename for download
-    const extension = this.getFileExtension(doc.documentType || '');
-    const cleanName =
-      doc.documentName?.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_') ||
-      'document';
-    return `${cleanName}${extension}`;
-  }
-
-  private getFileExtension(documentType: string): string {
-    switch (documentType.toUpperCase()) {
-      case 'PDF':
-        return '.pdf';
-      case 'DOC':
-        return '.doc';
-      case 'DOCX':
-        return '.docx';
-      case 'XLS':
-        return '.xls';
-      case 'XLSX':
-        return '.xlsx';
-      case 'JPG':
-      case 'JPEG':
-        return '.jpg';
-      case 'PNG':
-        return '.png';
-      case 'MP4':
-        return '.mp4';
-      default:
-        return '.file';
-    }
-  }
-
-  // Alternative method for API-based downloads
-  downloadDocumentFromAPI(doc: TableData): void {
-    // Example implementation for API-based downloads
-    const downloadUrl = `/api/documents/${doc.id}/download`;
-
-    fetch(downloadUrl, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${this.getAuthToken()}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Download failed');
-        }
-        return response.blob();
-      })
-      .then((blob) => {
-        // Create blob URL and trigger download
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = this.getFileName(doc);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      })
-      .catch((error) => {
-        console.error('Download error:', error);
-        alert('Failed to download the document. Please try again.');
-      });
-  }
-
-  private getAuthToken(): string {
-    // Get authentication token from your auth service
-    // This is just a placeholder implementation
-    return localStorage.getItem('authToken') || '';
   }
 
   getFileTypeClass(fileType: string): string {
-    switch (fileType.toUpperCase()) {
-      case 'PDF':
-        return 'bg-red-100 text-red-800';
-      case 'DOC':
-      case 'DOCX':
-        return 'bg-blue-100 text-blue-800';
-      case 'XLS':
-      case 'XLSX':
-        return 'bg-green-100 text-green-800';
-      case 'JPG':
-      case 'JPEG':
-      case 'PNG':
-        return 'bg-purple-100 text-purple-800';
-      case 'MP4':
-        return 'bg-yellow-100 text-yellow-800';
+    switch (fileType?.toLowerCase()) {
+      case 'pdf':
+        return 'bg-red-100 text-red-600';
+      case 'doc':
+      case 'docx':
+        return 'bg-blue-100 text-blue-600';
+      case 'xls':
+      case 'xlsx':
+        return 'bg-green-100 text-green-600';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return 'bg-purple-100 text-purple-600';
+      case 'mp4':
+        return 'bg-orange-100 text-orange-600';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-600';
     }
   }
 
   getFileIconClass(fileType: string): string {
-    switch (fileType.toUpperCase()) {
-      case 'PDF':
-        return 'text-red-600';
-      case 'DOC':
-      case 'DOCX':
-        return 'text-blue-600';
-      case 'XLS':
-      case 'XLSX':
-        return 'text-green-600';
-      case 'JPG':
-      case 'JPEG':
-      case 'PNG':
-        return 'text-purple-600';
-      case 'MP4':
-        return 'text-yellow-600';
+    switch (fileType?.toLowerCase()) {
+      case 'pdf':
+        return 'fa-file-pdf';
+      case 'doc':
+      case 'docx':
+        return 'fa-file-word';
+      case 'xls':
+      case 'xlsx':
+        return 'fa-file-excel';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return 'fa-file-image';
+      case 'mp4':
+        return 'fa-file-video';
       default:
-        return 'text-gray-600';
+        return 'fa-file';
     }
   }
 

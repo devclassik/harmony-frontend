@@ -358,9 +358,9 @@
 
       <div class="border-b border-gray-200 mb-8"></div>
 
-      <!-- Leave Summary - Only show for non-camp meetings -->
+      <!-- Leave Summary - Only show for Annual Leave -->
       <div
-        *ngIf="!isCampMeeting"
+        *ngIf="!isCampMeeting && leaveType === 'Annual Leave'"
         class="border border-green-200 rounded-lg p-4 mb-6 bg-[#12C16F26]"
       >
         <div class="flex items-center gap-2 mb-2">
@@ -975,3 +975,14 @@
     </svg>
   </button>
 </div>
+
+<!-- Confirmation Modal -->
+<app-confirm-prompt
+  *ngIf="showConfirmModal"
+  [title]="'Confirm'"
+  [text]="confirmationText"
+  [yesButtonText]="'Yes'"
+  [noButtonText]="'No'"
+  (confirmed)="onConfirmSubmit($event)"
+  (closed)="onConfirmCancel()"
+></app-confirm-prompt>

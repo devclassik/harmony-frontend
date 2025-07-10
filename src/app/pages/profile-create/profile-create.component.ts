@@ -10,6 +10,7 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  FormArray,
 } from '@angular/forms';
 import { CommonModule, Location } from '@angular/common';
 import { Router } from '@angular/router';
@@ -39,6 +40,17 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   uploadedFiles: UploadedFile[] = [];
   isEditMode = false;
   isSubmitting = false;
+
+  // Accordion state management
+  accordionState = {
+    employeeInfo: true,
+    contactInfo: true,
+    personalInfo: true,
+    spiritualHistory: true,
+    legalQuestions: true,
+    references: true,
+    uploadDocuments: true,
+  };
 
   // Form options from constants
   titles = FORM_OPTIONS.titles;
@@ -196,31 +208,40 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       serviceStateProvince: ['', [Validators.required]],
       serviceCountry: ['', [Validators.required]],
       pastor: ['', [Validators.required]],
-      previousPosition: ['', [Validators.required]],
-      previousPositionTitle: ['', [Validators.required]],
-      previousPositionDate: ['', [Validators.required]],
       ordained: ['', [Validators.required]],
       ordainedDate: ['', [Validators.required]],
+      // Previous Positions (FormArray)
+      previousPositions: this.fb.array([
+        this.fb.group({
+          previousPositionTitle: ['', [Validators.required]],
+          previousPosition: ['', [Validators.required]],
+          previousPositionDate: ['', [Validators.required]],
+        }),
+      ]),
       // Legal Questions
       convictedOfCrime: ['', [Validators.required]],
       sexualMisconductInvestigation: ['', [Validators.required]],
       integrityQuestionableBackground: ['', [Validators.required]],
-      // References
-      referenceName: ['', [Validators.required]],
-      referencePhone: [
-        '',
-        [Validators.required, Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)],
-      ],
-      referenceEmail: ['', [Validators.required, Validators.email]],
-      referenceAddress: ['', [Validators.required]],
-      referenceCityTown: ['', [Validators.required]],
-      referenceStateProvince: ['', [Validators.required]],
-      referenceCountry: ['', [Validators.required]],
-      referenceZipCode: [
-        '',
-        [Validators.required, Validators.pattern(/^\d{5}(-\d{4})?$/)],
-      ],
-      howDoYouKnowThisPerson: ['', [Validators.required]],
+      // References (FormArray)
+      references: this.fb.array([
+        this.fb.group({
+          referenceName: ['', [Validators.required]],
+          referencePhone: [
+            '',
+            [Validators.required, Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)],
+          ],
+          referenceEmail: ['', [Validators.required, Validators.email]],
+          referenceAddress: ['', [Validators.required]],
+          referenceCityTown: ['', [Validators.required]],
+          referenceStateProvince: ['', [Validators.required]],
+          referenceCountry: ['', [Validators.required]],
+          referenceZipCode: [
+            '',
+            [Validators.required, Validators.pattern(/^\d{6}$/)],
+          ],
+          howDoYouKnowThisPerson: ['', [Validators.required]],
+        }),
+      ]),
       highestAcademicQualification: ['', [Validators.required]],
       fieldOfStudy: ['', [Validators.required]],
       highestAcademicQualificationDetails: ['', [Validators.required]],
@@ -289,7 +310,6 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
         this.createProfile();
       }
     } else {
-      console.log('Form is invalid');
       this.markAllFieldsAsTouched();
       this.scrollToFirstError();
     }
@@ -297,7 +317,6 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
 
   private updateProfile() {
     if (!this.employeeData) {
-      console.error('Employee data not available for update');
       this.isSubmitting = false;
       return;
     }
@@ -308,7 +327,6 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     const employeeId = this.authService.getCurrentEmployeeId();
 
     if (!employeeId) {
-      console.error('No employee ID available for current worker');
       this.isSubmitting = false;
       this.alertService.error('Error: No employee ID available for update');
       return;
@@ -318,15 +336,12 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       next: (response) => {
         this.isSubmitting = false;
         if (response.status === 'success') {
-          console.log('Profile updated successfully:', response.data);
-
           // Show success message
           this.alertService.success('Profile updated successfully!');
 
           // Navigate to profile view component
           this.router.navigate(['/profile-view']);
         } else {
-          console.error('Update failed:', response.message);
           this.alertService.error(
             'Failed to update profile: ' + response.message
           );
@@ -334,12 +349,10 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       },
       error: (error) => {
         this.isSubmitting = false;
-        console.error('Error updating profile:', error);
 
         // Extract detailed error information
         let errorMessage = 'Error updating profile. Please try again.';
         if (error.error) {
-          console.log('Error details:', error.error);
           if (error.error.message) {
             errorMessage = `Update failed: ${error.error.message}`;
           } else if (error.error.errors) {
@@ -377,20 +390,40 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       return value === '' ? undefined : value;
     };
 
+    // Helper function to capitalize title
+    const capitalizeTitle = (title: string): string => {
+      return title ? title.toUpperCase() : '';
+    };
+
+    // Helper function to capitalize gender
+    const capitalizeGender = (gender: string): string => {
+      return gender ? gender.toUpperCase() : '';
+    };
+
+    // Helper function to capitalize marital status
+    const capitalizeMaritalStatus = (status: string): string => {
+      return status ? status.toUpperCase() : '';
+    };
+
+    // Helper function to capitalize phone types
+    const capitalizePhoneType = (type: string): string => {
+      return type ? type.toUpperCase() : '';
+    };
+
     const updateData: UpdateEmployeeRequest = {
       firstName: cleanValue(formValue.legalFirstName),
       lastName: cleanValue(formValue.legalLastName),
       middleName: cleanValue(formValue.legalMiddleName),
-      title: cleanValue(formValue.title),
-      gender: cleanValue(formValue.gender),
+      title: capitalizeTitle(formValue.title),
+      gender: capitalizeGender(formValue.gender),
       profferedName: cleanValue(formValue.profferedName),
       primaryPhone: cleanValue(formValue.primaryPhone),
-      primaryPhoneType: cleanValue(formValue.primaryPhoneType),
+      primaryPhoneType: capitalizePhoneType(formValue.primaryPhoneType),
       altPhone: cleanValue(formValue.alternatePhone),
-      altPhoneType: cleanValue(formValue.alternatePhoneType),
+      altPhoneType: capitalizePhoneType(formValue.alternatePhoneType),
       dob: cleanValue(formValue.dateOfBirth),
       altEmail: cleanValue(formValue.emailAddress),
-      maritalStatus: cleanValue(formValue.maritalStatus),
+      maritalStatus: capitalizeMaritalStatus(formValue.maritalStatus),
       everDivorced: toBooleanOrUndefined(formValue.everDivorced),
       employeeStatus: 'ACTIVE', // Default status
       beenConvicted: toBooleanOrUndefined(formValue.convictedOfCrime),
@@ -422,9 +455,11 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       firstSermonCity: cleanValue(formValue.serviceCityTown),
       firstSermonState: cleanValue(formValue.serviceStateProvince),
       firstSermonCountry: cleanValue(formValue.serviceCountry),
-      previousChurchPositions: formValue.previousPosition
-        ? [formValue.previousPosition]
-        : undefined,
+      // Handle previous positions array - API expects array of strings
+      previousChurchPositions:
+        formValue.previousPositions
+          ?.map((pos: any) => cleanValue(pos.previousPosition))
+          .filter((position: string) => position) || [],
     };
 
     // Remove undefined fields to avoid sending them
@@ -433,10 +468,6 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
         delete updateData[key as keyof UpdateEmployeeRequest];
       }
     });
-
-    // Debug logging
-    console.log('Form values:', formValue);
-    console.log('Mapped update data:', updateData);
 
     return updateData;
   }
@@ -450,6 +481,33 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   getErrorMessage(fieldName: string): string {
     const control = this.profileForm.get(fieldName);
     return this.validationService.getErrorMessage(fieldName, control);
+  }
+
+  // Helper method to check FormArray control errors
+  hasFormArrayError(
+    arrayName: string,
+    index: number,
+    fieldName: string
+  ): boolean {
+    const formArray = this.profileForm.get(arrayName) as FormArray;
+    if (formArray && formArray.at(index)) {
+      const control = formArray.at(index).get(fieldName);
+      return this.validationService.hasError(control);
+    }
+    return false;
+  }
+
+  getFormArrayErrorMessage(
+    arrayName: string,
+    index: number,
+    fieldName: string
+  ): string {
+    const formArray = this.profileForm.get(arrayName) as FormArray;
+    if (formArray && formArray.at(index)) {
+      const control = formArray.at(index).get(fieldName);
+      return this.validationService.getErrorMessage(fieldName, control);
+    }
+    return '';
   }
 
   isFormValid(): boolean {
@@ -478,12 +536,79 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     return this.fileUploadService.formatFileSize(bytes);
   }
 
+  // Accordion toggle methods
+  toggleAccordion(section: string) {
+    this.accordionState[section as keyof typeof this.accordionState] =
+      !this.accordionState[section as keyof typeof this.accordionState];
+  }
+
+  // Previous positions methods
+  get previousPositions(): FormArray {
+    return this.profileForm.get('previousPositions') as FormArray;
+  }
+
+  addPreviousPosition() {
+    const previousPositionGroup = this.fb.group({
+      previousPositionTitle: ['', [Validators.required]],
+      previousPosition: ['', [Validators.required]],
+      previousPositionDate: ['', [Validators.required]],
+    });
+    this.previousPositions.push(previousPositionGroup);
+  }
+
+  removePreviousPosition(index: number) {
+    this.previousPositions.removeAt(index);
+  }
+
+  // References methods
+  get references(): FormArray {
+    return this.profileForm.get('references') as FormArray;
+  }
+
+  addReference() {
+    const referenceGroup = this.fb.group({
+      referenceName: ['', [Validators.required]],
+      referencePhone: [
+        '',
+        [Validators.required, Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)],
+      ],
+      referenceEmail: ['', [Validators.required, Validators.email]],
+      referenceAddress: ['', [Validators.required]],
+      referenceCityTown: ['', [Validators.required]],
+      referenceStateProvince: ['', [Validators.required]],
+      referenceCountry: ['', [Validators.required]],
+      referenceZipCode: [
+        '',
+        [Validators.required, Validators.pattern(/^\d{6}$/)],
+      ],
+      howDoYouKnowThisPerson: ['', [Validators.required]],
+    });
+    this.references.push(referenceGroup);
+  }
+
+  removeReference(index: number) {
+    this.references.removeAt(index);
+  }
+
   // Helper methods
   private markAllFieldsAsTouched() {
     Object.keys(this.profileForm.controls).forEach((key) => {
       const control = this.profileForm.get(key);
       if (control) {
-        control.markAsTouched();
+        if (control instanceof FormArray) {
+          // Handle FormArray controls
+          control.controls.forEach((arrayControl) => {
+            if (arrayControl instanceof FormGroup) {
+              Object.keys(arrayControl.controls).forEach((arrayKey) => {
+                arrayControl.get(arrayKey)?.markAsTouched();
+              });
+            } else {
+              arrayControl.markAsTouched();
+            }
+          });
+        } else {
+          control.markAsTouched();
+        }
       }
     });
   }
