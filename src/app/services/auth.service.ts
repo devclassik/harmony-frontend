@@ -30,7 +30,7 @@ export class AuthService {
   constructor(private router: Router, private http: HttpClient) {
     this.loadAuthState();
     // Add to window for debugging purposes
-    (window as any).authService = this;
+    // (window as any).authService = this;
   }
 
   register(data: RegisterRequest): Observable<RegisterResponse> {
@@ -139,7 +139,7 @@ export class AuthService {
     return true;
   }
 
-  getWorkerRole(): string | null {    
+  getWorkerRole(): string | null {
     return localStorage.getItem('workerRole');
   }
 

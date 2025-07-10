@@ -63,6 +63,8 @@ export class InboxComponent implements OnInit, OnDestroy {
     this.selectedItem = itemId;
     // Mark item as read using the service
     this.notificationService.markInboxItemAsRead(itemId);
+    this.notificationService.markSelectedInboxItemAsRead(itemId);
+    // Optionally, you can also refresh the inbox
   }
 
   goBack() {

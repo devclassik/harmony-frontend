@@ -112,7 +112,7 @@
           />
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-1">
-              <span class="font-medium text-gray-900 text-sm">{{
+              <span class="font-medium text-gray-900 text-sm capitalize">{{
                 item.sender
               }}</span>
               <span class="text-xs text-gray-500">{{ item.time }}</span>
@@ -231,8 +231,8 @@
             />
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-1">
-                <h3 class="font-semibold text-gray-900">
-                  {{ getSelectedItem()?.sender }}
+                <h3 class="font-semibold text-gray-900 capitalize">
+                  Weca HQ
                 </h3>
                 <span class="text-sm text-gray-500">admin&#64;weca.org</span>
               </div>
@@ -262,12 +262,13 @@
 
           <!-- Message Body -->
           <div class="mb-6">
-            <p class="text-gray-900 leading-relaxed">Hi John,</p>
+            <p class="text-gray-900 leading-relaxed capitalize">Hi {{ getSelectedItem()?.sender }}
+            </p>
             <br />
             <div class="prose prose-gray max-w-none">
               <p>{{ getSelectedItemContent() }}</p>
               <br />
-              <p>Thanks and best regards,<br />HR Admin.</p>
+              <p>Thanks and best regards,<br />AFM WECA HQ.</p>
             </div>
           </div>
 

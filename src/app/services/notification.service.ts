@@ -298,6 +298,17 @@ export class NotificationService {
     });
   }
 
+  markSelectedInboxItemAsRead(itemId: number) {
+    this.apiService.put(`/message/`, { messageIds: [itemId] }).subscribe({
+      next: () => {
+        this.markInboxItemAsRead(itemId);
+      },
+      error: (error) => {
+        console.error('Error marking inbox item as read:', error);
+      },
+    });
+  }
+
   private mapApiMessagesToInboxItems(
     apiMessages: ApiMessageItem[]
   ): InboxItem[] {

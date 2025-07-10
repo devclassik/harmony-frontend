@@ -420,7 +420,7 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       primaryPhone: cleanValue(formValue.primaryPhone),
       primaryPhoneType: capitalizePhoneType(formValue.primaryPhoneType),
       altPhone: cleanValue(formValue.alternatePhone),
-      altPhoneType: capitalizePhoneType(formValue.alternatePhoneType),
+      altPhoneType: capitalizePhoneType(formValue.alternatePhoneType) ? capitalizePhoneType(formValue.alternatePhoneType) : capitalizePhoneType(formValue.primaryPhoneType),
       dob: cleanValue(formValue.dateOfBirth),
       altEmail: cleanValue(formValue.emailAddress),
       maritalStatus: capitalizeMaritalStatus(formValue.maritalStatus),
