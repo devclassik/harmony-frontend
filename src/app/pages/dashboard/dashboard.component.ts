@@ -60,6 +60,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private alertService: AlertService
   ) {
     this.workerRole = this.authService.getWorkerRole();
+
+    console.log('workerRole', this.workerRole);
     this.currentWorker = this.authService.getCurrentWorker();
     this.currentEmployeeId = this.authService.getCurrentEmployeeId();
     // Initialize worker name from auth service
@@ -68,7 +70,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Load employee profile and check if animation should be shown
-    if (this.workerRole?.toLowerCase() === 'worker') {
+    if (
+      this.workerRole?.toLowerCase() === 'worker' ||
+      this.workerRole?.toLowerCase() === 'minister'
+    ) {
       this.loadEmployeeProfile();
       this.loadLeaveRequests();
     }

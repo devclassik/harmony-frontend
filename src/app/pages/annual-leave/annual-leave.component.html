@@ -12,7 +12,7 @@
 ></app-loading-overlay>
 
 <!-- Admin/Manager View -->
-<div *ngIf="userRole?.toLowerCase() !== 'worker'">
+<div *ngIf="userRole?.toLowerCase() === 'admin'">
   <div class="p-2">
     <app-table
       [tableTitle]="'Annual Leave'"
@@ -42,7 +42,12 @@
 </div>
 
 <!-- Worker View -->
-<div *ngIf="userRole?.toLowerCase() === 'worker'">
+<div
+  *ngIf="
+    userRole?.toLowerCase() === 'worker' ||
+    userRole?.toLowerCase() === 'minister'
+  "
+>
   <div class="p-2">
     <app-table
       [tableTitle]="'Annual Leave'"
