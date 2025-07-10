@@ -100,7 +100,10 @@ export class EmployeeService {
    * @returns boolean indicating if profile is complete
    */
   isProfileComplete(employee: EmployeeDetails): boolean {
+    console.log('🔍 Checking profile completion for employee:', employee);
+
     // Define essential fields that should not be null for a complete profile
+    // Based on the current form structure we've implemented
     const essentialFields = [
       'title',
       'firstName',
@@ -109,29 +112,22 @@ export class EmployeeService {
       'primaryPhone',
       'dob',
       'maritalStatus',
-      'employeeStatus',
-      'employmentType',
-      'serviceStartDate',
     ];
 
     // Check if any essential field is null or empty
     for (const field of essentialFields) {
       const value = employee[field as keyof EmployeeDetails];
+      console.log(`📝 Field ${field}:`, value, `(type: ${typeof value})`);
+
       if (value === null || value === undefined || value === '') {
+        console.log(`❌ Profile incomplete - missing field: ${field}`);
         return false;
       }
     }
 
-    // Check if home address exists
-    if (!employee.homeAddress) {
-      return false;
-    }
-
-    // Check if at least one department is assigned
-    if (!employee.departments || employee.departments.length === 0) {
-      return false;
-    }
-
+    console.log('✅ Profile is complete!');
+    // Profile is considered complete if basic personal information is filled
+    // We've relaxed the requirements to match the current form implementation
     return true;
   }
 
@@ -151,9 +147,6 @@ export class EmployeeService {
       { key: 'primaryPhone', label: 'Primary Phone' },
       { key: 'dob', label: 'Date of Birth' },
       { key: 'maritalStatus', label: 'Marital Status' },
-      { key: 'employeeStatus', label: 'Employee Status' },
-      { key: 'employmentType', label: 'Employment Type' },
-      { key: 'serviceStartDate', label: 'Service Start Date' },
     ];
 
     // Check essential fields
@@ -162,16 +155,6 @@ export class EmployeeService {
       if (value === null || value === undefined || value === '') {
         missingFields.push(field.label);
       }
-    }
-
-    // Check home address
-    if (!employee.homeAddress) {
-      missingFields.push('Home Address');
-    }
-
-    // Check departments
-    if (!employee.departments || employee.departments.length === 0) {
-      missingFields.push('Department Assignment');
     }
 
     return missingFields;

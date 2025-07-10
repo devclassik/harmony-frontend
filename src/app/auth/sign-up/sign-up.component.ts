@@ -115,7 +115,7 @@ export class SignUpComponent {
         lastName: this.form.lastName,
         email: this.form.email,
         password: this.form.password,
-        // roleId: 3, // Assuming role 3 is for regular users
+        // roleId: 1, // Assuming role 1 Admin, 2-HOD, 3-Minister, 4-worker
       })
       .subscribe({
         next: (response: RegisterResponse) => {

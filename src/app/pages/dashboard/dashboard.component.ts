@@ -108,9 +108,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.updateEmployeeInfo();
 
             // Check if profile is complete and show animation if not
+            console.log('🔍 Dashboard: About to check profile completion');
+            console.log(
+              '📊 Dashboard: Employee data being passed:',
+              response.data
+            );
+
             const isComplete = this.employeeService.isProfileComplete(
               response.data
             );
+
+            console.log('📊 Dashboard: Profile complete result:', isComplete);
+            console.log(
+              '📊 Dashboard: Setting showWelcomeAnimation to:',
+              !isComplete
+            );
+
             this.showWelcomeAnimation = !isComplete;
           }
         },

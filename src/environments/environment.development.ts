@@ -33,6 +33,13 @@ export const environment = {
       delete: '/employee/{id}',
       profile: '/employee/profile',
     },
+    departments: {
+      getAll: '/department',
+      getById: '/department/{id}',
+      create: '/department',
+      update: '/department/{id}',
+      delete: '/department/{id}',
+    },
     leave: {
       annual: '/leave/annual',
       getAll: '/leave/annual',
@@ -45,7 +52,10 @@ export const environment = {
       sickCreate: '/leave/sick',
     },
     files: {
-      upload: '/files/upload',
+      uploadSingle: '/upload/single',
+      uploadMultiple: '/upload/multiple',
+      uploadAll: '/upload/all',
+      delete: '/upload/delete',
     },
     campMeeting: {
       getAll: '/camp-meeting',

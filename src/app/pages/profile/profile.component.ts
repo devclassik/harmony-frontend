@@ -63,7 +63,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.isLoadingProfile = false;
           if (response.status === 'success' && response.data) {
-            this.employeeData = response.data;
+            // Handle the case where data is an array (multiple employees)
+            if (Array.isArray(response.data)) {
+              // Find the employee with matching ID or use the first one
+              const employee =
+                response.data.find((emp) => emp.id === employeeId) ||
+                response.data[0];
+              this.employeeData = employee || null;
+            } else {
+              // Handle the case where data is a single employee object
+              this.employeeData = response.data;
+            }
           } else {
             this.employeeData = null;
           }

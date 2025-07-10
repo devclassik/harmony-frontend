@@ -25,6 +25,8 @@ import { EmployeeService } from '../../services/employee.service';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 import { AuthService } from '../../services/auth.service';
 import { AlertService } from '../../services/alert.service';
+import { DepartmentService } from '../../services/department.service';
+import { Department } from '../../dto/department.dto';
 
 @Component({
   selector: 'app-profile-create',
@@ -65,6 +67,13 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   states = FORM_OPTIONS.states;
   countries = FORM_OPTIONS.countries;
 
+  // Additional options for new fields
+  employmentTypeOptions = ['STAFF', 'CONTRACT', 'VOLUNTEER'];
+  departments: Department[] = []; // Loaded from API
+  phoneTypeOptions = ['HOME', 'WORK', 'CELL'];
+  genderOptionsChildren = ['MALE', 'FEMALE'];
+  currentUserRole: string = ''; // User's role from API
+
   constructor(
     private fb: FormBuilder,
     private location: Location,
@@ -73,7 +82,8 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     private fileUploadService: FileUploadService,
     private employeeService: EmployeeService,
     private authService: AuthService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private departmentService: DepartmentService
   ) {
     this.profileForm = this.createForm();
   }
@@ -81,6 +91,8 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.checkEditMode();
     this.prefillFormIfNeeded();
+    this.loadDepartments();
+    this.loadUserRole();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -108,50 +120,175 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       this.avatarPreview = 'assets/svg/gender.svg';
     }
 
+    // Helper function to safely get email from user object
+    const getEmailFromUser = () => {
+      if (employeeData.user && employeeData.user.email) {
+        return employeeData.user.email;
+      }
+      return '';
+    };
+
     // Pre-fill form with employee data
     this.profileForm.patchValue({
+      // Basic employee info
       title: employeeData.title || '',
       legalFirstName: employeeData.firstName || '',
       legalMiddleName: employeeData.middleName || '',
       legalLastName: employeeData.lastName || '',
       profferedName: employeeData.profferedName || '',
       gender: employeeData.gender || '',
+      email: getEmailFromUser(),
+      altEmail: employeeData.altEmail || '',
+      employmentType: employeeData.employmentType || '',
+
+      // Personal info
       maritalStatus: employeeData.maritalStatus || '',
+      everDivorced: employeeData.everDivorced || false,
       dateOfBirth: employeeData.dob
         ? new Date(employeeData.dob).toISOString().split('T')[0]
         : '',
+
+      // Contact info
       primaryPhone: employeeData.primaryPhone || '',
-      alternatePhone: employeeData.altPhone || '',
-      emailAddress: employeeData.altEmail || '',
-      homeAddress: employeeData.homeAddress
-        ? `${employeeData.homeAddress.street || ''}, ${
-            employeeData.homeAddress.city || ''
-          }, ${employeeData.homeAddress.state || ''}`.replace(
-            /^,\s*|,\s*$/g,
-            ''
-          )
-        : '',
-      mailingAddress: employeeData.mailingAddress
-        ? `${employeeData.mailingAddress.street || ''}, ${
-            employeeData.mailingAddress.city || ''
-          }, ${employeeData.mailingAddress.state || ''}`.replace(
-            /^,\s*|,\s*$/g,
-            ''
-          )
-        : '',
-      cityTown: employeeData.homeAddress?.city || '',
-      stateProvince: employeeData.homeAddress?.state || '',
-      country: employeeData.homeAddress?.country || '',
-      zipCode: employeeData.homeAddress?.zipCode || '',
-      cityTown2: employeeData.mailingAddress?.city || '',
-      stateProvince2: employeeData.mailingAddress?.state || '',
-      country2: employeeData.mailingAddress?.country || '',
-      zipCode2: employeeData.mailingAddress?.zipCode || '',
+      primaryPhoneType: employeeData.primaryPhoneType || '',
+      altPhone: employeeData.altPhone || '',
+      altPhoneType: employeeData.altPhoneType || '',
+
+      // Address info - Handle mailingAddress object structure
+      homeAddress: employeeData.mailingAddress?.address || '',
+      homeCity: employeeData.mailingAddress?.city || '',
+      homeState: employeeData.mailingAddress?.state || '',
+      homeCountry: employeeData.mailingAddress?.country || '',
+      homeZipCode: employeeData.mailingAddress?.zipCode || '',
+
+      // Mailing address (copy from mailingAddress if exists)
+      mailingAddress: employeeData.mailingAddress?.address || '',
+      mailingCity: employeeData.mailingAddress?.city || '',
+      mailingState: employeeData.mailingAddress?.state || '',
+      mailingCountry: employeeData.mailingAddress?.country || '',
+      mailingZipCode: employeeData.mailingAddress?.zipCode || '',
+
+      // Legal questions
+      beenConvicted: employeeData.beenConvicted || false,
+      hasQuestionableBackground:
+        employeeData.hasQuestionableBackground || false,
+      hasBeenInvestigatedForMisconductOrAbuse:
+        employeeData.hasBeenInvestigatedForMisconductOrAbuse || false,
     });
+
+    // Handle children array if exists
+    if (employeeData.children && employeeData.children.length > 0) {
+      const childrenArray = this.profileForm.get('children') as FormArray;
+      childrenArray.clear();
+
+      employeeData.children.forEach((child) => {
+        const childGroup = this.fb.group({
+          childName: [child.firstName || '', [Validators.required]],
+          childDob: [
+            child.dob ? new Date(child.dob).toISOString().split('T')[0] : '',
+            [Validators.required],
+          ],
+          childGender: [child.gender || '', [Validators.required]],
+        });
+        childrenArray.push(childGroup);
+      });
+    }
+
+    // Handle spouse info if exists
+    if (employeeData.spouse) {
+      this.profileForm.patchValue({
+        spouseFirstName: employeeData.spouse.firstName || '',
+        spouseMiddleName: employeeData.spouse.middleName || '',
+        spouseDob: employeeData.spouse.dob
+          ? new Date(employeeData.spouse.dob).toISOString().split('T')[0]
+          : '',
+      });
+    }
+
+    // Handle previous positions if exists
+    if (
+      employeeData.previousPositions &&
+      employeeData.previousPositions.length > 0
+    ) {
+      const positionsArray = this.profileForm.get(
+        'previousPositions'
+      ) as FormArray;
+      positionsArray.clear();
+
+      employeeData.previousPositions.forEach((position) => {
+        const positionGroup = this.fb.group({
+          previousPositionTitle: [position.title || '', [Validators.required]],
+          previousPosition: [position.department || '', [Validators.required]],
+          previousPositionDate: [
+            position.startDate
+              ? new Date(position.startDate).toISOString().split('T')[0]
+              : '',
+            [Validators.required],
+          ],
+        });
+        positionsArray.push(positionGroup);
+      });
+    }
+
+    // Handle spiritual history if exists
+    if (employeeData.spiritualHistory) {
+      this.profileForm.patchValue({
+        yearOfWaterBaptism: employeeData.spiritualHistory.baptismDate
+          ? new Date(employeeData.spiritualHistory.baptismDate)
+              .getFullYear()
+              .toString()
+          : '',
+        dateOfFirstSermon: employeeData.spiritualHistory.baptismDate
+          ? new Date(employeeData.spiritualHistory.baptismDate)
+              .toISOString()
+              .split('T')[0]
+          : '',
+      });
+    }
+
+    // Handle credentials if exists
+    if (employeeData.credentials && employeeData.credentials.length > 0) {
+      const credential = employeeData.credentials[0]; // Use first credential
+      this.profileForm.patchValue({
+        credentialName: credential.degree || '',
+        credentialNumber: credential.institution || '',
+        credentialIssuedDate: credential.graduationYear
+          ? `${credential.graduationYear}-01-01`
+          : '',
+      });
+    }
+  }
+
+  private loadDepartments() {
+    this.departmentService.getActiveDepartments().subscribe({
+      next: (departments) => {
+        this.departments = departments;
+      },
+      error: (error) => {
+        console.error('Error loading departments:', error);
+        this.alertService.error(
+          'Failed to load departments. Please try again.'
+        );
+        // Fallback to empty array to prevent form errors
+        this.departments = [];
+      },
+    });
+  }
+
+  private loadUserRole() {
+    // Get current user's role from AuthService
+    const currentWorker = this.authService.getCurrentWorker();
+    if (currentWorker?.role) {
+      this.currentUserRole = currentWorker.role;
+      // Set the role in the form and disable it
+      this.profileForm.patchValue({ role: this.currentUserRole });
+      this.profileForm.get('role')?.disable();
+    }
   }
 
   private createForm(): FormGroup {
     return this.fb.group({
+      // Employee Basic Info
       title: ['', [Validators.required]],
       legalFirstName: [
         '',
@@ -180,98 +317,7 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
         [Validators.maxLength(100), Validators.pattern(/^[a-zA-Z\s]*$/)],
       ],
       gender: ['', [Validators.required]],
-      avatar: [null],
-      // Personal Information
-      maritalStatus: ['', [Validators.required]],
-      everDivorced: ['', [Validators.required]],
-      dateOfBirth: ['', [Validators.required]],
-      nationalIdNumber: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(5),
-          Validators.maxLength(20),
-        ],
-      ],
-      // Spiritual History
-      yearSaved: ['', [Validators.required]],
-      sanctified: ['', [Validators.required]],
-      baptizedWithHolySpirit: ['', [Validators.required]],
-      yearWaterBaptized: ['', [Validators.required]],
-      firstYearInApostolicChurch: ['', [Validators.required]],
-      areFaithfulInTithing: ['', [Validators.required]],
-      areaOfService: ['', [Validators.required]],
-      everServedInApostolicChurch: ['', [Validators.required]],
-      serviceDate: ['', [Validators.required]],
-      serviceLocation: ['', [Validators.required]],
-      serviceCityTown: ['', [Validators.required]],
-      serviceStateProvince: ['', [Validators.required]],
-      serviceCountry: ['', [Validators.required]],
-      pastor: ['', [Validators.required]],
-      ordained: ['', [Validators.required]],
-      ordainedDate: ['', [Validators.required]],
-      // Previous Positions (FormArray)
-      previousPositions: this.fb.array([
-        this.fb.group({
-          previousPositionTitle: ['', [Validators.required]],
-          previousPosition: ['', [Validators.required]],
-          previousPositionDate: ['', [Validators.required]],
-        }),
-      ]),
-      // Legal Questions
-      convictedOfCrime: ['', [Validators.required]],
-      sexualMisconductInvestigation: ['', [Validators.required]],
-      integrityQuestionableBackground: ['', [Validators.required]],
-      // References (FormArray)
-      references: this.fb.array([
-        this.fb.group({
-          referenceName: ['', [Validators.required]],
-          referencePhone: [
-            '',
-            [Validators.required, Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)],
-          ],
-          referenceEmail: ['', [Validators.required, Validators.email]],
-          referenceAddress: ['', [Validators.required]],
-          referenceCityTown: ['', [Validators.required]],
-          referenceStateProvince: ['', [Validators.required]],
-          referenceCountry: ['', [Validators.required]],
-          referenceZipCode: [
-            '',
-            [Validators.required, Validators.pattern(/^\d{6}$/)],
-          ],
-          howDoYouKnowThisPerson: ['', [Validators.required]],
-        }),
-      ]),
-      highestAcademicQualification: ['', [Validators.required]],
-      fieldOfStudy: ['', [Validators.required]],
-      highestAcademicQualificationDetails: ['', [Validators.required]],
-      detailsOfCurrentEmployment: ['', [Validators.required]],
-      // Contact Information
-      homeAddress: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(10),
-          Validators.maxLength(200),
-        ],
-      ],
-      cityTown: ['', [Validators.required]],
-      stateProvince: ['', [Validators.required]],
-      country: ['Nigeria', [Validators.required]],
-      zipCode: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
-      mailingAddress: ['', [Validators.maxLength(200)]],
-      cityTown2: [''],
-      stateProvince2: [''],
-      country2: ['Nigeria'],
-      zipCode2: ['', [Validators.pattern(/^\d{6}$/)]],
-      primaryPhone: [
-        '',
-        [Validators.required, Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)],
-      ],
-      primaryPhoneType: [''],
-      alternatePhone: ['', [Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)]],
-      alternatePhoneType: [''],
-      emailAddress: [
+      email: [
         '',
         [
           Validators.required,
@@ -281,7 +327,99 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
           ),
         ],
       ],
-      other: ['', [Validators.maxLength(500)]],
+      altEmail: [
+        '',
+        [
+          Validators.email,
+          Validators.pattern(
+            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+          ),
+        ],
+      ],
+      departmentId: ['', [Validators.required]],
+      role: ['', [Validators.required]],
+      employmentType: ['', [Validators.required]],
+      location: ['', [Validators.required]],
+      avatar: [null],
+      // Personal Information
+      maritalStatus: ['', [Validators.required]],
+      everDivorced: ['', [Validators.required]],
+      dateOfBirth: ['', [Validators.required]],
+      highestQualification: [''], // Added to match HTML template
+      // Spiritual History
+      yearSaved: ['', [Validators.required]],
+      sanctified: ['', [Validators.required]],
+      baptizedWithWater: ['', [Validators.required]],
+      yearOfWaterBaptism: ['', [Validators.required]],
+      firstYearInChurch: ['', [Validators.required]],
+      isFaithfulInTithing: ['', [Validators.required]],
+      firstSermonPastor: ['', [Validators.required]],
+      currentPastor: [''],
+      dateOfFirstSermon: ['', [Validators.required]],
+      spiritualStatus: ['ACTIVE'],
+      firstSermonAddress: ['', [Validators.required]],
+      firstSermonCity: ['', [Validators.required]],
+      firstSermonState: ['', [Validators.required]],
+      firstSermonCountry: ['', [Validators.required]],
+      firstSermonZipCode: ['', [Validators.required]],
+      currentChurchAddress: [''],
+      currentChurchCity: [''],
+      currentChurchState: [''],
+      currentChurchCountry: [''],
+      currentChurchZipCode: [''],
+      // Previous Positions (FormArray)
+      previousPositions: this.fb.array([
+        this.fb.group({
+          previousPositionTitle: ['', [Validators.required]],
+          previousPosition: ['', [Validators.required]],
+          previousPositionDate: ['', [Validators.required]],
+        }),
+      ]),
+      // Additional fields to match HTML
+      ordained: [''],
+      ordainedDate: [''],
+      // Spouse Information
+      spouseFirstName: [''],
+      spouseMiddleName: [''],
+      spouseDob: [''],
+      weddingDate: [''],
+      // Children (FormArray)
+      children: this.fb.array([]),
+      // Legal Questions
+      beenConvicted: ['', [Validators.required]],
+      hasQuestionableBackground: ['', [Validators.required]],
+      hasBeenInvestigatedForMisconductOrAbuse: ['', [Validators.required]],
+      // Credentials
+      credentialName: [''],
+      credentialNumber: [''],
+      credentialIssuedDate: [''],
+      credentialExpirationDate: [''],
+      // Contact Information
+      homeAddress: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(10),
+          Validators.maxLength(200),
+        ],
+      ],
+      homeCity: ['', [Validators.required]],
+      homeState: ['', [Validators.required]],
+      homeCountry: ['Nigeria', [Validators.required]],
+      homeZipCode: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+      mailingAddress: ['', [Validators.maxLength(200)]],
+      mailingCity: [''],
+      mailingState: [''],
+      mailingCountry: ['Nigeria'],
+      mailingZipCode: ['', [Validators.pattern(/^\d{6}$/)]],
+      primaryPhone: [
+        '',
+        [Validators.required, Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)],
+      ],
+      primaryPhoneType: ['', [Validators.required]],
+      altPhone: ['', [Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)]],
+      altPhoneType: [''],
+      other: [''], // Additional information field
     });
   }
 
@@ -376,7 +514,8 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   }
 
   private mapFormToUpdateRequest(): UpdateEmployeeRequest {
-    const formValue = this.profileForm.value;
+    // Get form value including disabled controls
+    const formValue = this.profileForm.getRawValue();
 
     // Helper function to safely convert to boolean
     const toBooleanOrUndefined = (value: any): boolean | undefined => {
@@ -410,52 +549,106 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       return type ? type.toUpperCase() : '';
     };
 
+    // Helper function to capitalize role
+    const capitalizeRole = (role: string): string => {
+      return role ? role.toUpperCase() : '';
+    };
+
     const updateData: UpdateEmployeeRequest = {
+      // Basic Employee Info
+      employeeId: cleanValue(formValue.employeeId),
       firstName: cleanValue(formValue.legalFirstName),
       lastName: cleanValue(formValue.legalLastName),
       middleName: cleanValue(formValue.legalMiddleName),
       title: capitalizeTitle(formValue.title),
       gender: capitalizeGender(formValue.gender),
       profferedName: cleanValue(formValue.profferedName),
+      email: cleanValue(formValue.email),
+      altEmail: cleanValue(formValue.altEmail),
+      departmentId: cleanValue(formValue.departmentId),
+      role: capitalizeRole(formValue.role),
+      employmentType: cleanValue(formValue.employmentType),
+      location: cleanValue(formValue.location),
+
+      // Contact Info
       primaryPhone: cleanValue(formValue.primaryPhone),
       primaryPhoneType: capitalizePhoneType(formValue.primaryPhoneType),
-      altPhone: cleanValue(formValue.alternatePhone),
-      altPhoneType: capitalizePhoneType(formValue.alternatePhoneType) ? capitalizePhoneType(formValue.alternatePhoneType) : capitalizePhoneType(formValue.primaryPhoneType),
+      altPhone:
+        cleanValue(formValue.altPhone) || cleanValue(formValue.primaryPhone), // Use primary if alt is empty
+      altPhoneType:
+        capitalizePhoneType(formValue.altPhoneType) ||
+        capitalizePhoneType(formValue.primaryPhoneType),
+
+      // Personal Info
       dob: cleanValue(formValue.dateOfBirth),
-      altEmail: cleanValue(formValue.emailAddress),
       maritalStatus: capitalizeMaritalStatus(formValue.maritalStatus),
       everDivorced: toBooleanOrUndefined(formValue.everDivorced),
       employeeStatus: 'ACTIVE', // Default status
-      beenConvicted: toBooleanOrUndefined(formValue.convictedOfCrime),
+
+      // Legal Questions
+      beenConvicted: toBooleanOrUndefined(formValue.beenConvicted),
       hasQuestionableBackground: toBooleanOrUndefined(
-        formValue.integrityQuestionableBackground
+        formValue.hasQuestionableBackground
       ),
       hasBeenInvestigatedForMisconductOrAbuse: toBooleanOrUndefined(
-        formValue.sexualMisconductInvestigation
+        formValue.hasBeenInvestigatedForMisconductOrAbuse
       ),
+
+      // Address Info
       homeAddress: cleanValue(formValue.homeAddress),
-      homeCity: cleanValue(formValue.cityTown),
-      homeState: cleanValue(formValue.stateProvince),
-      homeCountry: cleanValue(formValue.country),
-      homeZipCode: cleanValue(formValue.zipCode),
+      homeCity: cleanValue(formValue.homeCity),
+      homeState: cleanValue(formValue.homeState),
+      homeCountry: cleanValue(formValue.homeCountry),
+      homeZipCode: cleanValue(formValue.homeZipCode),
       mailingAddress: cleanValue(formValue.mailingAddress),
-      mailingCity: cleanValue(formValue.cityTown2),
-      mailingState: cleanValue(formValue.stateProvince2),
-      mailingCountry: cleanValue(formValue.country2),
-      mailingZipCode: cleanValue(formValue.zipCode2),
+      mailingCity: cleanValue(formValue.mailingCity),
+      mailingState: cleanValue(formValue.mailingState),
+      mailingCountry: cleanValue(formValue.mailingCountry),
+      mailingZipCode: cleanValue(formValue.mailingZipCode),
+
+      // Spouse Info
+      spouseFirstName: cleanValue(formValue.spouseFirstName),
+      spouseMiddleName: cleanValue(formValue.spouseMiddleName),
+      spouseDob: cleanValue(formValue.spouseDob),
+      weddingDate: cleanValue(formValue.weddingDate),
+
+      // Children Array
+      children:
+        formValue.children?.map((child: any) => ({
+          childName: cleanValue(child.childName),
+          childDob: cleanValue(child.childDob),
+          childGender: capitalizeGender(child.childGender),
+        })) || [],
+
+      // Spiritual History
       yearSaved: cleanValue(formValue.yearSaved),
       sanctified: toBooleanOrUndefined(formValue.sanctified),
-      baptizedWithWater: toBooleanOrUndefined(formValue.baptizedWithHolySpirit),
-      yearOfWaterBaptism: cleanValue(formValue.yearWaterBaptized),
-      firstYearInChurch: cleanValue(formValue.firstYearInApostolicChurch),
-      isFaithfulInTithing: toBooleanOrUndefined(formValue.areFaithfulInTithing),
-      firstSermonPastor: cleanValue(formValue.pastor),
-      dateOfFirstSermon: cleanValue(formValue.serviceDate),
-      firstSermonAddress: cleanValue(formValue.serviceLocation),
-      firstSermonCity: cleanValue(formValue.serviceCityTown),
-      firstSermonState: cleanValue(formValue.serviceStateProvince),
-      firstSermonCountry: cleanValue(formValue.serviceCountry),
-      // Handle previous positions array - API expects array of strings
+      baptizedWithWater: toBooleanOrUndefined(formValue.baptizedWithWater),
+      yearOfWaterBaptism: cleanValue(formValue.yearOfWaterBaptism),
+      firstYearInChurch: cleanValue(formValue.firstYearInChurch),
+      isFaithfulInTithing: toBooleanOrUndefined(formValue.isFaithfulInTithing),
+      firstSermonPastor: cleanValue(formValue.firstSermonPastor),
+      currentPastor: cleanValue(formValue.currentPastor),
+      dateOfFirstSermon: cleanValue(formValue.dateOfFirstSermon),
+      spiritualStatus: cleanValue(formValue.spiritualStatus) || 'ACTIVE',
+      firstSermonAddress: cleanValue(formValue.firstSermonAddress),
+      firstSermonCity: cleanValue(formValue.firstSermonCity),
+      firstSermonState: cleanValue(formValue.firstSermonState),
+      firstSermonCountry: cleanValue(formValue.firstSermonCountry),
+      firstSermonZipCode: cleanValue(formValue.firstSermonZipCode),
+      currentChurchAddress: cleanValue(formValue.currentChurchAddress),
+      currentChurchCity: cleanValue(formValue.currentChurchCity),
+      currentChurchState: cleanValue(formValue.currentChurchState),
+      currentChurchCountry: cleanValue(formValue.currentChurchCountry),
+      currentChurchZipCode: cleanValue(formValue.currentChurchZipCode),
+
+      // Credentials
+      credentialName: cleanValue(formValue.credentialName),
+      credentialNumber: cleanValue(formValue.credentialNumber),
+      credentialIssuedDate: cleanValue(formValue.credentialIssuedDate),
+      credentialExpirationDate: cleanValue(formValue.credentialExpirationDate),
+
+      // Previous Positions Array - API expects array of strings
       previousChurchPositions:
         formValue.previousPositions
           ?.map((pos: any) => cleanValue(pos.previousPosition))
@@ -560,34 +753,22 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     this.previousPositions.removeAt(index);
   }
 
-  // References methods
-  get references(): FormArray {
-    return this.profileForm.get('references') as FormArray;
+  // Children methods
+  get children(): FormArray {
+    return this.profileForm.get('children') as FormArray;
   }
 
-  addReference() {
-    const referenceGroup = this.fb.group({
-      referenceName: ['', [Validators.required]],
-      referencePhone: [
-        '',
-        [Validators.required, Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)],
-      ],
-      referenceEmail: ['', [Validators.required, Validators.email]],
-      referenceAddress: ['', [Validators.required]],
-      referenceCityTown: ['', [Validators.required]],
-      referenceStateProvince: ['', [Validators.required]],
-      referenceCountry: ['', [Validators.required]],
-      referenceZipCode: [
-        '',
-        [Validators.required, Validators.pattern(/^\d{6}$/)],
-      ],
-      howDoYouKnowThisPerson: ['', [Validators.required]],
+  addChild() {
+    const childGroup = this.fb.group({
+      childName: ['', [Validators.required]],
+      childDob: ['', [Validators.required]],
+      childGender: ['', [Validators.required]],
     });
-    this.references.push(referenceGroup);
+    this.children.push(childGroup);
   }
 
-  removeReference(index: number) {
-    this.references.removeAt(index);
+  removeChild(index: number) {
+    this.children.removeAt(index);
   }
 
   // Helper methods
@@ -596,7 +777,7 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       const control = this.profileForm.get(key);
       if (control) {
         if (control instanceof FormArray) {
-          // Handle FormArray controls
+          // Handle FormArray controls (previousPositions, children)
           control.controls.forEach((arrayControl) => {
             if (arrayControl instanceof FormGroup) {
               Object.keys(arrayControl.controls).forEach((arrayKey) => {

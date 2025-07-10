@@ -49,7 +49,7 @@ export class InboxComponent implements OnInit, OnDestroy {
 
     // Subscribe to unread count
     this.subscriptions.push(
-      this.notificationService.getUnreadCount().subscribe((count) => {
+      this.notificationService.getUnreadInboxCount().subscribe((count) => {
         this.unreadCount = count;
       })
     );
