@@ -29,6 +29,8 @@ export class AuthService {
 
   constructor(private router: Router, private http: HttpClient) {
     this.loadAuthState();
+    // Add to window for debugging purposes
+    // (window as any).authService = this;
   }
 
   register(data: RegisterRequest): Observable<RegisterResponse> {
@@ -116,10 +118,28 @@ export class AuthService {
   isLoggedIn(): boolean {
     const token = localStorage.getItem('token');
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    return !!token && isLoggedIn;
+
+    // Check if we have both token and login flag
+    if (!token || !isLoggedIn) {
+      // If either is missing, clear all auth state to prevent inconsistent state
+      this.clearAuthState();
+      return false;
+    }
+
+    // Additional validation: check if we have essential user data
+    const workerEmail = localStorage.getItem('workerEmail');
+    const workerFullName = localStorage.getItem('workerFullName');
+
+    if (!workerEmail || !workerFullName) {
+      // If essential data is missing, clear all auth state
+      this.clearAuthState();
+      return false;
+    }
+
+    return true;
   }
 
-  getWorkerRole(): string | null {    
+  getWorkerRole(): string | null {
     return localStorage.getItem('workerRole');
   }
 
@@ -219,6 +239,7 @@ export class AuthService {
   }
 
   private clearAuthState(): void {
+    // Clear all authentication-related data from localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('workerRole');
     localStorage.removeItem('workerEmail');
@@ -227,6 +248,8 @@ export class AuthService {
     localStorage.removeItem('roleId');
     localStorage.removeItem('permissions');
     localStorage.removeItem('employeeId');
+
+    // Clear in-memory state
     this.currentWorker = null;
     this.currentPermissions = [];
   }
@@ -234,6 +257,15 @@ export class AuthService {
   getCurrentEmployeeId(): number | null {
     const employeeId = localStorage.getItem('employeeId');
     return employeeId ? parseInt(employeeId, 10) : null;
+  }
+
+  // Debug method to force clear all auth state
+  // Can be called from browser console: window.authService.forceLogout()
+  forceLogout(): void {
+    console.log('Force clearing all authentication state...');
+    this.clearAuthState();
+    this.router.navigate(['/auth/login']);
+    console.log('Authentication state cleared. Redirecting to login...');
   }
 
   // Password Reset Methods

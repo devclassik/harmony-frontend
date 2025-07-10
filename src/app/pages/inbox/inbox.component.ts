@@ -63,6 +63,8 @@ export class InboxComponent implements OnInit, OnDestroy {
     this.selectedItem = itemId;
     // Mark item as read using the service
     this.notificationService.markInboxItemAsRead(itemId);
+    this.notificationService.markSelectedInboxItemAsRead(itemId);
+    // Optionally, you can also refresh the inbox
   }
 
   goBack() {
@@ -216,15 +218,11 @@ export class InboxComponent implements OnInit, OnDestroy {
   }
 
   getSelectedItemContent(): string {
-    const content: { [key: number]: string } = {
-      1: 'The promotion request placed by your head of department for the position of zonal pastor on the 25th of July 2024 was approved by the admin. Please find attached your promotion letter.',
-      2: 'Your accommodation request has been processed and approved. You have been assigned to Building A, Room 204. The accommodation includes all necessary amenities and utilities. Please report to the accommodation office to collect your keys and complete the check-in process.',
-      3: 'Your May 2024 paystub is now available for download. This includes your salary, allowances, and deductions for the month. Please review the document and contact payroll if you have any questions or discrepancies.',
-      4: 'Your accommodation request has been processed and approved. You have been assigned to Building B, Room 105. The accommodation includes all necessary amenities and utilities. Please report to the accommodation office to collect your keys and complete the check-in process.',
-      5: 'The promotion request placed by your head of department for the position of Team Lead on the 20th of July 2024 was approved by the admin. Please find attached your promotion letter.',
-      6: 'The promotion request placed by your head of department for the position of Project Manager on the 18th of July 2024 was approved by the admin. Please find attached your promotion letter.',
-    };
-    return content[this.selectedItem!] || '';
+    const selectedItem = this.getSelectedItem();
+    if (!selectedItem) return '';
+
+    // Return the full message content
+    return selectedItem.message;
   }
 
   applyFilter() {

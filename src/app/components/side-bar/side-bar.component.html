@@ -426,31 +426,6 @@
           </a>
         </li>
 
-        <!-- Calendar -->
-        <li class="menu-item" *ngIf="canViewCalendar()">
-          <a
-            routerLink="/calendar"
-            routerLinkActive="bg-[#12C16F] text-white"
-            [routerLinkActiveOptions]="{ exact: true }"
-            [matTooltip]="sidebarToggle ? 'Calendar' : ''"
-            [matTooltipPosition]="'right'"
-            [class]="
-              sidebarToggle
-                ? 'flex items-center justify-center w-12 h-12 mx-auto rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
-                : 'flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-[#12C16F] hover:text-white cursor-pointer text-gray-400 transition-all duration-200'
-            "
-          >
-            <mat-icon [class]="sidebarToggle ? 'text-xl' : 'text-lg'"
-              >calendar_today</mat-icon
-            >
-            <span
-              [ngClass]="sidebarToggle ? 'lg:hidden' : ''"
-              class="font-medium"
-              >Calendar</span
-            >
-          </a>
-        </li>
-
         <!-- Payroll -->
         <li class="menu-item" *ngIf="canViewPayroll()">
           <a

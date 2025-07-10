@@ -33,7 +33,6 @@ import { Subscription } from 'rxjs';
 export class TopNavComponent implements OnInit, OnDestroy {
   menuToggle = false;
   sidebarToggle = false;
-  darkMode = false;
   dropdownOpen = false;
   userDropdownOpen = false;
   notifying = false;
@@ -101,11 +100,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
       this.userEmail = currentWorker.email || '';
     }
 
-    this.role = this.formatRole(workerRole || 'worker');
-  }
-
-  formatRole(role: string): string {
-    return role.charAt(0).toUpperCase() + role.slice(1);
+    this.role = workerRole ? workerRole : 'Worker';
   }
 
   trackRouteChanges() {
@@ -162,11 +157,6 @@ export class TopNavComponent implements OnInit, OnDestroy {
   toggleSidebar() {
     this.sidebarToggle = !this.sidebarToggle;
     this.sidebarToggleEvent.emit();
-  }
-
-  toggleDarkMode() {
-    this.darkMode = !this.darkMode;
-    document.documentElement.classList.toggle('dark');
   }
 
   toggleDropdown() {

@@ -121,11 +121,13 @@ export class FormValidationService {
         return 'Name can only contain letters and spaces';
       case 'zipCode':
       case 'zipCode2':
-        return 'Please enter a valid zip code (e.g., 12345 or 12345-6789)';
+        return 'Please enter a valid Nigerian postal code (e.g., 100001)';
       case 'nationalIdNumber':
         return 'Please enter a valid national identification number';
       case 'primaryPhone':
-        return 'Please enter a valid phone number';
+        return 'Please enter a valid phone number (e.g., 08023034230 or +2348023034230)';
+      case 'alternatePhone':
+        return 'Please enter a valid phone number (e.g., 08023034230 or +2348023034230)';
       case 'emailAddress':
         return 'Please enter a valid email address';
       default:

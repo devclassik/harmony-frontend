@@ -1,4 +1,9 @@
 import { Injectable } from '@angular/core';
+import { Observable, forkJoin, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ApiService } from '../../services/api.service';
+import { environment } from '../../../environments/environment';
+import { HttpClient, HttpEventType, HttpRequest } from '@angular/common/http';
 
 export interface UploadedFile {
   name: string;
@@ -6,12 +11,24 @@ export interface UploadedFile {
   file: File;
   uploadStatus: 'uploading' | 'completed' | 'error';
   progress?: number;
+  url?: string; // URL after successful upload
+}
+
+export interface FileUploadResponse {
+  status: string;
+  message: string;
+  data: {
+    url: string;
+    fileName: string;
+    fileSize: number;
+  };
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class FileUploadService {
+  constructor(private apiService: ApiService, private http: HttpClient) {}
   validateFile(file: File): { isValid: boolean; error?: string } {
     // Check file size (limit to 10MB)
     if (file.size > 10 * 1024 * 1024) {
@@ -93,5 +110,71 @@ export class FileUploadService {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Upload multiple files and return their URLs
+  uploadFiles(files: File[]): Observable<string[]> {
+    if (files.length === 0) {
+      return new Observable((observer) => {
+        observer.next([]);
+        observer.complete();
+      });
+    }
+
+    // Create upload observables for each file
+    const uploadObservables = files.map((file) => this.uploadSingleFile(file));
+
+    // Use forkJoin to wait for all uploads to complete
+    return forkJoin(uploadObservables).pipe(
+      map((responses: FileUploadResponse[]) =>
+        responses.map((response) => response.data.url)
+      )
+    );
+  }
+
+  // Upload a single file with progress tracking
+  uploadSingleFileWithProgress(file: File): Observable<{
+    progress?: number;
+    response?: FileUploadResponse;
+  }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const req = new HttpRequest(
+      'POST',
+      `${environment.apiUrl}${environment.routes.files.upload}`,
+      formData,
+      {
+        reportProgress: true,
+      }
+    );
+
+    return new Observable((observer) => {
+      this.http.request(req).subscribe({
+        next: (event) => {
+          if (event.type === HttpEventType.UploadProgress) {
+            if (event.total) {
+              const progress = Math.round((100 * event.loaded) / event.total);
+              observer.next({ progress });
+            }
+          } else if (event.type === HttpEventType.Response) {
+            observer.next({ response: event.body as FileUploadResponse });
+            observer.complete();
+          }
+        },
+        error: (error) => observer.error(error),
+      });
+    });
+  }
+
+  // Upload a single file (without progress)
+  private uploadSingleFile(file: File): Observable<FileUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.apiService.post<FileUploadResponse>(
+      environment.routes.files.upload,
+      formData
+    );
   }
 }

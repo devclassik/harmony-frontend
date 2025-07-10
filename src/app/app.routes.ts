@@ -154,7 +154,7 @@ export const routes: Routes = [
       {
         path: 'notifications',
         component: NotificationsComponent,
-        canActivate: [permissionGuard('Notification')],
+        canActivate: [authGuard], // Notifications access for all authenticated users
       },
       {
         path: 'admin',

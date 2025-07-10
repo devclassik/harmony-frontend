@@ -1,4 +1,4 @@
-<div *ngIf="userRole?.toLowerCase() !== 'worker'">
+<div *ngIf="userRole?.toLowerCase() === 'admin'">
   <div class="p-2">
     <app-table
       [tableTitle]="'Sick Leave'"
@@ -22,7 +22,12 @@
   </div>
 </div>
 
-<div *ngIf="userRole?.toLowerCase() === 'worker'">
+<div
+  *ngIf="
+    userRole?.toLowerCase() === 'worker' ||
+    userRole?.toLowerCase() === 'minister'
+  "
+>
   <div class="p-2">
     <app-table
       [tableTitle]="'Sick Leave'"
@@ -84,28 +89,44 @@
   (closed)="successModal = false"
 ></app-success-modal>
 
-<!-- Sick Leave Details Modal -->
+<!-- Sick Leave Details Component (handles both view and create modes) -->
 <app-leave-details
-  [view]="showSickLeaveDetails"
+  [view]="showSickLeaveDetails || showCreateRequest"
   [leaveData]="selectedSickLeaveData"
-  [title]="'Sick Leave'"
+  [title]="
+    leaveDetailsMode === 'create'
+      ? 'Create Sick Leave Request'
+      : 'Sick Leave Details'
+  "
   [leaveType]="'Sick Leave'"
   [totalLeaveDays]="30"
-  [showRequestType]="false"
+  [showRequestType]="true"
   [showDuration]="true"
-  [showLocation]="false"
-  [showEndDate]="true"
+  [showLocation]="true"
+  [showEndDate]="false"
   [showSubstitution]="true"
-  (close)="showSickLeaveDetails = false"
+  [showDocuments]="true"
+  [mode]="leaveDetailsMode"
+  (close)="
+    leaveDetailsMode === 'create'
+      ? onCloseCreateSickLeaveRequest()
+      : onCloseSickLeaveDetails()
+  "
+  (submit)="onCreateRequestSubmitted($event)"
+  (cancel)="onCloseCreateSickLeaveRequest()"
 ></app-leave-details>
 
-<!-- Create Sick Leave Request Modal -->
-<app-create-leave-of-absence
-  [show]="showCreateRequest"
-  [title]="'Create Sick Leave Request'"
-  [subtitle]="'Sick Leave Information'"
-  [reasonPlaceholder]="'Enter your reason for sick leave...'"
-  [confirmText]="'Are you sure you want to create this sick leave request?'"
-  (close)="showCreateRequest = false"
-  (submitted)="onCreateRequestSubmitted($event)"
-></app-create-leave-of-absence>
+<!-- Loading Overlay -->
+<app-loading-overlay
+  [isVisible]="isLoading || isCreating"
+  [title]="
+    isLoading
+      ? 'Loading Sick Leave Requests...'
+      : 'Creating Sick Leave Request...'
+  "
+  [message]="
+    isLoading
+      ? 'Please wait while we fetch your sick leave requests.'
+      : 'Please wait while we process your sick leave request.'
+  "
+></app-loading-overlay>

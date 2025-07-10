@@ -29,6 +29,8 @@ export interface TableData {
   documentType?: string;
   documentName?: string;
   reason?: string;
+  downloadUrl?: string;
+  templateType?: string;
   // Notification properties
   isRead?: boolean;
   type?: string;

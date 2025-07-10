@@ -1,11 +1,27 @@
-<div *ngIf="userRole?.toLowerCase() !== 'worker'">
+<!-- Loading Overlay -->
+<app-loading-overlay
+  [isVisible]="isLoadingLeaves || isCreatingLeave"
+  [title]="
+    isLoadingLeaves
+      ? 'Loading Leave of Absence Requests...'
+      : 'Creating Leave of Absence Request...'
+  "
+  [message]="
+    isLoadingLeaves
+      ? 'Please wait while we fetch your leave requests.'
+      : 'Please wait while we process your leave request.'
+  "
+></app-loading-overlay>
+
+<!-- Admin/Manager View -->
+<div *ngIf="userRole?.toLowerCase() === 'admin'">
   <div class="p-2">
     <app-table
       [tableTitle]="'Leave of Absence'"
-      [tableHeader]="tableHeader"
-      [tableData]="employees"
+      [tableHeader]="leaveRequestsHeader"
+      [tableData]="leaveRequests"
       [showViewAll]="false"
-      [showFilter]="false"
+      [showFilter]="true"
       [showStatusTab]="true"
       [statusTabs]="statusTabs"
       [activeStatusTab]="selectedStatus"
@@ -15,15 +31,20 @@
       (filterTabChange)="onFilterTabChange($event)"
       [searchValue]="searchValue"
       (search)="onSearch($event)"
-      [tableData]="filteredEmployees"
+      [tableData]="filteredLeaveRequests"
       [menuItems]="actionButton"
       (menuAction)="onMenuAction($event)"
-      [showFilter]="true"
     ></app-table>
   </div>
 </div>
 
-<div *ngIf="userRole?.toLowerCase() === 'worker'">
+<!-- Worker View -->
+<div
+  *ngIf="
+    userRole?.toLowerCase() === 'worker' ||
+    userRole?.toLowerCase() === 'minister'
+  "
+>
   <div class="p-2">
     <app-table
       [tableTitle]="'Leave of Absence'"
@@ -54,33 +75,30 @@
   </div>
 </div>
 
-<!-- Leave Details Modal -->
+<!-- Leave Details Component (handles both view and create modes) -->
 <app-leave-details
-  [view]="showLeaveDetails"
+  [view]="showLeaveDetails || showCreateRequest"
   [leaveData]="selectedLeaveData"
-  [title]="'Leave of Absence'"
+  [title]="
+    leaveDetailsMode === 'create'
+      ? 'Create Leave of Absence Request'
+      : 'Leave of Absence Details'
+  "
   [leaveType]="'Leave of Absence'"
-  [totalLeaveDays]="90"
   [showRequestType]="true"
   [showDuration]="true"
   [showLocation]="true"
   [showEndDate]="false"
   [showSubstitution]="true"
-  (close)="showLeaveDetails = false"
-></app-leave-details>
-
-<!-- Create Leave of Absence Request Modal -->
-<app-create-leave-of-absence
-  [show]="showCreateRequest"
-  [title]="'Create Leave of Absence Request'"
-  [subtitle]="'Leave of Absence Information'"
-  [reasonPlaceholder]="'Enter your reason for leave of absence...'"
-  [confirmText]="
-    'Are you sure you want to create this leave of absence request?'
+  [mode]="leaveDetailsMode"
+  (close)="
+    leaveDetailsMode === 'create'
+      ? onCloseCreateLeaveRequest()
+      : onCloseLeaveDetails()
   "
-  (close)="showCreateRequest = false"
-  (submitted)="onCreateRequestSubmitted($event)"
-></app-create-leave-of-absence>
+  (submit)="onCreateRequestSubmitted($event)"
+  (cancel)="onCloseCreateLeaveRequest()"
+></app-leave-details>
 
 <app-employee-details
   [view]="showEmployeeDetails"
