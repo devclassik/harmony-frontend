@@ -14,6 +14,17 @@ export interface UploadedFile {
   url?: string; // URL after successful upload
 }
 
+export interface SingleFileUploadResponse {
+  status: string;
+  file: string;
+}
+
+export interface MultipleFileUploadResponse {
+  status: string;
+  files: string[];
+}
+
+// Keep legacy interface for backward compatibility
 export interface FileUploadResponse {
   status: string;
   message: string;
@@ -126,8 +137,8 @@ export class FileUploadService {
 
     // Use forkJoin to wait for all uploads to complete
     return forkJoin(uploadObservables).pipe(
-      map((responses: FileUploadResponse[]) =>
-        responses.map((response) => response.data.url)
+      map((responses: SingleFileUploadResponse[]) =>
+        responses.map((response) => response.file)
       )
     );
   }
@@ -135,14 +146,14 @@ export class FileUploadService {
   // Upload a single file with progress tracking
   uploadSingleFileWithProgress(file: File): Observable<{
     progress?: number;
-    response?: FileUploadResponse;
+    response?: SingleFileUploadResponse;
   }> {
     const formData = new FormData();
     formData.append('file', file);
 
     const req = new HttpRequest(
       'POST',
-      `${environment.apiUrl}${environment.routes.files.upload}`,
+      `${environment.apiUrl}${environment.routes.files.uploadSingle}`,
       formData,
       {
         reportProgress: true,
@@ -158,7 +169,7 @@ export class FileUploadService {
               observer.next({ progress });
             }
           } else if (event.type === HttpEventType.Response) {
-            observer.next({ response: event.body as FileUploadResponse });
+            observer.next({ response: event.body as SingleFileUploadResponse });
             observer.complete();
           }
         },
@@ -168,13 +179,62 @@ export class FileUploadService {
   }
 
   // Upload a single file (without progress)
-  private uploadSingleFile(file: File): Observable<FileUploadResponse> {
+  private uploadSingleFile(file: File): Observable<SingleFileUploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.apiService.post<FileUploadResponse>(
-      environment.routes.files.upload,
+    return this.apiService.post<SingleFileUploadResponse>(
+      environment.routes.files.uploadSingle,
       formData
+    );
+  }
+
+  // Upload multiple files using the /upload/multiple endpoint
+  uploadMultipleFiles(files: File[]): Observable<MultipleFileUploadResponse> {
+    if (files.length === 0) {
+      return new Observable((observer) => {
+        observer.next({ status: 'success', files: [] });
+        observer.complete();
+      });
+    }
+
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    return this.apiService.post<MultipleFileUploadResponse>(
+      environment.routes.files.uploadMultiple,
+      formData
+    );
+  }
+
+  // Upload all files using the /upload/all endpoint
+  uploadAllFiles(files: File[]): Observable<MultipleFileUploadResponse> {
+    if (files.length === 0) {
+      return new Observable((observer) => {
+        observer.next({ status: 'success', files: [] });
+        observer.complete();
+      });
+    }
+
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    return this.apiService.post<MultipleFileUploadResponse>(
+      environment.routes.files.uploadAll,
+      formData
+    );
+  }
+
+  // Delete a file using the /upload/delete endpoint
+  deleteFile(url: string): Observable<{ status: string; message?: string }> {
+    const body = { url };
+    return this.apiService.delete<{ status: string; message?: string }>(
+      environment.routes.files.delete,
+      body
     );
   }
 }

@@ -60,10 +60,11 @@ export class ApiService {
       .pipe(catchError(this.handleError));
   }
 
-  delete<T>(endpoint: string): Observable<T> {
+  delete<T>(endpoint: string, data?: any): Observable<T> {
     return this.http
       .delete<T>(`${this.baseUrl}${endpoint}`, {
         headers: this.getHeaders(),
+        body: data,
       })
       .pipe(catchError(this.handleError));
   }

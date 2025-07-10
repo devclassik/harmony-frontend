@@ -282,7 +282,7 @@ export class LeaveDetailsComponent implements OnInit {
             // Upload completed
             uploadedFile.uploadStatus = 'completed';
             uploadedFile.progress = 100;
-            uploadedFile.url = event.response.data.url;
+            uploadedFile.url = event.response.file;
           }
         },
         error: (error) => {
@@ -298,7 +298,29 @@ export class LeaveDetailsComponent implements OnInit {
   }
 
   removeFile(index: number) {
-    this.uploadedFiles.splice(index, 1);
+    const file = this.uploadedFiles[index];
+
+    // If file has a URL (successfully uploaded), call delete API
+    if (file.url) {
+      console.log('Deleting file from server:', file.url);
+
+      this.fileUploadService.deleteFile(file.url).subscribe({
+        next: (response) => {
+          console.log('File deleted successfully:', response);
+          // Remove from local array after successful deletion
+          this.uploadedFiles.splice(index, 1);
+        },
+        error: (error) => {
+          console.error('Error deleting file:', error);
+          // Still remove from local array even if server deletion fails
+          // This prevents orphaned references in the UI
+          this.uploadedFiles.splice(index, 1);
+        },
+      });
+    } else {
+      // File not uploaded yet or no URL, just remove from local array
+      this.uploadedFiles.splice(index, 1);
+    }
   }
 
   isFormValid(): boolean {
@@ -353,13 +375,177 @@ export class LeaveDetailsComponent implements OnInit {
   }
 
   downloadDocument(doc: any) {
-    const content = `Document: ${doc.documentName}\nSize: ${doc.size}\nDate: ${doc.date}`;
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = doc.documentName;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    console.log('Download document called with:', doc); // Debug log
+
+    // Try to find the actual download URL
+    let downloadUrl = '';
+    let filename = 'document';
+
+    if (doc.downloadUrl) {
+      downloadUrl = doc.downloadUrl;
+      filename = doc.documentName || doc.name || 'document';
+    } else if (doc.url) {
+      downloadUrl = doc.url;
+      filename = doc.name || doc.documentName || 'document';
+    } else {
+      console.error('No download URL found for document:', doc);
+      return;
+    }
+
+    console.log(
+      'Downloading from URL:',
+      downloadUrl,
+      'with filename:',
+      filename
+    ); // Debug log
+
+    // Use the same download logic as uploadFile
+    try {
+      if (downloadUrl.includes('firebasestorage.googleapis.com')) {
+        // Method 1: Try adding download parameter to Firebase URL
+        const firebaseDownloadUrl = this.getFirebaseDownloadUrl(
+          downloadUrl,
+          filename
+        );
+        const link = document.createElement('a');
+        link.href = firebaseDownloadUrl;
+        link.target = '_blank';
+        link.click();
+      } else {
+        // Method 2: For other URLs, use fetch and blob
+        this.downloadFileViaFetch(downloadUrl, filename);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: Just open in new tab
+      window.open(downloadUrl, '_blank');
+    }
+  }
+
+  // Helper method to get file type icon
+  getFileTypeIcon(fileName: string): string {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return 'pdf';
+      case 'doc':
+      case 'docx':
+        return 'word';
+      case 'xls':
+      case 'xlsx':
+        return 'excel';
+      case 'txt':
+        return 'text';
+      default:
+        return 'file';
+    }
+  }
+
+  // Helper method to get file type color
+  getFileTypeColor(fileName: string): string {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return 'text-red-600 bg-red-100';
+      case 'doc':
+      case 'docx':
+        return 'text-blue-600 bg-blue-100';
+      case 'xls':
+      case 'xlsx':
+        return 'text-green-600 bg-green-100';
+      case 'txt':
+        return 'text-gray-600 bg-gray-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
+  }
+
+  // Download uploaded file
+  downloadFile(file: any) {
+    console.log('Download file called with:', file); // Debug log
+
+    if (file.url) {
+      try {
+        // Ensure we have a valid filename
+        const filename = file.name || 'downloaded-file';
+        console.log('Downloading file:', filename, 'from URL:', file.url); // Debug log
+
+        // For Firebase storage URLs, we need to handle CORS properly
+        if (file.url.includes('firebasestorage.googleapis.com')) {
+          // Method 1: Try adding download parameter to Firebase URL
+          const downloadUrl = this.getFirebaseDownloadUrl(file.url, filename);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.target = '_blank';
+          link.click();
+        } else {
+          // Method 2: For other URLs, use fetch and blob
+          this.downloadFileViaFetch(file.url, filename);
+        }
+      } catch (error) {
+        console.error('Download failed:', error);
+        // Fallback: Just open in new tab
+        window.open(file.url, '_blank');
+      }
+    } else {
+      console.error('No URL found for file:', file);
+    }
+  }
+
+  // Helper method to create Firebase download URL with proper filename
+  private getFirebaseDownloadUrl(url: string, filename: string): string {
+    try {
+      const urlObj = new URL(url);
+      // Add response-content-disposition parameter to force download with correct filename
+      urlObj.searchParams.set(
+        'response-content-disposition',
+        `attachment; filename="${filename}"`
+      );
+      return urlObj.toString();
+    } catch (error) {
+      console.error('Error creating download URL:', error);
+      return url;
+    }
+  }
+
+  // Alternative download method using fetch
+  private async downloadFileViaFetch(url: string, filename: string) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up the object URL
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Fetch download failed:', error);
+      // Fallback: Just open in new tab
+      window.open(url, '_blank');
+    }
+  }
+
+  // Preview file (for PDFs and images)
+  previewFile(file: any) {
+    if (file.url) {
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      if (extension === 'pdf') {
+        // Open PDF in new tab
+        window.open(file.url, '_blank');
+      } else {
+        // For other files, just download
+        this.downloadFile(file);
+      }
+    }
   }
 }

@@ -52,7 +52,10 @@ export const environment = {
       sickCreate: '/leave/sick',
     },
     files: {
-      upload: '/files/upload',
+      uploadSingle: '/upload/single',
+      uploadMultiple: '/upload/multiple',
+      uploadAll: '/upload/all',
+      delete: '/upload/delete',
     },
     campMeeting: {
       getAll: '/camp-meeting',
