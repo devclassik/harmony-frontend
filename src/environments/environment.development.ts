@@ -33,6 +33,13 @@ export const environment = {
       delete: '/employee/{id}',
       profile: '/employee/profile',
     },
+    departments: {
+      getAll: '/department',
+      getById: '/department/{id}',
+      create: '/department',
+      update: '/department/{id}',
+      delete: '/department/{id}',
+    },
     leave: {
       annual: '/leave/annual',
       getAll: '/leave/annual',

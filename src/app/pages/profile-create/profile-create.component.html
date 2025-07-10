@@ -271,6 +271,172 @@
                     </div>
                   </div>
                 </div>
+                <!-- Row 4 - Email and Alt Email -->
+                <div class="flex flex-row gap-6">
+                  <div class="flex flex-col flex-1">
+                    <label class="text-sm text-gray-700 mb-1" for="email"
+                      >Email Address *</label
+                    >
+                    <input
+                      formControlName="email"
+                      id="email"
+                      name="email"
+                      autocomplete="email"
+                      placeholder="Enter email address"
+                      type="email"
+                      [class]="
+                        'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                        (hasError('email')
+                          ? 'border-red-500 focus:ring-red-400'
+                          : 'border-gray-300 focus:ring-green-400')
+                      "
+                    />
+                    <div
+                      *ngIf="hasError('email')"
+                      class="text-red-500 text-xs mt-1"
+                    >
+                      {{ getErrorMessage("email") }}
+                    </div>
+                  </div>
+                  <div class="flex flex-col flex-1">
+                    <label class="text-sm text-gray-700 mb-1" for="altEmail"
+                      >Alternative Email</label
+                    >
+                    <input
+                      formControlName="altEmail"
+                      id="altEmail"
+                      name="altEmail"
+                      autocomplete="email"
+                      placeholder="Enter alternative email"
+                      type="email"
+                      [class]="
+                        'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                        (hasError('altEmail')
+                          ? 'border-red-500 focus:ring-red-400'
+                          : 'border-gray-300 focus:ring-green-400')
+                      "
+                    />
+                    <div
+                      *ngIf="hasError('altEmail')"
+                      class="text-red-500 text-xs mt-1"
+                    >
+                      {{ getErrorMessage("altEmail") }}
+                    </div>
+                  </div>
+                </div>
+                <!-- Row 5 - Department and Role -->
+                <div class="flex flex-row gap-6">
+                  <div class="flex flex-col flex-1">
+                    <label class="text-sm text-gray-700 mb-1" for="departmentId"
+                      >Department *</label
+                    >
+                    <select
+                      formControlName="departmentId"
+                      id="departmentId"
+                      name="departmentId"
+                      autocomplete="off"
+                      [class]="
+                        'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                        (hasError('departmentId')
+                          ? 'border-red-500 focus:ring-red-400'
+                          : 'border-gray-300 focus:ring-green-400')
+                      "
+                    >
+                      <option value="">Select</option>
+                      <option
+                        *ngFor="let dept of departments"
+                        [value]="dept.id"
+                      >
+                        {{ dept.name }}
+                      </option>
+                    </select>
+                    <div
+                      *ngIf="hasError('departmentId')"
+                      class="text-red-500 text-xs mt-1"
+                    >
+                      {{ getErrorMessage("departmentId") }}
+                    </div>
+                  </div>
+                  <div class="flex flex-col flex-1">
+                    <label class="text-sm text-gray-700 mb-1" for="role"
+                      >Role *</label
+                    >
+                    <input
+                      formControlName="role"
+                      id="role"
+                      name="role"
+                      type="text"
+                      readonly
+                      [value]="currentUserRole"
+                      class="border rounded-md px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed focus:outline-none border-gray-300"
+                      placeholder="Role will be loaded from your account"
+                    />
+                    <div class="text-xs text-gray-500 mt-1">
+                      Role is determined by your account permissions
+                    </div>
+                  </div>
+                </div>
+                <!-- Row 6 - Employment Type and Location -->
+                <div class="flex flex-row gap-6">
+                  <div class="flex flex-col flex-1">
+                    <label
+                      class="text-sm text-gray-700 mb-1"
+                      for="employmentType"
+                      >Employment Type *</label
+                    >
+                    <select
+                      formControlName="employmentType"
+                      id="employmentType"
+                      name="employmentType"
+                      autocomplete="off"
+                      [class]="
+                        'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                        (hasError('employmentType')
+                          ? 'border-red-500 focus:ring-red-400'
+                          : 'border-gray-300 focus:ring-green-400')
+                      "
+                    >
+                      <option value="">Select</option>
+                      <option
+                        *ngFor="let empType of employmentTypeOptions"
+                        [value]="empType"
+                      >
+                        {{ empType }}
+                      </option>
+                    </select>
+                    <div
+                      *ngIf="hasError('employmentType')"
+                      class="text-red-500 text-xs mt-1"
+                    >
+                      {{ getErrorMessage("employmentType") }}
+                    </div>
+                  </div>
+                  <div class="flex flex-col flex-1">
+                    <label class="text-sm text-gray-700 mb-1" for="location"
+                      >Location *</label
+                    >
+                    <input
+                      formControlName="location"
+                      id="location"
+                      name="location"
+                      autocomplete="off"
+                      placeholder="Enter work location"
+                      type="text"
+                      [class]="
+                        'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                        (hasError('location')
+                          ? 'border-red-500 focus:ring-red-400'
+                          : 'border-gray-300 focus:ring-green-400')
+                      "
+                    />
+                    <div
+                      *ngIf="hasError('location')"
+                      class="text-red-500 text-xs mt-1"
+                    >
+                      {{ getErrorMessage("location") }}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -340,17 +506,17 @@
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="cityTown"
+                  <label class="text-sm text-gray-700 mb-1" for="homeCity"
                     >City/Town *</label
                   >
                   <select
-                    formControlName="cityTown"
-                    id="cityTown"
-                    name="cityTown"
+                    formControlName="homeCity"
+                    id="homeCity"
+                    name="homeCity"
                     autocomplete="address-level2"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('cityTown')
+                      (hasError('homeCity')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
@@ -361,24 +527,24 @@
                     </option>
                   </select>
                   <div
-                    *ngIf="hasError('cityTown')"
+                    *ngIf="hasError('homeCity')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("cityTown") }}
+                    {{ getErrorMessage("homeCity") }}
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="stateProvince"
+                  <label class="text-sm text-gray-700 mb-1" for="homeState"
                     >State/Province *</label
                   >
                   <select
-                    formControlName="stateProvince"
-                    id="stateProvince"
-                    name="stateProvince"
+                    formControlName="homeState"
+                    id="homeState"
+                    name="homeState"
                     autocomplete="address-level1"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('stateProvince')
+                      (hasError('homeState')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
@@ -389,27 +555,27 @@
                     </option>
                   </select>
                   <div
-                    *ngIf="hasError('stateProvince')"
+                    *ngIf="hasError('homeState')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("stateProvince") }}
+                    {{ getErrorMessage("homeState") }}
                   </div>
                 </div>
               </div>
               <!-- Row 2 -->
               <div class="flex flex-row gap-6">
                 <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="country"
+                  <label class="text-sm text-gray-700 mb-1" for="homeCountry"
                     >Country *</label
                   >
                   <select
-                    formControlName="country"
-                    id="country"
-                    name="country"
+                    formControlName="homeCountry"
+                    id="homeCountry"
+                    name="homeCountry"
                     autocomplete="country-name"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('country')
+                      (hasError('homeCountry')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
@@ -420,35 +586,35 @@
                     </option>
                   </select>
                   <div
-                    *ngIf="hasError('country')"
+                    *ngIf="hasError('homeCountry')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("country") }}
+                    {{ getErrorMessage("homeCountry") }}
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="zipCode"
+                  <label class="text-sm text-gray-700 mb-1" for="homeZipCode"
                     >Zip Code *</label
                   >
                   <input
-                    formControlName="zipCode"
-                    id="zipCode"
-                    name="zipCode"
+                    formControlName="homeZipCode"
+                    id="homeZipCode"
+                    name="homeZipCode"
                     autocomplete="postal-code"
                     placeholder="Enter"
                     type="text"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('zipCode')
+                      (hasError('homeZipCode')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
                   />
                   <div
-                    *ngIf="hasError('zipCode')"
+                    *ngIf="hasError('homeZipCode')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("zipCode") }}
+                    {{ getErrorMessage("homeZipCode") }}
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
@@ -535,19 +701,19 @@
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="alternatePhone"
+                  <label class="text-sm text-gray-700 mb-1" for="altPhone"
                     >Alternate Phone</label
                   >
                   <input
-                    formControlName="alternatePhone"
-                    id="alternatePhone"
-                    name="alternatePhone"
+                    formControlName="altPhone"
+                    id="altPhone"
+                    name="altPhone"
                     autocomplete="tel"
                     placeholder="Enter phone number"
                     type="tel"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('alternatePhone')
+                      (hasError('altPhone')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
@@ -556,7 +722,7 @@
                     <label class="flex items-center text-sm text-gray-600">
                       <input
                         type="radio"
-                        formControlName="alternatePhoneType"
+                        formControlName="altPhoneType"
                         value="HOME"
                         class="mr-1 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500 focus:ring-2 rounded-full"
                       />
@@ -565,7 +731,7 @@
                     <label class="flex items-center text-sm text-gray-600">
                       <input
                         type="radio"
-                        formControlName="alternatePhoneType"
+                        formControlName="altPhoneType"
                         value="WORK"
                         class="mr-1 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500 focus:ring-2 rounded-full"
                       />
@@ -574,7 +740,7 @@
                     <label class="flex items-center text-sm text-gray-600">
                       <input
                         type="radio"
-                        formControlName="alternatePhoneType"
+                        formControlName="altPhoneType"
                         value="CELL"
                         class="mr-1 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500 focus:ring-2 rounded-full"
                       />
@@ -582,38 +748,116 @@
                     </label>
                   </div>
                   <div
-                    *ngIf="hasError('alternatePhone')"
+                    *ngIf="hasError('altPhone')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("alternatePhone") }}
+                    {{ getErrorMessage("altPhone") }}
                   </div>
                 </div>
               </div>
-              <!-- Row 5 - Email Address -->
+              <!-- Row 5 - Mailing Address Details -->
               <div class="flex flex-row gap-6">
                 <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="emailAddress"
-                    >Email Address *</label
+                  <label class="text-sm text-gray-700 mb-1" for="mailingCity"
+                    >Mailing City</label
                   >
                   <input
-                    formControlName="emailAddress"
-                    id="emailAddress"
-                    name="emailAddress"
-                    autocomplete="email"
-                    placeholder="Enter email address"
-                    type="email"
+                    formControlName="mailingCity"
+                    id="mailingCity"
+                    name="mailingCity"
+                    autocomplete="address-level2"
+                    placeholder="Enter mailing city"
+                    type="text"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('emailAddress')
+                      (hasError('mailingCity')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
                   />
                   <div
-                    *ngIf="hasError('emailAddress')"
+                    *ngIf="hasError('mailingCity')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("emailAddress") }}
+                    {{ getErrorMessage("mailingCity") }}
+                  </div>
+                </div>
+                <div class="flex flex-col flex-1">
+                  <label class="text-sm text-gray-700 mb-1" for="mailingState"
+                    >Mailing State</label
+                  >
+                  <input
+                    formControlName="mailingState"
+                    id="mailingState"
+                    name="mailingState"
+                    autocomplete="address-level1"
+                    placeholder="Enter mailing state"
+                    type="text"
+                    [class]="
+                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                      (hasError('mailingState')
+                        ? 'border-red-500 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-green-400')
+                    "
+                  />
+                  <div
+                    *ngIf="hasError('mailingState')"
+                    class="text-red-500 text-xs mt-1"
+                  >
+                    {{ getErrorMessage("mailingState") }}
+                  </div>
+                </div>
+                <div class="flex flex-col flex-1">
+                  <label class="text-sm text-gray-700 mb-1" for="mailingCountry"
+                    >Mailing Country</label
+                  >
+                  <input
+                    formControlName="mailingCountry"
+                    id="mailingCountry"
+                    name="mailingCountry"
+                    autocomplete="country-name"
+                    placeholder="Enter mailing country"
+                    type="text"
+                    [class]="
+                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                      (hasError('mailingCountry')
+                        ? 'border-red-500 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-green-400')
+                    "
+                  />
+                  <div
+                    *ngIf="hasError('mailingCountry')"
+                    class="text-red-500 text-xs mt-1"
+                  >
+                    {{ getErrorMessage("mailingCountry") }}
+                  </div>
+                </div>
+              </div>
+              <!-- Row 6 - Mailing Zip Code and Other -->
+              <div class="flex flex-row gap-6">
+                <div class="flex flex-col flex-1">
+                  <label class="text-sm text-gray-700 mb-1" for="mailingZipCode"
+                    >Mailing Zip Code</label
+                  >
+                  <input
+                    formControlName="mailingZipCode"
+                    id="mailingZipCode"
+                    name="mailingZipCode"
+                    autocomplete="postal-code"
+                    placeholder="Enter mailing zip code"
+                    type="text"
+                    [class]="
+                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                      (hasError('mailingZipCode')
+                        ? 'border-red-500 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-green-400')
+                    "
+                  />
+                  <div
+                    *ngIf="hasError('mailingZipCode')"
+                    class="text-red-500 text-xs mt-1"
+                  >
+                    {{ getErrorMessage("mailingZipCode") }}
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
@@ -778,28 +1022,28 @@
                 <div class="flex flex-col flex-1">
                   <label
                     class="text-sm text-gray-700 mb-1"
-                    for="nationalIdNumber"
-                    >National Identification Number *</label
+                    for="highestQualification"
+                    >Highest Qualification</label
                   >
                   <input
-                    formControlName="nationalIdNumber"
-                    id="nationalIdNumber"
-                    name="nationalIdNumber"
+                    formControlName="highestQualification"
+                    id="highestQualification"
+                    name="highestQualification"
                     autocomplete="off"
-                    placeholder="Enter"
+                    placeholder="Enter your highest qualification"
                     type="text"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('nationalIdNumber')
+                      (hasError('highestQualification')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
                   />
                   <div
-                    *ngIf="hasError('nationalIdNumber')"
+                    *ngIf="hasError('highestQualification')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("nationalIdNumber") }}
+                    {{ getErrorMessage("highestQualification") }}
                   </div>
                 </div>
                 <div class="flex-1"></div>
@@ -906,17 +1150,17 @@
                 <div class="flex flex-col flex-1">
                   <label
                     class="text-sm text-gray-700 mb-1"
-                    for="baptizedWithHolySpirit"
-                    >Baptized With Holy Spirit *</label
+                    for="baptizedWithWater"
+                    >Baptized With Water *</label
                   >
                   <select
-                    formControlName="baptizedWithHolySpirit"
-                    id="baptizedWithHolySpirit"
-                    name="baptizedWithHolySpirit"
+                    formControlName="baptizedWithWater"
+                    id="baptizedWithWater"
+                    name="baptizedWithWater"
                     autocomplete="off"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('baptizedWithHolySpirit')
+                      (hasError('baptizedWithWater')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
@@ -930,10 +1174,10 @@
                     </option>
                   </select>
                   <div
-                    *ngIf="hasError('baptizedWithHolySpirit')"
+                    *ngIf="hasError('baptizedWithWater')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("baptizedWithHolySpirit") }}
+                    {{ getErrorMessage("baptizedWithWater") }}
                   </div>
                 </div>
               </div>
@@ -942,71 +1186,71 @@
                 <div class="flex flex-col flex-1">
                   <label
                     class="text-sm text-gray-700 mb-1"
-                    for="yearWaterBaptized"
-                    >Year Water Baptized *</label
+                    for="yearOfWaterBaptism"
+                    >Year Of Water Baptism *</label
                   >
                   <input
-                    formControlName="yearWaterBaptized"
-                    id="yearWaterBaptized"
-                    name="yearWaterBaptized"
+                    formControlName="yearOfWaterBaptism"
+                    id="yearOfWaterBaptism"
+                    name="yearOfWaterBaptism"
                     autocomplete="off"
                     placeholder="MM-DD-YYYY"
                     type="date"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('yearWaterBaptized')
+                      (hasError('yearOfWaterBaptism')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
                   />
                   <div
-                    *ngIf="hasError('yearWaterBaptized')"
+                    *ngIf="hasError('yearOfWaterBaptism')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("yearWaterBaptized") }}
+                    {{ getErrorMessage("yearOfWaterBaptism") }}
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
                   <label
                     class="text-sm text-gray-700 mb-1"
-                    for="firstYearInApostolicChurch"
-                    >First Year In Apostolic Church *</label
+                    for="firstYearInChurch"
+                    >First Year In Church *</label
                   >
                   <input
-                    formControlName="firstYearInApostolicChurch"
-                    id="firstYearInApostolicChurch"
-                    name="firstYearInApostolicChurch"
+                    formControlName="firstYearInChurch"
+                    id="firstYearInChurch"
+                    name="firstYearInChurch"
                     autocomplete="off"
                     placeholder="MM-DD-YYYY"
                     type="date"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('firstYearInApostolicChurch')
+                      (hasError('firstYearInChurch')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
                   />
                   <div
-                    *ngIf="hasError('firstYearInApostolicChurch')"
+                    *ngIf="hasError('firstYearInChurch')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("firstYearInApostolicChurch") }}
+                    {{ getErrorMessage("firstYearInChurch") }}
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
                   <label
                     class="text-sm text-gray-700 mb-1"
-                    for="areFaithfulInTithing"
+                    for="isFaithfulInTithing"
                     >Are You Faithful In Tithing *</label
                   >
                   <select
-                    formControlName="areFaithfulInTithing"
-                    id="areFaithfulInTithing"
-                    name="areFaithfulInTithing"
+                    formControlName="isFaithfulInTithing"
+                    id="isFaithfulInTithing"
+                    name="isFaithfulInTithing"
                     autocomplete="off"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('areFaithfulInTithing')
+                      (hasError('isFaithfulInTithing')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
@@ -1020,242 +1264,375 @@
                     </option>
                   </select>
                   <div
-                    *ngIf="hasError('areFaithfulInTithing')"
+                    *ngIf="hasError('isFaithfulInTithing')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("areFaithfulInTithing") }}
+                    {{ getErrorMessage("isFaithfulInTithing") }}
                   </div>
                 </div>
               </div>
               <!-- Row 3 -->
               <div class="flex flex-row gap-6">
                 <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="areaOfService"
-                    >Area Of Service *</label
+                  <label
+                    class="text-sm text-gray-700 mb-1"
+                    for="firstSermonPastor"
+                    >First Sermon Pastor *</label
                   >
                   <input
-                    formControlName="areaOfService"
-                    id="areaOfService"
-                    name="areaOfService"
+                    formControlName="firstSermonPastor"
+                    id="firstSermonPastor"
+                    name="firstSermonPastor"
                     autocomplete="off"
-                    placeholder="Enter"
+                    placeholder="Enter pastor name"
                     type="text"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('areaOfService')
+                      (hasError('firstSermonPastor')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
                   />
                   <div
-                    *ngIf="hasError('areaOfService')"
+                    *ngIf="hasError('firstSermonPastor')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("areaOfService") }}
+                    {{ getErrorMessage("firstSermonPastor") }}
+                  </div>
+                </div>
+                <div class="flex flex-col flex-1">
+                  <label class="text-sm text-gray-700 mb-1" for="currentPastor"
+                    >Current Pastor</label
+                  >
+                  <input
+                    formControlName="currentPastor"
+                    id="currentPastor"
+                    name="currentPastor"
+                    autocomplete="off"
+                    placeholder="Enter current pastor name"
+                    type="text"
+                    [class]="
+                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                      (hasError('currentPastor')
+                        ? 'border-red-500 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-green-400')
+                    "
+                  />
+                  <div
+                    *ngIf="hasError('currentPastor')"
+                    class="text-red-500 text-xs mt-1"
+                  >
+                    {{ getErrorMessage("currentPastor") }}
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
                   <label
                     class="text-sm text-gray-700 mb-1"
-                    for="everServedInApostolicChurch"
-                    >Ever Served In An Apostolic Church? *</label
-                  >
-                  <select
-                    formControlName="everServedInApostolicChurch"
-                    id="everServedInApostolicChurch"
-                    name="everServedInApostolicChurch"
-                    autocomplete="off"
-                    [class]="
-                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('everServedInApostolicChurch')
-                        ? 'border-red-500 focus:ring-red-400'
-                        : 'border-gray-300 focus:ring-green-400')
-                    "
-                  >
-                    <option value="">Select</option>
-                    <option
-                      *ngFor="let option of apostolicChurchOptions"
-                      [value]="option"
-                    >
-                      {{ option }}
-                    </option>
-                  </select>
-                  <div
-                    *ngIf="hasError('everServedInApostolicChurch')"
-                    class="text-red-500 text-xs mt-1"
-                  >
-                    {{ getErrorMessage("everServedInApostolicChurch") }}
-                  </div>
-                </div>
-                <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="serviceDate"
-                    >Date *</label
+                    for="dateOfFirstSermon"
+                    >Date Of First Sermon *</label
                   >
                   <input
-                    formControlName="serviceDate"
-                    id="serviceDate"
-                    name="serviceDate"
+                    formControlName="dateOfFirstSermon"
+                    id="dateOfFirstSermon"
+                    name="dateOfFirstSermon"
                     autocomplete="off"
                     placeholder="MM-DD-YYYY"
                     type="date"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('serviceDate')
+                      (hasError('dateOfFirstSermon')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
                   />
                   <div
-                    *ngIf="hasError('serviceDate')"
+                    *ngIf="hasError('dateOfFirstSermon')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("serviceDate") }}
+                    {{ getErrorMessage("dateOfFirstSermon") }}
                   </div>
                 </div>
               </div>
-              <!-- Row 4 -->
+              <!-- Row 4 - First Sermon Address -->
               <div class="flex flex-row gap-6">
                 <div class="flex flex-col flex-1">
                   <label
                     class="text-sm text-gray-700 mb-1"
-                    for="serviceLocation"
-                    >Location *</label
+                    for="firstSermonAddress"
+                    >First Sermon Address *</label
                   >
                   <input
-                    formControlName="serviceLocation"
-                    id="serviceLocation"
-                    name="serviceLocation"
+                    formControlName="firstSermonAddress"
+                    id="firstSermonAddress"
+                    name="firstSermonAddress"
                     autocomplete="off"
-                    placeholder="Enter"
+                    placeholder="Enter address"
                     type="text"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('serviceLocation')
+                      (hasError('firstSermonAddress')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
                   />
                   <div
-                    *ngIf="hasError('serviceLocation')"
+                    *ngIf="hasError('firstSermonAddress')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("serviceLocation") }}
+                    {{ getErrorMessage("firstSermonAddress") }}
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
                   <label
                     class="text-sm text-gray-700 mb-1"
-                    for="serviceCityTown"
-                    >City/Town *</label
+                    for="firstSermonCity"
+                    >First Sermon City *</label
                   >
-                  <select
-                    formControlName="serviceCityTown"
-                    id="serviceCityTown"
-                    name="serviceCityTown"
+                  <input
+                    formControlName="firstSermonCity"
+                    id="firstSermonCity"
+                    name="firstSermonCity"
                     autocomplete="off"
+                    placeholder="Enter city"
+                    type="text"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('serviceCityTown')
+                      (hasError('firstSermonCity')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
-                  >
-                    <option value="">Select</option>
-                    <option *ngFor="let city of cities" [value]="city">
-                      {{ city }}
-                    </option>
-                  </select>
+                  />
                   <div
-                    *ngIf="hasError('serviceCityTown')"
+                    *ngIf="hasError('firstSermonCity')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("serviceCityTown") }}
+                    {{ getErrorMessage("firstSermonCity") }}
                   </div>
                 </div>
                 <div class="flex flex-col flex-1">
                   <label
                     class="text-sm text-gray-700 mb-1"
-                    for="serviceStateProvince"
-                    >State/Province *</label
+                    for="firstSermonState"
+                    >First Sermon State *</label
                   >
-                  <select
-                    formControlName="serviceStateProvince"
-                    id="serviceStateProvince"
-                    name="serviceStateProvince"
+                  <input
+                    formControlName="firstSermonState"
+                    id="firstSermonState"
+                    name="firstSermonState"
                     autocomplete="off"
+                    placeholder="Enter state"
+                    type="text"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('serviceStateProvince')
+                      (hasError('firstSermonState')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
-                  >
-                    <option value="">Select</option>
-                    <option *ngFor="let state of states" [value]="state">
-                      {{ state }}
-                    </option>
-                  </select>
+                  />
                   <div
-                    *ngIf="hasError('serviceStateProvince')"
+                    *ngIf="hasError('firstSermonState')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("serviceStateProvince") }}
+                    {{ getErrorMessage("firstSermonState") }}
                   </div>
                 </div>
               </div>
-              <!-- Row 5 -->
+              <!-- Row 5 - First Sermon Country and Zip -->
               <div class="flex flex-row gap-6">
                 <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="serviceCountry"
-                    >Country *</label
-                  >
-                  <select
-                    formControlName="serviceCountry"
-                    id="serviceCountry"
-                    name="serviceCountry"
-                    autocomplete="off"
-                    [class]="
-                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('serviceCountry')
-                        ? 'border-red-500 focus:ring-red-400'
-                        : 'border-gray-300 focus:ring-green-400')
-                    "
-                  >
-                    <option value="">Select</option>
-                    <option *ngFor="let country of countries" [value]="country">
-                      {{ country }}
-                    </option>
-                  </select>
-                  <div
-                    *ngIf="hasError('serviceCountry')"
-                    class="text-red-500 text-xs mt-1"
-                  >
-                    {{ getErrorMessage("serviceCountry") }}
-                  </div>
-                </div>
-                <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="pastor"
-                    >Pastor *</label
+                  <label
+                    class="text-sm text-gray-700 mb-1"
+                    for="firstSermonCountry"
+                    >First Sermon Country *</label
                   >
                   <input
-                    formControlName="pastor"
-                    id="pastor"
-                    name="pastor"
+                    formControlName="firstSermonCountry"
+                    id="firstSermonCountry"
+                    name="firstSermonCountry"
                     autocomplete="off"
-                    placeholder="Enter"
+                    placeholder="Enter country"
                     type="text"
                     [class]="
                       'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('pastor')
+                      (hasError('firstSermonCountry')
                         ? 'border-red-500 focus:ring-red-400'
                         : 'border-gray-300 focus:ring-green-400')
                     "
                   />
                   <div
-                    *ngIf="hasError('pastor')"
+                    *ngIf="hasError('firstSermonCountry')"
                     class="text-red-500 text-xs mt-1"
                   >
-                    {{ getErrorMessage("pastor") }}
+                    {{ getErrorMessage("firstSermonCountry") }}
+                  </div>
+                </div>
+                <div class="flex flex-col flex-1">
+                  <label
+                    class="text-sm text-gray-700 mb-1"
+                    for="firstSermonZipCode"
+                    >First Sermon Zip Code *</label
+                  >
+                  <input
+                    formControlName="firstSermonZipCode"
+                    id="firstSermonZipCode"
+                    name="firstSermonZipCode"
+                    autocomplete="off"
+                    placeholder="Enter zip code"
+                    type="text"
+                    [class]="
+                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                      (hasError('firstSermonZipCode')
+                        ? 'border-red-500 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-green-400')
+                    "
+                  />
+                  <div
+                    *ngIf="hasError('firstSermonZipCode')"
+                    class="text-red-500 text-xs mt-1"
+                  >
+                    {{ getErrorMessage("firstSermonZipCode") }}
+                  </div>
+                </div>
+                <div class="flex-1"></div>
+              </div>
+              <!-- Row 6 - Current Church Information -->
+              <div class="flex flex-row gap-6">
+                <div class="flex flex-col flex-1">
+                  <label
+                    class="text-sm text-gray-700 mb-1"
+                    for="currentChurchAddress"
+                    >Current Church Address</label
+                  >
+                  <input
+                    formControlName="currentChurchAddress"
+                    id="currentChurchAddress"
+                    name="currentChurchAddress"
+                    autocomplete="off"
+                    placeholder="Enter current church address"
+                    type="text"
+                    [class]="
+                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                      (hasError('currentChurchAddress')
+                        ? 'border-red-500 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-green-400')
+                    "
+                  />
+                  <div
+                    *ngIf="hasError('currentChurchAddress')"
+                    class="text-red-500 text-xs mt-1"
+                  >
+                    {{ getErrorMessage("currentChurchAddress") }}
+                  </div>
+                </div>
+                <div class="flex flex-col flex-1">
+                  <label
+                    class="text-sm text-gray-700 mb-1"
+                    for="currentChurchCity"
+                    >Current Church City</label
+                  >
+                  <input
+                    formControlName="currentChurchCity"
+                    id="currentChurchCity"
+                    name="currentChurchCity"
+                    autocomplete="off"
+                    placeholder="Enter current church city"
+                    type="text"
+                    [class]="
+                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                      (hasError('currentChurchCity')
+                        ? 'border-red-500 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-green-400')
+                    "
+                  />
+                  <div
+                    *ngIf="hasError('currentChurchCity')"
+                    class="text-red-500 text-xs mt-1"
+                  >
+                    {{ getErrorMessage("currentChurchCity") }}
+                  </div>
+                </div>
+                <div class="flex flex-col flex-1">
+                  <label
+                    class="text-sm text-gray-700 mb-1"
+                    for="currentChurchState"
+                    >Current Church State</label
+                  >
+                  <input
+                    formControlName="currentChurchState"
+                    id="currentChurchState"
+                    name="currentChurchState"
+                    autocomplete="off"
+                    placeholder="Enter current church state"
+                    type="text"
+                    [class]="
+                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                      (hasError('currentChurchState')
+                        ? 'border-red-500 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-green-400')
+                    "
+                  />
+                  <div
+                    *ngIf="hasError('currentChurchState')"
+                    class="text-red-500 text-xs mt-1"
+                  >
+                    {{ getErrorMessage("currentChurchState") }}
+                  </div>
+                </div>
+              </div>
+              <!-- Row 7 - Current Church Country and Zip -->
+              <div class="flex flex-row gap-6">
+                <div class="flex flex-col flex-1">
+                  <label
+                    class="text-sm text-gray-700 mb-1"
+                    for="currentChurchCountry"
+                    >Current Church Country</label
+                  >
+                  <input
+                    formControlName="currentChurchCountry"
+                    id="currentChurchCountry"
+                    name="currentChurchCountry"
+                    autocomplete="off"
+                    placeholder="Enter current church country"
+                    type="text"
+                    [class]="
+                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                      (hasError('currentChurchCountry')
+                        ? 'border-red-500 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-green-400')
+                    "
+                  />
+                  <div
+                    *ngIf="hasError('currentChurchCountry')"
+                    class="text-red-500 text-xs mt-1"
+                  >
+                    {{ getErrorMessage("currentChurchCountry") }}
+                  </div>
+                </div>
+                <div class="flex flex-col flex-1">
+                  <label
+                    class="text-sm text-gray-700 mb-1"
+                    for="currentChurchZipCode"
+                    >Current Church Zip Code</label
+                  >
+                  <input
+                    formControlName="currentChurchZipCode"
+                    id="currentChurchZipCode"
+                    name="currentChurchZipCode"
+                    autocomplete="off"
+                    placeholder="Enter current church zip code"
+                    type="text"
+                    [class]="
+                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
+                      (hasError('currentChurchZipCode')
+                        ? 'border-red-500 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-green-400')
+                    "
+                  />
+                  <div
+                    *ngIf="hasError('currentChurchZipCode')"
+                    class="text-red-500 text-xs mt-1"
+                  >
+                    {{ getErrorMessage("currentChurchZipCode") }}
                   </div>
                 </div>
                 <div class="flex-1"></div>
@@ -1459,7 +1836,7 @@
                   <label class="flex items-center text-sm text-gray-600">
                     <input
                       type="radio"
-                      formControlName="convictedOfCrime"
+                      formControlName="beenConvicted"
                       value="Yes"
                       class="mr-2 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500 focus:ring-2 rounded-full"
                     />
@@ -1468,7 +1845,7 @@
                   <label class="flex items-center text-sm text-gray-600">
                     <input
                       type="radio"
-                      formControlName="convictedOfCrime"
+                      formControlName="beenConvicted"
                       value="No"
                       class="mr-2 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500 focus:ring-2 rounded-full"
                     />
@@ -1476,10 +1853,10 @@
                   </label>
                 </div>
                 <div
-                  *ngIf="hasError('convictedOfCrime')"
+                  *ngIf="hasError('beenConvicted')"
                   class="text-red-500 text-xs mt-1"
                 >
-                  {{ getErrorMessage("convictedOfCrime") }}
+                  {{ getErrorMessage("beenConvicted") }}
                 </div>
               </div>
 
@@ -1493,7 +1870,7 @@
                   <label class="flex items-center text-sm text-gray-600">
                     <input
                       type="radio"
-                      formControlName="sexualMisconductInvestigation"
+                      formControlName="hasBeenInvestigatedForMisconductOrAbuse"
                       value="Yes"
                       class="mr-2 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500 focus:ring-2 rounded-full"
                     />
@@ -1502,7 +1879,7 @@
                   <label class="flex items-center text-sm text-gray-600">
                     <input
                       type="radio"
-                      formControlName="sexualMisconductInvestigation"
+                      formControlName="hasBeenInvestigatedForMisconductOrAbuse"
                       value="No"
                       class="mr-2 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500 focus:ring-2 rounded-full"
                     />
@@ -1510,10 +1887,12 @@
                   </label>
                 </div>
                 <div
-                  *ngIf="hasError('sexualMisconductInvestigation')"
+                  *ngIf="hasError('hasBeenInvestigatedForMisconductOrAbuse')"
                   class="text-red-500 text-xs mt-1"
                 >
-                  {{ getErrorMessage("sexualMisconductInvestigation") }}
+                  {{
+                    getErrorMessage("hasBeenInvestigatedForMisconductOrAbuse")
+                  }}
                 </div>
               </div>
 
@@ -1528,7 +1907,7 @@
                   <label class="flex items-center text-sm text-gray-600">
                     <input
                       type="radio"
-                      formControlName="integrityQuestionableBackground"
+                      formControlName="hasQuestionableBackground"
                       value="Yes"
                       class="mr-2 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500 focus:ring-2 rounded-full"
                     />
@@ -1537,7 +1916,7 @@
                   <label class="flex items-center text-sm text-gray-600">
                     <input
                       type="radio"
-                      formControlName="integrityQuestionableBackground"
+                      formControlName="hasQuestionableBackground"
                       value="No"
                       class="mr-2 w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500 focus:ring-2 rounded-full"
                     />
@@ -1545,372 +1924,10 @@
                   </label>
                 </div>
                 <div
-                  *ngIf="hasError('integrityQuestionableBackground')"
+                  *ngIf="hasError('hasQuestionableBackground')"
                   class="text-red-500 text-xs mt-1"
                 >
-                  {{ getErrorMessage("integrityQuestionableBackground") }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- References Section -->
-    <div class="bg-white rounded-xl mt-6 shadow-sm">
-      <div class="pt-8 pb-12 px-8">
-        <div class="w-full">
-          <div
-            class="text-base font-medium text-gray-800 border-b border-gray-100 pb-2 mb-6 flex items-center justify-between cursor-pointer"
-            (click)="toggleAccordion('references')"
-          >
-            <span>References</span>
-            <button
-              type="button"
-              class="flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <svg
-                class="w-5 h-5 transform transition-transform"
-                [class.rotate-180]="!accordionState.references"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 9l-7 7-7-7"
-                ></path>
-              </svg>
-            </button>
-          </div>
-          <div
-            *ngIf="accordionState.references"
-            class="transition-all duration-300"
-          >
-            <!-- References Dynamic Section -->
-            <div formArrayName="references">
-              <div
-                *ngFor="let reference of references.controls; let i = index"
-                [formGroupName]="i"
-                class="mb-6"
-              >
-                <div class="flex items-center justify-between mb-4">
-                  <h4 class="text-sm font-medium text-gray-700">
-                    Reference {{ i + 1 }}
-                  </h4>
-                  <button
-                    *ngIf="i > 0"
-                    type="button"
-                    (click)="removeReference(i)"
-                    class="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Remove
-                  </button>
-                </div>
-
-                <!-- Row 1 -->
-                <div class="flex flex-row gap-6 mb-4">
-                  <div class="flex flex-col flex-1">
-                    <label
-                      class="text-sm text-gray-700 mb-1"
-                      [for]="'referenceName_' + i"
-                      >Name *</label
-                    >
-                    <input
-                      formControlName="referenceName"
-                      [id]="'referenceName_' + i"
-                      autocomplete="name"
-                      placeholder="Enter"
-                      type="text"
-                      class="border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 border-gray-300 focus:ring-green-400"
-                    />
-                  </div>
-                  <div class="flex flex-col flex-1">
-                    <label
-                      class="text-sm text-gray-700 mb-1"
-                      [for]="'referencePhone_' + i"
-                      >Phone *</label
-                    >
-                    <input
-                      formControlName="referencePhone"
-                      [id]="'referencePhone_' + i"
-                      autocomplete="tel"
-                      placeholder="Enter"
-                      type="tel"
-                      class="border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 border-gray-300 focus:ring-green-400"
-                    />
-                  </div>
-                  <div class="flex flex-col flex-1">
-                    <label
-                      class="text-sm text-gray-700 mb-1"
-                      [for]="'referenceEmail_' + i"
-                      >Email Address *</label
-                    >
-                    <input
-                      formControlName="referenceEmail"
-                      [id]="'referenceEmail_' + i"
-                      autocomplete="email"
-                      placeholder="Enter"
-                      type="email"
-                      class="border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 border-gray-300 focus:ring-green-400"
-                    />
-                  </div>
-                </div>
-
-                <!-- Row 2 -->
-                <div class="flex flex-row gap-6 mb-4">
-                  <div class="flex flex-col flex-1">
-                    <label
-                      class="text-sm text-gray-700 mb-1"
-                      [for]="'referenceAddress_' + i"
-                      >Address *</label
-                    >
-                    <input
-                      formControlName="referenceAddress"
-                      [id]="'referenceAddress_' + i"
-                      autocomplete="street-address"
-                      placeholder="Enter"
-                      type="text"
-                      class="border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 border-gray-300 focus:ring-green-400"
-                    />
-                  </div>
-                  <div class="flex flex-col flex-1">
-                    <label
-                      class="text-sm text-gray-700 mb-1"
-                      [for]="'referenceCityTown_' + i"
-                      >City/Town *</label
-                    >
-                    <select
-                      formControlName="referenceCityTown"
-                      [id]="'referenceCityTown_' + i"
-                      autocomplete="address-level2"
-                      class="border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 border-gray-300 focus:ring-green-400"
-                    >
-                      <option value="">Select</option>
-                      <option *ngFor="let city of cities" [value]="city">
-                        {{ city }}
-                      </option>
-                    </select>
-                  </div>
-                  <div class="flex flex-col flex-1">
-                    <label
-                      class="text-sm text-gray-700 mb-1"
-                      [for]="'referenceStateProvince_' + i"
-                      >State/Province *</label
-                    >
-                    <select
-                      formControlName="referenceStateProvince"
-                      [id]="'referenceStateProvince_' + i"
-                      autocomplete="address-level1"
-                      class="border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 border-gray-300 focus:ring-green-400"
-                    >
-                      <option value="">Select</option>
-                      <option *ngFor="let state of states" [value]="state">
-                        {{ state }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Row 3 -->
-                <div class="flex flex-row gap-6 mb-4">
-                  <div class="flex flex-col flex-1">
-                    <label
-                      class="text-sm text-gray-700 mb-1"
-                      [for]="'referenceCountry_' + i"
-                      >Country *</label
-                    >
-                    <select
-                      formControlName="referenceCountry"
-                      [id]="'referenceCountry_' + i"
-                      autocomplete="country-name"
-                      class="border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 border-gray-300 focus:ring-green-400"
-                    >
-                      <option value="">Select</option>
-                      <option
-                        *ngFor="let country of countries"
-                        [value]="country"
-                      >
-                        {{ country }}
-                      </option>
-                    </select>
-                  </div>
-                  <div class="flex flex-col flex-1">
-                    <label
-                      class="text-sm text-gray-700 mb-1"
-                      [for]="'referenceZipCode_' + i"
-                      >Zip Code *</label
-                    >
-                    <input
-                      formControlName="referenceZipCode"
-                      [id]="'referenceZipCode_' + i"
-                      autocomplete="postal-code"
-                      placeholder="Enter"
-                      type="text"
-                      class="border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 border-gray-300 focus:ring-green-400"
-                    />
-                  </div>
-                  <div class="flex flex-col flex-1">
-                    <label
-                      class="text-sm text-gray-700 mb-1"
-                      [for]="'howDoYouKnowThisPerson_' + i"
-                      >How Do You Know This Person? *</label
-                    >
-                    <input
-                      formControlName="howDoYouKnowThisPerson"
-                      [id]="'howDoYouKnowThisPerson_' + i"
-                      autocomplete="off"
-                      placeholder="Enter"
-                      type="text"
-                      class="border rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 border-gray-300 focus:ring-green-400"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Add Reference Button -->
-              <div class="flex justify-start mt-4">
-                <button
-                  type="button"
-                  (click)="addReference()"
-                  class="flex items-center text-green-600 hover:text-green-700 text-sm font-medium"
-                >
-                  <svg
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    ></path>
-                  </svg>
-                  Add Reference
-                </button>
-              </div>
-            </div>
-
-            <div class="flex-1 flex flex-col gap-4">
-              <!-- Row 4 -->
-              <div class="flex flex-row gap-6">
-                <div class="flex flex-col flex-1">
-                  <label
-                    class="text-sm text-gray-700 mb-1"
-                    for="highestAcademicQualification"
-                    >Highest Academic Qualification *</label
-                  >
-                  <input
-                    formControlName="highestAcademicQualification"
-                    id="highestAcademicQualification"
-                    name="highestAcademicQualification"
-                    autocomplete="off"
-                    placeholder="Enter"
-                    type="text"
-                    [class]="
-                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('highestAcademicQualification')
-                        ? 'border-red-500 focus:ring-red-400'
-                        : 'border-gray-300 focus:ring-green-400')
-                    "
-                  />
-                  <div
-                    *ngIf="hasError('highestAcademicQualification')"
-                    class="text-red-500 text-xs mt-1"
-                  >
-                    {{ getErrorMessage("highestAcademicQualification") }}
-                  </div>
-                </div>
-                <div class="flex flex-col flex-1">
-                  <label class="text-sm text-gray-700 mb-1" for="fieldOfStudy"
-                    >Field Of Study *</label
-                  >
-                  <input
-                    formControlName="fieldOfStudy"
-                    id="fieldOfStudy"
-                    name="fieldOfStudy"
-                    autocomplete="off"
-                    placeholder="Enter"
-                    type="text"
-                    [class]="
-                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 ' +
-                      (hasError('fieldOfStudy')
-                        ? 'border-red-500 focus:ring-red-400'
-                        : 'border-gray-300 focus:ring-green-400')
-                    "
-                  />
-                  <div
-                    *ngIf="hasError('fieldOfStudy')"
-                    class="text-red-500 text-xs mt-1"
-                  >
-                    {{ getErrorMessage("fieldOfStudy") }}
-                  </div>
-                </div>
-                <div class="flex-1"></div>
-              </div>
-              <!-- Row 5 -->
-              <div class="flex flex-row gap-6">
-                <div class="flex flex-col flex-1">
-                  <label
-                    class="text-sm text-gray-700 mb-1"
-                    for="highestAcademicQualificationDetails"
-                    >Highest Academic Qualification *</label
-                  >
-                  <textarea
-                    formControlName="highestAcademicQualificationDetails"
-                    id="highestAcademicQualificationDetails"
-                    name="highestAcademicQualificationDetails"
-                    autocomplete="off"
-                    placeholder="Enter"
-                    rows="3"
-                    [class]="
-                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 resize-none ' +
-                      (hasError('highestAcademicQualificationDetails')
-                        ? 'border-red-500 focus:ring-red-400'
-                        : 'border-gray-300 focus:ring-green-400')
-                    "
-                  ></textarea>
-                  <div
-                    *ngIf="hasError('highestAcademicQualificationDetails')"
-                    class="text-red-500 text-xs mt-1"
-                  >
-                    {{ getErrorMessage("highestAcademicQualificationDetails") }}
-                  </div>
-                </div>
-              </div>
-              <!-- Row 6 -->
-              <div class="flex flex-row gap-6">
-                <div class="flex flex-col flex-1">
-                  <label
-                    class="text-sm text-gray-700 mb-1"
-                    for="detailsOfCurrentEmployment"
-                    >Details Of Current Employment *</label
-                  >
-                  <textarea
-                    formControlName="detailsOfCurrentEmployment"
-                    id="detailsOfCurrentEmployment"
-                    name="detailsOfCurrentEmployment"
-                    autocomplete="off"
-                    placeholder="Enter"
-                    rows="3"
-                    [class]="
-                      'border rounded-md px-3 py-2 bg-gray-50 focus:outline-none focus:ring-2 resize-none ' +
-                      (hasError('detailsOfCurrentEmployment')
-                        ? 'border-red-500 focus:ring-red-400'
-                        : 'border-gray-300 focus:ring-green-400')
-                    "
-                  ></textarea>
-                  <div
-                    *ngIf="hasError('detailsOfCurrentEmployment')"
-                    class="text-red-500 text-xs mt-1"
-                  >
-                    {{ getErrorMessage("detailsOfCurrentEmployment") }}
-                  </div>
+                  {{ getErrorMessage("hasQuestionableBackground") }}
                 </div>
               </div>
             </div>
@@ -1952,142 +1969,52 @@
             *ngIf="accordionState.uploadDocuments"
             class="transition-all duration-300"
           >
-            <div class="flex-1 flex flex-col gap-4">
-              <!-- Upload Area -->
-              <div class="flex flex-col">
-                <label class="text-sm text-gray-700 mb-2">Upload</label>
-                <div
-                  class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center bg-gray-50 hover:bg-gray-100 transition-colors"
-                >
+            <!-- Upload Documents Content -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-700 mb-2">
+                    Upload CV/Resume (PDF)
+                  </label>
                   <input
                     type="file"
-                    multiple
-                    (change)="onFileSelect($event)"
-                    class="hidden"
-                    #fileInput
-                    accept=".pdf,.doc,.docx,.xls,.xlsx"
+                    accept=".pdf"
+                    class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                   />
-                  <div class="flex flex-col items-center">
-                    <svg
-                      class="w-12 h-12 text-gray-400 mb-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1"
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      ></path>
-                    </svg>
-                    <button
-                      type="button"
-                      (click)="fileInput.click()"
-                      class="text-green-600 hover:text-green-700 font-medium mb-2"
-                    >
-                      Choose files or drag and drop
-                    </button>
-                    <p class="text-xs text-gray-400">
-                      PDF, DOC, DOCX, XLS, XLSX up to 10MB
-                    </p>
-                  </div>
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-700 mb-2">
+                    Upload Cover Letter (PDF)
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                  />
                 </div>
               </div>
-
-              <!-- File List -->
-              <div *ngIf="uploadedFiles.length > 0" class="mt-6">
-                <div class="space-y-3">
-                  <div
-                    *ngFor="let file of uploadedFiles; let i = index"
-                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div class="flex items-center flex-1">
-                      <!-- File Icon -->
-                      <div class="flex-shrink-0 mr-3">
-                        <div
-                          *ngIf="getFileType(file.name) === 'excel'"
-                          class="w-8 h-8 bg-green-100 rounded flex items-center justify-center"
-                        >
-                          <svg
-                            class="w-5 h-5 text-green-600"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 2h12v10H4V5z"
-                            />
-                            <path d="M6 7h8v2H6V7zm0 4h8v2H6v-2z" />
-                          </svg>
-                        </div>
-                        <div
-                          *ngIf="getFileType(file.name) === 'pdf'"
-                          class="w-8 h-8 bg-red-100 rounded flex items-center justify-center"
-                        >
-                          <svg
-                            class="w-5 h-5 text-red-600"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              d="M4 18h12V6l-4-4H4v16zm8-14v3h3l-3-3zM6 9h8v1H6V9zm0 2h8v1H6v-1zm0 2h5v1H6v-1z"
-                            />
-                          </svg>
-                        </div>
-                        <div
-                          *ngIf="getFileType(file.name) === 'word'"
-                          class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center"
-                        >
-                          <svg
-                            class="w-5 h-5 text-blue-600"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 2h12v10H4V5z"
-                            />
-                            <path d="M6 7h8v6H6V7z" />
-                          </svg>
-                        </div>
-                      </div>
-
-                      <!-- File Info -->
-                      <div class="flex-1 min-w-0">
-                        <div class="flex items-center">
-                          <p class="text-sm font-medium text-gray-900 truncate">
-                            {{ file.name }}
-                          </p>
-                          <span
-                            *ngIf="file.uploadStatus === 'completed'"
-                            class="ml-2 text-xs text-green-600"
-                            >Uploaded</span
-                          >
-                        </div>
-                        <p class="text-xs text-gray-500">
-                          {{ formatFileSize(file.size) }}
-                        </p>
-                      </div>
-                    </div>
-
-                    <!-- Remove Button -->
-                    <button
-                      type="button"
-                      (click)="removeFile(i)"
-                      class="ml-4 text-gray-400 hover:text-red-500 transition-colors"
-                    >
-                      <svg
-                        class="w-5 h-5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                          clip-rule="evenodd"
-                        ></path>
-                      </svg>
-                    </button>
-                  </div>
+              <div class="space-y-4">
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-700 mb-2">
+                    Upload Certificates (PDF)
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    multiple
+                    class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                  />
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-700 mb-2">
+                    Upload Other Documents (PDF)
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    multiple
+                    class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                  />
                 </div>
               </div>
             </div>

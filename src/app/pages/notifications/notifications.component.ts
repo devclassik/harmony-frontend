@@ -126,6 +126,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   markAsRead(notificationId: number) {
     this.notificationService.markNotificationAsRead(notificationId);
+    this.notificationService.markSelectedNotificationItemAsRead(notificationId);
   }
 
   getUnreadCount(): number {

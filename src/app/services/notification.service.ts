@@ -60,212 +60,9 @@ export class NotificationService {
       (item) => !item.isRead
     ).length;
 
-    const totalUnreadCount = unreadInboxCount + unreadNotificationsCount;
+    const totalUnreadCount = unreadInboxCount;
 
     this.unreadCountSubject.next(totalUnreadCount);
-  }
-
-  private getDefaultInboxItems(): InboxItem[] {
-    return [
-      {
-        id: 1,
-        sender: 'Admin',
-        profileImage: './assets/svg/profilePix.svg',
-        subject: 'Promotion Approved',
-        preview:
-          'The promotion request placed by your head of department on the 25th of July for the position of so...',
-        message:
-          'The promotion request placed by your head of department on the 25th of July for the position of zonal pastor was approved by the admin. Please find attached your promotion letter.',
-        time: '1:45PM',
-        isRead: false,
-      },
-      {
-        id: 2,
-        sender: 'Admin',
-        profileImage: './assets/svg/profilePix.svg',
-        subject: 'Accommodation Assigned',
-        preview:
-          'Your accommodation request has been processed and approved. You have been assigned to Building A...',
-        message:
-          'Your accommodation request has been processed and approved. You have been assigned to Building A, Room 204. The accommodation includes all necessary amenities and utilities. Please report to the accommodation office to collect your keys and complete the check-in process.',
-        time: '1:45PM',
-        isRead: false,
-      },
-      {
-        id: 3,
-        sender: 'Admin',
-        profileImage: './assets/svg/profilePix.svg',
-        subject: 'May Paystub',
-        preview:
-          'Your May 2024 paystub is now available for download. This includes your salary, allowances...',
-        message:
-          'Your May 2024 paystub is now available for download. This includes your salary, allowances, and deductions for the month. Please review the document and contact payroll if you have any questions or discrepancies.',
-        time: '1:45PM',
-        isRead: false,
-      },
-      {
-        id: 4,
-        sender: 'Admin',
-        profileImage: './assets/svg/profilePix.svg',
-        subject: 'Accommodation Assigned',
-        preview:
-          'Your accommodation request has been processed and approved. You have been assigned to Building B...',
-        message:
-          'Your accommodation request has been processed and approved. You have been assigned to Building B, Room 105. The accommodation includes all necessary amenities and utilities. Please report to the accommodation office to collect your keys and complete the check-in process.',
-        time: '1:45PM',
-        isRead: false,
-      },
-      {
-        id: 5,
-        sender: 'Admin',
-        profileImage: './assets/svg/profilePix.svg',
-        subject: 'Promotion Approved',
-        preview:
-          'The promotion request placed by your head of department on the 20th of July for the position of so...',
-        message:
-          'The promotion request placed by your head of department on the 20th of July for the position of Team Lead was approved by the admin. Please find attached your promotion letter.',
-        time: '1:45PM',
-        isRead: false,
-      },
-      {
-        id: 6,
-        sender: 'Admin',
-        profileImage: './assets/svg/profilePix.svg',
-        subject: 'Promotion Approved',
-        preview:
-          'The promotion request placed by your head of department on the 18th of July for the position of so...',
-        message:
-          'The promotion request placed by your head of department on the 18th of July for the position of Project Manager was approved by the admin. Please find attached your promotion letter.',
-        time: '1:45PM',
-        isRead: false,
-      },
-    ];
-  }
-
-  private getDefaultNotifications(): NotificationItem[] {
-    return [
-      {
-        id: 1,
-        worker: {
-          name: 'Jane Adesanya',
-          image: './assets/svg/profilePix.svg',
-        },
-        type: 'Promotion Request',
-        message:
-          'submitted a promotion request with detailed explanation about career progression, achievements over the past three years, additional responsibilities taken on, and reasons for requesting advancement in the company hierarchy to',
-        targetWorker: 'John Adegoke',
-        timestamp: '26-07-2024',
-        isRead: false,
-      },
-      {
-        id: 2,
-        worker: {
-          name: 'Michael Johnson',
-          image: './assets/svg/profilePix.svg',
-        },
-        type: 'Leave Request',
-        message: 'submitted a leave request for approval to',
-        targetWorker: 'John Adegoke',
-        timestamp: '27-07-2024',
-        isRead: false,
-      },
-      {
-        id: 3,
-        worker: {
-          name: 'Sarah Williams',
-          image: './assets/svg/profilePix.svg',
-        },
-        type: 'Transfer Request',
-        message: 'submitted a transfer request to',
-        targetWorker: 'John Adegoke',
-        timestamp: '25-07-2024',
-        isRead: false,
-      },
-      {
-        id: 4,
-        worker: {
-          name: 'David Brown',
-          image: './assets/svg/profilePix.svg',
-        },
-        type: 'Sick Leave Request',
-        message: 'submitted a sick leave request to',
-        targetWorker: 'John Adegoke',
-        timestamp: '28-07-2024',
-        isRead: false,
-      },
-      {
-        id: 5,
-        worker: {
-          name: 'Emily Davis',
-          image: './assets/svg/profilePix.svg',
-        },
-        type: 'Annual Leave Request',
-        message: 'submitted an annual leave request to',
-        targetWorker: 'John Adegoke',
-        timestamp: '29-07-2024',
-        isRead: false,
-      },
-      {
-        id: 6,
-        worker: {
-          name: 'Robert Wilson',
-          image: './assets/svg/profilePix.svg',
-        },
-        type: 'Overtime Request',
-        message: 'submitted an overtime request to',
-        targetWorker: 'John Adegoke',
-        timestamp: '30-07-2024',
-        isRead: false,
-      },
-      {
-        id: 7,
-        worker: {
-          name: 'Lisa Anderson',
-          image: './assets/svg/profilePix.svg',
-        },
-        type: 'Training Request',
-        message: 'submitted a training request to',
-        targetWorker: 'John Adegoke',
-        timestamp: '31-07-2024',
-        isRead: false,
-      },
-      {
-        id: 8,
-        worker: {
-          name: 'James Taylor',
-          image: './assets/svg/profilePix.svg',
-        },
-        type: 'Disciplinary Appeal',
-        message: 'submitted a disciplinary appeal to',
-        targetWorker: 'John Adegoke',
-        timestamp: '01-08-2024',
-        isRead: false,
-      },
-      {
-        id: 9,
-        worker: {
-          name: 'Maria Garcia',
-          image: './assets/svg/profilePix.svg',
-        },
-        type: 'Accommodation Request',
-        message: 'submitted an accommodation request to',
-        targetWorker: 'John Adegoke',
-        timestamp: '02-08-2024',
-        isRead: false,
-      },
-      {
-        id: 10,
-        worker: {
-          name: 'Jane Adesanya',
-          image: './assets/svg/profilePix.svg',
-        },
-        type: 'Promotion Request',
-        message: 'submitted a promotion request to',
-        targetWorker: 'John Adegoke',
-        timestamp: '26-07-2024',
-        isRead: true,
-      },
-    ];
   }
 
   private loadInboxItemsFromApi(): void {
@@ -276,8 +73,8 @@ export class NotificationService {
       },
       error: (error) => {
         console.error('Error loading inbox items:', error);
-        // Fallback to default data or handle error appropriately
-        this.inboxItemsSubject.next(this.getDefaultInboxItems());
+        // Show empty list when API fails to ensure accurate unread count
+        this.inboxItemsSubject.next([]);
       },
     });
   }
@@ -292,21 +89,36 @@ export class NotificationService {
       },
       error: (error) => {
         console.error('Error loading notifications:', error);
-        // Fallback to default data or handle error appropriately
-        this.notificationsSubject.next(this.getDefaultNotifications());
+        // Show empty list when API fails to ensure accurate unread count
+        this.notificationsSubject.next([]);
       },
     });
   }
 
   markSelectedInboxItemAsRead(itemId: number) {
-    this.apiService.put(`/message/`, { messageIds: [itemId] }).subscribe({
-      next: () => {
-        this.markInboxItemAsRead(itemId);
-      },
-      error: (error) => {
-        console.error('Error marking inbox item as read:', error);
-      },
-    });
+    this.apiService
+      .put(`/message/mark-read`, { messageIds: [itemId] })
+      .subscribe({
+        next: () => {
+          this.markInboxItemAsRead(itemId);
+        },
+        error: (error) => {
+          console.error('Error marking inbox item as read:', error);
+        },
+      });
+  }
+
+  markSelectedNotificationItemAsRead(itemId: number) {
+    this.apiService
+      .put(`/notification/mark-read`, { notificationIds: [itemId] })
+      .subscribe({
+        next: () => {
+          this.markNotificationAsRead(itemId);
+        },
+        error: (error) => {
+          console.error('Error marking notification item as read:', error);
+        },
+      });
   }
 
   private mapApiMessagesToInboxItems(
@@ -377,11 +189,6 @@ export class NotificationService {
     this.notificationsSubject.next(updatedItems);
   }
 
-  // Common methods
-  getUnreadCount(): Observable<number> {
-    return this.unreadCountSubject.asObservable();
-  }
-
   getUnreadInboxCount(): Observable<number> {
     return this.inboxItemsSubject
       .asObservable()
@@ -392,10 +199,6 @@ export class NotificationService {
     return this.notificationsSubject
       .asObservable()
       .pipe(map((items) => items.filter((item) => !item.isRead).length));
-  }
-
-  hasUnreadMessages(): Observable<boolean> {
-    return this.getUnreadCount().pipe(map((count) => count > 0));
   }
 
   // Methods to refresh data from API
