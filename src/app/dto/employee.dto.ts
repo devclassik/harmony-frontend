@@ -2,7 +2,7 @@ import { ApiResponse, Permission, Department } from './common.dto';
 
 export interface Address {
   id: number;
-  street: string;
+  address: string;
   city: string;
   state: string;
   country: string;
@@ -153,7 +153,7 @@ export interface EmployeeDetails {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
-  worker: WorkerInfo;
+  user: WorkerInfo | null;
   spouse: Spouse | null;
   children: Child[];
   payrolls: Payroll[];

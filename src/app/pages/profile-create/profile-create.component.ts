@@ -120,45 +120,143 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       this.avatarPreview = 'assets/svg/gender.svg';
     }
 
+    // Helper function to safely get email from user object
+    const getEmailFromUser = () => {
+      if (employeeData.user && employeeData.user.email) {
+        return employeeData.user.email;
+      }
+      return '';
+    };
+
     // Pre-fill form with employee data
     this.profileForm.patchValue({
+      // Basic employee info
       title: employeeData.title || '',
       legalFirstName: employeeData.firstName || '',
       legalMiddleName: employeeData.middleName || '',
       legalLastName: employeeData.lastName || '',
       profferedName: employeeData.profferedName || '',
       gender: employeeData.gender || '',
+      email: getEmailFromUser(),
+      altEmail: employeeData.altEmail || '',
+      employmentType: employeeData.employmentType || '',
+
+      // Personal info
       maritalStatus: employeeData.maritalStatus || '',
+      everDivorced: employeeData.everDivorced || false,
       dateOfBirth: employeeData.dob
         ? new Date(employeeData.dob).toISOString().split('T')[0]
         : '',
+
+      // Contact info
       primaryPhone: employeeData.primaryPhone || '',
-      alternatePhone: employeeData.altPhone || '',
-      emailAddress: employeeData.altEmail || '',
-      homeAddress: employeeData.homeAddress
-        ? `${employeeData.homeAddress.street || ''}, ${
-            employeeData.homeAddress.city || ''
-          }, ${employeeData.homeAddress.state || ''}`.replace(
-            /^,\s*|,\s*$/g,
-            ''
-          )
-        : '',
-      mailingAddress: employeeData.mailingAddress
-        ? `${employeeData.mailingAddress.street || ''}, ${
-            employeeData.mailingAddress.city || ''
-          }, ${employeeData.mailingAddress.state || ''}`.replace(
-            /^,\s*|,\s*$/g,
-            ''
-          )
-        : '',
-      cityTown: employeeData.homeAddress?.city || '',
-      stateProvince: employeeData.homeAddress?.state || '',
-      country: employeeData.homeAddress?.country || '',
-      zipCode: employeeData.homeAddress?.zipCode || '',
-      cityTown2: employeeData.mailingAddress?.city || '',
-      stateProvince2: employeeData.mailingAddress?.state || '',
-      country2: employeeData.mailingAddress?.zipCode || '',
+      primaryPhoneType: employeeData.primaryPhoneType || '',
+      altPhone: employeeData.altPhone || '',
+      altPhoneType: employeeData.altPhoneType || '',
+
+      // Address info - Handle mailingAddress object structure
+      homeAddress: employeeData.mailingAddress?.address || '',
+      homeCity: employeeData.mailingAddress?.city || '',
+      homeState: employeeData.mailingAddress?.state || '',
+      homeCountry: employeeData.mailingAddress?.country || '',
+      homeZipCode: employeeData.mailingAddress?.zipCode || '',
+
+      // Mailing address (copy from mailingAddress if exists)
+      mailingAddress: employeeData.mailingAddress?.address || '',
+      mailingCity: employeeData.mailingAddress?.city || '',
+      mailingState: employeeData.mailingAddress?.state || '',
+      mailingCountry: employeeData.mailingAddress?.country || '',
+      mailingZipCode: employeeData.mailingAddress?.zipCode || '',
+
+      // Legal questions
+      beenConvicted: employeeData.beenConvicted || false,
+      hasQuestionableBackground:
+        employeeData.hasQuestionableBackground || false,
+      hasBeenInvestigatedForMisconductOrAbuse:
+        employeeData.hasBeenInvestigatedForMisconductOrAbuse || false,
     });
+
+    // Handle children array if exists
+    if (employeeData.children && employeeData.children.length > 0) {
+      const childrenArray = this.profileForm.get('children') as FormArray;
+      childrenArray.clear();
+
+      employeeData.children.forEach((child) => {
+        const childGroup = this.fb.group({
+          childName: [child.firstName || '', [Validators.required]],
+          childDob: [
+            child.dob ? new Date(child.dob).toISOString().split('T')[0] : '',
+            [Validators.required],
+          ],
+          childGender: [child.gender || '', [Validators.required]],
+        });
+        childrenArray.push(childGroup);
+      });
+    }
+
+    // Handle spouse info if exists
+    if (employeeData.spouse) {
+      this.profileForm.patchValue({
+        spouseFirstName: employeeData.spouse.firstName || '',
+        spouseMiddleName: employeeData.spouse.middleName || '',
+        spouseDob: employeeData.spouse.dob
+          ? new Date(employeeData.spouse.dob).toISOString().split('T')[0]
+          : '',
+      });
+    }
+
+    // Handle previous positions if exists
+    if (
+      employeeData.previousPositions &&
+      employeeData.previousPositions.length > 0
+    ) {
+      const positionsArray = this.profileForm.get(
+        'previousPositions'
+      ) as FormArray;
+      positionsArray.clear();
+
+      employeeData.previousPositions.forEach((position) => {
+        const positionGroup = this.fb.group({
+          previousPositionTitle: [position.title || '', [Validators.required]],
+          previousPosition: [position.department || '', [Validators.required]],
+          previousPositionDate: [
+            position.startDate
+              ? new Date(position.startDate).toISOString().split('T')[0]
+              : '',
+            [Validators.required],
+          ],
+        });
+        positionsArray.push(positionGroup);
+      });
+    }
+
+    // Handle spiritual history if exists
+    if (employeeData.spiritualHistory) {
+      this.profileForm.patchValue({
+        yearOfWaterBaptism: employeeData.spiritualHistory.baptismDate
+          ? new Date(employeeData.spiritualHistory.baptismDate)
+              .getFullYear()
+              .toString()
+          : '',
+        dateOfFirstSermon: employeeData.spiritualHistory.baptismDate
+          ? new Date(employeeData.spiritualHistory.baptismDate)
+              .toISOString()
+              .split('T')[0]
+          : '',
+      });
+    }
+
+    // Handle credentials if exists
+    if (employeeData.credentials && employeeData.credentials.length > 0) {
+      const credential = employeeData.credentials[0]; // Use first credential
+      this.profileForm.patchValue({
+        credentialName: credential.degree || '',
+        credentialNumber: credential.institution || '',
+        credentialIssuedDate: credential.graduationYear
+          ? `${credential.graduationYear}-01-01`
+          : '',
+      });
+    }
   }
 
   private loadDepartments() {
