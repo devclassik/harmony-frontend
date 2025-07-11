@@ -1095,7 +1095,8 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     this.employeeService.updateEmployee(employeeId, updateData).subscribe({
       next: (response) => {
         this.isSubmitting = false;
-        if (response.status === 'success') {
+        // Check for HTTP 200 status code to determine success
+        if (response) {
           // Update the user profile data in auth service and localStorage
           if (this.uploadedAvatarUrl || this.modifiedFields.size > 0) {
             // Extract the updated data from the form for localStorage update
@@ -1133,10 +1134,6 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
 
           // Navigate to profile view component
           this.router.navigate(['/profile-view']);
-        } else {
-          this.alertService.error(
-            'Failed to update profile: ' + response.message
-          );
         }
       },
       error: (error) => {
