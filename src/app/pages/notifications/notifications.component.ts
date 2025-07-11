@@ -39,6 +39,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   constructor(private notificationService: NotificationService) {}
 
   ngOnInit() {
+    // Check if notifications are already loaded, if not initialize them
+    if (!this.notificationService.hasNotifications()) {
+      this.notificationService.initializeNotifications();
+    }
+
     this.loadNotifications();
   }
 

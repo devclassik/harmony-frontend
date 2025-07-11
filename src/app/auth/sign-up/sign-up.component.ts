@@ -115,7 +115,7 @@ export class SignUpComponent {
         lastName: this.form.lastName,
         email: this.form.email,
         password: this.form.password,
-        // roleId: 1, // Assuming role 1 Admin, 2-HOD, 3-Minister, 4-worker
+        // roleId: 1, // Admin role - signup creates admin accounts only
       })
       .subscribe({
         next: (response: RegisterResponse) => {
@@ -216,6 +216,7 @@ export class SignUpComponent {
         lastName: this.form.lastName,
         email: this.form.email,
         password: this.form.password,
+        roleId: 1, // Admin role - signup creates admin accounts only
       })
       .subscribe({
         next: (response: RegisterResponse) => {
@@ -244,8 +245,8 @@ export class SignUpComponent {
     switch (this.currentOperation) {
       case 'register':
         return {
-          title: 'Creating your account...',
-          message: 'Please wait while we set up your Harmony account.',
+          title: 'Creating admin account...',
+          message: 'Please wait while we set up your administrator account.',
         };
       case 'verify':
         return {

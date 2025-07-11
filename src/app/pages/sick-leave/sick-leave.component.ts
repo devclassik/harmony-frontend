@@ -110,13 +110,21 @@ export class SickLeaveComponent implements OnInit {
 
   transformToTableData(leaves: any[]): TableData[] {
     return leaves.map((leave) => {
-      // Calculate end date from start date and duration
+      // Calculate end date
       const startDate = new Date(leave.startDate);
       const endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + (leave.duration - 1)); // -1 because the start date counts as day 1
+
+      if (leave.durationUnit === 'Days') {
+        endDate.setDate(startDate.getDate() + leave.duration - 1);
+      } else if (leave.durationUnit === 'Weeks') {
+        endDate.setDate(startDate.getDate() + leave.duration * 7 - 1);
+      } else if (leave.durationUnit === 'Months') {
+        endDate.setMonth(startDate.getMonth() + leave.duration);
+        endDate.setDate(endDate.getDate() - 1);
+      }
 
       return {
-        id: leave.leaveId || leave.id,
+        id: leave.id.toString(),
         name: leave.employee
           ? `${leave.employee.firstName} ${leave.employee.lastName}`
           : 'N/A',
@@ -126,7 +134,7 @@ export class SickLeaveComponent implements OnInit {
         status: this.transformStatus(leave.status) as any,
         requestType: leave.type,
         substitution: 'N/A', // This would come from API if available
-        imageUrl: leave.employee?.photoUrl || 'assets/svg/profilePix.svg',
+        imageUrl: this.formatImageUrl(leave.employee?.photoUrl),
         // Additional data for details view
         reason: leave.reason,
         location: leave.location,
@@ -136,6 +144,31 @@ export class SickLeaveComponent implements OnInit {
         originalData: leave,
       };
     });
+  }
+
+  // Helper function to properly format image URLs
+  formatImageUrl(url: string | null): string {
+    // First try to get the photo URL from localStorage if no URL is provided
+    if (!url) {
+      const storedPhotoUrl = localStorage.getItem('workerPhotoUrl');
+      if (storedPhotoUrl && storedPhotoUrl !== '') {
+        url = storedPhotoUrl;
+      }
+    }
+
+    // If still no URL, use a generic avatar fallback
+    if (!url || url === '') {
+      return 'assets/svg/gender.svg'; // Use gender.svg as fallback instead of profilePix.svg
+    }
+
+    // If it's already a complete URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // If it's a relative path, prepend the base URL
+    const baseUrl = 'https://harmoney-backend.onrender.com';
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 
   // Transform status from API format to display format

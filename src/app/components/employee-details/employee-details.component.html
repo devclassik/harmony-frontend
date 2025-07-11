@@ -10,21 +10,33 @@
     </button>
     <div class="flex items-center gap-4 pb-6 border-b border-gray-100">
       <img
-        src="assets/svg/profilePix.svg"
-        alt="Employee Photo"
-        class="rounded-full w-16 h-16 object-cover"
+        class="size-32 rounded-full object-cover"
+        [src]="formatImageUrl(employeeDetails?.photoUrl)"
+        [alt]="
+          (employeeDetails?.firstName || '') +
+          ' ' +
+          (employeeDetails?.lastName || '')
+        "
+        (error)="handleImageError($event)"
       />
       <div>
         <div
           class="font-semibold text-sm text-gray-900 flex items-center gap-2"
         >
-          John Adegoke
+          {{ employeeDetails?.firstName }} {{ employeeDetails?.lastName }}
           <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-2"
-            >Employee ID: <span class="font-medium">124-08</span></span
+            >Employee ID:
+            <span class="font-medium">{{
+              employeeDetails?.employeeId || employeeDetails?.id
+            }}</span></span
           >
         </div>
-        <div class="text-xs text-gray-600">Technical Team</div>
-        <div class="text-xs text-gray-500">Minister</div>
+        <div class="text-xs text-gray-600">
+          {{ employeeDetails?.departments?.[0]?.name || "N/A" }}
+        </div>
+        <div class="text-xs text-gray-500">
+          {{ employeeDetails?.user?.role?.name || "N/A" }}
+        </div>
       </div>
     </div>
 
@@ -63,53 +75,110 @@
           <div class="grid grid-cols-2 gap-x-8 gap-y-4">
             <div>
               <div class="text-xs text-gray-400">Employee ID</div>
-              <div class="font-medium text-gray-900">124-08</div>
+              <div class="font-medium text-gray-900">
+                {{
+                  employeeDetails?.employeeId || employeeDetails?.id || "N/A"
+                }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Title</div>
-              <div class="font-medium text-gray-900">Mr.</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.title || "N/A" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Legal First Name</div>
-              <div class="font-medium text-gray-900">John</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.firstName || "N/A" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Legal Middle Name</div>
-              <div class="font-medium text-gray-900">Tobi</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.middleName || "N/A" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Legal Last Name</div>
-              <div class="font-medium text-gray-900">Adegoke</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.lastName || "N/A" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">
                 Preferred Name of Correspondence
               </div>
-              <div class="font-medium text-gray-900">John Adegoke</div>
+              <div class="font-medium text-gray-900">
+                {{
+                  employeeDetails?.profferedName ||
+                    employeeDetails?.firstName +
+                      " " +
+                      employeeDetails?.lastName ||
+                    "N/A"
+                }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Gender</div>
-              <div class="font-medium text-gray-900">Male</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.gender || "N/A" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Department</div>
-              <div class="font-medium text-gray-900">Technical Team</div>
+              <div class="font-medium text-gray-900">
+                {{employeeDetails?.departments?.[0]?.name || 'N/A'}}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Role</div>
-              <div class="font-medium text-gray-900">Minister</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.user?.role?.name || "N/A" }}
+              </div>
             </div>
             <div>
-              <div class="text-xs text-gray-400">Location</div>
-              <div class="font-medium text-gray-900">Alimosho</div>
+              <div class="text-xs text-gray-400">Employment Type</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.employmentType || "N/A" }}
+              </div>
             </div>
             <div class="col-span-2 flex items-center mt-2">
               <div class="text-xs text-gray-400 mr-2">Status</div>
               <span
-                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700"
+                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                [ngClass]="{
+                  'bg-green-100 text-green-700':
+                    employeeDetails?.employeeStatus?.toLowerCase() === 'active',
+                  'bg-yellow-100 text-yellow-700':
+                    employeeDetails?.employeeStatus?.toLowerCase() ===
+                    'on leave',
+                  'bg-red-100 text-red-700':
+                    employeeDetails?.employeeStatus?.toLowerCase() ===
+                    'on discipline',
+                  'bg-gray-100 text-gray-700':
+                    employeeDetails?.employeeStatus?.toLowerCase() ===
+                      'retired' || !employeeDetails?.employeeStatus
+                }"
               >
-                <span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                Active
+                <span
+                  class="w-2 h-2 rounded-full mr-2"
+                  [ngClass]="{
+                    'bg-green-500':
+                      employeeDetails?.employeeStatus?.toLowerCase() ===
+                      'active',
+                    'bg-yellow-500':
+                      employeeDetails?.employeeStatus?.toLowerCase() ===
+                      'on leave',
+                    'bg-red-500':
+                      employeeDetails?.employeeStatus?.toLowerCase() ===
+                      'on discipline',
+                    'bg-gray-500':
+                      employeeDetails?.employeeStatus?.toLowerCase() ===
+                        'retired' || !employeeDetails?.employeeStatus
+                  }"
+                ></span>
+                {{ employeeDetails?.employeeStatus || "N/A" }}
               </span>
             </div>
           </div>
@@ -148,43 +217,71 @@
           <div class="grid grid-cols-2 gap-x-8 gap-y-4">
             <div>
               <div class="text-xs text-gray-400">Home Address</div>
-              <div class="font-medium text-gray-900">124-08</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.homeAddress?.address || "N/A" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">City/Town</div>
-              <div class="font-medium text-gray-900">Mr.</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.homeAddress?.city || "N/A" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">State/Province</div>
-              <div class="font-medium text-gray-900">John</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.homeAddress?.state || "N/A" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Country</div>
-              <div class="font-medium text-gray-900">Tobi</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.homeAddress?.country || "N/A" }}
+              </div>
             </div>
             <div>
-              <div class="text-xs text-gray-400">zip code</div>
-              <div class="font-medium text-gray-900">Adegoke</div>
+              <div class="text-xs text-gray-400">ZIP Code</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.homeAddress?.zipCode || "N/A" }}
+              </div>
             </div>
             <div>
-              <div class="text-xs text-gray-400">email</div>
-              <div class="font-medium text-gray-900">John Adegoke</div>
+              <div class="text-xs text-gray-400">Email</div>
+              <div class="font-medium text-gray-900">
+                {{
+                  employeeDetails?.user?.email ||
+                    employeeDetails?.altEmail ||
+                    "N/A"
+                }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Phone Number</div>
-              <div class="font-medium text-gray-900">Male</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.primaryPhone || "N/A" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Alternative Phone Number</div>
-              <div class="font-medium text-gray-900">Technical Team</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.altPhone || "N/A" }}
+              </div>
             </div>
             <div>
-              <div class="text-xs text-gray-400">Role</div>
-              <div class="font-medium text-gray-900">Minister</div>
+              <div class="text-xs text-gray-400">Service Start Date</div>
+              <div class="font-medium text-gray-900">
+                {{
+                  employeeDetails?.serviceStartDate
+                    ? (employeeDetails?.serviceStartDate | date : "shortDate")
+                    : "N/A"
+                }}
+              </div>
             </div>
             <div>
-              <div class="text-xs text-gray-400">Location</div>
-              <div class="font-medium text-gray-900">Alimosho</div>
+              <div class="text-xs text-gray-400">Employee Status</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.employeeStatus || "N/A" }}
+              </div>
             </div>
           </div>
         </div>
@@ -219,20 +316,36 @@
         >
           <div class="grid grid-cols-2 gap-x-8 gap-y-4">
             <div>
-              <div class="text-xs text-gray-400">Married</div>
-              <div class="font-medium text-gray-900">124-08</div>
+              <div class="text-xs text-gray-400">Marital Status</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.maritalStatus || "N/A" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Ever Divorced</div>
-              <div class="font-medium text-gray-900">Mr.</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.everDivorced ? "Yes" : "No" }}
+              </div>
             </div>
             <div>
               <div class="text-xs text-gray-400">Date of Birth</div>
-              <div class="font-medium text-gray-900">John</div>
+              <div class="font-medium text-gray-900">
+                {{
+                  employeeDetails?.dob
+                    ? (employeeDetails?.dob | date : "shortDate")
+                    : "N/A"
+                }}
+              </div>
             </div>
             <div>
-              <div class="text-xs text-gray-400">National Identity Number</div>
-              <div class="font-medium text-gray-900">Tobi</div>
+              <div class="text-xs text-gray-400">Spouse Information</div>
+              <div class="font-medium text-gray-900">
+                {{
+                  (employeeDetails?.spouse?.firstName || "") +
+                    " " +
+                    (employeeDetails?.spouse?.lastName || "") || "N/A"
+                }}
+              </div>
             </div>
           </div>
         </div>
@@ -240,9 +353,15 @@
       <div class="employee-section mb-4">
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'spiritualHistory'
+              ? (openSection = null)
+              : (openSection = 'spiritualHistory')
+          "
         >
           <svg
             class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'spiritualHistory' }"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -256,13 +375,42 @@
           </svg>
           <span class="font-medium text-black">Spiritual History</span>
         </button>
+        <div
+          *ngIf="openSection === 'spiritualHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+            <div>
+              <div class="text-xs text-gray-400">Baptism Date</div>
+              <div class="font-medium text-gray-900">N/A</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Baptism Location</div>
+              <div class="font-medium text-gray-900">N/A</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Church Membership</div>
+              <div class="font-medium text-gray-900">N/A</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Spiritual Gifts</div>
+              <div class="font-medium text-gray-900">N/A</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="employee-section mb-4">
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'areaOfService'
+              ? (openSection = null)
+              : (openSection = 'areaOfService')
+          "
         >
           <svg
             class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'areaOfService' }"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -276,13 +424,52 @@
           </svg>
           <span class="font-medium text-black">Area Of Service</span>
         </button>
+        <div
+          *ngIf="openSection === 'areaOfService'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+            <div>
+              <div class="text-xs text-gray-400">Current Department</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.departments?.[0]?.name || "N/A" }}
+              </div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Position</div>
+              <div class="font-medium text-gray-900">
+                {{ employeeDetails?.user?.role?.name || "N/A" }}
+              </div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Service Start Date</div>
+              <div class="font-medium text-gray-900">
+                {{
+                  employeeDetails?.serviceStartDate
+                    ? (employeeDetails?.serviceStartDate | date : "shortDate")
+                    : "N/A"
+                }}
+              </div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Years of Service</div>
+              <div class="font-medium text-gray-900">N/A</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="employee-section mb-4">
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'legalQuestions'
+              ? (openSection = null)
+              : (openSection = 'legalQuestions')
+          "
         >
           <svg
             class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'legalQuestions' }"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -296,6 +483,29 @@
           </svg>
           <span class="font-medium text-black">Legal Questions</span>
         </button>
+        <div
+          *ngIf="openSection === 'legalQuestions'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+            <div>
+              <div class="text-xs text-gray-400">Criminal Record</div>
+              <div class="font-medium text-gray-900">No</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Legal Issues</div>
+              <div class="font-medium text-gray-900">None</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Background Check</div>
+              <div class="font-medium text-gray-900">Cleared</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Compliance Status</div>
+              <div class="font-medium text-gray-900">Compliant</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="employee-section mb-4">
         <button
@@ -348,9 +558,15 @@
       <div class="employee-section mb-4">
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'appraisalHistory'
+              ? (openSection = null)
+              : (openSection = 'appraisalHistory')
+          "
         >
           <svg
             class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'appraisalHistory' }"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -364,6 +580,29 @@
           </svg>
           <span class="font-medium text-black">Appraisal History</span>
         </button>
+        <div
+          *ngIf="openSection === 'appraisalHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+            <div>
+              <div class="text-xs text-gray-400">Last Appraisal Date</div>
+              <div class="font-medium text-gray-900">N/A</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Overall Rating</div>
+              <div class="font-medium text-gray-900">N/A</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Next Appraisal Due</div>
+              <div class="font-medium text-gray-900">N/A</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-400">Performance Goals</div>
+              <div class="font-medium text-gray-900">N/A</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="flex gap-4 w-1/2 m-auto" *ngIf="showButton">
         <button

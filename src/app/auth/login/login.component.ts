@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AlertService } from '../../services/alert.service';
+import { NotificationService } from '../../services/notification.service';
 import { MatIconModule } from '@angular/material/icon';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 
@@ -24,7 +25,8 @@ export class LoginComponent {
   constructor(
     private router: Router,
     private auth: AuthService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private notificationService: NotificationService
   ) {}
 
   signUp() {
@@ -51,7 +53,8 @@ export class LoginComponent {
 
     this.auth.login(this.email, this.password).subscribe({
       next: () => {
-        // Successful login
+        // Successful login - initialize notifications
+        this.notificationService.initializeNotifications();
         this.alertService.success('Login successful! Welcome back.');
         // Navigate after a short delay to show the success alert
         setTimeout(() => {
@@ -59,6 +62,7 @@ export class LoginComponent {
         }, 500);
       },
       error: (error: any) => {
+        this.isLoading = false; // Fix: Set loading to false on error
         const errorMsg =
           error?.message || 'An error occurred. Please try again.';
         this.errorMessage = errorMsg;

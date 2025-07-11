@@ -263,6 +263,7 @@ export interface UpdateEmployeeRequest {
   credentialNumber?: string;
   credentialIssuedDate?: string;
   credentialExpirationDate?: string;
+  documentUrls?: string[];
 }
 
 export type CreateEmployeeResponse = ApiResponse<EmployeeDetails>;

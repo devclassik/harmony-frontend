@@ -26,9 +26,9 @@ export const environment = {
       profile: 'users/profile',
     },
     employees: {
-      getAll: '/employees',
+      getAll: '/employee',
       getById: '/employee/{id}',
-      create: '/employees',
+      create: '/employee',
       update: '/employee/{id}',
       delete: '/employee/{id}',
       profile: '/employee/profile',
@@ -59,6 +59,11 @@ export const environment = {
     },
     campMeeting: {
       getAll: '/camp-meeting',
+    },
+    analytics: {
+      getAnalyticsOverview: '/analytics/overview',
+      getLeaveStatistics: '/analytics/leave-stat',
+      getEmployeeDemographics: '/analytics/employee-demographics',
     },
     posts: {
       getAll: 'posts',

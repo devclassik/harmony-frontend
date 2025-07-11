@@ -589,13 +589,10 @@
 
           <!-- Profile Image -->
           <img
-            [src]="
-              item.imageUrl ||
-              item.worker?.image ||
-              './assets/svg/profilePix.svg'
-            "
+            [src]="formatImageUrl(item.imageUrl || item.worker?.image)"
             [alt]="item.name || item.worker?.name"
             class="w-10 h-10 rounded-full flex-shrink-0"
+            (error)="handleImageError($event)"
           />
 
           <!-- Notification Content -->

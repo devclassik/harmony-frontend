@@ -8,9 +8,16 @@ import { AreaChartComponent } from '../../components/area-chart/area-chart.compo
 import { FilterTab } from '../../components/area-chart/area-chart.component';
 @Component({
   selector: 'app-reporting-and-analytics',
-  imports: [ComponentsModule, DashboardGreetingsComponent, BarChartComponent, PieChartComponent, DoughnutChartComponent, AreaChartComponent],
+  imports: [
+    ComponentsModule,
+    DashboardGreetingsComponent,
+    BarChartComponent,
+    PieChartComponent,
+    DoughnutChartComponent,
+    AreaChartComponent,
+  ],
   templateUrl: './reporting-and-analytics.component.html',
-  styleUrl: './reporting-and-analytics.component.css'
+  styleUrl: './reporting-and-analytics.component.css',
 })
 export class ReportingAndAnalyticsComponent {
   filterTabs: FilterTab[] = [

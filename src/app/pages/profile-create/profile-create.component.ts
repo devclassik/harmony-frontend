@@ -27,11 +27,20 @@ import { AuthService } from '../../services/auth.service';
 import { AlertService } from '../../services/alert.service';
 import { DepartmentService } from '../../services/department.service';
 import { Department } from '../../dto/department.dto';
+import {
+  ConfirmPromptComponent,
+  PromptConfig,
+} from '../../components/confirm-prompt/confirm-prompt.component';
 
 @Component({
   selector: 'app-profile-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LoadingOverlayComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LoadingOverlayComponent,
+    ConfirmPromptComponent,
+  ],
   templateUrl: './profile-create.component.html',
 })
 export class ProfileCreateComponent implements OnInit, OnChanges {
@@ -43,15 +52,32 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   isEditMode = false;
   isSubmitting = false;
 
-  // Accordion state management
+  // File upload state
+  isUploadingAvatar = false;
+  uploadedAvatarUrl: string | null = null; // Only for newly uploaded photos
+  existingPhotoUrl: string | null = null; // For existing photos from profile data
+  uploadedDocumentUrls: string[] = [];
+  isUploadingDocuments = false;
+
+  // Track which fields have been modified by the user
+  private modifiedFields = new Set<string>();
+  private originalFormValues: any = {};
+
+  // Confirmation modal state
+  showModal: boolean = false;
+  promptConfig: PromptConfig | null = null;
+
+  // UI state management
   accordionState = {
     employeeInfo: true,
     contactInfo: true,
-    personalInfo: true,
-    spiritualHistory: true,
-    legalQuestions: true,
-    references: true,
-    uploadDocuments: true,
+    familyInfo: false,
+    personalInfo: false,
+    spiritualHistory: false,
+    areaOfService: false,
+    references: false,
+    legalQuestions: false,
+    uploadDocuments: false,
   };
 
   // Form options from constants
@@ -74,6 +100,102 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   genderOptionsChildren = ['MALE', 'FEMALE'];
   currentUserRole: string = ''; // User's role from API
 
+  // Dynamic location data based on country selection
+  availableStates: string[] = [];
+  availableCities: string[] = [];
+
+  // Multi-select options for previous church positions
+  churchPositionOptions = [
+    'Pastor',
+    'Assistant Pastor',
+    'Elder',
+    'Deacon',
+    'Youth Leader',
+    'Music Director',
+    'Sunday School Teacher',
+    'Choir Member',
+    'Usher',
+    'Secretary',
+    'Treasurer',
+    'Board Member',
+    'Evangelist',
+    'Missionary',
+    "Children's Ministry Leader",
+    "Women's Ministry Leader",
+    "Men's Ministry Leader",
+  ];
+
+  selectedChurchPositions: string[] = [];
+  showPositionDropdown = false;
+
+  // Nigerian states
+  nigerianStates = [
+    'Abia',
+    'Adamawa',
+    'Akwa Ibom',
+    'Anambra',
+    'Bauchi',
+    'Bayelsa',
+    'Benue',
+    'Borno',
+    'Cross River',
+    'Delta',
+    'Ebonyi',
+    'Edo',
+    'Ekiti',
+    'Enugu',
+    'Gombe',
+    'Imo',
+    'Jigawa',
+    'Kaduna',
+    'Kano',
+    'Katsina',
+    'Kebbi',
+    'Kogi',
+    'Kwara',
+    'Lagos',
+    'Nasarawa',
+    'Niger',
+    'Ogun',
+    'Ondo',
+    'Osun',
+    'Oyo',
+    'Plateau',
+    'Rivers',
+    'Sokoto',
+    'Taraba',
+    'Yobe',
+    'Zamfara',
+    'FCT',
+  ];
+
+  // Nigerian cities by state (sample for major states)
+  nigerianCities: { [key: string]: string[] } = {
+    Lagos: [
+      'Ikeja',
+      'Victoria Island',
+      'Lekki',
+      'Surulere',
+      'Yaba',
+      'Ikoyi',
+      'Ajah',
+      'Magodo',
+    ],
+    Abuja: [
+      'Garki',
+      'Wuse',
+      'Maitama',
+      'Asokoro',
+      'Gwarinpa',
+      'Kubwa',
+      'Nyanya',
+    ],
+    Kano: ['Kano Municipal', 'Fagge', 'Dala', 'Gwale', 'Tarauni'],
+    Rivers: ['Port Harcourt', 'Obio-Akpor', 'Okrika', 'Eleme', 'Ikwerre'],
+    Oyo: ['Ibadan North', 'Ibadan South-West', 'Egbeda', 'Akinyele', 'Ona Ara'],
+    FCT: ['Garki', 'Wuse', 'Maitama', 'Asokoro', 'Gwarinpa', 'Kubwa', 'Nyanya'],
+  };
+
   constructor(
     private fb: FormBuilder,
     private location: Location,
@@ -89,35 +211,113 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    this.checkEditMode();
-    this.prefillFormIfNeeded();
     this.loadDepartments();
     this.loadUserRole();
+    this.profileForm = this.createForm();
+    this.checkEditMode();
+    this.prefillFormIfNeeded();
+
+    // Initialize form change tracking after form is set up
+    this.initializeFormChangeTracking();
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['employeeData']) {
+    if (changes['employeeData'] && this.employeeData) {
       this.checkEditMode();
       this.prefillFormIfNeeded();
+      // Re-initialize tracking when employee data changes
+      this.initializeFormChangeTracking();
     }
   }
 
   private checkEditMode() {
-    this.isEditMode = this.employeeData !== null;
+    this.isEditMode = !!this.employeeData;
   }
 
   private prefillFormIfNeeded() {
     if (this.employeeData) {
       this.prefillForm(this.employeeData);
+      // Load any additional spiritual/service data that might be available
+      this.loadAdditionalEmployeeData();
+    }
+  }
+
+  private loadAdditionalEmployeeData() {
+    // This method can be extended to load additional spiritual/service data
+    // if the API provides extended endpoints for complete employee profiles
+    if (!this.employeeData) return;
+
+    // Check if we have additional data in the employee response
+    // that might be nested or in different properties
+    this.mapExtendedEmployeeData(this.employeeData);
+  }
+
+  private mapExtendedEmployeeData(employeeData: any) {
+    // Extract additional fields that may not be in the basic structure
+    const safeSetValue = (fieldName: string, value: any) => {
+      const control = this.profileForm.get(fieldName);
+      if (control) {
+        control.setValue(value || '');
+      }
+    };
+
+    // Convert API boolean values to form-friendly strings
+    const boolToString = (value: any): string => {
+      if (value === true || value === 'true') return 'Yes';
+      if (value === false || value === 'false') return 'No';
+      return '';
+    };
+
+    // Handle additional mappings that might not be covered in main prefill
+    const convertChildGender = (apiGender: string | null): string => {
+      if (!apiGender) return '';
+      const genderMap: { [key: string]: string } = {
+        MALE: 'MALE',
+        FEMALE: 'FEMALE',
+      };
+      return genderMap[apiGender.toUpperCase()] || apiGender;
+    };
+
+    // Additional field mappings can be added here as needed
+    // This method provides flexibility for handling extended API responses
+
+    // Example: Handle any special cases or computed fields
+    if (employeeData.computedFields) {
+      // Process computed fields if they exist
     }
   }
 
   private prefillForm(employeeData: EmployeeDetails) {
+    // Helper function to properly format image URLs
+    const formatImageUrl = (url: string | null): string => {
+      if (!url) return 'assets/svg/gender.svg';
+
+      // If it's already a complete URL, return as is
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+
+      // If it's a relative path, prepend the base URL
+      const baseUrl = 'https://harmoney-backend.onrender.com';
+      return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+    };
+
     // Set avatar preview if photoUrl exists, otherwise use default fallback
-    if (employeeData.photoUrl) {
-      this.avatarPreview = employeeData.photoUrl;
-    } else {
-      this.avatarPreview = 'assets/svg/gender.svg';
+    const formattedPhotoUrl = formatImageUrl(employeeData.photoUrl);
+    this.avatarPreview = formattedPhotoUrl;
+    this.existingPhotoUrl = employeeData.photoUrl; // Store original URL for API
+
+    // Load existing documents if any
+    if (employeeData.documents && employeeData.documents.length > 0) {
+      this.uploadedDocumentUrls = employeeData.documents.map((doc) => doc.url);
+      this.uploadedFiles = employeeData.documents.map((doc) => ({
+        name: doc.title || 'Document',
+        size: 0, // Unknown size for existing documents
+        file: null as any, // No file object for existing documents
+        uploadStatus: 'completed' as const,
+        progress: 100,
+        url: doc.url,
+      }));
     }
 
     // Helper function to safely get email from user object
@@ -128,84 +328,245 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       return '';
     };
 
-    // Pre-fill form with employee data
-    this.profileForm.patchValue({
-      // Basic employee info
-      title: employeeData.title || '',
+    // Helper function to convert boolean to string for dropdowns
+    const booleanToString = (value: any): string => {
+      if (value === null || value === undefined || value === '') {
+        return '';
+      }
+
+      // Handle string booleans
+      if (typeof value === 'string') {
+        const lowerValue = value.toLowerCase();
+        if (lowerValue === 'true' || lowerValue === 'yes') return 'Yes';
+        if (lowerValue === 'false' || lowerValue === 'no') return 'No';
+        return '';
+      }
+
+      // Handle actual booleans
+      if (typeof value === 'boolean') {
+        return value ? 'Yes' : 'No';
+      }
+
+      return '';
+    };
+
+    // Helper function to format dates
+    const formatDate = (dateString: string | null): string => {
+      if (!dateString) return '';
+      try {
+        return new Date(dateString).toISOString().split('T')[0];
+      } catch {
+        return '';
+      }
+    };
+
+    // Helper functions to convert API values to form option values
+    const convertTitle = (apiTitle: string | null): string => {
+      if (!apiTitle) return '';
+      const titleMap: { [key: string]: string } = {
+        MR: 'Mr',
+        MRS: 'Mrs',
+        MS: 'Ms',
+        DR: 'Dr',
+        PROF: 'Prof',
+      };
+      return titleMap[apiTitle.toUpperCase()] || apiTitle;
+    };
+
+    const convertGender = (apiGender: string | null): string => {
+      if (!apiGender) return '';
+      const genderMap: { [key: string]: string } = {
+        MALE: 'Male',
+        FEMALE: 'Female',
+        OTHER: 'Other',
+      };
+      return genderMap[apiGender.toUpperCase()] || apiGender;
+    };
+
+    const convertMaritalStatus = (apiStatus: string | null): string => {
+      if (!apiStatus) return '';
+      const statusMap: { [key: string]: string } = {
+        SINGLE: 'Single',
+        MARRIED: 'Married',
+        DIVORCED: 'Divorced',
+        WIDOWED: 'Widowed',
+        SEPARATED: 'Separated',
+      };
+      return statusMap[apiStatus.toUpperCase()] || apiStatus;
+    };
+
+    const convertPhoneType = (apiType: string | null): string => {
+      if (!apiType) return '';
+      const typeMap: { [key: string]: string } = {
+        HOME: 'HOME',
+        WORK: 'WORK',
+        CELL: 'CELL',
+        MOBILE: 'CELL', // In case API uses MOBILE instead of CELL
+      };
+      return typeMap[apiType.toUpperCase()] || apiType;
+    };
+
+    const convertEmploymentType = (apiType: string | null): string => {
+      if (!apiType) return '';
+      const typeMap: { [key: string]: string } = {
+        STAFF: 'STAFF',
+        CONTRACT: 'CONTRACT',
+        VOLUNTEER: 'VOLUNTEER',
+      };
+      return typeMap[apiType.toUpperCase()] || apiType;
+    };
+
+    // Convert role from WORKER to worker for role checks
+    const convertRole = (apiRole: string | null): string => {
+      if (!apiRole) return '';
+      return apiRole.toLowerCase();
+    };
+
+    // Get department ID if departments exist
+    const getDepartmentId = (): string => {
+      if (employeeData.departments && employeeData.departments.length > 0) {
+        return employeeData.departments[0].id.toString();
+      }
+      return '';
+    };
+
+    // STEP 1: Pre-fill basic employee and address information
+    const basicFormData = {
+      // Basic employee info - Apply conversions to match form options
+      title: convertTitle(employeeData.title),
       legalFirstName: employeeData.firstName || '',
       legalMiddleName: employeeData.middleName || '',
       legalLastName: employeeData.lastName || '',
       profferedName: employeeData.profferedName || '',
-      gender: employeeData.gender || '',
+      gender: convertGender(employeeData.gender),
       email: getEmailFromUser(),
       altEmail: employeeData.altEmail || '',
-      employmentType: employeeData.employmentType || '',
+      employmentType: convertEmploymentType(employeeData.employmentType),
+      departmentId: getDepartmentId(),
+      role: convertRole(employeeData.user?.role?.name || ''),
 
       // Personal info
-      maritalStatus: employeeData.maritalStatus || '',
-      everDivorced: employeeData.everDivorced || false,
-      dateOfBirth: employeeData.dob
-        ? new Date(employeeData.dob).toISOString().split('T')[0]
-        : '',
+      maritalStatus: convertMaritalStatus(employeeData.maritalStatus),
+      everDivorced: booleanToString(employeeData.everDivorced),
+      dateOfBirth: formatDate(employeeData.dob),
 
-      // Contact info
+      // Contact info - Apply phone type conversions
       primaryPhone: employeeData.primaryPhone || '',
-      primaryPhoneType: employeeData.primaryPhoneType || '',
+      primaryPhoneType: convertPhoneType(employeeData.primaryPhoneType),
       altPhone: employeeData.altPhone || '',
-      altPhoneType: employeeData.altPhoneType || '',
+      altPhoneType: convertPhoneType(employeeData.altPhoneType),
 
-      // Address info - Handle mailingAddress object structure
-      homeAddress: employeeData.mailingAddress?.address || '',
-      homeCity: employeeData.mailingAddress?.city || '',
-      homeState: employeeData.mailingAddress?.state || '',
-      homeCountry: employeeData.mailingAddress?.country || '',
-      homeZipCode: employeeData.mailingAddress?.zipCode || '',
+      // Home Address - Handle homeAddress object structure
+      homeAddress: employeeData.homeAddress?.address || '',
+      homeCity: employeeData.homeAddress?.city || '',
+      homeState: employeeData.homeAddress?.state || '',
+      homeCountry: employeeData.homeAddress?.country || 'Nigeria',
+      homeZipCode: employeeData.homeAddress?.zipCode || '',
 
-      // Mailing address (copy from mailingAddress if exists)
+      // Mailing Address - Handle mailingAddress object structure
       mailingAddress: employeeData.mailingAddress?.address || '',
       mailingCity: employeeData.mailingAddress?.city || '',
       mailingState: employeeData.mailingAddress?.state || '',
-      mailingCountry: employeeData.mailingAddress?.country || '',
+      mailingCountry: employeeData.mailingAddress?.country || 'Nigeria',
       mailingZipCode: employeeData.mailingAddress?.zipCode || '',
 
-      // Legal questions
-      beenConvicted: employeeData.beenConvicted || false,
-      hasQuestionableBackground:
-        employeeData.hasQuestionableBackground || false,
-      hasBeenInvestigatedForMisconductOrAbuse:
-        employeeData.hasBeenInvestigatedForMisconductOrAbuse || false,
-    });
+      // Legal questions - Handle actual boolean values
+      beenConvicted: booleanToString(employeeData.beenConvicted),
+      hasQuestionableBackground: booleanToString(
+        employeeData.hasQuestionableBackground
+      ),
+      hasBeenInvestigatedForMisconductOrAbuse: booleanToString(
+        employeeData.hasBeenInvestigatedForMisconductOrAbuse
+      ),
+    };
 
-    // Handle children array if exists
+    // Patch the form with basic data
+    this.profileForm.patchValue(basicFormData);
+
+    // STEP 2: Handle spiritual history if exists - Map all available spiritual fields
+    if (employeeData.spiritualHistory) {
+      const spiritual = employeeData.spiritualHistory as any; // Cast to any since interface doesn't match API response
+
+      const spiritualFormData = {
+        // Core spiritual fields
+        yearSaved: spiritual.yearSaved || '',
+        sanctified: booleanToString(spiritual.sanctified),
+        baptizedWithHolySpirit: booleanToString(spiritual.baptizedWithWater), // Map API field to form field
+        yearOfWaterBaptism: spiritual.yearOfWaterBaptism || '',
+        firstYearInApostolicChurch: spiritual.firstYearInChurch || '',
+        isFaithfulInTithing: booleanToString(spiritual.isFaithfulInTithing),
+
+        // Sermon and pastoral info
+        dateOfFirstSermon: formatDate(spiritual.dateOfFirstSermon),
+        firstSermonPastorArea: spiritual.firstSermonPastor || '',
+        currentChurchPastorArea: spiritual.currentPastor || '',
+
+        // First sermon location details
+        firstSermonLocation: spiritual.locationOfFirstSermon?.address || '',
+        firstSermonCityArea: spiritual.locationOfFirstSermon?.city || '',
+        firstSermonStateArea: spiritual.locationOfFirstSermon?.state || '',
+        firstSermonCountryArea: spiritual.locationOfFirstSermon?.country || '',
+        firstSermonZipCodeArea: spiritual.locationOfFirstSermon?.zipCode || '',
+
+        // Current church location details
+        currentChurchLocationArea:
+          spiritual.currentChurchLocation?.address || '',
+        currentChurchCityArea: spiritual.currentChurchLocation?.city || '',
+        currentChurchStateArea: spiritual.currentChurchLocation?.state || '',
+        currentChurchCountryArea:
+          spiritual.currentChurchLocation?.country || '',
+        currentChurchZipCodeArea:
+          spiritual.currentChurchLocation?.zipCode || '',
+      };
+
+      // Patch spiritual data
+      this.profileForm.patchValue(spiritualFormData);
+    }
+
+    // STEP 3: Handle spouse info if exists - Updated for API structure
+    if (employeeData.spouse) {
+      const spouseFormData = {
+        spouseFirstName: employeeData.spouse.firstName || '',
+        spouseMiddleName: employeeData.spouse.middleName || '',
+        spouseDob: formatDate(employeeData.spouse.dob),
+        weddingDate: formatDate((employeeData.spouse as any).weddingDate), // weddingDate from API
+      };
+
+      this.profileForm.patchValue(spouseFormData);
+    }
+
+    // STEP 4: Handle children array if exists - Updated for API structure (name field)
     if (employeeData.children && employeeData.children.length > 0) {
       const childrenArray = this.profileForm.get('children') as FormArray;
       childrenArray.clear();
 
-      employeeData.children.forEach((child) => {
+      employeeData.children.forEach((child: any) => {
+        // Helper to convert child gender from API format to form format
+        const convertChildGender = (apiGender: string | null): string => {
+          if (!apiGender) return '';
+          const genderMap: { [key: string]: string } = {
+            MALE: 'MALE',
+            FEMALE: 'FEMALE',
+          };
+          return genderMap[apiGender.toUpperCase()] || apiGender;
+        };
+
         const childGroup = this.fb.group({
-          childName: [child.firstName || '', [Validators.required]],
-          childDob: [
-            child.dob ? new Date(child.dob).toISOString().split('T')[0] : '',
+          childName: [
+            child.name || child.firstName || '',
+            [Validators.required],
+          ], // API uses 'name' field
+          childDob: [formatDate(child.dob), [Validators.required]],
+          childGender: [
+            convertChildGender(child.gender),
             [Validators.required],
           ],
-          childGender: [child.gender || '', [Validators.required]],
         });
         childrenArray.push(childGroup);
       });
     }
 
-    // Handle spouse info if exists
-    if (employeeData.spouse) {
-      this.profileForm.patchValue({
-        spouseFirstName: employeeData.spouse.firstName || '',
-        spouseMiddleName: employeeData.spouse.middleName || '',
-        spouseDob: employeeData.spouse.dob
-          ? new Date(employeeData.spouse.dob).toISOString().split('T')[0]
-          : '',
-      });
-    }
-
-    // Handle previous positions if exists
+    // STEP 5: Handle previous positions if exists - Updated for API structure
     if (
       employeeData.previousPositions &&
       employeeData.previousPositions.length > 0
@@ -215,48 +576,143 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       ) as FormArray;
       positionsArray.clear();
 
-      employeeData.previousPositions.forEach((position) => {
+      employeeData.previousPositions.forEach((position: any) => {
         const positionGroup = this.fb.group({
-          previousPositionTitle: [position.title || '', [Validators.required]],
-          previousPosition: [position.department || '', [Validators.required]],
-          previousPositionDate: [
-            position.startDate
-              ? new Date(position.startDate).toISOString().split('T')[0]
-              : '',
-            [Validators.required],
-          ],
+          previousPositionTitle: [position.title || ''], // API has title field
+          previousPosition: [position.title || ''], // Use title for both fields since API doesn't have department
+          previousPositionDate: [''], // API doesn't provide dates in this structure
         });
         positionsArray.push(positionGroup);
       });
     }
 
-    // Handle spiritual history if exists
-    if (employeeData.spiritualHistory) {
-      this.profileForm.patchValue({
-        yearOfWaterBaptism: employeeData.spiritualHistory.baptismDate
-          ? new Date(employeeData.spiritualHistory.baptismDate)
-              .getFullYear()
-              .toString()
-          : '',
-        dateOfFirstSermon: employeeData.spiritualHistory.baptismDate
-          ? new Date(employeeData.spiritualHistory.baptismDate)
-              .toISOString()
-              .split('T')[0]
-          : '',
-      });
-    }
-
-    // Handle credentials if exists
+    // STEP 6: Handle credentials if exists - Updated for API structure
     if (employeeData.credentials && employeeData.credentials.length > 0) {
       const credential = employeeData.credentials[0]; // Use first credential
-      this.profileForm.patchValue({
-        credentialName: credential.degree || '',
-        credentialNumber: credential.institution || '',
-        credentialIssuedDate: credential.graduationYear
-          ? `${credential.graduationYear}-01-01`
-          : '',
-      });
+      const credentialFormData = {
+        credentialName: (credential as any).name || credential.degree || '',
+        credentialNumber:
+          (credential as any).number || credential.institution || '',
+        credentialIssuedDate:
+          formatDate((credential as any).issuedDate) ||
+          (credential.graduationYear
+            ? `${credential.graduationYear}-01-01`
+            : ''),
+        credentialExpirationDate:
+          formatDate((credential as any).expirationDate) || '',
+      };
+
+      this.profileForm.patchValue(credentialFormData);
     }
+
+    // STEP 7: Final form validation and debugging
+    // Debug which fields are populated vs missing
+    this.debugFieldMapping();
+
+    // Force form to recognize the new values
+    this.profileForm.updateValueAndValidity();
+  }
+
+  // Debug method to identify field mapping issues
+  private debugFieldMapping() {
+    const formValue = this.profileForm.getRawValue();
+
+    // List of all expected fields for debugging
+    const expectedFields = [
+      'legalFirstName',
+      'legalLastName',
+      'legalMiddleName',
+      'profferedName',
+      'email',
+      'altEmail',
+      'title',
+      'gender',
+      'employmentType',
+      'departmentId',
+      'primaryPhone',
+      'primaryPhoneType',
+      'altPhone',
+      'altPhoneType',
+      'dateOfBirth',
+      'maritalStatus',
+      'everDivorced',
+      'homeAddress',
+      'homeCity',
+      'homeState',
+      'homeCountry',
+      'homeZipCode',
+      'mailingAddress',
+      'mailingCity',
+      'mailingState',
+      'mailingCountry',
+      'mailingZipCode',
+      'spouseFirstName',
+      'spouseMiddleName',
+      'spouseDob',
+      'weddingDate',
+      'yearSaved',
+      'sanctified',
+      'baptizedWithHolySpirit',
+      'yearOfWaterBaptism',
+      'firstYearInApostolicChurch',
+      'isFaithfulInTithing',
+    ];
+
+    // Separate populated vs empty fields
+    const populatedFields: string[] = [];
+    const emptyFields: string[] = [];
+
+    expectedFields.forEach((field) => {
+      const value = formValue[field];
+      if (value !== null && value !== undefined && value !== '') {
+        populatedFields.push(field);
+      } else {
+        emptyFields.push(field);
+      }
+    });
+
+    // Check boolean field values specifically
+    const booleanFields = [
+      'everDivorced',
+      'sanctified',
+      'baptizedWithHolySpirit',
+      'isFaithfulInTithing',
+      'beenConvicted',
+      'hasQuestionableBackground',
+      'hasBeenInvestigatedForMisconductOrAbuse',
+    ];
+    const booleanValues: { [key: string]: any } = {};
+    booleanFields.forEach((field) => {
+      booleanValues[field] = formValue[field];
+    });
+
+    // Check address fields specifically
+    const addressFields = {
+      home: [
+        'homeAddress',
+        'homeCity',
+        'homeState',
+        'homeCountry',
+        'homeZipCode',
+      ],
+      mailing: [
+        'mailingAddress',
+        'mailingCity',
+        'mailingState',
+        'mailingCountry',
+        'mailingZipCode',
+      ],
+    };
+
+    const addressValues: { [key: string]: any } = {};
+    Object.keys(addressFields).forEach((addressType) => {
+      addressValues[addressType] = {};
+      addressFields[addressType as keyof typeof addressFields].forEach(
+        (field) => {
+          addressValues[addressType][field] = formValue[field];
+        }
+      );
+    });
   }
 
   private loadDepartments() {
@@ -287,139 +743,227 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   }
 
   private createForm(): FormGroup {
+    // Define validators conditionally based on edit mode
+    const getValidators = (validators: any[]): any[] => {
+      // In edit mode, remove most validators to allow partial updates
+      if (this.isEditMode) {
+        return []; // No validators in edit mode
+      }
+      return validators; // Full validators in create mode
+    };
+
+    const getRequiredValidators = (validators: any[]): any[] => {
+      // In edit mode, keep only basic format validators (no required)
+      if (this.isEditMode) {
+        return validators.filter(
+          (validator) =>
+            validator !== Validators.required &&
+            !validator.toString().includes('required')
+        );
+      }
+      return validators; // Full validators in create mode
+    };
+
     return this.fb.group({
-      // Employee Basic Info
-      title: ['', [Validators.required]],
+      // Employee Basic Info - Required for ALL roles in create mode only
+      title: ['', getValidators([Validators.required])],
       legalFirstName: [
         '',
-        [
+        getValidators([
           Validators.required,
           Validators.minLength(2),
           Validators.maxLength(50),
           Validators.pattern(/^[a-zA-Z\s]+$/),
-        ],
+        ]),
       ],
       legalMiddleName: [
         '',
-        [Validators.maxLength(50), Validators.pattern(/^[a-zA-Z\s]*$/)],
+        getRequiredValidators([
+          Validators.required,
+          Validators.maxLength(50),
+          Validators.pattern(/^[a-zA-Z\s]*$/),
+        ]),
       ],
       legalLastName: [
         '',
-        [
+        getValidators([
           Validators.required,
           Validators.minLength(2),
           Validators.maxLength(50),
           Validators.pattern(/^[a-zA-Z\s]+$/),
-        ],
+        ]),
       ],
       profferedName: [
         '',
-        [Validators.maxLength(100), Validators.pattern(/^[a-zA-Z\s]*$/)],
+        getRequiredValidators([
+          Validators.required,
+          Validators.maxLength(100),
+          Validators.pattern(/^[a-zA-Z\s]*$/),
+        ]),
       ],
-      gender: ['', [Validators.required]],
+      gender: ['', getValidators([Validators.required])],
       email: [
         '',
-        [
+        getRequiredValidators([
           Validators.required,
           Validators.email,
           Validators.pattern(
             /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
           ),
-        ],
+        ]),
       ],
       altEmail: [
         '',
-        [
+        getRequiredValidators([
           Validators.email,
           Validators.pattern(
             /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
           ),
-        ],
+        ]),
       ],
-      departmentId: ['', [Validators.required]],
-      role: ['', [Validators.required]],
-      employmentType: ['', [Validators.required]],
-      location: ['', [Validators.required]],
-      avatar: [null],
-      // Personal Information
-      maritalStatus: ['', [Validators.required]],
-      everDivorced: ['', [Validators.required]],
-      dateOfBirth: ['', [Validators.required]],
-      highestQualification: [''], // Added to match HTML template
-      // Spiritual History
-      yearSaved: ['', [Validators.required]],
-      sanctified: ['', [Validators.required]],
-      baptizedWithWater: ['', [Validators.required]],
-      yearOfWaterBaptism: ['', [Validators.required]],
-      firstYearInChurch: ['', [Validators.required]],
-      isFaithfulInTithing: ['', [Validators.required]],
-      firstSermonPastor: ['', [Validators.required]],
-      currentPastor: [''],
-      dateOfFirstSermon: ['', [Validators.required]],
-      spiritualStatus: ['ACTIVE'],
-      firstSermonAddress: ['', [Validators.required]],
-      firstSermonCity: ['', [Validators.required]],
-      firstSermonState: ['', [Validators.required]],
-      firstSermonCountry: ['', [Validators.required]],
-      firstSermonZipCode: ['', [Validators.required]],
-      currentChurchAddress: [''],
-      currentChurchCity: [''],
-      currentChurchState: [''],
-      currentChurchCountry: [''],
-      currentChurchZipCode: [''],
-      // Previous Positions (FormArray)
-      previousPositions: this.fb.array([
-        this.fb.group({
-          previousPositionTitle: ['', [Validators.required]],
-          previousPosition: ['', [Validators.required]],
-          previousPositionDate: ['', [Validators.required]],
-        }),
-      ]),
-      // Additional fields to match HTML
-      ordained: [''],
+      departmentId: [''],
+      role: [''],
+      employmentType: [''],
+      location: [''],
+
+      // Contact Information - Required for ALL roles in create mode only
+      homeAddress: [
+        '',
+        getValidators([
+          Validators.required,
+          Validators.minLength(10),
+          Validators.maxLength(200),
+        ]),
+      ],
+      homeCity: ['', getValidators([Validators.required])],
+      homeState: ['', getValidators([Validators.required])],
+      homeCountry: ['Nigeria', getValidators([Validators.required])],
+      homeZipCode: [
+        '',
+        getRequiredValidators([
+          Validators.required,
+          Validators.pattern(/^\d{6}$/),
+        ]),
+      ],
+      mailingAddress: ['', getRequiredValidators([Validators.maxLength(200)])],
+      mailingCity: [''],
+      mailingState: [''],
+      mailingCountry: ['Nigeria'],
+      mailingZipCode: [
+        '',
+        getRequiredValidators([Validators.pattern(/^\d{6}$/)]),
+      ],
+      primaryPhone: [
+        '',
+        getRequiredValidators([
+          Validators.required,
+          Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/),
+        ]),
+      ],
+      primaryPhoneType: ['', getValidators([Validators.required])],
+      altPhone: [
+        '',
+        getRequiredValidators([Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)]),
+      ],
+      altPhoneType: [''],
+
+      // Personal Information - Required for ALL roles in create mode only
+      maritalStatus: ['', getValidators([Validators.required])],
+      everDivorced: ['', getValidators([Validators.required])],
+      dateOfBirth: ['', getValidators([Validators.required])],
+
+      // Legal Questions - Required for ALL roles in create mode only
+      beenConvicted: ['', getValidators([Validators.required])],
+      hasQuestionableBackground: ['', getValidators([Validators.required])],
+      hasBeenInvestigatedForMisconductOrAbuse: [
+        '',
+        getValidators([Validators.required]),
+      ],
+
+      // Spiritual History - Required for ALL roles in create mode only
+      yearSaved: ['', getValidators([Validators.required])],
+      sanctified: ['', getValidators([Validators.required])],
+      baptizedWithHolySpirit: ['', getValidators([Validators.required])],
+      yearOfWaterBaptism: ['', getValidators([Validators.required])],
+      firstYearInApostolicChurch: ['', getValidators([Validators.required])],
+      isFaithfulInTithing: ['', getValidators([Validators.required])],
+
+      // Worker-specific fields - Will be conditionally required in create mode only
+      nationIdNumber: [''], // Required only for worker role in create mode
+      areaOfService: [''], // Required only for worker role in create mode
+      everServedInApostolicChurch: [''], // Required only for worker role in create mode
+      serviceDate: [''], // Required only for worker role in create mode
+      serviceLocation: [''], // Required only for worker role in create mode
+      serviceCity: [''], // Required only for worker role in create mode
+      serviceState: [''], // Required only for worker role in create mode
+      serviceCountry: [''], // Required only for worker role in create mode
+      servicePastor: [''], // Required only for worker role in create mode
+      ordained: [''], // Required only for worker role in create mode
       ordainedDate: [''],
-      // Spouse Information
+
+      // Spouse Information - Optional
       spouseFirstName: [''],
       spouseMiddleName: [''],
       spouseDob: [''],
       weddingDate: [''],
-      // Children (FormArray)
+      spouseMaidenName: [''],
+
+      // Children (FormArray) - Optional
       children: this.fb.array([]),
-      // Legal Questions
-      beenConvicted: ['', [Validators.required]],
-      hasQuestionableBackground: ['', [Validators.required]],
-      hasBeenInvestigatedForMisconductOrAbuse: ['', [Validators.required]],
-      // Credentials
+
+      // Previous Positions (FormArray) - Required only for worker role in create mode
+      previousPositions: this.fb.array([
+        this.fb.group({
+          previousPositionTitle: [''],
+          previousPosition: [''],
+          previousPositionDate: [''],
+        }),
+      ]),
+
+      // References (FormArray) - Required only for worker role in create mode
+      references: this.fb.array([
+        this.fb.group({
+          referenceName: [''],
+          referencePhone: [''],
+          referenceEmail: [''],
+          referenceAddress: [''],
+          referenceCity: [''],
+          referenceState: [''],
+          referenceCountry: [''],
+          referenceZipCode: [''],
+          relationshipToReference: [''],
+        }),
+      ]),
+
+      // Credentials - Optional
       credentialName: [''],
       credentialNumber: [''],
       credentialIssuedDate: [''],
       credentialExpirationDate: [''],
-      // Contact Information
-      homeAddress: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(10),
-          Validators.maxLength(200),
-        ],
-      ],
-      homeCity: ['', [Validators.required]],
-      homeState: ['', [Validators.required]],
-      homeCountry: ['Nigeria', [Validators.required]],
-      homeZipCode: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
-      mailingAddress: ['', [Validators.maxLength(200)]],
-      mailingCity: [''],
-      mailingState: [''],
-      mailingCountry: ['Nigeria'],
-      mailingZipCode: ['', [Validators.pattern(/^\d{6}$/)]],
-      primaryPhone: [
-        '',
-        [Validators.required, Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)],
-      ],
-      primaryPhoneType: ['', [Validators.required]],
-      altPhone: ['', [Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)]],
-      altPhoneType: [''],
-      other: [''], // Additional information field
+
+      // Area Of Service fields (for non-worker roles) - Optional
+      previousChurchPositions: [[]],
+      dateOfFirstSermon: [''],
+      firstSermonLocation: [''],
+      firstSermonCityArea: [''],
+      firstSermonStateArea: [''],
+      firstSermonCountryArea: [''],
+      firstSermonZipCodeArea: [''],
+      firstSermonPastorArea: [''],
+      currentStatusArea: [''],
+      recentCredentialsNameArea: [''],
+      credentialNumberArea: [''],
+      credentialDateIssuedArea: [''],
+      credentialExpirationDateArea: [''],
+      currentChurchLocationArea: [''],
+      currentChurchCityArea: [''],
+      currentChurchStateArea: [''],
+      currentChurchCountryArea: [''],
+      currentChurchZipCodeArea: [''],
+      currentChurchPastorArea: [''],
+
+      // Additional fields
+      other: [''],
     });
   }
 
@@ -427,10 +971,38 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      this.profileForm.patchValue({ avatar: file });
+
+      // Set preview immediately
       const reader = new FileReader();
       reader.onload = (e) => (this.avatarPreview = reader.result);
       reader.readAsDataURL(file);
+
+      // Upload file immediately
+      this.isUploadingAvatar = true;
+      this.fileUploadService.uploadSingleFileWithProgress(file).subscribe({
+        next: (event) => {
+          if (event.response) {
+            // Upload completed - store the URL
+            this.uploadedAvatarUrl = event.response.file;
+            this.isUploadingAvatar = false;
+
+            // Only track photo as modified if user actually uploaded a new image
+            this.modifiedFields.add('photoUrl');
+
+            this.alertService.success('Profile image uploaded successfully!');
+          }
+        },
+        error: (error) => {
+          this.isUploadingAvatar = false;
+          console.error('Avatar upload failed:', error);
+          this.alertService.error(
+            'Failed to upload profile image. Please try again.'
+          );
+          // Reset preview on error
+          this.avatarPreview = null;
+          this.uploadedAvatarUrl = null;
+        },
+      });
     }
   }
 
@@ -439,18 +1011,59 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   }
 
   onSubmit() {
-    if (this.profileForm.valid) {
-      this.isSubmitting = true;
-
+    // In edit mode, skip form validation since we allow partial updates
+    if (this.isEditMode || this.profileForm.valid) {
       if (this.isEditMode) {
-        this.updateProfile();
+        // Show confirmation modal for updates
+        this.showConfirmModal();
       } else {
+        // Direct submission for create mode
+        this.isSubmitting = true;
         this.createProfile();
       }
     } else {
       this.markAllFieldsAsTouched();
       this.scrollToFirstError();
     }
+  }
+
+  private showConfirmModal() {
+    // Set up the confirmation modal configuration
+    const modifiedFieldsCount = this.modifiedFields.size;
+    const hasUploadedFiles =
+      this.uploadedAvatarUrl || this.uploadedDocumentUrls.length > 0;
+
+    let confirmText = 'Are you sure you want to update your profile?';
+    if (modifiedFieldsCount > 0) {
+      confirmText += ` You have ${modifiedFieldsCount} field(s) that will be updated.`;
+    }
+    if (hasUploadedFiles) {
+      confirmText += ' Your uploaded files will also be saved.';
+    }
+
+    this.promptConfig = {
+      title: 'Update Profile',
+      text: confirmText,
+      imageUrl: undefined, // Will use default question gif
+      yesButtonText: 'Update',
+      noButtonText: 'Cancel',
+    };
+
+    // Show the modal
+    this.showModal = true;
+  }
+
+  onModalConfirm(confirmed: boolean) {
+    this.showModal = false;
+
+    if (confirmed) {
+      this.isSubmitting = true;
+      this.updateProfile();
+    }
+  }
+
+  onModalClose() {
+    this.showModal = false;
   }
 
   private updateProfile() {
@@ -460,6 +1073,15 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     }
 
     const updateData: UpdateEmployeeRequest = this.mapFormToUpdateRequest();
+
+    // Check if there are any changes to update
+    if (Object.keys(updateData).length === 0) {
+      this.isSubmitting = false;
+      this.alertService.info(
+        'No changes detected. Please modify some fields before updating.'
+      );
+      return;
+    }
 
     // Get employee ID from the current worker data
     const employeeId = this.authService.getCurrentEmployeeId();
@@ -473,16 +1095,45 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     this.employeeService.updateEmployee(employeeId, updateData).subscribe({
       next: (response) => {
         this.isSubmitting = false;
-        if (response.status === 'success') {
+        // Check for HTTP 200 status code to determine success
+        if (response) {
+          // Update the user profile data in auth service and localStorage
+          if (this.uploadedAvatarUrl || this.modifiedFields.size > 0) {
+            // Extract the updated data from the form for localStorage update
+            const formValue = this.profileForm.getRawValue();
+            const updatedProfileData: Partial<UpdateEmployeeRequest> = {};
+
+            // Include photo if updated
+            if (this.uploadedAvatarUrl) {
+              updatedProfileData.photoUrl = this.uploadedAvatarUrl;
+            }
+
+            // Include modified form fields
+            if (this.modifiedFields.has('legalFirstName')) {
+              updatedProfileData.firstName = formValue.legalFirstName;
+            }
+            if (this.modifiedFields.has('legalLastName')) {
+              updatedProfileData.lastName = formValue.legalLastName;
+            }
+            if (this.modifiedFields.has('profferedName')) {
+              updatedProfileData.profferedName = formValue.profferedName;
+            }
+            if (this.modifiedFields.has('email')) {
+              updatedProfileData.email = formValue.email;
+            }
+
+            // Update auth service with the changes
+            this.authService.updateUserProfile(updatedProfileData);
+          }
+
+          // Reset modified fields tracking for future edits
+          this.modifiedFields.clear();
+
           // Show success message
           this.alertService.success('Profile updated successfully!');
 
           // Navigate to profile view component
           this.router.navigate(['/profile-view']);
-        } else {
-          this.alertService.error(
-            'Failed to update profile: ' + response.message
-          );
         }
       },
       error: (error) => {
@@ -514,155 +1165,276 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   }
 
   private mapFormToUpdateRequest(): UpdateEmployeeRequest {
-    // Get form value including disabled controls
-    const formValue = this.profileForm.getRawValue();
+    // If no fields are modified, return empty object
+    if (this.modifiedFields.size === 0 && !this.uploadedAvatarUrl) {
+      return {} as UpdateEmployeeRequest;
+    }
 
-    // Helper function to safely convert to boolean
+    // Build payload with only modified fields
+    return this.buildSelectivePayload();
+  }
+
+  private buildSelectivePayload(): UpdateEmployeeRequest {
+    const formValue = this.profileForm.getRawValue();
+    const payload: Partial<UpdateEmployeeRequest> = {};
+
+    // Helper functions
     const toBooleanOrUndefined = (value: any): boolean | undefined => {
-      if (value === 'true' || value === true) return true;
-      if (value === 'false' || value === false) return false;
+      if (value === 'Yes' || value === 'true' || value === true) return true;
+      if (value === 'No' || value === 'false' || value === false) return false;
+      if (value === '') return undefined;
       return undefined;
     };
 
-    // Helper function to handle empty strings
     const cleanValue = (value: any): any => {
       return value === '' ? undefined : value;
     };
 
-    // Helper function to capitalize title
     const capitalizeTitle = (title: string): string => {
-      return title ? title.toUpperCase() : '';
+      if (!title) return '';
+      const titleMap: { [key: string]: string } = {
+        Mr: 'MR',
+        Mrs: 'MRS',
+        Ms: 'MS',
+        Dr: 'DR',
+        Prof: 'PROF',
+      };
+      return titleMap[title] || title.toUpperCase();
     };
 
-    // Helper function to capitalize gender
     const capitalizeGender = (gender: string): string => {
       return gender ? gender.toUpperCase() : '';
     };
 
-    // Helper function to capitalize marital status
     const capitalizeMaritalStatus = (status: string): string => {
       return status ? status.toUpperCase() : '';
     };
 
-    // Helper function to capitalize phone types
     const capitalizePhoneType = (type: string): string => {
       return type ? type.toUpperCase() : '';
     };
 
-    // Helper function to capitalize role
     const capitalizeRole = (role: string): string => {
       return role ? role.toUpperCase() : '';
     };
 
-    const updateData: UpdateEmployeeRequest = {
+    // Map only modified fields
+    const fieldMapping: { [key: string]: () => void } = {
       // Basic Employee Info
-      employeeId: cleanValue(formValue.employeeId),
-      firstName: cleanValue(formValue.legalFirstName),
-      lastName: cleanValue(formValue.legalLastName),
-      middleName: cleanValue(formValue.legalMiddleName),
-      title: capitalizeTitle(formValue.title),
-      gender: capitalizeGender(formValue.gender),
-      profferedName: cleanValue(formValue.profferedName),
-      email: cleanValue(formValue.email),
-      altEmail: cleanValue(formValue.altEmail),
-      departmentId: cleanValue(formValue.departmentId),
-      role: capitalizeRole(formValue.role),
-      employmentType: cleanValue(formValue.employmentType),
-      location: cleanValue(formValue.location),
+      employeeId: () => (payload.employeeId = cleanValue(formValue.employeeId)),
+      legalFirstName: () =>
+        (payload.firstName = cleanValue(formValue.legalFirstName)),
+      legalLastName: () =>
+        (payload.lastName = cleanValue(formValue.legalLastName)),
+      legalMiddleName: () =>
+        (payload.middleName = cleanValue(formValue.legalMiddleName)),
+      title: () => (payload.title = capitalizeTitle(formValue.title)),
+      gender: () => (payload.gender = capitalizeGender(formValue.gender)),
+      profferedName: () =>
+        (payload.profferedName = cleanValue(formValue.profferedName)),
+      email: () => (payload.email = cleanValue(formValue.email)),
+      altEmail: () => (payload.altEmail = cleanValue(formValue.altEmail)),
+      departmentId: () =>
+        (payload.departmentId = cleanValue(formValue.departmentId)),
+      role: () => (payload.role = capitalizeRole(formValue.role)),
+      employmentType: () =>
+        (payload.employmentType = cleanValue(formValue.employmentType)),
+      location: () => (payload.location = cleanValue(formValue.location)),
 
       // Contact Info
-      primaryPhone: cleanValue(formValue.primaryPhone),
-      primaryPhoneType: capitalizePhoneType(formValue.primaryPhoneType),
-      altPhone:
-        cleanValue(formValue.altPhone) || cleanValue(formValue.primaryPhone), // Use primary if alt is empty
-      altPhoneType:
-        capitalizePhoneType(formValue.altPhoneType) ||
-        capitalizePhoneType(formValue.primaryPhoneType),
+      primaryPhone: () =>
+        (payload.primaryPhone = cleanValue(formValue.primaryPhone)),
+      primaryPhoneType: () =>
+        (payload.primaryPhoneType = capitalizePhoneType(
+          formValue.primaryPhoneType
+        )),
+      altPhone: () =>
+        (payload.altPhone =
+          cleanValue(formValue.altPhone) || cleanValue(formValue.primaryPhone)),
+      altPhoneType: () =>
+        (payload.altPhoneType =
+          capitalizePhoneType(formValue.altPhoneType) ||
+          capitalizePhoneType(formValue.primaryPhoneType)),
 
       // Personal Info
-      dob: cleanValue(formValue.dateOfBirth),
-      maritalStatus: capitalizeMaritalStatus(formValue.maritalStatus),
-      everDivorced: toBooleanOrUndefined(formValue.everDivorced),
-      employeeStatus: 'ACTIVE', // Default status
+      dateOfBirth: () => (payload.dob = cleanValue(formValue.dateOfBirth)),
+      maritalStatus: () =>
+        (payload.maritalStatus = capitalizeMaritalStatus(
+          formValue.maritalStatus
+        )),
+      everDivorced: () =>
+        (payload.everDivorced = toBooleanOrUndefined(formValue.everDivorced)),
 
       // Legal Questions
-      beenConvicted: toBooleanOrUndefined(formValue.beenConvicted),
-      hasQuestionableBackground: toBooleanOrUndefined(
-        formValue.hasQuestionableBackground
-      ),
-      hasBeenInvestigatedForMisconductOrAbuse: toBooleanOrUndefined(
-        formValue.hasBeenInvestigatedForMisconductOrAbuse
-      ),
+      beenConvicted: () =>
+        (payload.beenConvicted = toBooleanOrUndefined(formValue.beenConvicted)),
+      hasQuestionableBackground: () =>
+        (payload.hasQuestionableBackground = toBooleanOrUndefined(
+          formValue.hasQuestionableBackground
+        )),
+      hasBeenInvestigatedForMisconductOrAbuse: () =>
+        (payload.hasBeenInvestigatedForMisconductOrAbuse = toBooleanOrUndefined(
+          formValue.hasBeenInvestigatedForMisconductOrAbuse
+        )),
 
       // Address Info
-      homeAddress: cleanValue(formValue.homeAddress),
-      homeCity: cleanValue(formValue.homeCity),
-      homeState: cleanValue(formValue.homeState),
-      homeCountry: cleanValue(formValue.homeCountry),
-      homeZipCode: cleanValue(formValue.homeZipCode),
-      mailingAddress: cleanValue(formValue.mailingAddress),
-      mailingCity: cleanValue(formValue.mailingCity),
-      mailingState: cleanValue(formValue.mailingState),
-      mailingCountry: cleanValue(formValue.mailingCountry),
-      mailingZipCode: cleanValue(formValue.mailingZipCode),
+      homeAddress: () =>
+        (payload.homeAddress = cleanValue(formValue.homeAddress)),
+      homeCity: () => (payload.homeCity = cleanValue(formValue.homeCity)),
+      homeState: () => (payload.homeState = cleanValue(formValue.homeState)),
+      homeCountry: () =>
+        (payload.homeCountry = cleanValue(formValue.homeCountry)),
+      homeZipCode: () =>
+        (payload.homeZipCode = cleanValue(formValue.homeZipCode)),
+      mailingAddress: () =>
+        (payload.mailingAddress = cleanValue(formValue.mailingAddress)),
+      mailingCity: () =>
+        (payload.mailingCity = cleanValue(formValue.mailingCity)),
+      mailingState: () =>
+        (payload.mailingState = cleanValue(formValue.mailingState)),
+      mailingCountry: () =>
+        (payload.mailingCountry = cleanValue(formValue.mailingCountry)),
+      mailingZipCode: () =>
+        (payload.mailingZipCode = cleanValue(formValue.mailingZipCode)),
 
       // Spouse Info
-      spouseFirstName: cleanValue(formValue.spouseFirstName),
-      spouseMiddleName: cleanValue(formValue.spouseMiddleName),
-      spouseDob: cleanValue(formValue.spouseDob),
-      weddingDate: cleanValue(formValue.weddingDate),
-
-      // Children Array
-      children:
-        formValue.children?.map((child: any) => ({
-          childName: cleanValue(child.childName),
-          childDob: cleanValue(child.childDob),
-          childGender: capitalizeGender(child.childGender),
-        })) || [],
+      spouseFirstName: () =>
+        (payload.spouseFirstName = cleanValue(formValue.spouseFirstName)),
+      spouseMiddleName: () =>
+        (payload.spouseMiddleName = cleanValue(formValue.spouseMiddleName)),
+      spouseDob: () => (payload.spouseDob = cleanValue(formValue.spouseDob)),
+      weddingDate: () =>
+        (payload.weddingDate = cleanValue(formValue.weddingDate)),
 
       // Spiritual History
-      yearSaved: cleanValue(formValue.yearSaved),
-      sanctified: toBooleanOrUndefined(formValue.sanctified),
-      baptizedWithWater: toBooleanOrUndefined(formValue.baptizedWithWater),
-      yearOfWaterBaptism: cleanValue(formValue.yearOfWaterBaptism),
-      firstYearInChurch: cleanValue(formValue.firstYearInChurch),
-      isFaithfulInTithing: toBooleanOrUndefined(formValue.isFaithfulInTithing),
-      firstSermonPastor: cleanValue(formValue.firstSermonPastor),
-      currentPastor: cleanValue(formValue.currentPastor),
-      dateOfFirstSermon: cleanValue(formValue.dateOfFirstSermon),
-      spiritualStatus: cleanValue(formValue.spiritualStatus) || 'ACTIVE',
-      firstSermonAddress: cleanValue(formValue.firstSermonAddress),
-      firstSermonCity: cleanValue(formValue.firstSermonCity),
-      firstSermonState: cleanValue(formValue.firstSermonState),
-      firstSermonCountry: cleanValue(formValue.firstSermonCountry),
-      firstSermonZipCode: cleanValue(formValue.firstSermonZipCode),
-      currentChurchAddress: cleanValue(formValue.currentChurchAddress),
-      currentChurchCity: cleanValue(formValue.currentChurchCity),
-      currentChurchState: cleanValue(formValue.currentChurchState),
-      currentChurchCountry: cleanValue(formValue.currentChurchCountry),
-      currentChurchZipCode: cleanValue(formValue.currentChurchZipCode),
+      yearSaved: () => (payload.yearSaved = cleanValue(formValue.yearSaved)),
+      sanctified: () =>
+        (payload.sanctified = toBooleanOrUndefined(formValue.sanctified)),
+      baptizedWithHolySpirit: () =>
+        (payload.baptizedWithWater = toBooleanOrUndefined(
+          formValue.baptizedWithHolySpirit
+        )),
+      yearOfWaterBaptism: () =>
+        (payload.yearOfWaterBaptism = cleanValue(formValue.yearOfWaterBaptism)),
+      firstYearInApostolicChurch: () =>
+        (payload.firstYearInChurch = cleanValue(
+          formValue.firstYearInApostolicChurch
+        )),
+      isFaithfulInTithing: () =>
+        (payload.isFaithfulInTithing = toBooleanOrUndefined(
+          formValue.isFaithfulInTithing
+        )),
+      firstSermonPastorArea: () =>
+        (payload.firstSermonPastor = cleanValue(
+          formValue.firstSermonPastorArea
+        )),
+      currentChurchPastorArea: () =>
+        (payload.currentPastor = cleanValue(formValue.currentChurchPastorArea)),
+      dateOfFirstSermon: () =>
+        (payload.dateOfFirstSermon = cleanValue(formValue.dateOfFirstSermon)),
+
+      // First Sermon Address
+      firstSermonLocation: () =>
+        (payload.firstSermonAddress = cleanValue(
+          formValue.firstSermonLocation
+        )),
+      firstSermonCityArea: () =>
+        (payload.firstSermonCity = cleanValue(formValue.firstSermonCityArea)),
+      firstSermonStateArea: () =>
+        (payload.firstSermonState = cleanValue(formValue.firstSermonStateArea)),
+      firstSermonCountryArea: () =>
+        (payload.firstSermonCountry = cleanValue(
+          formValue.firstSermonCountryArea
+        )),
+      firstSermonZipCodeArea: () =>
+        (payload.firstSermonZipCode = cleanValue(
+          formValue.firstSermonZipCodeArea
+        )),
+
+      // Current Church Address
+      currentChurchLocationArea: () =>
+        (payload.currentChurchAddress = cleanValue(
+          formValue.currentChurchLocationArea
+        )),
+      currentChurchCityArea: () =>
+        (payload.currentChurchCity = cleanValue(
+          formValue.currentChurchCityArea
+        )),
+      currentChurchStateArea: () =>
+        (payload.currentChurchState = cleanValue(
+          formValue.currentChurchStateArea
+        )),
+      currentChurchCountryArea: () =>
+        (payload.currentChurchCountry = cleanValue(
+          formValue.currentChurchCountryArea
+        )),
+      currentChurchZipCodeArea: () =>
+        (payload.currentChurchZipCode = cleanValue(
+          formValue.currentChurchZipCodeArea
+        )),
 
       // Credentials
-      credentialName: cleanValue(formValue.credentialName),
-      credentialNumber: cleanValue(formValue.credentialNumber),
-      credentialIssuedDate: cleanValue(formValue.credentialIssuedDate),
-      credentialExpirationDate: cleanValue(formValue.credentialExpirationDate),
+      credentialName: () =>
+        (payload.credentialName = cleanValue(formValue.credentialName)),
+      credentialNumber: () =>
+        (payload.credentialNumber = cleanValue(formValue.credentialNumber)),
+      credentialIssuedDate: () =>
+        (payload.credentialIssuedDate = cleanValue(
+          formValue.credentialIssuedDate
+        )),
+      credentialExpirationDate: () =>
+        (payload.credentialExpirationDate = cleanValue(
+          formValue.credentialExpirationDate
+        )),
 
-      // Previous Positions Array - API expects array of strings
-      previousChurchPositions:
-        formValue.previousPositions
-          ?.map((pos: any) => cleanValue(pos.previousPosition))
-          .filter((position: string) => position) || [],
+      // Photo URL - only if actually uploaded in this session
+      photoUrl: () => {
+        if (this.uploadedAvatarUrl) {
+          payload.photoUrl = this.uploadedAvatarUrl;
+        }
+      },
+
+      // Document URLs - only if actually uploaded in this session
+      documentUrls: () => {
+        if (this.uploadedDocumentUrls.length > 0) {
+          payload.documentUrls = this.uploadedDocumentUrls;
+        }
+      },
+
+      // Form Arrays
+      children: () => {
+        if (formValue.children) {
+          payload.children = formValue.children.map((child: any) => ({
+            childName: cleanValue(child.childName),
+            childDob: cleanValue(child.childDob),
+            childGender: capitalizeGender(child.childGender),
+          }));
+        }
+      },
+      previousPositions: () => {
+        if (formValue.previousPositions) {
+          payload.previousChurchPositions = formValue.previousPositions
+            .map((pos: any) => cleanValue(pos.previousPosition))
+            .filter((position: string) => position);
+        }
+      },
     };
 
-    // Remove undefined fields to avoid sending them
-    Object.keys(updateData).forEach((key) => {
-      if (updateData[key as keyof UpdateEmployeeRequest] === undefined) {
-        delete updateData[key as keyof UpdateEmployeeRequest];
+    // Apply only modified fields
+    this.modifiedFields.forEach((fieldName) => {
+      if (fieldMapping[fieldName]) {
+        fieldMapping[fieldName]();
       }
     });
 
-    return updateData;
+    // Remove undefined values
+    Object.keys(payload).forEach((key) => {
+      if (payload[key as keyof UpdateEmployeeRequest] === undefined) {
+        delete payload[key as keyof UpdateEmployeeRequest];
+      }
+    });
+
+    return payload as UpdateEmployeeRequest;
   }
 
   // Validation methods using service
@@ -704,7 +1476,124 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   }
 
   isFormValid(): boolean {
-    return this.profileForm.valid;
+    // Check basic form validity first
+    if (!this.profileForm.valid) {
+      // For role-specific validation, we need to check which fields are actually required
+      return this.isRoleSpecificFormValid();
+    }
+    return true;
+  }
+
+  private isRoleSpecificFormValid(): boolean {
+    const formValue = this.profileForm.value;
+    const errors: string[] = [];
+
+    // Core required fields for ALL roles
+    const coreRequiredFields = [
+      'title',
+      'legalFirstName',
+      'legalMiddleName',
+      'legalLastName',
+      'profferedName',
+      'gender',
+      'email',
+      'maritalStatus',
+      'everDivorced',
+      'dateOfBirth',
+      'homeAddress',
+      'homeCity',
+      'homeState',
+      'homeCountry',
+      'homeZipCode',
+      'primaryPhone',
+      'primaryPhoneType',
+      'beenConvicted',
+      'hasQuestionableBackground',
+      'hasBeenInvestigatedForMisconductOrAbuse',
+      'yearSaved',
+      'sanctified',
+      'baptizedWithHolySpirit',
+      'yearOfWaterBaptism',
+      'firstYearInApostolicChurch',
+      'isFaithfulInTithing',
+    ];
+
+    // Check core required fields
+    for (const field of coreRequiredFields) {
+      const control = this.profileForm.get(field);
+      if (!control || control.invalid) {
+        errors.push(field);
+      }
+    }
+
+    // Role-specific validation for worker role
+    if (this.currentUserRole?.toLowerCase() === 'worker') {
+      // Worker-specific fields that are available in the form but may not be in API
+      const workerRequiredFields = [
+        'nationIdNumber',
+        'areaOfService',
+        'everServedInApostolicChurch',
+        'serviceDate',
+        'serviceLocation',
+        'serviceCity',
+        'serviceState',
+        'serviceCountry',
+        'servicePastor',
+        'ordained',
+      ];
+
+      for (const field of workerRequiredFields) {
+        const control = this.profileForm.get(field);
+        // Only validate if the control exists (some fields may not be in API)
+        if (control && control.invalid) {
+          errors.push(field);
+        }
+      }
+
+      // Check if at least one previous position is filled
+      const previousPositions = this.profileForm.get(
+        'previousPositions'
+      ) as FormArray;
+      if (
+        previousPositions.length === 0 ||
+        !this.isAtLeastOnePositionValid(previousPositions)
+      ) {
+        errors.push('previousPositions');
+      }
+
+      // Check if at least one reference is filled
+      const references = this.profileForm.get('references') as FormArray;
+      if (
+        references.length === 0 ||
+        !this.isAtLeastOneReferenceValid(references)
+      ) {
+        errors.push('references');
+      }
+    }
+
+    return errors.length === 0;
+  }
+
+  private isAtLeastOnePositionValid(positions: FormArray): boolean {
+    return positions.controls.some((control) => {
+      const group = control as FormGroup;
+      return (
+        group.get('previousPositionTitle')?.value?.trim() &&
+        group.get('previousPosition')?.value?.trim() &&
+        group.get('previousPositionDate')?.value?.trim()
+      );
+    });
+  }
+
+  private isAtLeastOneReferenceValid(references: FormArray): boolean {
+    return references.controls.some((control) => {
+      const group = control as FormGroup;
+      return (
+        group.get('referenceName')?.value?.trim() &&
+        group.get('referencePhone')?.value?.trim() &&
+        group.get('referenceEmail')?.value?.trim()
+      );
+    });
   }
 
   // File upload methods using service
@@ -718,7 +1607,24 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   }
 
   removeFile(index: number): void {
+    // Get the file being removed
+    const fileToRemove = this.uploadedFiles[index];
+
+    // Remove from uploaded files array
     this.uploadedFiles.splice(index, 1);
+
+    // Remove the URL from uploadedDocumentUrls if it exists
+    if (fileToRemove.url) {
+      const urlIndex = this.uploadedDocumentUrls.findIndex(
+        (url) => url === fileToRemove.url
+      );
+      if (urlIndex > -1) {
+        this.uploadedDocumentUrls.splice(urlIndex, 1);
+      }
+    }
+
+    // Track document removal as modification for selective payload
+    this.modifiedFields.add('documentUrls');
   }
 
   getFileType(fileName: string): string {
@@ -727,6 +1633,108 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
 
   formatFileSize(bytes: number): string {
     return this.fileUploadService.formatFileSize(bytes);
+  }
+
+  // Document upload methods
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const files = Array.from(event.dataTransfer?.files || []);
+    if (files.length > 0) {
+      this.handleFileUpload(files);
+    }
+  }
+
+  onDocumentSelect(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const files = Array.from(input.files);
+      this.handleFileUpload(files);
+    }
+    // Clear the input
+    input.value = '';
+  }
+
+  private handleFileUpload(files: File[]) {
+    // Process and validate files
+    const newFiles = this.fileUploadService.processFiles(
+      files,
+      this.uploadedFiles
+    );
+
+    if (newFiles.length === 0) {
+      this.alertService.warning(
+        'No valid files to upload. Please check file types and sizes.'
+      );
+      return;
+    }
+
+    // Add files to the list
+    this.uploadedFiles = [...this.uploadedFiles, ...newFiles];
+
+    // Upload files using the multiple upload endpoint
+    this.isUploadingDocuments = true;
+    const filesToUpload = newFiles.map((f) => f.file);
+
+    this.fileUploadService.uploadMultipleFiles(filesToUpload).subscribe({
+      next: (response) => {
+        this.isUploadingDocuments = false;
+        if (response.status === 'success' && response.files) {
+          // Store the uploaded URLs
+          this.uploadedDocumentUrls = [
+            ...this.uploadedDocumentUrls,
+            ...response.files,
+          ];
+
+          // Track documents as modified for selective payload
+          this.modifiedFields.add('documentUrls');
+
+          // Update the uploaded files with their URLs
+          response.files.forEach((url, index) => {
+            if (newFiles[index]) {
+              newFiles[index].url = url;
+              newFiles[index].uploadStatus = 'completed';
+            }
+          });
+
+          this.alertService.success(
+            `Successfully uploaded ${response.files.length} document(s)!`
+          );
+        } else {
+          this.alertService.error(
+            'Failed to upload documents. Please try again.'
+          );
+        }
+      },
+      error: (error) => {
+        this.isUploadingDocuments = false;
+        console.error('Document upload failed:', error);
+        this.alertService.error(
+          'Failed to upload documents. Please try again.'
+        );
+
+        // Remove the failed files from the list
+        newFiles.forEach((file) => {
+          const index = this.uploadedFiles.findIndex(
+            (f) => f.name === file.name && f.size === file.size
+          );
+          if (index > -1) {
+            this.uploadedFiles.splice(index, 1);
+          }
+        });
+      },
+    });
   }
 
   // Accordion toggle methods
@@ -771,6 +1779,33 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     this.children.removeAt(index);
   }
 
+  // References methods (for worker role only)
+  get references(): FormArray {
+    return this.profileForm.get('references') as FormArray;
+  }
+
+  addReference() {
+    const referenceGroup = this.fb.group({
+      referenceName: ['', [Validators.required]],
+      referencePhone: [
+        '',
+        [Validators.required, Validators.pattern(/^[\+]?[0-9][\d]{0,15}$/)],
+      ],
+      referenceEmail: ['', [Validators.required, Validators.email]],
+      referenceAddress: ['', [Validators.required]],
+      referenceCity: ['', [Validators.required]],
+      referenceState: ['', [Validators.required]],
+      referenceCountry: ['', [Validators.required]],
+      referenceZipCode: ['', [Validators.required]],
+      relationshipToReference: ['', [Validators.required]],
+    });
+    this.references.push(referenceGroup);
+  }
+
+  removeReference(index: number) {
+    this.references.removeAt(index);
+  }
+
   // Helper methods
   private markAllFieldsAsTouched() {
     Object.keys(this.profileForm.controls).forEach((key) => {
@@ -799,5 +1834,149 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     if (firstErrorField) {
       firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+  }
+
+  // Handle country selection to populate states
+  onCountryChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const selectedCountry = target.value;
+
+    if (selectedCountry === 'Nigeria') {
+      this.availableStates = this.nigerianStates;
+    } else {
+      // For other countries, you can add their states/provinces
+      this.availableStates = [];
+    }
+
+    // Clear city and state when country changes
+    this.availableCities = [];
+    this.profileForm.patchValue({
+      homeState: '',
+      homeCity: '',
+    });
+  }
+
+  // Handle state selection to populate cities
+  onStateChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const selectedState = target.value;
+
+    if (selectedState && this.nigerianCities[selectedState]) {
+      this.availableCities = this.nigerianCities[selectedState];
+    } else {
+      this.availableCities = [];
+    }
+
+    // Clear city when state changes
+    this.profileForm.patchValue({
+      homeCity: '',
+    });
+  }
+
+  // Handle city selection (currently just for validation)
+  onCityChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const selectedCity = target.value;
+    // You can add any city-specific logic here if needed
+  }
+
+  // Multi-select church positions methods
+  togglePositionDropdown() {
+    this.showPositionDropdown = !this.showPositionDropdown;
+  }
+
+  selectChurchPosition(position: string) {
+    if (!this.selectedChurchPositions.includes(position)) {
+      this.selectedChurchPositions.push(position);
+      this.profileForm.patchValue({
+        previousChurchPositions: this.selectedChurchPositions,
+      });
+    }
+    this.showPositionDropdown = false;
+  }
+
+  removeChurchPosition(position: string) {
+    this.selectedChurchPositions = this.selectedChurchPositions.filter(
+      (p) => p !== position
+    );
+    this.profileForm.patchValue({
+      previousChurchPositions: this.selectedChurchPositions,
+    });
+  }
+
+  getAvailablePositions(): string[] {
+    return this.churchPositionOptions.filter(
+      (position) => !this.selectedChurchPositions.includes(position)
+    );
+  }
+
+  private initializeFormChangeTracking() {
+    if (!this.isEditMode) return; // Only track changes in edit mode
+
+    // Store original values after form is prefilled
+    setTimeout(() => {
+      this.originalFormValues = this.profileForm.getRawValue();
+      this.modifiedFields.clear();
+
+      // Reset uploaded avatar URL since we're starting fresh tracking
+      this.uploadedAvatarUrl = null;
+
+      // Subscribe to form changes to track modified fields
+      this.profileForm.valueChanges.subscribe((currentValue) => {
+        this.trackModifiedFields(currentValue);
+      });
+    }, 100);
+  }
+
+  private trackModifiedFields(currentValue: any) {
+    // Compare current values with original values
+    Object.keys(currentValue).forEach((key) => {
+      const isModified = this.isFieldModified(
+        key,
+        currentValue[key],
+        this.originalFormValues[key]
+      );
+
+      if (isModified) {
+        this.modifiedFields.add(key);
+      } else {
+        this.modifiedFields.delete(key);
+      }
+    });
+
+    // Handle form arrays separately
+    this.trackFormArrayChanges(currentValue);
+  }
+
+  private isFieldModified(
+    fieldName: string,
+    currentValue: any,
+    originalValue: any
+  ): boolean {
+    // Handle arrays (like children, previousPositions)
+    if (Array.isArray(currentValue) && Array.isArray(originalValue)) {
+      return JSON.stringify(currentValue) !== JSON.stringify(originalValue);
+    }
+
+    // Handle regular fields
+    return currentValue !== originalValue;
+  }
+
+  private trackFormArrayChanges(currentValue: any) {
+    // Track changes in form arrays
+    const formArrayFields = ['children', 'previousPositions', 'references'];
+
+    formArrayFields.forEach((arrayField) => {
+      if (currentValue[arrayField]) {
+        const currentArray = currentValue[arrayField];
+        const originalArray = this.originalFormValues[arrayField] || [];
+
+        if (JSON.stringify(currentArray) !== JSON.stringify(originalArray)) {
+          this.modifiedFields.add(arrayField);
+        } else {
+          this.modifiedFields.delete(arrayField);
+        }
+      }
+    });
   }
 }

@@ -46,6 +46,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
   userFullName = '';
   userEmail = '';
   role = '';
+  userPhotoUrl = '';
   pageTitle = '';
 
   private subscriptions: Subscription[] = [];
@@ -66,6 +67,11 @@ export class TopNavComponent implements OnInit, OnDestroy {
     this.trackRouteChanges();
     this.updatePageTitle();
 
+    // Initialize notifications after auth check
+    if (this.authService.isLoggedIn()) {
+      this.notificationService.initializeNotifications();
+    }
+
     // Load notifications on init
     this.loadRecentNotifications();
 
@@ -84,23 +90,70 @@ export class TopNavComponent implements OnInit, OnDestroy {
           this.notifying = count > 0;
         })
     );
+
+    // Subscribe to user profile updates to refresh user info
+    this.subscriptions.push(
+      this.authService.getUserProfileUpdatedSubject().subscribe(() => {
+        this.loadWorkerInfo();
+      })
+    );
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
+  // Make this method public so it can be called from other components
   loadWorkerInfo() {
     const currentWorker = this.authService.getCurrentWorker();
     const workerRole = this.authService.getWorkerRole();
 
     if (currentWorker) {
-      this.userName = currentWorker.name || 'Worker';
-      this.userFullName = currentWorker.fullName || 'Worker';
+      this.userName = currentWorker.name;
+      this.userFullName = currentWorker.fullName;
       this.userEmail = currentWorker.email || '';
+      this.userPhotoUrl = this.formatImageUrl(currentWorker.photoUrl);
     }
 
     this.role = workerRole ? workerRole : 'Worker';
+  }
+
+  // Method to refresh user info (can be called after profile updates)
+  refreshUserInfo() {
+    this.loadWorkerInfo();
+  }
+
+  // Helper function to properly format image URLs
+  private formatImageUrl(url: string | null | undefined): string {
+    // First try to get the photo URL from localStorage if no URL is provided
+    if (!url) {
+      const storedPhotoUrl = localStorage.getItem('workerPhotoUrl');
+      if (storedPhotoUrl && storedPhotoUrl !== '') {
+        url = storedPhotoUrl;
+      }
+    }
+
+    // If still no URL, use a generic avatar fallback instead of SVG
+    if (!url || url === '') {
+      return 'assets/svg/gender.svg'; // Use gender.svg as fallback instead of profilePix.svg
+    }
+
+    // If it's already a complete URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // If it's a relative path, prepend the base URL
+    const baseUrl = 'https://harmoney-backend.onrender.com';
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+  }
+
+  // Handle image loading errors
+  handleImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'assets/svg/gender.svg';
+    }
   }
 
   trackRouteChanges() {

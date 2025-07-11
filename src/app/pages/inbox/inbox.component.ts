@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   NotificationService,
   InboxItem,
@@ -19,7 +20,12 @@ interface Attachment {
 @Component({
   selector: 'app-inbox',
   standalone: true,
-  imports: [CommonModule, DocumentViewerComponent, ClickOutsideDirective],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DocumentViewerComponent,
+    ClickOutsideDirective,
+  ],
   templateUrl: './inbox.component.html',
   styleUrl: './inbox.component.css',
 })
@@ -33,12 +39,18 @@ export class InboxComponent implements OnInit, OnDestroy {
   selectedDocumentData: TableData | null = null;
   showFilterDropdown: boolean = false;
   currentFilter: 'all' | 'unread' | 'recent' | 'oldest' = 'all';
+  searchTerm: string = '';
 
   private subscriptions: Subscription[] = [];
 
   constructor(private notificationService: NotificationService) {}
 
   ngOnInit() {
+    // Check if inbox items are already loaded, if not initialize them
+    if (!this.notificationService.hasInboxItems()) {
+      this.notificationService.initializeNotifications();
+    }
+
     // Subscribe to inbox items
     this.subscriptions.push(
       this.notificationService.getInboxItems().subscribe((items) => {
@@ -225,9 +237,26 @@ export class InboxComponent implements OnInit, OnDestroy {
     return selectedItem.message;
   }
 
+  onSearchChange() {
+    this.applyFilter();
+  }
+
   applyFilter() {
     let filtered = [...this.inboxItems];
 
+    // Apply search filter first
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(
+        (item) =>
+          item.sender.toLowerCase().includes(searchLower) ||
+          item.subject.toLowerCase().includes(searchLower) ||
+          item.message.toLowerCase().includes(searchLower) ||
+          item.preview.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply status filter
     switch (this.currentFilter) {
       case 'unread':
         filtered = filtered.filter((item) => !item.isRead);

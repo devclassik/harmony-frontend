@@ -103,15 +103,14 @@ export class EmployeeService {
     console.log('🔍 Checking profile completion for employee:', employee);
 
     // Define essential fields that should not be null for a complete profile
-    // Based on the current form structure we've implemented
+    // Based on the current form structure we've implemented (Employee Information section)
     const essentialFields = [
       'title',
       'firstName',
+      'middleName',
       'lastName',
+      'profferedName',
       'gender',
-      'primaryPhone',
-      'dob',
-      'maritalStatus',
     ];
 
     // Check if any essential field is null or empty
@@ -142,7 +141,9 @@ export class EmployeeService {
     const essentialFields = [
       { key: 'title', label: 'Title' },
       { key: 'firstName', label: 'First Name' },
+      { key: 'middleName', label: 'Middle Name' },
       { key: 'lastName', label: 'Last Name' },
+      { key: 'profferedName', label: 'Proffered Name' },
       { key: 'gender', label: 'Gender' },
       { key: 'primaryPhone', label: 'Primary Phone' },
       { key: 'dob', label: 'Date of Birth' },

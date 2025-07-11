@@ -247,13 +247,16 @@
         >
           <span class="h-10 w-10 overflow-hidden rounded-full">
             <img
-              src="./assets/svg/profilePix.svg"
-              alt="User"
-              class="w-full h-full object-cover"
+              [src]="userPhotoUrl"
+              alt="User Profile"
+              class="w-8 h-8 rounded-full object-cover"
+              (error)="handleImageError($event)"
             />
           </span>
           <div class="flex flex-col">
-            <span class="text-black font-bold text-sm capitalize">{{ userName }}</span>
+            <span class="text-black font-bold text-sm capitalize">{{
+              userName
+            }}</span>
             <span class="text-gray-500 text-xs capitalize">{{ role }}</span>
           </div>
         </a>
