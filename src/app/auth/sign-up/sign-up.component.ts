@@ -115,7 +115,7 @@ export class SignUpComponent {
         lastName: this.form.lastName,
         email: this.form.email,
         password: this.form.password,
-        roleId: 1, // Admin role - signup creates admin accounts only
+        // roleId: 1, // Admin role - signup creates admin accounts only
       })
       .subscribe({
         next: (response: RegisterResponse) => {
