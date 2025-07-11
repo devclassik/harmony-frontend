@@ -146,6 +146,39 @@ export class TableComponent implements OnInit, OnChanges {
     }, 100);
   }
 
+  // Helper function to properly format image URLs
+  formatImageUrl(url: string | null | undefined): string {
+    // First try to get the photo URL from localStorage if no URL is provided
+    if (!url) {
+      const storedPhotoUrl = localStorage.getItem('workerPhotoUrl');
+      if (storedPhotoUrl && storedPhotoUrl !== '') {
+        url = storedPhotoUrl;
+      }
+    }
+
+    // If still no URL, use a generic avatar fallback
+    if (!url || url === '') {
+      return 'assets/svg/gender.svg';
+    }
+
+    // If it's already a complete URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // If it's a relative path, prepend the base URL
+    const baseUrl = 'https://harmoney-backend.onrender.com';
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+  }
+
+  // Handle image loading errors
+  handleImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'assets/svg/gender.svg';
+    }
+  }
+
   ngOnChanges() {
     // Update activeView when currentView input changes
     this.activeView = this.currentView === 'table' ? 'list' : this.currentView;

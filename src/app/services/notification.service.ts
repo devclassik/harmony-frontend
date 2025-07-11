@@ -42,13 +42,28 @@ export class NotificationService {
   private unreadCountSubject = new BehaviorSubject<number>(0);
 
   constructor(private apiService: ApiService) {
-    // Load data from API
-    this.loadInboxItemsFromApi();
-    this.loadNotificationsFromApi();
+    // Don't auto-load data in constructor - wait for manual trigger after auth
+    // This prevents API calls before user is authenticated
 
     // Update unread count whenever inbox items or notifications change
     this.inboxItemsSubject.subscribe(() => this.updateUnreadCount());
     this.notificationsSubject.subscribe(() => this.updateUnreadCount());
+  }
+
+  // Public method to initialize data after authentication
+  initializeNotifications(): void {
+    this.loadInboxItemsFromApi();
+    this.loadNotificationsFromApi();
+  }
+
+  // Public method to check if notifications are loaded
+  hasNotifications(): boolean {
+    return this.notificationsSubject.value.length > 0;
+  }
+
+  // Public method to check if inbox items are loaded
+  hasInboxItems(): boolean {
+    return this.inboxItemsSubject.value.length > 0;
   }
 
   private updateUnreadCount(): void {
@@ -127,7 +142,7 @@ export class NotificationService {
     return apiMessages.map((message) => ({
       id: message.id,
       sender: `${message.actionBy.firstName} ${message.actionBy.lastName}`,
-      profileImage: message.actionBy.photoUrl || './assets/svg/profilePix.svg',
+      profileImage: this.formatImageUrl(message.actionBy.photoUrl),
       subject: message.title || 'No Subject',
       preview:
         message.message.length > 100
@@ -150,7 +165,7 @@ export class NotificationService {
       id: notification.id,
       worker: {
         name: `${notification.actionBy.firstName} ${notification.actionBy.lastName}`,
-        image: notification.actionBy.photoUrl || './assets/svg/profilePix.svg',
+        image: this.formatImageUrl(notification.actionBy.photoUrl),
       },
       type: notification.title || notification.feature,
       message: notification.message,
@@ -161,6 +176,31 @@ export class NotificationService {
       timestamp: new Date(notification.createdAt).toLocaleDateString('en-GB'),
       isRead: notification.isRead,
     }));
+  }
+
+  // Helper function to properly format image URLs
+  private formatImageUrl(url: string | null): string {
+    // First try to get the photo URL from localStorage if no URL is provided
+    if (!url) {
+      const storedPhotoUrl = localStorage.getItem('workerPhotoUrl');
+      if (storedPhotoUrl && storedPhotoUrl !== '') {
+        url = storedPhotoUrl;
+      }
+    }
+
+    // If still no URL, use a generic avatar fallback
+    if (!url || url === '') {
+      return './assets/svg/gender.svg'; // Use gender.svg as fallback instead of profilePix.svg
+    }
+
+    // If it's already a complete URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // If it's a relative path, prepend the base URL
+    const baseUrl = 'https://harmoney-backend.onrender.com';
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 
   // Inbox methods

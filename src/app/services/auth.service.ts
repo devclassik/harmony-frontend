@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   Worker,
@@ -18,6 +19,7 @@ import {
   PasswordResetFinalizeResponse,
   Permission,
   WorkerRole,
+  UpdateEmployeeRequest,
 } from '../dto';
 
 @Injectable({
@@ -26,6 +28,7 @@ import {
 export class AuthService {
   private currentWorker: Worker | null = null;
   private currentPermissions: Permission[] = [];
+  private userProfileUpdatedSubject = new BehaviorSubject<void>(undefined);
 
   constructor(private router: Router, private http: HttpClient) {
     this.loadAuthState();
@@ -178,6 +181,10 @@ export class AuthService {
     return this.hasPermission(feature, 'view');
   }
 
+  isAdmin(): boolean {
+    return this.getWorkerRole()?.toLowerCase() === 'admin';
+  }
+
   private mapEmployeeToWorker(
     employee: Employee,
     email: string,
@@ -188,6 +195,7 @@ export class AuthService {
       fullName: `${employee.firstName} ${employee.lastName}`,
       email: email,
       role: roleName.toLowerCase(),
+      photoUrl: employee.photoUrl,
     };
   }
 
@@ -202,6 +210,7 @@ export class AuthService {
     localStorage.setItem('workerRole', worker.role.toLowerCase());
     localStorage.setItem('workerEmail', worker.email);
     localStorage.setItem('workerFullName', worker.fullName);
+    localStorage.setItem('workerPhotoUrl', worker.photoUrl || '');
     localStorage.setItem('isLoggedIn', isLoggedIn.toString());
     localStorage.setItem('roleId', role.id.toString());
     localStorage.setItem('permissions', JSON.stringify(role.permissions));
@@ -209,6 +218,7 @@ export class AuthService {
 
     this.currentWorker = { ...worker, role: worker.role.toLowerCase() };
     this.currentPermissions = role.permissions;
+    this.userProfileUpdatedSubject.next();
   }
 
   private loadAuthState(): void {
@@ -216,6 +226,7 @@ export class AuthService {
     const workerRole = localStorage.getItem('workerRole');
     const workerEmail = localStorage.getItem('workerEmail');
     const workerFullName = localStorage.getItem('workerFullName');
+    const workerPhotoUrl = localStorage.getItem('workerPhotoUrl');
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const permissionsStr = localStorage.getItem('permissions');
 
@@ -225,6 +236,7 @@ export class AuthService {
         fullName: workerFullName,
         email: workerEmail,
         role: workerRole,
+        photoUrl: workerPhotoUrl || null,
       };
 
       if (permissionsStr) {
@@ -244,6 +256,7 @@ export class AuthService {
     localStorage.removeItem('workerRole');
     localStorage.removeItem('workerEmail');
     localStorage.removeItem('workerFullName');
+    localStorage.removeItem('workerPhotoUrl');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('roleId');
     localStorage.removeItem('permissions');
@@ -252,6 +265,7 @@ export class AuthService {
     // Clear in-memory state
     this.currentWorker = null;
     this.currentPermissions = [];
+    this.userProfileUpdatedSubject.next();
   }
 
   getCurrentEmployeeId(): number | null {
@@ -259,13 +273,60 @@ export class AuthService {
     return employeeId ? parseInt(employeeId, 10) : null;
   }
 
+  // Method to update user photo after profile update
+  updateUserPhoto(photoUrl: string | null): void {
+    if (this.currentWorker) {
+      this.currentWorker.photoUrl = photoUrl;
+      localStorage.setItem('workerPhotoUrl', photoUrl || '');
+      this.userProfileUpdatedSubject.next();
+    }
+  }
+
+  // Comprehensive method to update user profile data after profile update
+  updateUserProfile(updatedData: Partial<UpdateEmployeeRequest>): void {
+    if (!this.currentWorker) return;
+
+    // Update name if changed
+    if (
+      updatedData.firstName ||
+      updatedData.lastName ||
+      updatedData.profferedName
+    ) {
+      const firstName =
+        updatedData.firstName || this.currentWorker.fullName.split(' ')[0];
+      const lastName =
+        updatedData.lastName ||
+        this.currentWorker.fullName.split(' ').slice(1).join(' ');
+      const profferedName = updatedData.profferedName;
+
+      // Update displayed name (prefer proffered name)
+      this.currentWorker.name = profferedName || firstName;
+      this.currentWorker.fullName = `${firstName} ${lastName}`;
+
+      localStorage.setItem('workerFullName', this.currentWorker.fullName);
+    }
+
+    // Update email if changed
+    if (updatedData.email) {
+      this.currentWorker.email = updatedData.email;
+      localStorage.setItem('workerEmail', updatedData.email);
+    }
+
+    // Update photo if changed
+    if (updatedData.photoUrl !== undefined) {
+      this.currentWorker.photoUrl = updatedData.photoUrl;
+      localStorage.setItem('workerPhotoUrl', updatedData.photoUrl || '');
+    }
+
+    // Trigger update notification to all subscribed components
+    this.userProfileUpdatedSubject.next();
+  }
+
   // Debug method to force clear all auth state
   // Can be called from browser console: window.authService.forceLogout()
   forceLogout(): void {
-    console.log('Force clearing all authentication state...');
     this.clearAuthState();
     this.router.navigate(['/auth/login']);
-    console.log('Authentication state cleared. Redirecting to login...');
   }
 
   // Password Reset Methods
@@ -312,5 +373,9 @@ export class AuthService {
         confirmPassword,
       }
     );
+  }
+
+  getUserProfileUpdatedSubject(): BehaviorSubject<void> {
+    return this.userProfileUpdatedSubject;
   }
 }

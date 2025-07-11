@@ -3,7 +3,10 @@ import { AuthService } from '../../services/auth.service';
 import { EmployeeService } from '../../services/employee.service';
 import { LeaveService } from '../../services/leave.service';
 import { AlertService } from '../../services/alert.service';
+import { AnalyticsService } from '../../services/analytics.service';
+import { NotificationService } from '../../services/notification.service';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { DashboardGreetingsComponent } from '../../components/dashboard-greetings/dashboard-greetings.component';
 import { DashboardInformationComponent } from '../../components/dashboard-information/dashboard-information.component';
 import { ComponentsModule } from '../../components/components.module';
@@ -19,6 +22,11 @@ import { LeaveDetailsComponent } from '../../components/leave-details/leave-deta
 import { WelcomeScreenAnimationComponent } from '../../components/welcome-screen-animation/welcome-screen-animation.component';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 import { EmployeeDetails } from '../../dto/employee.dto';
+import {
+  AnalyticsOverview,
+  LeaveStatistics,
+  EmployeeDemographics,
+} from '../../dto/analytics.dto';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
@@ -26,6 +34,7 @@ import { finalize } from 'rxjs/operators';
   selector: 'app-dashboard',
   imports: [
     CommonModule,
+    FormsModule,
     ComponentsModule,
     DashboardGreetingsComponent,
     DashboardInformationComponent,
@@ -48,7 +57,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   showWelcomeAnimation: boolean = false;
   isLoadingProfile: boolean = false;
   isLoadingLeaveRequests: boolean = false;
+  isLoadingAnalytics: boolean = false;
+  isLoadingEmployees: boolean = false;
   employeeData: EmployeeDetails | null = null;
+  analyticsData: AnalyticsOverview | null = null;
+  leaveStatisticsData: LeaveStatistics | null = null;
+  demographicsData: EmployeeDemographics | null = null;
+  selectedYear: number = new Date().getFullYear();
+  currentYear: number = new Date().getFullYear();
   workerName: string = 'Worker';
 
   private subscriptions: Subscription[] = [];
@@ -57,7 +73,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private employeeService: EmployeeService,
     private leaveService: LeaveService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private analyticsService: AnalyticsService,
+    private notificationService: NotificationService
   ) {
     this.workerRole = this.authService.getWorkerRole();
 
@@ -69,6 +87,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Initialize notifications for authenticated users
+    if (this.authService.isLoggedIn()) {
+      this.notificationService.initializeNotifications();
+    }
+
+    // Load analytics data for all user roles
+    this.loadAnalyticsData();
+
     // Load employee profile and check if animation should be shown
     if (
       this.workerRole?.toLowerCase() === 'worker' ||
@@ -76,6 +102,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     ) {
       this.loadEmployeeProfile();
       this.loadLeaveRequests();
+    }
+
+    // Load all employees for admin dashboard
+    if (this.workerRole?.toLowerCase() === 'admin') {
+      this.loadAllEmployees();
     }
   }
 
@@ -152,7 +183,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.employeeData.profferedName ||
           `${this.employeeData.firstName} ${this.employeeData.lastName}`,
         gender: this.employeeData.gender || 'Not specified',
-        profileImage: this.employeeData.photoUrl || 'assets/svg/gender.svg',
+        profileImage: this.formatImageUrl(this.employeeData.photoUrl),
         status:
           (this.employeeData.employeeStatus as
             | 'Active'
@@ -169,6 +200,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       // Update worker name when employee data is available
       this.updateWorkerName();
     }
+  }
+
+  // Helper function to properly format image URLs
+  private formatImageUrl(url: string | null): string {
+    if (!url) return 'assets/svg/gender.svg';
+
+    // If it's already a complete URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // If it's a relative path, prepend the base URL
+    const baseUrl = 'https://harmoney-backend.onrender.com';
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 
   // Update worker name property (called only when data actually changes)
@@ -238,26 +283,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.subscriptions.push(leaveSub);
   }
 
+  // Load analytics data from API
+  loadAnalyticsData() {
+    this.isLoadingAnalytics = true;
+    const analyticsSub = this.analyticsService
+      .getOverview()
+      .pipe(
+        finalize(() => {
+          this.isLoadingAnalytics = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.status === 'success' && response.data) {
+            this.analyticsData = response.data;
+          }
+        },
+        error: (error) => {
+          console.error('Error loading analytics data:', error);
+          this.alertService.error(
+            'Failed to load analytics data. Please try again.'
+          );
+        },
+      });
+    this.subscriptions.push(analyticsSub);
+
+    // Load leave statistics for selected year
+    this.loadLeaveStatistics();
+
+    // Load employee demographics
+    this.loadEmployeeDemographics();
+  }
+
   // Employee data from API - will be populated after API call
   employeeInfo: EmployeeInfo | null = null;
 
-  employees: TableData[] = [
-    {
-      id: '124 - 08',
-      name: 'John Adegoke',
-      role: 'Zonal Pastor',
-      status: 'Active',
-      imageUrl: 'assets/svg/gender.svg',
-    },
-    {
-      id: '124 - 01',
-      name: 'John Adegoke',
-      role: 'Zonal Pastor',
-      status: 'On leave',
-      imageUrl: 'assets/svg/gender.svg',
-    },
-    // ... more employees
-  ];
+  // Real employees data - will be populated from API
+  employees: TableData[] = [];
 
   // Real leave requests data - will be populated from API
   leaveRequests: TableData[] = [];
@@ -275,6 +337,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { key: 'endDate', label: 'END DATE' },
     { key: 'status', label: 'STATUS' },
     { key: 'action', label: 'ACTION' },
+  ];
+
+  // Employee records table header configuration
+  employeeRecordsHeader = [
+    { key: 'id', label: 'EMPLOYEE ID' },
+    { key: 'name', label: 'NAME' },
+    { key: 'role', label: 'ROLE' },
+    { key: 'department', label: 'DEPARTMENT' },
+    { key: 'status', label: 'STATUS' },
   ];
 
   onMenuAction(event: { action: string; row: TableData }) {
@@ -308,5 +379,136 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onCloseLeaveDetails() {
     this.showLeaveDetails = false;
     this.selectedLeaveData = null;
+  }
+
+  onYearChange(year: number) {
+    this.selectedYear = year;
+    console.log('Year changed to:', this.selectedYear);
+    this.loadLeaveStatistics();
+  }
+
+  private loadLeaveStatistics() {
+    const leaveStatsSub = this.analyticsService
+      .getLeaveStatistics(this.selectedYear)
+      .subscribe({
+        next: (response) => {
+          console.log('Leave Statistics Response:', response);
+          if (response.status === 'success' && response.data) {
+            this.leaveStatisticsData = response.data;
+            console.log('Leave Statistics Data:', response.data);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading leave statistics:', error);
+        },
+      });
+    this.subscriptions.push(leaveStatsSub);
+  }
+
+  private loadEmployeeDemographics() {
+    const demographicsSub = this.analyticsService
+      .getEmployeeDemographics()
+      .subscribe({
+        next: (response) => {
+          console.log('Employee Demographics Response:', response);
+          if (response.status === 'success' && response.data) {
+            this.demographicsData = response.data;
+            console.log('Employee Demographics Data:', response.data);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading employee demographics:', error);
+        },
+      });
+    this.subscriptions.push(demographicsSub);
+  }
+
+  // Load all employees from API
+  private loadAllEmployees() {
+    this.isLoadingEmployees = true;
+    const employeesSub = this.employeeService
+      .getAllEmployees()
+      .pipe(
+        finalize(() => {
+          this.isLoadingEmployees = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          console.log('All Employees Response:', response);
+          if (response.status === 'success' && response.data) {
+            // Handle both single employee and array of employees
+            const employeesData = Array.isArray(response.data)
+              ? response.data
+              : [response.data];
+            this.employees = this.transformEmployeesToTableData(employeesData);
+            console.log('Transformed Employees Data:', this.employees);
+          }
+        },
+        error: (error) => {
+          console.error('Error loading employees:', error);
+          this.alertService.error(
+            'Failed to load employees. Please try again.'
+          );
+        },
+      });
+    this.subscriptions.push(employeesSub);
+  }
+
+  // Transform employee data from API to table format
+  private transformEmployeesToTableData(
+    employees: EmployeeDetails[]
+  ): TableData[] {
+    return employees.map((employee) => ({
+      id: employee.employeeId,
+      name: `${employee.firstName} ${employee.lastName}`,
+      role:
+        employee.title ||
+        this.getEmployeeDepartmentRole(employee) ||
+        'Employee',
+      status: this.mapEmployeeStatus(employee.employeeStatus),
+      imageUrl: this.formatImageUrl(employee.photoUrl),
+      department: this.getEmployeeDepartment(employee),
+    }));
+  }
+
+  // Get employee's primary department name
+  private getEmployeeDepartment(employee: EmployeeDetails): string {
+    if (employee.departments && employee.departments.length > 0) {
+      return employee.departments[0].name;
+    }
+    return 'Unassigned';
+  }
+
+  // Get employee's role from department or title
+  private getEmployeeDepartmentRole(employee: EmployeeDetails): string | null {
+    if (employee.departments && employee.departments.length > 0) {
+      return employee.departments[0].name;
+    }
+    return null;
+  }
+
+  // Map employee status to table status format
+  private mapEmployeeStatus(
+    status: string | null
+  ): 'Active' | 'On leave' | 'Retired' | 'On Discipline' {
+    if (!status) return 'Active';
+
+    const statusLower = status.toLowerCase();
+
+    if (statusLower.includes('leave') || statusLower.includes('absent')) {
+      return 'On leave';
+    }
+    if (statusLower.includes('retired') || statusLower.includes('retire')) {
+      return 'Retired';
+    }
+    if (
+      statusLower.includes('discipline') ||
+      statusLower.includes('suspended')
+    ) {
+      return 'On Discipline';
+    }
+
+    return 'Active'; // Default to active
   }
 }

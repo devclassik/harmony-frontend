@@ -12,24 +12,39 @@
   <div *ngIf="workerRole?.toLowerCase() === 'admin'">
     <div class="flex flex-col gap-4 p-2">
       <app-dashboard-greetings
-        [userName]="'John 👋🏼'"
+        [userName]="workerName"
         [showSubText]="true"
         [subText]="'Here is a brief overview of the employees.'"
+        [analyticsData]="analyticsData"
       ></app-dashboard-greetings>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
       <div class="lg:col-span-6">
-        <app-bar-chart></app-bar-chart>
+        <app-bar-chart
+          [leaveData]="leaveStatisticsData"
+          [selectedYear]="selectedYear"
+          (yearChange)="onYearChange($event)"
+        ></app-bar-chart>
       </div>
       <div class="lg:col-span-4">
-        <app-doughnut-chart></app-doughnut-chart>
+        <app-doughnut-chart
+          [demographicsData]="demographicsData"
+        ></app-doughnut-chart>
       </div>
     </div>
-    <div class="p-2">
+    <div class="p-2 relative">
+      <!-- Loading Overlay for Employee Records -->
+      <app-loading-overlay
+        [isVisible]="isLoadingEmployees"
+        title="Loading Employee Records"
+        message="Fetching employee data from the system..."
+      ></app-loading-overlay>
+
       <app-table
         [tableTitle]="'Employee Records'"
         [viewAllLink]="'employee-records'"
         [tableData]="employees"
+        [tableHeader]="employeeRecordsHeader"
         [showViewAll]="true"
         [showSearch]="false"
         [showFilter]="false"
@@ -62,6 +77,7 @@
         [showSubText]="true"
         [subText]="'Here is a brief summary of your employment.'"
         [showMetrics]="false"
+        [analyticsData]="analyticsData"
       ></app-dashboard-greetings>
 
       <!-- Employee Information Section -->

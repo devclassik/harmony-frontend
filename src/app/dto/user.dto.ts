@@ -5,6 +5,7 @@ export interface Worker {
   fullName: string;
   email: string;
   role: string;
+  photoUrl?: string | null;
 }
 
 export interface Employee {
