@@ -85,7 +85,7 @@ export class SickLeaveComponent implements OnInit {
           const allSickLeaves = response.data;
 
           // Filter leaves based on user role
-          if (this.userRole?.toLowerCase() === 'worker' && this.currentUserId) {
+          if (this.userRole?.toLowerCase() !== 'admin' && this.currentUserId) {
             // Workers see only their own sick leaves
             this.sickLeaveRequests = this.transformToTableData(
               this.leaveService.filterLeavesByEmployee(
@@ -277,7 +277,10 @@ export class SickLeaveComponent implements OnInit {
     console.log(event);
 
     if (event.action === 'View') {
-      if (this.userRole?.toLowerCase() === 'worker') {
+      if (
+        this.userRole?.toLowerCase() === 'worker' ||
+        this.userRole?.toLowerCase() === 'minister'
+      ) {
         this.showSickLeaveDetailsModal();
 
         // Get the original API data and transform it for the leave-details component

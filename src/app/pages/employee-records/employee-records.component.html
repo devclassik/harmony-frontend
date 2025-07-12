@@ -17,6 +17,11 @@
     [tableData]="filteredEmployees"
     [menuItems]="actionButton"
     (menuAction)="onMenuAction($event)"
+    [showPagination]="true"
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)"
   ></app-table>
 </div>
 

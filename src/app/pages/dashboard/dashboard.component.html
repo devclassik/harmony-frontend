@@ -48,8 +48,12 @@
         [showViewAll]="true"
         [showSearch]="false"
         [showFilter]="false"
-        [showPagination]="false"
+        [showPagination]="true"
+        [currentPage]="currentPage"
+        [totalPages]="totalPages"
+        [pageSize]="pageSize"
         [showStatusTab]="false"
+        (pageChange)="onEmployeePageChange($event)"
       ></app-table>
     </div>
   </div>

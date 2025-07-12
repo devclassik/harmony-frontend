@@ -67,6 +67,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   currentYear: number = new Date().getFullYear();
   workerName: string = 'Worker';
 
+  // Pagination state
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalPages: number = 1;
+  totalEmployees: number = 0;
+
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -424,10 +430,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // Load all employees from API
-  private loadAllEmployees() {
+  private loadAllEmployees(page: number = 1) {
     this.isLoadingEmployees = true;
     const employeesSub = this.employeeService
-      .getAllEmployees()
+      .getAllEmployees(page, this.pageSize)
       .pipe(
         finalize(() => {
           this.isLoadingEmployees = false;
@@ -437,12 +443,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: (response) => {
           console.log('All Employees Response:', response);
           if (response.status === 'success' && response.data) {
-            // Handle both single employee and array of employees
-            const employeesData = Array.isArray(response.data)
-              ? response.data
-              : [response.data];
+            // Handle the new nested structure with pagination
+            const employeesData = response.data.data || [];
+            const paginationMeta = response.data.pagination;
+
             this.employees = this.transformEmployeesToTableData(employeesData);
+
+            // Update pagination state
+            if (paginationMeta) {
+              this.currentPage = paginationMeta.page;
+              this.totalPages = paginationMeta.totalPages;
+              this.totalEmployees = paginationMeta.total;
+            }
+
             console.log('Transformed Employees Data:', this.employees);
+            console.log('Pagination Info:', {
+              currentPage: this.currentPage,
+              totalPages: this.totalPages,
+              totalEmployees: this.totalEmployees,
+            });
           }
         },
         error: (error) => {
@@ -510,5 +529,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     return 'Active'; // Default to active
+  }
+
+  onEmployeePageChange(page: number) {
+    console.log('Page changed to:', page);
+    this.currentPage = page;
+    this.loadAllEmployees(page);
   }
 }

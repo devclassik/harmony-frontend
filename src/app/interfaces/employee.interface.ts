@@ -53,4 +53,8 @@ export interface EmployeeInfo {
   gender: string;
   profileImage: string;
   status: 'Active' | 'On leave' | 'Retired' | 'On Discipline';
+  department?: string;
+  location?: string;
+  email?: string;
+  role?: string;
 }

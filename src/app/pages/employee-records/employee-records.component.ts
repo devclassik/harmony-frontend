@@ -49,6 +49,12 @@ export class EmployeeRecordsComponent implements OnInit {
   isLoading: boolean = false;
   allEmployees: EmployeeDetails[] = [];
 
+  // Pagination state
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalPages: number = 1;
+  totalEmployees: number = 0;
+
   constructor(
     private employeeService: EmployeeService,
     private alertService: AlertService
@@ -105,17 +111,26 @@ export class EmployeeRecordsComponent implements OnInit {
     this.loadEmployees();
   }
 
-  loadEmployees() {
+  loadEmployees(page: number = 1) {
     this.isLoading = true;
-    this.employeeService.getAllEmployees().subscribe({
+    this.employeeService.getAllEmployees(page, this.pageSize).subscribe({
       next: (response) => {
         if (response.status === 'success' && response.data) {
-          this.allEmployees = Array.isArray(response.data)
-            ? response.data
-            : [response.data];
+          // Handle the new nested structure with pagination
+          this.allEmployees = response.data.data || [];
+          const paginationMeta = response.data.pagination;
+
           this.employees = this.transformEmployeesToTableData(
             this.allEmployees
           );
+
+          // Update pagination state
+          if (paginationMeta) {
+            this.currentPage = paginationMeta.page;
+            this.totalPages = paginationMeta.totalPages;
+            this.totalEmployees = paginationMeta.total;
+          }
+
           this.updateFilterTabs();
           this.applyFilters();
         } else {
@@ -315,7 +330,7 @@ export class EmployeeRecordsComponent implements OnInit {
     this.employeeService.deleteEmployee(employeeId).subscribe({
       next: (response) => {
         this.alertService.success('Employee deleted successfully');
-        this.loadEmployees(); // Reload the employee list
+        this.loadEmployees(this.currentPage); // Reload the current page
         this.isLoading = false;
         this.successModal = true;
       },
@@ -490,5 +505,11 @@ export class EmployeeRecordsComponent implements OnInit {
     //     this.isLoading = false;
     //   },
     // });
+  }
+
+  onPageChange(page: number) {
+    console.log('Page changed to:', page);
+    this.currentPage = page;
+    this.loadEmployees(page);
   }
 }

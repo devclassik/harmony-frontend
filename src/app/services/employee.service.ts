@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import {
   EmployeeDetails,
   GetEmployeeResponse,
+  GetAllEmployeesResponse,
   CreateEmployeeRequest,
   CreateEmployeeResponse,
   UpdateEmployeeRequest,
@@ -32,11 +33,20 @@ export class EmployeeService {
 
   /**
    * Get all employees
-   * @returns Observable of all employees
+   * @param page Page number (optional, defaults to 1)
+   * @param limit Items per page (optional, defaults to 10)
+   * @returns Observable of all employees with pagination
    */
-  getAllEmployees(): Observable<GetEmployeeResponse> {
-    return this.apiService.get<GetEmployeeResponse>(
-      environment.routes.employees.getAll
+  getAllEmployees(
+    page: number = 1,
+    limit: number = 10
+  ): Observable<GetAllEmployeesResponse> {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+
+    return this.apiService.get<GetAllEmployeesResponse>(
+      `${environment.routes.employees.getAll}?${params.toString()}`
     );
   }
 
@@ -159,5 +169,14 @@ export class EmployeeService {
     }
 
     return missingFields;
+  }
+
+  createRetirementRequest(employeeId: number, reason: string): Observable<any> {
+    const requestData = {
+      employeeId: employeeId,
+      reason: reason,
+    };
+
+    return this.apiService.post<any>('/retirement', requestData);
   }
 }
