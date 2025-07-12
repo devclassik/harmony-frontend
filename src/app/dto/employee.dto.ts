@@ -42,6 +42,8 @@ export interface Spouse {
   middleName: string | null;
   gender: string;
   dob: string;
+  weddingDate: string;
+  maidenName: string;
   occupation: string;
   createdAt: string;
   updatedAt: string;
@@ -116,13 +118,26 @@ export interface PreviousPosition {
 
 export interface SpiritualHistory {
   id: number;
-  baptismDate: string | null;
-  baptismLocation: string | null;
-  confirmationDate: string | null;
-  confirmationLocation: string | null;
+  yearSaved: string | null;
+  sanctified: boolean;
+  baptizedWithWater: boolean;
+  yearOfWaterBaptism: string | null;
+  firstYearInChurch: string | null;
+  isFaithfulInTithing: boolean;
+  firstSermonPastor: string | null;
+  currentPastor: string | null;
+  dateOfFirstSermon: string | null;
+  isApostolicChurchMember: boolean;
+  areaOfService: string | null;
+  currentStatusArea: string | null;
+  ordained: boolean;
+  ordainedDate: string | null;
+  spiritualStatus: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  locationOfFirstSermon: Address | null;
+  currentChurchLocation: Address | null;
 }
 
 export interface EmployeeDetails {
@@ -140,6 +155,7 @@ export interface EmployeeDetails {
   altPhoneType: string | null;
   dob: string | null;
   maritalStatus: string | null;
+  nationalIdNumber: string | null;
   everDivorced: boolean;
   beenConvicted: boolean;
   hasQuestionableBackground: boolean;
@@ -150,6 +166,7 @@ export interface EmployeeDetails {
   employmentType: string | null;
   serviceStartDate: string | null;
   retiredDate: string | null;
+  recentCredentialsNameArea: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -264,6 +281,38 @@ export interface UpdateEmployeeRequest {
   credentialIssuedDate?: string;
   credentialExpirationDate?: string;
   documentUrls?: string[];
+  // Worker-specific fields
+  nationIdNumber?: string;
+  areaOfService?: string;
+  everServedInApostolicChurch?: boolean;
+  serviceDate?: string;
+  serviceLocation?: string;
+  serviceCity?: string;
+  serviceState?: string;
+  serviceCountry?: string;
+  servicePastor?: string;
+  ordained?: boolean;
+  ordainedDate?: string;
+  // Additional spouse field
+  spouseMaidenName?: string;
+  // Area of service fields
+  currentStatusArea?: string;
+  recentCredentialsNameArea?: string;
+  credentialNumberArea?: string;
+  credentialDateIssuedArea?: string;
+  credentialExpirationDateArea?: string;
+  // References
+  references?: Array<{
+    referenceName: string;
+    referencePhone: string;
+    referenceEmail: string;
+    referenceAddress: string;
+    referenceCity: string;
+    referenceState: string;
+    referenceCountry: string;
+    referenceZipCode: string;
+    relationshipToReference: string;
+  }>;
 }
 
 export type CreateEmployeeResponse = ApiResponse<EmployeeDetails>;

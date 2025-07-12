@@ -100,10 +100,6 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
   genderOptionsChildren = ['MALE', 'FEMALE'];
   currentUserRole: string = ''; // User's role from API
 
-  // Dynamic location data based on country selection
-  availableStates: string[] = [];
-  availableCities: string[] = [];
-
   // Multi-select options for previous church positions
   churchPositionOptions = [
     'Pastor',
@@ -127,74 +123,6 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
 
   selectedChurchPositions: string[] = [];
   showPositionDropdown = false;
-
-  // Nigerian states
-  nigerianStates = [
-    'Abia',
-    'Adamawa',
-    'Akwa Ibom',
-    'Anambra',
-    'Bauchi',
-    'Bayelsa',
-    'Benue',
-    'Borno',
-    'Cross River',
-    'Delta',
-    'Ebonyi',
-    'Edo',
-    'Ekiti',
-    'Enugu',
-    'Gombe',
-    'Imo',
-    'Jigawa',
-    'Kaduna',
-    'Kano',
-    'Katsina',
-    'Kebbi',
-    'Kogi',
-    'Kwara',
-    'Lagos',
-    'Nasarawa',
-    'Niger',
-    'Ogun',
-    'Ondo',
-    'Osun',
-    'Oyo',
-    'Plateau',
-    'Rivers',
-    'Sokoto',
-    'Taraba',
-    'Yobe',
-    'Zamfara',
-    'FCT',
-  ];
-
-  // Nigerian cities by state (sample for major states)
-  nigerianCities: { [key: string]: string[] } = {
-    Lagos: [
-      'Ikeja',
-      'Victoria Island',
-      'Lekki',
-      'Surulere',
-      'Yaba',
-      'Ikoyi',
-      'Ajah',
-      'Magodo',
-    ],
-    Abuja: [
-      'Garki',
-      'Wuse',
-      'Maitama',
-      'Asokoro',
-      'Gwarinpa',
-      'Kubwa',
-      'Nyanya',
-    ],
-    Kano: ['Kano Municipal', 'Fagge', 'Dala', 'Gwale', 'Tarauni'],
-    Rivers: ['Port Harcourt', 'Obio-Akpor', 'Okrika', 'Eleme', 'Ikwerre'],
-    Oyo: ['Ibadan North', 'Ibadan South-West', 'Egbeda', 'Akinyele', 'Ona Ara'],
-    FCT: ['Garki', 'Wuse', 'Maitama', 'Asokoro', 'Gwarinpa', 'Kubwa', 'Nyanya'],
-  };
 
   constructor(
     private fb: FormBuilder,
@@ -460,14 +388,14 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       homeAddress: employeeData.homeAddress?.address || '',
       homeCity: employeeData.homeAddress?.city || '',
       homeState: employeeData.homeAddress?.state || '',
-      homeCountry: employeeData.homeAddress?.country || 'Nigeria',
+      homeCountry: employeeData.homeAddress?.country || '',
       homeZipCode: employeeData.homeAddress?.zipCode || '',
 
       // Mailing Address - Handle mailingAddress object structure
       mailingAddress: employeeData.mailingAddress?.address || '',
       mailingCity: employeeData.mailingAddress?.city || '',
       mailingState: employeeData.mailingAddress?.state || '',
-      mailingCountry: employeeData.mailingAddress?.country || 'Nigeria',
+      mailingCountry: employeeData.mailingAddress?.country || '',
       mailingZipCode: employeeData.mailingAddress?.zipCode || '',
 
       // Legal questions - Handle actual boolean values
@@ -721,7 +649,6 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
         this.departments = departments;
       },
       error: (error) => {
-        console.error('Error loading departments:', error);
         this.alertService.error(
           'Failed to load departments. Please try again.'
         );
@@ -803,7 +730,7 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       ],
       gender: ['', getValidators([Validators.required])],
       email: [
-        '',
+        { value: '', disabled: true },
         getRequiredValidators([
           Validators.required,
           Validators.email,
@@ -837,7 +764,7 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       ],
       homeCity: ['', getValidators([Validators.required])],
       homeState: ['', getValidators([Validators.required])],
-      homeCountry: ['Nigeria', getValidators([Validators.required])],
+      homeCountry: ['', getValidators([Validators.required])],
       homeZipCode: [
         '',
         getRequiredValidators([
@@ -848,7 +775,7 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       mailingAddress: ['', getRequiredValidators([Validators.maxLength(200)])],
       mailingCity: [''],
       mailingState: [''],
-      mailingCountry: ['Nigeria'],
+      mailingCountry: [''],
       mailingZipCode: [
         '',
         getRequiredValidators([Validators.pattern(/^\d{6}$/)]),
@@ -961,9 +888,6 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       currentChurchCountryArea: [''],
       currentChurchZipCodeArea: [''],
       currentChurchPastorArea: [''],
-
-      // Additional fields
-      other: [''],
     });
   }
 
@@ -994,7 +918,7 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
         },
         error: (error) => {
           this.isUploadingAvatar = false;
-          console.error('Avatar upload failed:', error);
+
           this.alertService.error(
             'Failed to upload profile image. Please try again.'
           );
@@ -1401,6 +1325,61 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
         }
       },
 
+      // Worker-specific fields
+      nationIdNumber: () =>
+        (payload.nationIdNumber = cleanValue(formValue.nationIdNumber)),
+      areaOfService: () =>
+        (payload.areaOfService = cleanValue(formValue.areaOfService)),
+      everServedInApostolicChurch: () =>
+        (payload.everServedInApostolicChurch = toBooleanOrUndefined(
+          formValue.everServedInApostolicChurch
+        )),
+      serviceDate: () =>
+        (payload.serviceDate = cleanValue(formValue.serviceDate)),
+      serviceLocation: () =>
+        (payload.serviceLocation = cleanValue(formValue.serviceLocation)),
+      serviceCity: () =>
+        (payload.serviceCity = cleanValue(formValue.serviceCity)),
+      serviceState: () =>
+        (payload.serviceState = cleanValue(formValue.serviceState)),
+      serviceCountry: () =>
+        (payload.serviceCountry = cleanValue(formValue.serviceCountry)),
+      servicePastor: () =>
+        (payload.servicePastor = cleanValue(formValue.servicePastor)),
+      ordained: () =>
+        (payload.ordained = toBooleanOrUndefined(formValue.ordained)),
+      ordainedDate: () =>
+        (payload.ordainedDate = cleanValue(formValue.ordainedDate)),
+
+      // Additional spouse field
+      spouseMaidenName: () =>
+        (payload.spouseMaidenName = cleanValue(formValue.spouseMaidenName)),
+
+      // Area of service fields
+      previousChurchPositions: () => {
+        if (formValue.previousChurchPositions) {
+          payload.previousChurchPositions = formValue.previousChurchPositions;
+        }
+      },
+      currentStatusArea: () =>
+        (payload.currentStatusArea = cleanValue(formValue.currentStatusArea)),
+      recentCredentialsNameArea: () =>
+        (payload.recentCredentialsNameArea = cleanValue(
+          formValue.recentCredentialsNameArea
+        )),
+      credentialNumberArea: () =>
+        (payload.credentialNumberArea = cleanValue(
+          formValue.credentialNumberArea
+        )),
+      credentialDateIssuedArea: () =>
+        (payload.credentialDateIssuedArea = cleanValue(
+          formValue.credentialDateIssuedArea
+        )),
+      credentialExpirationDateArea: () =>
+        (payload.credentialExpirationDateArea = cleanValue(
+          formValue.credentialExpirationDateArea
+        )),
+
       // Form Arrays
       children: () => {
         if (formValue.children) {
@@ -1416,6 +1395,21 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
           payload.previousChurchPositions = formValue.previousPositions
             .map((pos: any) => cleanValue(pos.previousPosition))
             .filter((position: string) => position);
+        }
+      },
+      references: () => {
+        if (formValue.references) {
+          payload.references = formValue.references.map((ref: any) => ({
+            referenceName: cleanValue(ref.referenceName),
+            referencePhone: cleanValue(ref.referencePhone),
+            referenceEmail: cleanValue(ref.referenceEmail),
+            referenceAddress: cleanValue(ref.referenceAddress),
+            referenceCity: cleanValue(ref.referenceCity),
+            referenceState: cleanValue(ref.referenceState),
+            referenceCountry: cleanValue(ref.referenceCountry),
+            referenceZipCode: cleanValue(ref.referenceZipCode),
+            relationshipToReference: cleanValue(ref.relationshipToReference),
+          }));
         }
       },
     };
@@ -1683,57 +1677,92 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     // Add files to the list
     this.uploadedFiles = [...this.uploadedFiles, ...newFiles];
 
-    // Upload files using the multiple upload endpoint
+    // Upload files one by one using uploadSingleFile
     this.isUploadingDocuments = true;
-    const filesToUpload = newFiles.map((f) => f.file);
+    let uploadedCount = 0;
+    let failedCount = 0;
 
-    this.fileUploadService.uploadMultipleFiles(filesToUpload).subscribe({
-      next: (response) => {
-        this.isUploadingDocuments = false;
-        if (response.status === 'success' && response.files) {
-          // Store the uploaded URLs
-          this.uploadedDocumentUrls = [
-            ...this.uploadedDocumentUrls,
-            ...response.files,
-          ];
+    newFiles.forEach((uploadFile, index) => {
+      this.fileUploadService
+        .uploadSingleFileWithProgress(uploadFile.file)
+        .subscribe({
+          next: (event) => {
+            if (event.progress !== undefined) {
+              // Update progress
+              const fileIndex = this.uploadedFiles.findIndex(
+                (f) => f.name === uploadFile.name && f.size === uploadFile.size
+              );
 
-          // Track documents as modified for selective payload
-          this.modifiedFields.add('documentUrls');
+              if (fileIndex > -1) {
+                this.uploadedFiles[fileIndex].progress = event.progress;
+                this.uploadedFiles[fileIndex].uploadStatus = 'uploading';
+              }
+            } else if (event.response) {
+              // Upload completed
+              uploadedCount++;
 
-          // Update the uploaded files with their URLs
-          response.files.forEach((url, index) => {
-            if (newFiles[index]) {
-              newFiles[index].url = url;
-              newFiles[index].uploadStatus = 'completed';
+              // Update the file with the uploaded URL
+              const fileIndex = this.uploadedFiles.findIndex(
+                (f) => f.name === uploadFile.name && f.size === uploadFile.size
+              );
+
+              if (fileIndex > -1) {
+                this.uploadedFiles[fileIndex].url = event.response.file;
+                this.uploadedFiles[fileIndex].uploadStatus = 'completed';
+                this.uploadedFiles[fileIndex].progress = 100;
+              }
+
+              // Add URL to document URLs array
+              this.uploadedDocumentUrls.push(event.response.file);
+
+              // Track document upload as modification
+              this.modifiedFields.add('documentUrls');
+
+              // Check if all uploads are complete
+              if (uploadedCount + failedCount === newFiles.length) {
+                this.isUploadingDocuments = false;
+
+                if (failedCount === 0) {
+                  this.alertService.success(
+                    `Successfully uploaded ${uploadedCount} document(s)!`
+                  );
+                } else {
+                  this.alertService.warning(
+                    `Uploaded ${uploadedCount} document(s). ${failedCount} failed to upload.`
+                  );
+                }
+              }
             }
-          });
+          },
+          error: (error) => {
+            failedCount++;
 
-          this.alertService.success(
-            `Successfully uploaded ${response.files.length} document(s)!`
-          );
-        } else {
-          this.alertService.error(
-            'Failed to upload documents. Please try again.'
-          );
-        }
-      },
-      error: (error) => {
-        this.isUploadingDocuments = false;
-        console.error('Document upload failed:', error);
-        this.alertService.error(
-          'Failed to upload documents. Please try again.'
-        );
+            // Update file status to failed
+            const fileIndex = this.uploadedFiles.findIndex(
+              (f) => f.name === uploadFile.name && f.size === uploadFile.size
+            );
 
-        // Remove the failed files from the list
-        newFiles.forEach((file) => {
-          const index = this.uploadedFiles.findIndex(
-            (f) => f.name === file.name && f.size === file.size
-          );
-          if (index > -1) {
-            this.uploadedFiles.splice(index, 1);
-          }
+            if (fileIndex > -1) {
+              this.uploadedFiles[fileIndex].uploadStatus = 'error';
+              this.uploadedFiles[fileIndex].progress = 0;
+            }
+
+            // Check if all uploads are complete
+            if (uploadedCount + failedCount === newFiles.length) {
+              this.isUploadingDocuments = false;
+
+              if (uploadedCount === 0) {
+                this.alertService.error(
+                  'Failed to upload documents. Please try again.'
+                );
+              } else {
+                this.alertService.warning(
+                  `Uploaded ${uploadedCount} document(s). ${failedCount} failed to upload.`
+                );
+              }
+            }
+          },
         });
-      },
     });
   }
 
@@ -1834,50 +1863,6 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
     if (firstErrorField) {
       firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }
-
-  // Handle country selection to populate states
-  onCountryChange(event: Event) {
-    const target = event.target as HTMLSelectElement;
-    const selectedCountry = target.value;
-
-    if (selectedCountry === 'Nigeria') {
-      this.availableStates = this.nigerianStates;
-    } else {
-      // For other countries, you can add their states/provinces
-      this.availableStates = [];
-    }
-
-    // Clear city and state when country changes
-    this.availableCities = [];
-    this.profileForm.patchValue({
-      homeState: '',
-      homeCity: '',
-    });
-  }
-
-  // Handle state selection to populate cities
-  onStateChange(event: Event) {
-    const target = event.target as HTMLSelectElement;
-    const selectedState = target.value;
-
-    if (selectedState && this.nigerianCities[selectedState]) {
-      this.availableCities = this.nigerianCities[selectedState];
-    } else {
-      this.availableCities = [];
-    }
-
-    // Clear city when state changes
-    this.profileForm.patchValue({
-      homeCity: '',
-    });
-  }
-
-  // Handle city selection (currently just for validation)
-  onCityChange(event: Event) {
-    const target = event.target as HTMLSelectElement;
-    const selectedCity = target.value;
-    // You can add any city-specific logic here if needed
   }
 
   // Multi-select church positions methods

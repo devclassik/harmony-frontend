@@ -1,0 +1,55 @@
+<div class="bg-white rounded-xl shadow-sm">
+  <div class="pt-8 pb-12 px-8">
+    <div class="w-full">
+      <!-- Accordion Header -->
+      <div
+        class="text-base font-medium text-gray-800 border-b border-gray-100 pb-2 mb-6 flex items-center justify-between cursor-pointer"
+        (click)="toggleAccordion()"
+      >
+        <span>{{ title }}</span>
+        <button
+          type="button"
+          class="flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg
+            class="w-5 h-5 transform transition-transform"
+            [class.rotate-180]="!isExpanded"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            ></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Accordion Content -->
+      <div *ngIf="isExpanded" class="transition-all duration-300">
+        <!-- Grid Layout for Info Items -->
+        <div class="grid gap-6" [ngClass]="getGridClass()">
+          <div *ngFor="let item of data" class="flex flex-col">
+            <label class="text-sm font-medium text-gray-700 mb-2">
+              {{ item.label }}
+            </label>
+            <div class="text-sm text-gray-900 min-h-[40px] flex items-center">
+              {{ item.text || "N/A" }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="data.length === 0" class="text-center py-8 text-gray-500">
+          <div class="text-gray-400 text-4xl mb-2">
+            <span class="material-icons">info</span>
+          </div>
+          <p class="text-sm">No information available</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

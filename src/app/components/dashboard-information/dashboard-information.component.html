@@ -32,7 +32,6 @@
       >
         • {{ employeeData.status }}
       </span>
-
     </div>
 
     <!-- Left Column Details -->
@@ -64,6 +63,18 @@
           {{ employeeData.gender }}
         </p>
       </div>
+      <div *ngIf="isProfileMode">
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">Department</p>
+        <p class="text-base text-[#000000] font-medium">
+          {{ employeeData.department }}
+        </p>
+      </div>
+      <div *ngIf="isProfileMode">
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">Location</p>
+        <p class="text-base text-[#000000] font-medium">
+          {{ employeeData.location }}
+        </p>
+      </div>
     </div>
 
     <!-- Right Column Details -->
@@ -86,6 +97,18 @@
         </p>
         <p class="text-base text-[#000000] font-medium">
           {{ employeeData.preferredName }}
+        </p>
+      </div>
+      <div *ngIf="isProfileMode">
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">Email</p>
+        <p class="text-base text-[#000000] font-medium">
+          {{ employeeData.email }}
+        </p>
+      </div>
+      <div *ngIf="isProfileMode">
+        <p class="text-sm font-medium text-[#9F9F9F] mb-2">Role</p>
+        <p class="text-base text-[#000000] font-medium">
+          {{ employeeData.role }}
         </p>
       </div>
     </div>

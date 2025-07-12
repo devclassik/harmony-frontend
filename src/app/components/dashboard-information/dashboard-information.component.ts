@@ -12,6 +12,7 @@ import { EmployeeInfo } from '../../interfaces/employee.interface';
 export class DashboardInformationComponent {
   @Input() title: string = 'Employee Information';
   @Input() employeeData!: EmployeeInfo;
+  @Input() isProfileMode: boolean = false;
   @Input() personalTitle: string = 'Mr.';
 
   constructor(private router: Router) {}

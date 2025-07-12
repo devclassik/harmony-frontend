@@ -1,0 +1,200 @@
+<!-- Create Retirement Request Slide-out -->
+<div class="fixed inset-0 z-50 flex justify-end bg-[#7f7f7f63]" *ngIf="show">
+  <div
+    class="bg-white w-full max-w-xl h-full shadow-lg p-8 overflow-y-auto relative animate-slide-in-right"
+  >
+    <button
+      class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl"
+      (click)="onCancel()"
+    >
+      &times;
+    </button>
+
+    <!-- Header -->
+    <div class="flex items-center gap-2 mb-6">
+      <h2 class="text-xl font-semibold text-gray-900">
+        Create Retirement Request
+      </h2>
+    </div>
+
+    <div class="border-b border-gray-200 mb-8"></div>
+
+    <!-- Form Section -->
+    <div class="space-y-6">
+      <h3 class="text-lg font-medium text-gray-900">Retirement Information</h3>
+
+      <!-- Replacement Recommendation and Request Date on same line -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Replacement Recommendation</label
+          >
+          <input
+            type="text"
+            [(ngModel)]="formData.replacementRecommendation"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="Enter replacement recommendation..."
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Request Date</label
+          >
+          <input
+            type="date"
+            [(ngModel)]="formData.requestDate"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="MM-DD-YYYY"
+          />
+        </div>
+      </div>
+
+      <!-- Destination as separate field -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Destination</label
+        >
+        <input
+          type="text"
+          [(ngModel)]="formData.destination"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          placeholder="Enter destination..."
+        />
+      </div>
+
+      <!-- Reason as separate field -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Reason</label
+        >
+        <textarea
+          [(ngModel)]="formData.destinationReason"
+          rows="4"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+          placeholder="Enter your reason for retirement..."
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Document Upload</label
+        >
+        <div
+          class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center"
+        >
+          <input
+            type="file"
+            (change)="onFileSelect($event)"
+            multiple
+            class="hidden"
+            #fileInput
+          />
+          <button
+            type="button"
+            (click)="fileInput.click()"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          >
+            <svg
+              class="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              ></path>
+            </svg>
+            Choose Files
+          </button>
+          <p class="mt-2 text-sm text-gray-500">
+            Upload supporting documents (PDF, DOC, DOCX, XLS, XLSX)
+          </p>
+        </div>
+
+        <!-- Display uploaded files -->
+        <div *ngIf="formData.documents.length > 0" class="mt-4 space-y-2">
+          <div
+            *ngFor="let doc of formData.documents; let i = index"
+            class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+          >
+            <div class="flex items-center">
+              <svg
+                class="w-5 h-5 text-gray-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                ></path>
+              </svg>
+              <span class="text-sm text-gray-700">{{ doc.name }}</span>
+            </div>
+            <button
+              type="button"
+              (click)="removeDocument(i)"
+              class="text-red-500 hover:text-red-700"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mt-8 pt-6 border-t border-gray-200">
+      <div class="flex gap-3">
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="flex-1 px-4 py-2 border border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="onSubmit()"
+          class="flex-1 px-4 py-2 bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F] text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+          [disabled]="!isFormValid()"
+          [class.opacity-50]="!isFormValid()"
+          [class.cursor-not-allowed]="!isFormValid()"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Use Reusable Confirm Prompt Component -->
+<app-confirm-prompt
+  *ngIf="showConfirmModal"
+  [title]="'Confirm Retirement Request'"
+  [text]="
+    'Are you sure you want to create this retirement request? This action cannot be undone.'
+  "
+  [yesButtonText]="'Yes, Submit'"
+  [noButtonText]="'Cancel'"
+  (confirmed)="onConfirmSubmit($event)"
+  (closed)="onConfirmCancel()"
+></app-confirm-prompt>

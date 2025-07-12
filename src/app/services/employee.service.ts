@@ -160,4 +160,13 @@ export class EmployeeService {
 
     return missingFields;
   }
+
+  createRetirementRequest(employeeId: number, reason: string): Observable<any> {
+    const requestData = {
+      employeeId: employeeId,
+      reason: reason,
+    };
+
+    return this.apiService.post<any>('/retirement', requestData);
+  }
 }
