@@ -9,11 +9,7 @@ import { TableData } from '../../interfaces/employee.interface';
 import { DocumentViewerComponent } from '../../components/document-viewer/document-viewer.component';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 import { CommonModule } from '@angular/common';
-import {
-  TemplateService,
-  Template,
-  TemplateType,
-} from '../../services/template.service';
+import { TemplateService, Template } from '../../services/template.service';
 import { AlertService } from '../../services/alert.service';
 import { Subscription } from 'rxjs';
 
@@ -131,13 +127,11 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   transformTemplateData() {
     this.documentsData = this.templates.map((template) => ({
       id: template.id.toString(),
-      documentName: this.templateService.getTemplateTypeDisplayName(
-        template.type
-      ),
+      documentName: template.name,
       date: this.formatDate(template.createdAt),
-      documentType: this.getFileTypeFromUrl(template.downloadUrl),
+      documentType: template.fileType,
       downloadUrl: template.downloadUrl,
-      templateType: template.type,
+      templateType: template.fileType,
     }));
 
     // For now, keeping training data empty as it's not part of the template API
