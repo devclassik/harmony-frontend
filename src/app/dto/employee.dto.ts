@@ -155,7 +155,7 @@ export interface EmployeeDetails {
   altPhoneType: string | null;
   dob: string | null;
   maritalStatus: string | null;
-  nationalIdNumber: string | null;
+  nationIdNumber: string | null;
   everDivorced: boolean;
   beenConvicted: boolean;
   hasQuestionableBackground: boolean;
@@ -184,7 +184,20 @@ export interface EmployeeDetails {
   spiritualHistory: SpiritualHistory | null;
 }
 
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedEmployeeData {
+  data: EmployeeDetails[];
+  pagination: PaginationMeta;
+}
+
 export type GetEmployeeResponse = ApiResponse<EmployeeDetails>;
+export type GetAllEmployeesResponse = ApiResponse<PaginatedEmployeeData>;
 
 export interface CreateEmployeeRequest {
   title?: string;

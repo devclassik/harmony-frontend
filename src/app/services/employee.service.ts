@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import {
   EmployeeDetails,
   GetEmployeeResponse,
+  GetAllEmployeesResponse,
   CreateEmployeeRequest,
   CreateEmployeeResponse,
   UpdateEmployeeRequest,
@@ -32,10 +33,10 @@ export class EmployeeService {
 
   /**
    * Get all employees
-   * @returns Observable of all employees
+   * @returns Observable of all employees with pagination
    */
-  getAllEmployees(): Observable<GetEmployeeResponse> {
-    return this.apiService.get<GetEmployeeResponse>(
+  getAllEmployees(): Observable<GetAllEmployeesResponse> {
+    return this.apiService.get<GetAllEmployeesResponse>(
       environment.routes.employees.getAll
     );
   }

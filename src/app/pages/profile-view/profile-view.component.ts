@@ -319,7 +319,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
       },
       {
         label: 'Nation Identification Number',
-        text: this.employeeData.nationalIdNumber || 'Not specified',
+        text: this.employeeData.nationIdNumber || 'Not specified',
       },
     ];
   }

@@ -437,10 +437,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: (response) => {
           console.log('All Employees Response:', response);
           if (response.status === 'success' && response.data) {
-            // Handle both single employee and array of employees
-            const employeesData = Array.isArray(response.data)
-              ? response.data
-              : [response.data];
+            // Handle the new nested structure with pagination
+            const employeesData = response.data.data || [];
             this.employees = this.transformEmployeesToTableData(employeesData);
             console.log('Transformed Employees Data:', this.employees);
           }

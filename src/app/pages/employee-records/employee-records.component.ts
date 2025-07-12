@@ -110,9 +110,8 @@ export class EmployeeRecordsComponent implements OnInit {
     this.employeeService.getAllEmployees().subscribe({
       next: (response) => {
         if (response.status === 'success' && response.data) {
-          this.allEmployees = Array.isArray(response.data)
-            ? response.data
-            : [response.data];
+          // Handle the new nested structure with pagination
+          this.allEmployees = response.data.data || [];
           this.employees = this.transformEmployeesToTableData(
             this.allEmployees
           );
