@@ -102,10 +102,7 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
           let leaves = response.data;
 
           // Filter by employee ID if not admin
-          if (
-            this.userRole?.toLowerCase() !== 'admin' &&
-            this.currentEmployeeId
-          ) {
+          if (this.currentEmployeeId) {
             leaves = this.leaveService.filterLeavesByEmployee(
               leaves,
               this.currentEmployeeId
