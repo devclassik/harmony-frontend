@@ -1,7 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { ChartOptions } from '../bar-chart/bar-chart.component';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { CommonModule } from '@angular/common';
+import {
+  DisciplineStatistics,
+  PerformanceStatistics,
+} from '../../dto/analytics.dto';
 
 export interface FilterTab {
   label: string;
@@ -20,9 +24,11 @@ interface ChartData {
   templateUrl: './area-chart.component.html',
   styleUrl: './area-chart.component.css',
 })
-export class AreaChartComponent {
+export class AreaChartComponent implements OnChanges {
   public chartOptions: Partial<ChartOptions>;
   @Input() title: string = 'Leave Usage';
+  @Input() disciplineData: DisciplineStatistics | null = null;
+  @Input() performanceData: PerformanceStatistics | null = null;
   @Input() set colors(value: string[]) {
     if (value && value.length > 0) {
       this._colors = value;
@@ -51,19 +57,19 @@ export class AreaChartComponent {
         data: [40, 25, 20, 30, 40, 40, 40, 20, 40, 10, 20, 15],
       },
     ],
-    'Warnings': [
+    Warnings: [
       {
         name: 'Warnings',
         data: [15, 20, 25, 30, 25, 20, 15, 20, 25, 30, 25, 20],
       },
     ],
-    'Suspensions': [
+    Suspensions: [
       {
         name: 'Suspensions',
         data: [5, 8, 12, 10, 7, 5, 8, 12, 10, 7, 5, 8],
       },
     ],
-    'Terminations': [
+    Terminations: [
       {
         name: 'Terminations',
         data: [2, 3, 4, 3, 2, 1, 2, 3, 4, 3, 2, 1],
@@ -165,8 +171,8 @@ export class AreaChartComponent {
           inverseColors: false,
           opacityFrom: 1,
           opacityTo: 0.8,
-          stops: [0, 100]
-        }
+          stops: [0, 100],
+        },
       },
       colors: this.colors,
       legend: {
@@ -211,9 +217,97 @@ export class AreaChartComponent {
     this.toggleFilterDropdown();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['disciplineData'] && this.disciplineData) {
+      this.transformDisciplineData();
+    }
+    if (changes['performanceData'] && this.performanceData) {
+      this.transformPerformanceData();
+    }
+  }
+
+  private transformDisciplineData(): void {
+    if (!this.disciplineData) return;
+
+    const categories = [
+      'VERBAL',
+      'WRITTEN',
+      'SUSPENSION',
+      'TERMINATION',
+      'DEMOTION',
+      'PROMOTION',
+    ];
+    const months = this.disciplineData.map((item) => item.month);
+
+    // Update chart categories
+    if (this.chartOptions.xaxis) {
+      this.chartOptions.xaxis.categories = months;
+    }
+
+    // Transform data for each discipline type
+    const transformedData: ChartData[] = categories.map((category) => ({
+      name: category,
+      data: this.disciplineData!.map(
+        (monthData) => monthData[category as keyof typeof monthData] as number
+      ),
+    }));
+
+    // Update chart data
+    this.chartData[''] = transformedData;
+    this.chartData['All'] = transformedData;
+    this.chartData['Verbal'] = [
+      transformedData.find((d) => d.name === 'VERBAL')!,
+    ];
+    this.chartData['Written'] = [
+      transformedData.find((d) => d.name === 'WRITTEN')!,
+    ];
+    this.chartData['Suspension'] = [
+      transformedData.find((d) => d.name === 'SUSPENSION')!,
+    ];
+    this.chartData['Termination'] = [
+      transformedData.find((d) => d.name === 'TERMINATION')!,
+    ];
+
+    // Update filter tabs for discipline data
+    this.filterTabs = [
+      { label: 'All', value: '' },
+      { label: 'Verbal', value: 'Verbal' },
+      { label: 'Written', value: 'Written' },
+      { label: 'Suspension', value: 'Suspension' },
+      { label: 'Termination', value: 'Termination' },
+    ];
+
+    this.updateChartData();
+  }
+
+  private transformPerformanceData(): void {
+    if (!this.performanceData) return;
+
+    const quarters = this.performanceData.map((item) => item.quarter);
+    const scores = this.performanceData.map((item) => item.avgScore);
+
+    // Update chart categories
+    if (this.chartOptions.xaxis) {
+      this.chartOptions.xaxis.categories = quarters;
+    }
+
+    // Transform data for performance
+    const transformedData: ChartData[] = [
+      {
+        name: 'Average Score',
+        data: scores,
+      },
+    ];
+
+    // Update chart data
+    this.chartData[''] = transformedData;
+    this.updateChartData();
+  }
+
   private updateChartData() {
     if (this.chartOptions.series) {
-      this.chartOptions.series = this.chartData[this.activeFilterTab] || this.chartData[''];
+      this.chartOptions.series =
+        this.chartData[this.activeFilterTab] || this.chartData[''];
     }
   }
 
