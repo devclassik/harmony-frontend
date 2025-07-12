@@ -85,7 +85,7 @@ export class SickLeaveComponent implements OnInit {
           const allSickLeaves = response.data;
 
           // Filter leaves based on user role
-          if (this.currentUserId) {
+          if (this.userRole?.toLowerCase() !== 'admin' && this.currentUserId) {
             // Workers see only their own sick leaves
             this.sickLeaveRequests = this.transformToTableData(
               this.leaveService.filterLeavesByEmployee(
