@@ -33,11 +33,20 @@ export class EmployeeService {
 
   /**
    * Get all employees
+   * @param page Page number (optional, defaults to 1)
+   * @param limit Items per page (optional, defaults to 10)
    * @returns Observable of all employees with pagination
    */
-  getAllEmployees(): Observable<GetAllEmployeesResponse> {
+  getAllEmployees(
+    page: number = 1,
+    limit: number = 10
+  ): Observable<GetAllEmployeesResponse> {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+
     return this.apiService.get<GetAllEmployeesResponse>(
-      environment.routes.employees.getAll
+      `${environment.routes.employees.getAll}?${params.toString()}`
     );
   }
 
