@@ -24,10 +24,12 @@
   [view]="showEmployeeDetails"
   (close)="showEmployeeDetails = false"
   [employee]="selectedEmployeeRecord"
+  [employeeDetails]="selectedEmployeeDetails"
 ></app-employee-details>
 
 <app-appraisal
   [open]="showAppraisal"
+  [employee]="selectedEmployee"
   (closed)="showAppraisal = false"
   (submitted)="handleAppraisal($event)"
 ></app-appraisal>
@@ -52,3 +54,10 @@
   [okButtonLink]="'/dashboard'"
   (closed)="successModal = false"
 ></app-success-modal>
+
+<!-- Loading Overlay -->
+<app-loading-overlay
+  [isVisible]="isLoading"
+  title="Loading employees..."
+  message="Please wait while we fetch employee data."
+></app-loading-overlay>

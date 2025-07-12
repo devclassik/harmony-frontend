@@ -1,0 +1,321 @@
+<div
+  *ngIf="show"
+  class="fixed inset-0 bg-[#7f7f7f63] backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  (click)="onCancel()"
+>
+  <div
+    class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+    (click)="$event.stopPropagation()"
+  >
+    <div
+      class="sticky top-0 bg-white rounded-t-2xl p-6 border-b border-gray-200"
+    >
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-gray-900">
+          {{ title }}
+        </h2>
+        <button (click)="onCancel()" class="text-gray-400 hover:text-gray-600">
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="p-6 space-y-6">
+      <h3 class="text-lg font-medium text-gray-900">
+        {{ subtitle }}
+      </h3>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Request Type</label
+          >
+          <select
+            [(ngModel)]="formData.requestType"
+            name="requestType"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            required
+          >
+            <option value="">Select</option>
+            <option *ngFor="let type of requestTypes" [value]="type">
+              {{ type }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Start Date</label
+          >
+          <input
+            type="date"
+            [(ngModel)]="formData.startDate"
+            name="startDate"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="MM-DD-YYYY"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Duration</label
+          >
+          <input
+            type="number"
+            [(ngModel)]="formData.duration.value"
+            name="durationValue"
+            min="1"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="Enter duration"
+            required
+          />
+
+          <div class="mt-3">
+            <div class="flex flex-wrap gap-2">
+              <label
+                *ngFor="let unit of durationUnits"
+                class="flex items-center cursor-pointer"
+              >
+                <input
+                  type="radio"
+                  [(ngModel)]="formData.duration.unit"
+                  name="durationUnit"
+                  [value]="unit"
+                  class="w-3 h-3 text-green-600 border-gray-300 focus:ring-green-500 focus:ring-1 appearance-none border-2 checked:bg-green-600 checked:border-green-600 relative square-checkbox"
+                />
+                <span class="ml-1 text-xs text-gray-700">{{ unit }}</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Location</label
+          >
+          <input
+            type="text"
+            [(ngModel)]="formData.location"
+            name="location"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="Enter location"
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Reason</label
+        >
+        <textarea
+          [(ngModel)]="formData.reason"
+          name="reason"
+          rows="4"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+          [placeholder]="reasonPlaceholder"
+          required
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Upload Handover Note</label
+        >
+
+        <div
+          class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors"
+        >
+          <input
+            type="file"
+            multiple
+            (change)="onFileSelect($event)"
+            class="hidden"
+            #fileInput
+            accept=".pdf,.doc,.docx,.txt"
+          />
+          <div class="flex flex-col items-center">
+            <svg
+              class="w-8 h-8 text-gray-400 mb-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              />
+            </svg>
+            <button
+              type="button"
+              (click)="fileInput.click()"
+              class="text-green-600 hover:text-green-700 font-medium"
+            >
+              Choose files or drag and drop
+            </button>
+            <p class="text-xs text-gray-500 mt-1">
+              PDF, DOC, DOCX, TXT up to 10MB
+            </p>
+          </div>
+        </div>
+
+        <!-- Enhanced File List with Preview and Download -->
+        <div *ngIf="uploadedFiles.length > 0" class="mt-4 space-y-2">
+          <div
+            *ngFor="let file of uploadedFiles; let i = index"
+            class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+          >
+            <!-- File Icon -->
+            <div
+              class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-medium"
+              [class]="getFileTypeColor(file.name)"
+            >
+              {{ getFileTypeIcon(file.name).toUpperCase() }}
+            </div>
+
+            <!-- File Details -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-gray-900 text-sm truncate">{{
+                  file.name
+                }}</span>
+                <span class="text-xs text-gray-500"
+                  >({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span
+                >
+                <!-- Status Badge -->
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                  [ngClass]="{
+                    'bg-blue-100 text-blue-800':
+                      file.uploadStatus === 'uploading',
+                    'bg-green-100 text-green-800':
+                      file.uploadStatus === 'completed',
+                    'bg-red-100 text-red-800': file.uploadStatus === 'error'
+                  }"
+                >
+                  {{ file.uploadStatus | titlecase }}
+                </span>
+              </div>
+
+              <!-- Progress Bar -->
+              <div
+                *ngIf="file.uploadStatus === 'uploading'"
+                class="mt-1 w-full bg-gray-200 rounded-full h-1"
+              >
+                <div
+                  class="bg-blue-600 h-1 rounded-full transition-all duration-300"
+                  [style.width.%]="file.progress"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2">
+              <!-- Preview Button -->
+              <button
+                *ngIf="file.uploadStatus === 'completed' && file.url"
+                type="button"
+                (click)="previewFile(file)"
+                class="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
+                title="Preview"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+              </button>
+
+              <!-- Remove Button -->
+              <button
+                type="button"
+                (click)="removeFile(i)"
+                class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                title="Remove"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="sticky bottom-0 bg-white rounded-b-2xl p-6 border-t border-gray-200"
+    >
+      <div class="flex gap-3">
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="flex-1 px-4 py-2 border border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="onSubmit()"
+          class="flex-1 px-4 py-2 bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F] text-white rounded-lg font-medium transition-colors"
+          [disabled]="!isFormValid()"
+          [class.opacity-50]="!isFormValid()"
+          [class.cursor-not-allowed]="!isFormValid()"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-confirm-prompt
+  *ngIf="showConfirmModal"
+  [title]="'Confirm'"
+  [text]="confirmText"
+  [yesButtonText]="'Yes'"
+  [noButtonText]="'No'"
+  (confirmed)="onConfirmSubmit($event)"
+  (closed)="onConfirmCancel()"
+></app-confirm-prompt>

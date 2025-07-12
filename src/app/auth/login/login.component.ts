@@ -3,23 +3,31 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { AlertService } from '../../services/alert.service';
+import { NotificationService } from '../../services/notification.service';
+import { MatIconModule } from '@angular/material/icon';
+import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatIconModule, LoadingOverlayComponent],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
 })
 export class LoginComponent {
-
-  username: string = '';
+  email: string = '';
   password: string = '';
+  errorMessage: string = '';
+  isLoading: boolean = false;
+  showPassword: boolean = false;
 
-
-  constructor(private router: Router,
-    private auth: AuthService
-  ) { }
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+    private alertService: AlertService,
+    private notificationService: NotificationService
+  ) {}
 
   signUp() {
     this.router.navigate(['/auth/sign-up']);
@@ -29,20 +37,41 @@ export class LoginComponent {
     this.router.navigate(['/auth/forgot-password']);
   }
 
-  async onSubmit(): Promise<boolean> {
-    if (!this.username || !this.password) {
-      alert('Please enter your username and password.');
-      return false;
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  onSubmit() {
+    if (!this.email || !this.password) {
+      this.errorMessage = 'Please enter your email and password.';
+      this.alertService.error('Please enter your email and password.');
+      return;
     }
 
-    console.log('Username:', this.username);
-    console.log('Password:', this.password);
-    const res = await this.auth.login(this.username, this.password);
-    if (res && !res.auth) {
-      return false;
-    } else {
-      this.router.navigate(['/dashboard']);
-      return true;
-    }
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.auth.login(this.email, this.password).subscribe({
+      next: () => {
+        // Successful login - initialize notifications
+        this.notificationService.initializeNotifications();
+        this.alertService.success('Login successful! Welcome back.');
+        // Navigate after a short delay to show the success alert
+        setTimeout(() => {
+          this.router.navigate(['/dashboard']);
+        }, 500);
+      },
+      error: (error: any) => {
+        this.isLoading = false; // Fix: Set loading to false on error
+        const errorMsg =
+          error?.message || 'An error occurred. Please try again.';
+        this.errorMessage = errorMsg;
+        this.alertService.error(errorMsg);
+        console.error('Login error:', error);
+      },
+      complete: () => {
+        this.isLoading = false;
+      },
+    });
   }
 }

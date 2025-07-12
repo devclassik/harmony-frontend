@@ -3,7 +3,14 @@ export interface TableData {
   name?: string;
   department?: string;
   role?: string;
-  status?: 'Active' | 'On leave' | 'Retired' | 'On Discipline' | 'Approved' | 'Pending' | 'Rejected';
+  status?:
+    | 'Active'
+    | 'On leave'
+    | 'Retired'
+    | 'On Discipline'
+    | 'Approved'
+    | 'Pending'
+    | 'Rejected';
   imageUrl?: string;
   disciplineType?: 'Suspension' | 'Warning';
   offenseCategory?: string;
@@ -16,7 +23,34 @@ export interface TableData {
   endDate?: string;
   requestType?: string;
   duration?: string;
+  location?: string;
+  substitution?: string;
   date?: string;
   documentType?: string;
   documentName?: string;
-} 
+  reason?: string;
+  downloadUrl?: string;
+  templateType?: string;
+  // Notification properties
+  isRead?: boolean;
+  type?: string;
+  message?: string;
+  targetWorker?: string;
+  timestamp?: string;
+  worker?: {
+    name: string;
+    image: string;
+  };
+}
+
+export interface EmployeeInfo {
+  id: string;
+  firstName: string;
+  lastName: string;
+  middleName: string;
+  title: string;
+  preferredName: string;
+  gender: string;
+  profileImage: string;
+  status: 'Active' | 'On leave' | 'Retired' | 'On Discipline';
+}

@@ -1,0 +1,52 @@
+<!-- Welcome Screen Animation Overlay -->
+<div
+  *ngIf="show"
+  class="fixed inset-0 z-40 cursor-pointer"
+  style="background-color: rgba(0, 0, 0, 0.1)"
+  (click)="onOverlayClick($event)"
+>
+  <!-- Arrow pointing UP to profile picture in navbar -->
+  <div class="absolute top-12 right-16 z-50">
+    <img
+      src="assets/animations/arrow.gif"
+      alt="Arrow pointing to profile"
+      class="w-12 h-12 animate-bounce transform rotate-180"
+    />
+  </div>
+
+  <!-- Speech bubble positioned below the arrow -->
+  <div class="absolute top-1 right-2 z-50 animate-fade-in">
+    <!-- Speech bubble container -->
+    <div class="relative">
+      <!-- Main speech bubble background (image.gif) - made completely white -->
+      <img
+        src="assets/animations/image.gif"
+        alt="Welcome Speech Bubble"
+        class="w-130 h-100 drop-shadow-2xl saturate-0 brightness-300"
+      />
+
+      <!-- Characters and text positioned to fit inside the bubble with proper wrapping -->
+      <div
+        class="absolute inset-6 flex flex-col items-center justify-center text-center max-w-xs mx-auto"
+      >
+        <!-- Characters (welcome.gif) -->
+        <div class="mb-4">
+          <img
+            src="assets/animations/welcome.gif"
+            alt="Welcome Characters"
+            class="w-34 h-26 mx-auto"
+          />
+        </div>
+
+        <!-- Welcome text with proper wrapping -->
+        <div class="px-4">
+          <p
+            class="text-[#7A7A7A] text-sm font-bold drop-shadow-lg leading-relaxed break-words"
+          >
+            Welcome to Harmony, {{ userName }}! Set up your profile to begin.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

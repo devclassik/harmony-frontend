@@ -13,10 +13,8 @@ export interface PromptConfig {
   selector: 'app-confirm-prompt',
   imports: [CommonModule],
   templateUrl: './confirm-prompt.component.html',
-  styleUrl: './confirm-prompt.component.css'
+  styleUrl: './confirm-prompt.component.css',
 })
-
-
 export class ConfirmPromptComponent {
   @Input() title: string = 'Confirm';
   @Input() text: string = 'Are you sure you want to submit this appraisal?';
@@ -32,7 +30,7 @@ export class ConfirmPromptComponent {
 
   onConfirm(result: boolean) {
     if (result) {
-      this.confirmed.emit(this.data);
+      this.confirmed.emit(result);
     } else {
       this.closed.emit();
     }

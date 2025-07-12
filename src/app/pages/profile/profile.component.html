@@ -1,0 +1,11 @@
+<!-- Loading Overlay -->
+<app-loading-overlay
+  [isVisible]="isLoadingProfile"
+  title="Loading Profile"
+  message="Fetching employee profile data..."
+></app-loading-overlay>
+
+<!-- Profile Form -->
+<div *ngIf="!isLoadingProfile">
+  <app-profile-create [employeeData]="employeeData"></app-profile-create>
+</div>

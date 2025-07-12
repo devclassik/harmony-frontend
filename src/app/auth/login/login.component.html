@@ -8,7 +8,7 @@
       <img
         src="/assets/images/harmonyLogo.png"
         alt="Harmony Logo"
-        class="w-[150px] h-14"
+        class="h-14 object-contain"
       />
     </div>
 
@@ -20,14 +20,12 @@
     <div class="w-full p-4">
       <form (ngSubmit)="onSubmit()" class="login-form space-y-4">
         <div>
-          <label for="username" class="block text-gray-800 text-sm"
-            >Email</label
-          >
+          <label for="email" class="block text-gray-800 text-sm">Email</label>
           <input
-            id="username"
+            id="email"
             type="text"
-            [(ngModel)]="username"
-            name="username"
+            [(ngModel)]="email"
+            name="email"
             required
             class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
@@ -37,14 +35,34 @@
           <label for="password" class="block text-gray-800 text-sm"
             >Password</label
           >
-          <input
-            id="password"
-            type="password"
-            [(ngModel)]="password"
-            name="password"
-            required
-            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
+          <div class="relative">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="password"
+              name="password"
+              required
+              class="w-full p-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center"
+              (click)="togglePasswordVisibility()"
+            >
+              <!-- Material Design Eye Icons -->
+              <mat-icon
+                *ngIf="!showPassword"
+                class="text-gray-400 hover:text-gray-600 cursor-pointer"
+                >visibility</mat-icon
+              >
+
+              <mat-icon
+                *ngIf="showPassword"
+                class="text-gray-400 hover:text-gray-600 cursor-pointer"
+                >visibility_off</mat-icon
+              >
+            </button>
+          </div>
           <p
             class="text-gray-500 text-sm flex justify-end mt-1 hover:cursor-pointer"
             (click)="forgotPassword()"
@@ -55,9 +73,11 @@
 
         <button
           type="submit"
-          class="w-full text-white py-2 rounded-md shadow-md bg-gradient-to-r from-green-500 to-green-700 hover:text-green-500 cursor-pointer"
+          [disabled]="isLoading"
+          class="w-full text-white py-2 rounded-md shadow-md bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
-          Login
+          <span *ngIf="!isLoading">Login</span>
+          <span *ngIf="isLoading">Logging in...</span>
         </button>
       </form>
     </div>
@@ -68,7 +88,7 @@
         <span class="underline cursor-pointer">Terms of Use</span> and
         <span class="underline cursor-pointer">Privacy Policy</span>
       </p>
-      <p class="pt-5">
+      <p class="pt-5" (click)="signUp()">
         Don't have an account?
         <span class="text-green-500 cursor-pointer">Sign Up</span>
       </p>
@@ -122,4 +142,11 @@
       </div>
     </div>
   </div>
+
+  <!-- Loading Overlay -->
+  <app-loading-overlay
+    [isVisible]="isLoading"
+    title="Logging you in..."
+    message="Please wait while we authenticate your credentials."
+  ></app-loading-overlay>
 </div>

@@ -1,22 +1,23 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TableData } from '../../interfaces/employee.interface';
 
 @Component({
   selector: 'app-appraisal',
   imports: [CommonModule, FormsModule],
   templateUrl: './appraisal.component.html',
-  styleUrl: './appraisal.component.css'
+  styleUrl: './appraisal.component.css',
 })
 export class AppraisalComponent {
-
   @Input() open = false;
+  @Input() employee: TableData | null = null;
   @Output() closed = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<any>();
 
   quarters = ['Apr-Jul', 'Aug-Nov', 'Dec-Mar'];
   criteria = ['Attendance', 'Voluntary Work', 'Evangelism'];
-  scores = [1,2,3,4,5,6,7,8,9,10];
+  scores = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   form = {
     period: '',
@@ -24,8 +25,8 @@ export class AppraisalComponent {
     details: [
       { criteria: 'Attendance', score: '' },
       { criteria: 'Voluntary Work', score: '' },
-      { criteria: 'Evangelism', score: '' }
-    ]
+      { criteria: 'Evangelism', score: '' },
+    ],
   };
 
   onClose() {
@@ -39,8 +40,8 @@ export class AppraisalComponent {
   calculateAverage() {
     // Extract scores, convert to numbers, and filter out empty or invalid entries
     const scores = this.form.details
-      .map(avg => Number(avg.score))
-      .filter(score => !isNaN(score));
+      .map((avg) => Number(avg.score))
+      .filter((score) => !isNaN(score));
 
     if (scores.length === 0) {
       this.form.average = '';

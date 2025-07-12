@@ -1,0 +1,15 @@
+/* Blur effect for dashboard content when welcome animation is showing */
+.blur-sm {
+  filter: blur(4px);
+  -webkit-filter: blur(4px);
+  transition: filter 0.3s ease-in-out;
+  pointer-events: none; /* Prevent interaction with blurred content */
+}
+
+/* Smooth transition when blur is removed */
+div:not(.blur-sm) {
+  filter: blur(0px);
+  -webkit-filter: blur(0px);
+  transition: filter 0.3s ease-in-out;
+  pointer-events: auto;
+}
