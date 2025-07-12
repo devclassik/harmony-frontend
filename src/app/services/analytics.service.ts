@@ -5,6 +5,8 @@ import {
   GetAnalyticsOverviewResponse,
   GetLeaveStatisticsResponse,
   GetEmployeeDemographicsResponse,
+  GetDisciplineStatisticsResponse,
+  GetPerformanceStatisticsResponse,
 } from '../dto/analytics.dto';
 import { environment } from '../../environments/environment';
 
@@ -37,5 +39,29 @@ export class AnalyticsService {
     return this.apiService.get<GetEmployeeDemographicsResponse>(
       environment.routes.analytics.getEmployeeDemographics
     );
+  }
+
+  getDisciplineStatistics(
+    year: number
+  ): Observable<GetDisciplineStatisticsResponse> {
+    const params = new URLSearchParams({
+      year: year.toString(),
+    });
+
+    const url = `/analytics/discipline-stat?${params.toString()}`;
+    return this.apiService.get<GetDisciplineStatisticsResponse>(url);
+  }
+
+  getPerformanceStatistics(
+    employeeId: number,
+    year: number
+  ): Observable<GetPerformanceStatisticsResponse> {
+    const params = new URLSearchParams({
+      employeeId: employeeId.toString(),
+      year: year.toString(),
+    });
+
+    const url = `/analytics/performance-stat?${params.toString()}`;
+    return this.apiService.get<GetPerformanceStatisticsResponse>(url);
   }
 }

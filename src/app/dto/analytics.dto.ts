@@ -111,6 +111,28 @@ export interface EmployeeDemographics {
   serviceYears: ServiceYears;
 }
 
+export interface MonthlyDisciplineData {
+  month: string;
+  VERBAL: number;
+  WRITTEN: number;
+  SUSPENSION: number;
+  TERMINATION: number;
+  DEMOTION: number;
+  PROMOTION: number;
+}
+
+export type DisciplineStatistics = MonthlyDisciplineData[];
+
+export interface QuarterlyPerformanceData {
+  quarter: string;
+  avgScore: number;
+}
+
+export type PerformanceStatistics = QuarterlyPerformanceData[];
+
 export type GetAnalyticsOverviewResponse = ApiResponse<AnalyticsOverview>;
 export type GetLeaveStatisticsResponse = ApiResponse<LeaveStatistics>;
 export type GetEmployeeDemographicsResponse = ApiResponse<EmployeeDemographics>;
+export type GetDisciplineStatisticsResponse = ApiResponse<DisciplineStatistics>;
+export type GetPerformanceStatisticsResponse =
+  ApiResponse<PerformanceStatistics>;

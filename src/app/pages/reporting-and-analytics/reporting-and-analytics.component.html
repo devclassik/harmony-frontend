@@ -1,15 +1,23 @@
 <div class="flex flex-col gap-4 p-2">
   <app-dashboard-greetings
-    [userName]="'Overview'"
-    [showSubText]="false"
+    [userName]="workerName"
+    [showSubText]="true"
+    [subText]="'Here is a comprehensive overview of analytics and reporting.'"
+    [analyticsData]="analyticsData"
   ></app-dashboard-greetings>
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
   <div class="lg:col-span-6">
-    <app-bar-chart></app-bar-chart>
+    <app-bar-chart
+      [leaveData]="leaveStatisticsData"
+      [selectedYear]="selectedYear"
+      (yearChange)="onYearChange($event)"
+    ></app-bar-chart>
   </div>
   <div class="lg:col-span-4">
-    <app-doughnut-chart></app-doughnut-chart>
+    <app-doughnut-chart
+      [demographicsData]="demographicsData"
+    ></app-doughnut-chart>
   </div>
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
@@ -17,6 +25,7 @@
     <app-area-chart
       title="Disciplinary Actions"
       [colors]="['#FF4D4D', '#FF6B6B', '#FFE5E5']"
+      [disciplineData]="disciplineStatisticsData"
     ></app-area-chart>
   </div>
   <div class="lg:col-span-4">
@@ -33,6 +42,14 @@
     <app-area-chart
       title="Performance"
       [filterTabs]="filterTabs"
+      [performanceData]="performanceStatisticsData"
     ></app-area-chart>
   </div>
 </div>
+
+<!-- Loading Overlay -->
+<app-loading-overlay
+  [isVisible]="isLoading"
+  title="Loading Analytics Data"
+  [message]="loadingMessage"
+></app-loading-overlay>
