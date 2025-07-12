@@ -277,7 +277,10 @@ export class SickLeaveComponent implements OnInit {
     console.log(event);
 
     if (event.action === 'View') {
-      if (this.userRole?.toLowerCase() === 'worker') {
+      if (
+        this.userRole?.toLowerCase() === 'worker' ||
+        this.userRole?.toLowerCase() === 'minister'
+      ) {
         this.showSickLeaveDetailsModal();
 
         // Get the original API data and transform it for the leave-details component
