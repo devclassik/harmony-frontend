@@ -5,7 +5,7 @@
     <title>Harmony Frontend</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/x-icon" href="assets/images/HARMONY_LOGO.png" />
+    <link rel="icon" type="image/x-icon" href="assets/images/harmonyLogo.png" />
     <link
       href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600&display=swap"
       rel="stylesheet"
@@ -14,6 +14,89 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script>
+      // ApexCharts Passive Event Listener Fix
+      (function() {
+        // Override addEventListener before ApexCharts loads
+        const originalAddEventListener = EventTarget.prototype.addEventListener;
+        
+        EventTarget.prototype.addEventListener = function(type, listener, options) {
+          const element = this;
+          
+          // Check if this is an ApexCharts element
+          const isApexChartsElement = element.classList && (
+            element.classList.contains('apexcharts-canvas') ||
+            element.classList.contains('apexcharts-svg') ||
+            element.classList.contains('apexcharts-inner') ||
+            element.classList.contains('apexcharts-graphical') ||
+            element.classList.contains('apexcharts-data-labels') ||
+            element.classList.contains('apexcharts-datalabels') ||
+            element.classList.contains('apexcharts-annotations') ||
+            element.classList.contains('apexcharts-gridline') ||
+            element.classList.contains('apexcharts-gridLine') ||
+            element.classList.contains('apexcharts-xaxis') ||
+            element.classList.contains('apexcharts-yaxis') ||
+            element.classList.contains('apexcharts-xaxis-label') ||
+            element.classList.contains('apexcharts-yaxis-label') ||
+            element.classList.contains('apexcharts-title') ||
+            element.classList.contains('apexcharts-subtitle') ||
+            element.classList.contains('apexcharts-zoom') ||
+            element.classList.contains('apexcharts-pan') ||
+            element.classList.contains('apexcharts-selection') ||
+            element.classList.contains('apexcharts-crosshair') ||
+            element.classList.contains('apexcharts-marker') ||
+            element.classList.contains('apexcharts-point') ||
+            element.classList.contains('apexcharts-area') ||
+            element.classList.contains('apexcharts-line') ||
+            element.classList.contains('apexcharts-column') ||
+            element.classList.contains('apexcharts-bar') ||
+            element.classList.contains('apexcharts-candlestick') ||
+            element.classList.contains('apexcharts-boxplot') ||
+            element.classList.contains('apexcharts-rangebar') ||
+            element.classList.contains('apexcharts-radar') ||
+            element.classList.contains('apexcharts-polar') ||
+            element.classList.contains('apexcharts-scatter') ||
+            element.classList.contains('apexcharts-bubble') ||
+            element.classList.contains('apexcharts-heatmap') ||
+            element.classList.contains('apexcharts-treemap') ||
+            element.classList.contains('apexcharts-tooltip') ||
+            element.classList.contains('apexcharts-legend') ||
+            element.classList.contains('apexcharts-legend-marker') ||
+            element.classList.contains('apexcharts-point-annotations') ||
+            element.classList.contains('apexcharts-series') ||
+            element.classList.contains('apexcharts-donut-slice') ||
+            element.classList.contains('apexcharts-pie-slice') ||
+            element.classList.contains('apexcharts-bar-area') ||
+            element.classList.contains('apexcharts-line-area') ||
+            element.classList.contains('apexcharts-area-area') ||
+            element.classList.contains('apexcharts-candlestick-area') ||
+            element.classList.contains('apexcharts-boxplot-area') ||
+            element.classList.contains('apexcharts-rangebar-area') ||
+            element.classList.contains('apexcharts-radar-area') ||
+            element.classList.contains('apexcharts-polar-area') ||
+            element.classList.contains('apexcharts-scatter-area') ||
+            element.classList.contains('apexcharts-bubble-area') ||
+            element.classList.contains('apexcharts-heatmap-area') ||
+            element.classList.contains('apexcharts-treemap-area')
+          );
+          
+          // For touch and wheel events on ApexCharts elements, ensure passive is false
+          if (isApexChartsElement && 
+              (type === 'touchstart' || type === 'touchmove' || type === 'touchend' || type === 'wheel') &&
+              options !== false) {
+            
+            // Convert options to object if it's a boolean
+            const newOptions = typeof options === 'boolean' 
+              ? { passive: false, capture: options }
+              : { ...options, passive: false };
+            
+            return originalAddEventListener.call(this, type, listener, newOptions);
+          }
+          
+          return originalAddEventListener.call(this, type, listener, options);
+        };
+      })();
+    </script>
   </head>
   <body>
     <app-root></app-root>

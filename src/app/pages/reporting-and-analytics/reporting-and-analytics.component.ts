@@ -47,7 +47,7 @@ export class ReportingAndAnalyticsComponent implements OnInit, OnDestroy {
 
   // Years and employee selection
   selectedYear: number = new Date().getFullYear();
-  selectedEmployeeId: number = 1; // Default employee ID
+  selectedEmployeeId: number = 20; // Default employee ID
   allEmployees: EmployeeDetails[] = [];
 
   // Loading states
