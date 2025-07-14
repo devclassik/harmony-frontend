@@ -47,7 +47,7 @@ export class ReportingAndAnalyticsComponent implements OnInit, OnDestroy {
 
   // Years and employee selection
   selectedYear: number = new Date().getFullYear();
-  selectedEmployeeId: number = 1; // Default employee ID
+  selectedEmployeeId: number | null = null; // Will be set from logged-in employee
   allEmployees: EmployeeDetails[] = [];
 
   // Loading states
@@ -90,6 +90,7 @@ export class ReportingAndAnalyticsComponent implements OnInit, OnDestroy {
     private alertService: AlertService
   ) {
     this.updateWorkerName();
+    this.initializeEmployeeId();
   }
 
   ngOnInit() {
@@ -111,6 +112,17 @@ export class ReportingAndAnalyticsComponent implements OnInit, OnDestroy {
       this.workerName = currentWorker.fullName;
     } else {
       this.workerName = 'Worker';
+    }
+  }
+
+  private initializeEmployeeId(): void {
+    // Get the current logged-in employee ID
+    const currentEmployeeId = this.authService.getCurrentEmployeeId();
+    if (currentEmployeeId) {
+      this.selectedEmployeeId = currentEmployeeId;
+    } else {
+      this.selectedEmployeeId = null;
+      console.warn('No employee ID found for current user');
     }
   }
 
@@ -186,6 +198,14 @@ export class ReportingAndAnalyticsComponent implements OnInit, OnDestroy {
   }
 
   loadPerformanceStatistics() {
+    // Don't load performance statistics if we don't have an employee ID
+    if (!this.selectedEmployeeId) {
+      console.warn(
+        'Cannot load performance statistics: No employee ID available'
+      );
+      return;
+    }
+
     this.isLoadingPerformance = true;
     const performanceSub = this.analyticsService
       .getPerformanceStatistics(this.selectedEmployeeId, this.selectedYear)
@@ -243,6 +263,10 @@ export class ReportingAndAnalyticsComponent implements OnInit, OnDestroy {
   onEmployeeChange(employeeId: string) {
     if (employeeId) {
       this.selectedEmployeeId = parseInt(employeeId);
+      this.loadPerformanceStatistics();
+    } else {
+      // If no employee is selected, use current logged-in employee
+      this.initializeEmployeeId();
       this.loadPerformanceStatistics();
     }
   }

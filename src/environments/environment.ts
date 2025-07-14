@@ -65,6 +65,13 @@ export const environment = {
       getLeaveStatistics: '/analytics/leave-stat',
       getEmployeeDemographics: '/analytics/employee-demographics',
     },
+    appraisal: {
+      create: '/appraisal',
+      getAll: '/appraisal',
+      getById: '/appraisal/{id}',
+      update: '/appraisal/{id}',
+      delete: '/appraisal/{id}',
+    },
     posts: {
       getAll: 'posts',
       getById: 'posts/{id}',
