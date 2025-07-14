@@ -3,11 +3,12 @@ import { ChartOptions } from '../pie-chart/pie-chart.component';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ApexchartsFixDirective } from '../../directives/apexcharts-fix.directive';
 import { EmployeeDemographics } from '../../dto/analytics.dto';
 
 @Component({
   selector: 'app-doughnut-chart',
-  imports: [NgApexchartsModule, CommonModule],
+  imports: [NgApexchartsModule, CommonModule, ApexchartsFixDirective],
   templateUrl: './doughnut-chart.component.html',
   styleUrl: './doughnut-chart.component.css',
 })
@@ -39,6 +40,23 @@ export class DoughnutChartComponent implements OnChanges {
           speed: 350,
         },
       },
+      events: {
+        beforeMount: function(chartContext: any, config: any) {
+          // Add non-passive event listeners for touch and wheel events
+          const chartElement = chartContext.el;
+          if (chartElement) {
+            chartElement.addEventListener('touchstart', function(e: Event) {
+              e.stopPropagation();
+            }, { passive: false });
+            chartElement.addEventListener('touchmove', function(e: Event) {
+              e.stopPropagation();
+            }, { passive: false });
+            chartElement.addEventListener('wheel', function(e: Event) {
+              e.stopPropagation();
+            }, { passive: false });
+          }
+        }
+      }
     },
     labels: this.labels,
     colors: this.colors,

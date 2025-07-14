@@ -10,6 +10,7 @@ import {
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ApexchartsFixDirective } from '../../directives/apexcharts-fix.directive';
 import { LeaveStatistics } from '../../dto/analytics.dto';
 import {
   ApexAxisChartSeries,
@@ -49,7 +50,7 @@ export type ChartOptions = {
 @Component({
   selector: 'app-bar-chart',
   standalone: true,
-  imports: [NgApexchartsModule, FormsModule, CommonModule],
+  imports: [NgApexchartsModule, FormsModule, CommonModule, ApexchartsFixDirective],
   templateUrl: './bar-chart.component.html',
   styleUrl: './bar-chart.component.css',
 })
@@ -107,6 +108,23 @@ export class BarChartComponent implements OnInit, OnChanges {
         },
         redrawOnWindowResize: true,
         redrawOnParentResize: true,
+        events: {
+          beforeMount: function(chartContext: any, config: any) {
+            // Add non-passive event listeners for touch and wheel events
+            const chartElement = chartContext.el;
+            if (chartElement) {
+              chartElement.addEventListener('touchstart', function(e: Event) {
+                e.stopPropagation();
+              }, { passive: false });
+              chartElement.addEventListener('touchmove', function(e: Event) {
+                e.stopPropagation();
+              }, { passive: false });
+              chartElement.addEventListener('wheel', function(e: Event) {
+                e.stopPropagation();
+              }, { passive: false });
+            }
+          }
+        }
       },
       responsive: [
         {

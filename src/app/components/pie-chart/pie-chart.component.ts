@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { ApexchartsFixDirective } from '../../directives/apexcharts-fix.directive';
 import {
   ApexNonAxisChartSeries,
   ApexChart,
@@ -25,7 +26,7 @@ export type ChartOptions = {
 @Component({
   selector: 'app-pie-chart',
   standalone: true,
-  imports: [NgApexchartsModule],
+  imports: [NgApexchartsModule, ApexchartsFixDirective],
   templateUrl: './pie-chart.component.html',
   styleUrl: './pie-chart.component.css'
 })
@@ -45,6 +46,23 @@ export class PieChartComponent implements OnInit {
         dynamicAnimation: {
           enabled: true,
           speed: 350
+        }
+      },
+      events: {
+        beforeMount: function(chartContext: any, config: any) {
+          // Add non-passive event listeners for touch and wheel events
+          const chartElement = chartContext.el;
+          if (chartElement) {
+            chartElement.addEventListener('touchstart', function(e: Event) {
+              e.stopPropagation();
+            }, { passive: false });
+            chartElement.addEventListener('touchmove', function(e: Event) {
+              e.stopPropagation();
+            }, { passive: false });
+            chartElement.addEventListener('wheel', function(e: Event) {
+              e.stopPropagation();
+            }, { passive: false });
+          }
         }
       }
     },

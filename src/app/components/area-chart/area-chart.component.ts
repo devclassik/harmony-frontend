@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { ChartOptions } from '../bar-chart/bar-chart.component';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { CommonModule } from '@angular/common';
+import { ApexchartsFixDirective } from '../../directives/apexcharts-fix.directive';
 import {
   DisciplineStatistics,
   PerformanceStatistics,
@@ -20,7 +21,7 @@ interface ChartData {
 
 @Component({
   selector: 'app-area-chart',
-  imports: [NgApexchartsModule, CommonModule],
+  imports: [NgApexchartsModule, CommonModule, ApexchartsFixDirective],
   templateUrl: './area-chart.component.html',
   styleUrl: './area-chart.component.css',
 })
@@ -98,6 +99,23 @@ export class AreaChartComponent implements OnChanges {
         },
         redrawOnWindowResize: true,
         redrawOnParentResize: true,
+        events: {
+          beforeMount: function(chartContext: any, config: any) {
+            // Add non-passive event listeners for touch and wheel events
+            const chartElement = chartContext.el;
+            if (chartElement) {
+              chartElement.addEventListener('touchstart', function(e: Event) {
+                e.stopPropagation();
+              }, { passive: false });
+              chartElement.addEventListener('touchmove', function(e: Event) {
+                e.stopPropagation();
+              }, { passive: false });
+              chartElement.addEventListener('wheel', function(e: Event) {
+                e.stopPropagation();
+              }, { passive: false });
+            }
+          }
+        }
       },
       responsive: [
         {
