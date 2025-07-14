@@ -23,6 +23,6 @@ export class DashboardInformationComponent {
   }
 
   viewProfile() {
-    this.router.navigate(['/profile-view']);
+    this.router.navigate(['/profile']);
   }
 }

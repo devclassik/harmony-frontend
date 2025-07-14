@@ -184,7 +184,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
       '/notifications': 'Notifications',
       '/payroll': 'Payroll',
       '/settings': 'Settings',
-      '/profile': 'Profile',
+      '/profile-view': 'Profile',
     };
 
     this.pageTitle = routeMap[url] || 'Dashboard';

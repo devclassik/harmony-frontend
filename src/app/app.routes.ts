@@ -88,6 +88,11 @@ export const routes: Routes = [
         canActivate: [permissionGuard('Employee')],
       },
       {
+        path: 'employee/:employeeId',
+        component: ProfileViewComponent,
+        canActivate: [permissionGuard('Employee')],
+      },
+      {
         path: 'reporting-and-analytics',
         component: ReportingAndAnalyticsComponent,
         canActivate: [permissionGuard('Report')],
