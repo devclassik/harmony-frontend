@@ -303,8 +303,8 @@ export class EmployeeRecordsComponent implements OnInit {
       this.selectedEmployee = event.row;
       this.promptConfig = {
         title: 'Delete',
-        text: 'Are you sure you want to delete this employee?',
-        imageUrl: 'assets/svg/profilePix.svg',
+        text: `Are you sure you want to delete ${event.row.name}?`,
+        imageUrl: event.row.imageUrl || 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -475,8 +475,8 @@ export class EmployeeRecordsComponent implements OnInit {
     this.currentAppraisalForm = form; // Store the form data
     this.promptConfig = {
       title: 'Confirm',
-      text: 'Are you sure you want to submit this appraisal?',
-      imageUrl: 'assets/svg/profilePix.svg',
+      text: `Are you sure you want to submit this appraisal for ${this.selectedEmployee?.name}?`,
+      imageUrl: this.selectedEmployee?.imageUrl || 'assets/svg/profilePix.svg',
       yesButtonText: 'Yes',
       noButtonText: 'No',
     };
