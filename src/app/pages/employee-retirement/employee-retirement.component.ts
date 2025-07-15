@@ -1,7 +1,15 @@
 import { Component } from '@angular/core';
-import { FilterTab, MenuItem, TableComponent, TableHeader } from '../../components/table/table.component';
+import {
+  FilterTab,
+  MenuItem,
+  TableComponent,
+  TableHeader,
+} from '../../components/table/table.component';
 import { TableData } from '../../interfaces/employee.interface';
-import { ConfirmPromptComponent, PromptConfig } from '../../components/confirm-prompt/confirm-prompt.component';
+import {
+  ConfirmPromptComponent,
+  PromptConfig,
+} from '../../components/confirm-prompt/confirm-prompt.component';
 import { CommonModule } from '@angular/common';
 import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
 import { SuccessModalComponent } from '../../components/success-modal/success-modal.component';
@@ -16,7 +24,7 @@ import { SuccessModalComponent } from '../../components/success-modal/success-mo
     SuccessModalComponent,
   ],
   templateUrl: './employee-retirement.component.html',
-  styleUrl: './employee-retirement.component.css'
+  styleUrl: './employee-retirement.component.css',
 })
 export class EmployeeRetirementComponent {
   selectedStatus: string = '';
@@ -46,7 +54,6 @@ export class EmployeeRetirementComponent {
       requestDate: '02/05/2025',
       status: 'Pending',
       imageUrl: 'assets/svg/profilePix.svg',
-
     },
     {
       id: '124 - 01',
@@ -55,7 +62,6 @@ export class EmployeeRetirementComponent {
       requestDate: '05/05/2025',
       status: 'Approved',
       imageUrl: 'assets/svg/profilePix.svg',
-
     },
   ];
 
@@ -74,7 +80,11 @@ export class EmployeeRetirementComponent {
       value: '',
       icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z',
     },
-    { label: 'Technical Team', value: 'Technical Team', icon: 'M5 13l4 4L19 7' },
+    {
+      label: 'Technical Team',
+      value: 'Technical Team',
+      icon: 'M5 13l4 4L19 7',
+    },
     { label: 'Ushering', value: 'Ushering', icon: 'M5 13l4 4L19 7' },
     { label: 'Sound Team', value: 'Sound Team', icon: 'M5 13l4 4L19 7' },
   ];
@@ -149,7 +159,6 @@ export class EmployeeRetirementComponent {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to approve this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -158,7 +167,6 @@ export class EmployeeRetirementComponent {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to reject this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };

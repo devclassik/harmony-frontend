@@ -1,16 +1,30 @@
 import { Component } from '@angular/core';
-import { FilterTab, MenuItem, TableComponent, TableHeader } from "../../components/table/table.component";
-import { EmployeeDetailsComponent } from "../../components/employee-details/employee-details.component";
-import { ConfirmPromptComponent, PromptConfig } from "../../components/confirm-prompt/confirm-prompt.component";
-import { SubstitutionComponent } from "../../components/substitution/substitution.component";
-import { SuccessModalComponent } from "../../components/success-modal/success-modal.component";
+import {
+  FilterTab,
+  MenuItem,
+  TableComponent,
+  TableHeader,
+} from '../../components/table/table.component';
+import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
+import {
+  ConfirmPromptComponent,
+  PromptConfig,
+} from '../../components/confirm-prompt/confirm-prompt.component';
+import { SubstitutionComponent } from '../../components/substitution/substitution.component';
+import { SuccessModalComponent } from '../../components/success-modal/success-modal.component';
 import { TableData } from '../../interfaces/employee.interface';
 
 @Component({
   selector: 'app-payroll',
-  imports: [TableComponent, EmployeeDetailsComponent, ConfirmPromptComponent, SubstitutionComponent, SuccessModalComponent],
+  imports: [
+    TableComponent,
+    EmployeeDetailsComponent,
+    ConfirmPromptComponent,
+    SubstitutionComponent,
+    SuccessModalComponent,
+  ],
   templateUrl: './payroll.component.html',
-  styleUrl: './payroll.component.css'
+  styleUrl: './payroll.component.css',
 })
 export class PayrollComponent {
   selectedStatus: string = '';
@@ -135,7 +149,6 @@ export class PayrollComponent {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to approve this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -144,7 +157,6 @@ export class PayrollComponent {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to reject this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -173,7 +185,6 @@ export class PayrollComponent {
     this.promptConfig = {
       title: 'Confirm',
       text: 'Are you sure you want to submit this appraisal?',
-      imageUrl: 'assets/svg/profilePix.svg',
       yesButtonText: 'Yes',
       noButtonText: 'No',
     };
@@ -181,6 +192,8 @@ export class PayrollComponent {
   }
 
   onShowListClick(event: string) {
-    (event === 'list') ? this.showFilterTabFromParent = false : this.showFilterTabFromParent = true;
+    event === 'list'
+      ? (this.showFilterTabFromParent = false)
+      : (this.showFilterTabFromParent = true);
   }
 }

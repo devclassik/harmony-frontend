@@ -273,7 +273,6 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to approve this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -282,7 +281,6 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to reject this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -311,7 +309,6 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
     this.promptConfig = {
       title: 'Confirm',
       text: 'Are you sure you want to submit this appraisal?',
-      imageUrl: 'assets/svg/profilePix.svg',
       yesButtonText: 'Yes',
       noButtonText: 'No',
     };

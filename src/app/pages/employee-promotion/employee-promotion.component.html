@@ -17,17 +17,27 @@
     [tableData]="filteredEmployees"
     [menuItems]="actionButton"
     (menuAction)="onMenuAction($event)"
+    [showCalendar]="false"
+    [showButton]="shouldShowCreateButton"
+    showButtonText="Create Request"
+    showButtonIcon="assets/svg/add.svg"
+    showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+    (showButtonActionClick)="onCreatePromotionRequest()"
+    [showList]="false"
   ></app-table>
 </div>
 
 <app-employee-details
   [view]="showEmployeeDetails"
-  [showButton]="true"
+  [showButton]="selectedPromotionRecord?.status?.toUpperCase() === 'PENDING'"
   [noButtonText]="'Reject'"
-  [yesButtonText]="'Accept'"
+  [yesButtonText]="'Approve'"
   (confirm)="actionToPerform($event)"
   (close)="showEmployeeDetails = false"
   [employee]="selectedEmployeeRecord"
+  [employeeDetails]="selectedEmployeeDetails"
+  [promotionData]="selectedPromotionRecord"
+  [allPromotions]="allPromotions"
 ></app-employee-details>
 
 <app-confirm-prompt
@@ -42,11 +52,19 @@
   [data]="selectedEmployeeRecord"
 ></app-confirm-prompt>
 
-<app-success-modal
-  *ngIf="successModal"
-  [title]="'Operation Successful!'"
-  [showOkButton]="false"
-  [okButtonText]="'Click Ok'"
-  [okButtonLink]="'/dashboard'"
-  (closed)="successModal = false"
-></app-success-modal>
+<!-- Loading Overlay -->
+<app-loading-overlay
+  *ngIf="isLoading"
+  [message]="getLoadingMessage"
+></app-loading-overlay>
+
+<!-- Create Promotion Request Component -->
+<app-leave-details
+  [view]="showCreatePromotionRequest"
+  [isPromotion]="true"
+  [mode]="'create'"
+  [title]="'Create Promotion Request'"
+  [leaveType]="'Promotion'"
+  (close)="onCloseCreatePromotionRequest()"
+  (submit)="onCreatePromotionRequestSubmitted($event)"
+></app-leave-details>

@@ -1,7 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { ComponentsModule } from '../../components/components.module';
-import { MenuItem, TableComponent, TableHeader } from '../../components/table/table.component';
+import {
+  MenuItem,
+  TableComponent,
+  TableHeader,
+} from '../../components/table/table.component';
 import { TableData } from '../../interfaces/employee.interface';
 import { PromptConfig } from '../../components/confirm-prompt/confirm-prompt.component';
 import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
@@ -9,9 +13,15 @@ import { IncidenceFormComponent } from '../../components/incidence-form/incidenc
 
 @Component({
   selector: 'app-employee-discipline',
-  imports: [CommonModule, ComponentsModule, TableComponent, EmployeeDetailsComponent, IncidenceFormComponent],
+  imports: [
+    CommonModule,
+    ComponentsModule,
+    TableComponent,
+    EmployeeDetailsComponent,
+    IncidenceFormComponent,
+  ],
   templateUrl: './employee-discipline.component.html',
-  styleUrl: './employee-discipline.component.css'
+  styleUrl: './employee-discipline.component.css',
 })
 export class EmployeeDisciplineComponent {
   selectedStatus: string = '';
@@ -43,7 +53,6 @@ export class EmployeeDisciplineComponent {
       offenseCategory: 'lorem',
       disciplineDuration: '2 Days',
       imageUrl: 'assets/svg/profilePix.svg',
-
     },
     {
       id: '124 - 01',
@@ -52,7 +61,6 @@ export class EmployeeDisciplineComponent {
       offenseCategory: 'Minister',
       disciplineDuration: 'Rejected',
       imageUrl: 'assets/svg/profilePix.svg',
-
     },
   ];
 
@@ -132,7 +140,6 @@ export class EmployeeDisciplineComponent {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to approve this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -141,7 +148,6 @@ export class EmployeeDisciplineComponent {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to reject this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -153,17 +159,14 @@ export class EmployeeDisciplineComponent {
     this.showDiscipline = this.showDiscipline ? false : true;
   }
 
-  
   handleDiscipline(form: any) {
     console.log(form);
     this.promptConfig = {
       title: 'Confirm',
       text: 'Are you sure you want to submit this appraisal?',
-      imageUrl: 'assets/svg/profilePix.svg',
       yesButtonText: 'Yes',
       noButtonText: 'No',
     };
     this.showModal = true;
   }
-
 }

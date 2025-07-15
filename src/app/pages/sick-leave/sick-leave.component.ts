@@ -318,7 +318,6 @@ export class SickLeaveComponent implements OnInit {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to approve this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -327,7 +326,6 @@ export class SickLeaveComponent implements OnInit {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to reject this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
