@@ -72,6 +72,14 @@ export const environment = {
       update: '/appraisal/{id}',
       delete: '/appraisal/{id}',
     },
+    promotion: {
+      getAll: '/promotion',
+      create: '/promotion',
+      update: '/promotion/{id}',
+      delete: '/promotion/{id}',
+      approve: '/promotion/{id}',
+      reject: '/promotion/{id}',
+    },
     posts: {
       getAll: 'posts',
       getById: 'posts/{id}',

@@ -4,8 +4,24 @@ import { FormsModule } from '@angular/forms';
 import { OnInit } from '@angular/core';
 import { FORM_OPTIONS } from '../../shared/constants/form-options';
 import { FileUploadService } from '../../shared/services/file-upload.service';
+import { EmployeeService } from '../../services/employee.service';
+import { AlertService } from '../../services/alert.service';
+import { EmployeeDetails } from '../../dto/employee.dto';
 import { finalize } from 'rxjs/operators';
 import { ConfirmPromptComponent } from '../confirm-prompt/confirm-prompt.component';
+
+interface Employee {
+  id: number;
+  name: string;
+  employeeId: string;
+  department?: string;
+  currentPosition?: string;
+}
+
+interface Position {
+  label: string;
+  value: string;
+}
 
 @Component({
   selector: 'app-leave-details',
@@ -30,6 +46,7 @@ export class LeaveDetailsComponent implements OnInit {
   @Input() isCampMeeting: boolean = false;
   @Input() data: any;
   @Input() mode: 'view' | 'create' = 'view';
+  @Input() isPromotion: boolean = false; // New input for promotion mode
   @Output() close = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() submit = new EventEmitter<any>();
@@ -37,7 +54,25 @@ export class LeaveDetailsComponent implements OnInit {
   openSection: string | null = null;
   showConfirmModal: boolean = false;
 
-  constructor(private fileUploadService: FileUploadService) {}
+  // Promotion-specific properties
+  employees: Employee[] = [];
+  filteredEmployees: Employee[] = [];
+  searchTerm: string = '';
+  showEmployeeDropdown: boolean = false;
+  searchingEmployees: boolean = false;
+
+  positions: Position[] = [
+    { label: 'Minister', value: 'MINISTER' },
+    { label: 'Pastor', value: 'PASTOR' },
+    { label: 'Zonal Pastor', value: 'ZONAL_PASTOR' },
+    { label: 'District Pastor', value: 'DISTRICT_PASTOR' },
+  ];
+
+  constructor(
+    private fileUploadService: FileUploadService,
+    private employeeService: EmployeeService,
+    private alertService: AlertService
+  ) {}
 
   // Add form data structure for create mode
   formData = {
@@ -50,6 +85,10 @@ export class LeaveDetailsComponent implements OnInit {
     },
     location: '',
     reason: '',
+    // Promotion-specific fields
+    employeeId: '',
+    employeeName: '',
+    newPosition: '',
   };
 
   // Track uploaded files with progress
@@ -65,8 +104,66 @@ export class LeaveDetailsComponent implements OnInit {
   requestTypes = FORM_OPTIONS.leaveRequestTypes;
   durationUnits = FORM_OPTIONS.leaveDurationUnits;
 
-  ngOnInit(): void {
-    // Initialize component
+  ngOnInit() {
+    if (this.isPromotion && this.mode === 'create') {
+      this.loadEmployees();
+    }
+  }
+
+  // Promotion methods
+  loadEmployees() {
+    this.searchingEmployees = true;
+    this.employeeService.getAllEmployees(1, 50).subscribe({
+      next: (response) => {
+        if (
+          response.status === 'success' &&
+          response.data &&
+          response.data.data
+        ) {
+          this.employees = response.data.data.map((emp: EmployeeDetails) => ({
+            id: emp.id,
+            name: `${emp.firstName} ${emp.lastName}`,
+            employeeId: emp.employeeId || emp.id.toString(),
+            department: emp.departments?.[0]?.name || 'N/A',
+            currentPosition: emp.user?.role?.name || 'N/A',
+          }));
+          this.filteredEmployees = this.employees;
+        }
+        this.searchingEmployees = false;
+      },
+      error: (error) => {
+        this.alertService.error('Failed to load employees');
+        this.searchingEmployees = false;
+      },
+    });
+  }
+
+  onEmployeeSearch(event: any) {
+    this.searchTerm = event.target.value;
+    this.showEmployeeDropdown = true;
+
+    if (this.searchTerm.length > 0) {
+      this.filteredEmployees = this.employees.filter(
+        (emp) =>
+          emp.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          emp.employeeId.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    } else {
+      this.filteredEmployees = this.employees.slice(0, 5);
+    }
+  }
+
+  selectEmployee(employee: Employee) {
+    this.formData.employeeId = employee.id.toString();
+    this.formData.employeeName = employee.name;
+    this.searchTerm = employee.name;
+    this.showEmployeeDropdown = false;
+  }
+
+  onEmployeeInputBlur() {
+    setTimeout(() => {
+      this.showEmployeeDropdown = false;
+    }, 200);
   }
 
   get currentLeaveDuration(): number {
@@ -176,6 +273,16 @@ export class LeaveDetailsComponent implements OnInit {
   onConfirmSubmit(confirmed: boolean) {
     if (confirmed) {
       this.showConfirmModal = false;
+
+      // Handle promotion submission
+      if (this.isPromotion) {
+        const submissionData = {
+          employeeId: parseInt(this.formData.employeeId),
+          newPosition: this.formData.newPosition,
+        };
+        this.submit.emit(submissionData);
+        return;
+      }
 
       // Handle submission based on leave type
       if (this.showEndDate && !this.showDuration) {
@@ -324,6 +431,11 @@ export class LeaveDetailsComponent implements OnInit {
   }
 
   isFormValid(): boolean {
+    // Promotion validation
+    if (this.isPromotion) {
+      return !!(this.formData.employeeId && this.formData.newPosition);
+    }
+
     // Base validation - always required
     if (!this.formData.startDate || !this.formData.reason) {
       return false;
@@ -370,6 +482,10 @@ export class LeaveDetailsComponent implements OnInit {
       },
       location: '',
       reason: '',
+      // Promotion-specific fields
+      employeeId: '',
+      employeeName: '',
+      newPosition: '',
     };
     this.uploadedFiles = [];
   }

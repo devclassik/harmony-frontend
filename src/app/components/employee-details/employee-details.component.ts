@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { TableData } from '../../interfaces/employee.interface';
 import { EmployeeDetails } from '../../dto/employee.dto';
+import { PromotionRecord } from '../../dto/promotion.dto';
 
 @Component({
   selector: 'app-employee-details',
@@ -18,10 +19,15 @@ import { EmployeeDetails } from '../../dto/employee.dto';
 })
 export class EmployeeDetailsComponent implements OnInit {
   openSection: string | null = null;
+
   @Input() view = false;
   @Input() employee: TableData | null = null;
   @Input() employeeDetails: EmployeeDetails | null = null;
+  @Input() promotionData: PromotionRecord | null = null;
+  @Input() allPromotions: PromotionRecord[] = [];
+
   @Output() close = new EventEmitter<void>();
+
   @Input() showButton: boolean = false;
   @Input() yesButtonText: string = 'Ok';
   @Input() noButtonText: string = 'Close';
@@ -85,5 +91,13 @@ export class EmployeeDetailsComponent implements OnInit {
 
   onConfirm(result: boolean) {
     this.confirm.emit(result);
+  }
+
+  // Helper function to format position names
+  formatPosition(position: string): string {
+    return position
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 }
