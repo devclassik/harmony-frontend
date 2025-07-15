@@ -9,7 +9,13 @@
 <!-- Dashboard Content -->
 <div>
   <!-- Admin Dashboard View -->
-  <div *ngIf="workerRole?.toLowerCase() === 'admin'">
+  <div
+    *ngIf="
+      workerRole?.toLowerCase() === 'admin' ||
+      workerRole?.toLowerCase() === 'hod' ||
+      workerRole?.toLowerCase() === 'pastor'
+    "
+  >
     <div class="flex flex-col gap-4 p-2">
       <app-dashboard-greetings
         [userName]="workerName"

@@ -8,6 +8,7 @@ import {
   UpdatePromotionStatusRequest,
   UpdatePromotionResponse,
   GetPromotionsResponse,
+  GetPromotionDetailResponse,
 } from '../dto/promotion.dto';
 
 @Injectable({
@@ -24,6 +25,21 @@ export class PromotionService {
     return this.apiService.get<GetPromotionsResponse>(
       environment.routes.promotion.getAll
     );
+  }
+
+  /**
+   * Get detailed promotion information by ID
+   * @param promotionId - The promotion ID
+   * @returns Observable<GetPromotionDetailResponse>
+   */
+  getPromotionDetails(
+    promotionId: number
+  ): Observable<GetPromotionDetailResponse> {
+    const endpoint = environment.routes.promotion.getById.replace(
+      '{id}',
+      promotionId.toString()
+    );
+    return this.apiService.get<GetPromotionDetailResponse>(endpoint);
   }
 
   /**

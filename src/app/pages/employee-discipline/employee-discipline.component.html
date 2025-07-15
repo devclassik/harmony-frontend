@@ -4,9 +4,11 @@
     [tableHeader]="tableHeader"
     [tableData]="employees"
     [showViewAll]="false"
-    [showStatusTab]="false"
+    [showFilter]="false"
+    [showStatusTab]="true"
+    [statusTabs]="statusTabs"
     [activeStatusTab]="selectedStatus"
-    [showFilter]="true"
+    (statusTabChange)="onStatusTabChange($event)"
     [filterTabs]="filterTabs"
     [activeFilterTab]="selectedFilter"
     (filterTabChange)="onFilterTabChange($event)"
@@ -15,9 +17,13 @@
     [tableData]="filteredEmployees"
     [menuItems]="actionButton"
     (menuAction)="onMenuAction($event)"
-    [showButton]="true"
-    [showButtonIcon]="'./assets/svg/add.svg'"
-    (showButtonActionClick)="onShowButtonActionClick($event)"
+    [showCalendar]="false"
+    [showButton]="shouldShowCreateButton"
+    showButtonText="Create Request"
+    showButtonIcon="assets/svg/add.svg"
+    showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+    (showButtonActionClick)="onCreateDisciplineRequest()"
+    [showList]="false"
   ></app-table>
 </div>
 
@@ -25,14 +31,48 @@
   [view]="showEmployeeDetails"
   [showButton]="true"
   [noButtonText]="'Reject'"
-  [yesButtonText]="'Accept'"
+  [yesButtonText]="'Approve'"
+  [yesButtonDisabled]="
+    selectedDisciplineRecord?.status?.toUpperCase() === 'APPROVED'
+  "
+  [noButtonDisabled]="
+    selectedDisciplineRecord?.status?.toUpperCase() === 'REJECTED'
+  "
   (confirm)="actionToPerform($event)"
   (close)="showEmployeeDetails = false"
   [employee]="selectedEmployeeRecord"
+  [employeeDetails]="selectedEmployeeDetails"
+  [disciplineData]="selectedDisciplineRecord"
+  [allDisciplines]="selectedEmployeeDisciplines"
+  [disciplineHistory]="selectedDisciplineHistory"
 ></app-employee-details>
 
-<app-incidence-form
-  [open]="showDiscipline"
-  (closed)="showDiscipline = false"
-  (submitted)="handleDiscipline($event)"
-></app-incidence-form>
+<app-confirm-prompt
+  *ngIf="showModal"
+  [title]="promptConfig?.title || ''"
+  [text]="promptConfig?.text || ''"
+  [yesButtonText]="promptConfig?.yesButtonText || ''"
+  [noButtonText]="promptConfig?.noButtonText || ''"
+  (confirmed)="onModalConfirm($event)"
+  (closed)="onModalClose()"
+  [data]="selectedEmployeeRecord"
+></app-confirm-prompt>
+
+<!-- Loading Overlay -->
+<app-loading-overlay
+  *ngIf="isLoading"
+  [isVisible]="isLoading"
+  [title]="loadingTitle"
+  [message]="getLoadingMessage"
+></app-loading-overlay>
+
+<!-- Create Discipline Request Component -->
+<app-leave-details
+  [view]="showCreateDisciplineRequest"
+  [isDiscipline]="true"
+  [mode]="'create'"
+  [title]="'Create Discipline Incident'"
+  [leaveType]="'Discipline'"
+  (close)="onCloseCreateDisciplineRequest()"
+  (submit)="onCreateDisciplineRequestSubmitted($event)"
+></app-leave-details>

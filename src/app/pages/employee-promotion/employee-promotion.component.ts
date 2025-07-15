@@ -17,7 +17,11 @@ import { LeaveDetailsComponent } from '../../components/leave-details/leave-deta
 import { PromotionService } from '../../services/promotion.service';
 import { AlertService } from '../../services/alert.service';
 import { AuthService } from '../../services/auth.service';
-import { PromotionRecord, PromotionEmployee } from '../../dto/promotion.dto';
+import {
+  PromotionRecord,
+  PromotionEmployee,
+  PromotionRecordDetailed,
+} from '../../dto/promotion.dto';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { Subscription } from 'rxjs';
 
@@ -44,6 +48,7 @@ export class EmployeePromotionComponent implements OnInit, OnDestroy {
   selectedEmployeeRecord: TableData | null = null;
   selectedEmployeeDetails: EmployeeDetails | null = null;
   selectedPromotionRecord: PromotionRecord | null = null;
+  selectedAppraisalData: any[] = []; // Store appraisal data separately
   promptConfig: PromptConfig | null = null;
   showEmployeeDetails: boolean = false;
   showAppraisal: boolean = false;
@@ -59,6 +64,28 @@ export class EmployeePromotionComponent implements OnInit, OnDestroy {
   get shouldShowCreateButton(): boolean {
     const userRole = this.authService.getWorkerRole()?.toLowerCase();
     return userRole === 'pastor' || userRole === 'hod';
+  }
+
+  // Separate visibility logic for approve/reject buttons in modal
+  get shouldShowModalButtons(): boolean {
+    const userRole = this.authService.getWorkerRole()?.toLowerCase();
+    console.log('Current user role for modal buttons:', userRole);
+    return userRole === 'pastor' || userRole === 'hod';
+  }
+
+  // Filter promotions to show only those for the selected employee
+  get selectedEmployeePromotions(): PromotionRecord[] {
+    if (!this.selectedPromotionRecord || !this.allPromotions) {
+      return [];
+    }
+
+    // Get the selected employee's ID
+    const selectedEmployeeId = this.selectedPromotionRecord.employee.id;
+
+    // Filter promotions to only show those for this employee
+    return this.allPromotions.filter(
+      (promotion) => promotion.employee.id === selectedEmployeeId
+    );
   }
 
   private subscriptions: Subscription[] = [];
@@ -277,23 +304,59 @@ export class EmployeePromotionComponent implements OnInit, OnDestroy {
   }
 
   onMenuAction(event: { action: string; row: TableData }) {
-    console.log(event);
+    console.log('Menu action event:', event);
 
     if (event.action === 'View') {
-      this.showEmployeeDetails = true;
       this.selectedEmployeeRecord = event.row;
 
-      // Find the promotion record
-      const promotionRecord = this.allPromotions.find(
-        (p) => p.id.toString() === event.row.id
-      );
-      if (promotionRecord) {
-        this.selectedPromotionRecord = promotionRecord;
-        // Convert promotion employee to EmployeeDetails format
-        this.selectedEmployeeDetails = this.convertToEmployeeDetails(
-          promotionRecord.employee
-        );
-      }
+      // Set loading state for the detail view
+      this.isLoading = true;
+      this.loadingOperation = 'loading';
+
+      // Call the detailed promotion API instead of using existing data
+      const promotionId = parseInt(event.row.id);
+      const detailSub = this.promotionService
+        .getPromotionDetails(promotionId)
+        .subscribe({
+          next: (response) => {
+            if (response.status === 'success' && response.data) {
+              console.log('Detailed promotion data:', response.data);
+
+              // Set the detailed promotion record
+              this.selectedPromotionRecord =
+                this.convertDetailedToPromotionRecord(response.data);
+
+              // Convert the detailed employee data to EmployeeDetails format
+              this.selectedEmployeeDetails =
+                this.convertDetailedEmployeeToEmployeeDetails(
+                  response.data.employee
+                );
+
+              // Extract appraisal data
+              this.selectedAppraisalData =
+                response.data.employee.appraisals || [];
+
+              // Show the employee details modal
+              this.showEmployeeDetails = true;
+              console.log(
+                'Selected promotion record status:',
+                this.selectedPromotionRecord?.status
+              );
+            } else {
+              this.alertService.error('Failed to load promotion details');
+            }
+            this.isLoading = false;
+            this.loadingOperation = null;
+          },
+          error: (error) => {
+            console.error('Error loading promotion details:', error);
+            this.alertService.error('Failed to load promotion details');
+            this.isLoading = false;
+            this.loadingOperation = null;
+          },
+        });
+
+      this.subscriptions.push(detailSub);
     }
   }
 
@@ -359,6 +422,122 @@ export class EmployeePromotionComponent implements OnInit, OnDestroy {
       documents: [],
       credentials: [],
       departments: [], // Not available in promotion data
+      homeAddress: null,
+      mailingAddress: null,
+      departmentHeads: [],
+      previousPositions: [],
+      spiritualHistory: null,
+    };
+  }
+
+  // Convert detailed promotion response to PromotionRecord format
+  convertDetailedToPromotionRecord(
+    detailed: PromotionRecordDetailed
+  ): PromotionRecord {
+    return {
+      id: detailed.id,
+      promotionId: detailed.promotionId,
+      status: detailed.status as 'PENDING' | 'APPROVED' | 'REJECTED',
+      newPosition: detailed.newPosition,
+      createdAt: detailed.createdAt,
+      updatedAt: detailed.updatedAt,
+      deletedAt: detailed.deletedAt,
+      employee: {
+        id: detailed.employee.id,
+        employeeId: detailed.employee.employeeId,
+        title: detailed.employee.title,
+        firstName: detailed.employee.firstName,
+        lastName: detailed.employee.lastName,
+        middleName: detailed.employee.middleName,
+        gender: detailed.employee.gender,
+        profferedName: detailed.employee.profferedName,
+        primaryPhone: detailed.employee.primaryPhone,
+        primaryPhoneType: detailed.employee.primaryPhoneType,
+        altPhone: detailed.employee.altPhone,
+        altPhoneType: detailed.employee.altPhoneType,
+        dob: detailed.employee.dob,
+        maritalStatus: detailed.employee.maritalStatus,
+        everDivorced: detailed.employee.everDivorced,
+        beenConvicted: detailed.employee.beenConvicted,
+        hasQuestionableBackground: detailed.employee.hasQuestionableBackground,
+        hasBeenInvestigatedForMisconductOrAbuse:
+          detailed.employee.hasBeenInvestigatedForMisconductOrAbuse,
+        photoUrl: detailed.employee.photoUrl,
+        altEmail: detailed.employee.altEmail,
+        employeeStatus: detailed.employee.employeeStatus,
+        employmentType: detailed.employee.employmentType,
+        serviceStartDate: detailed.employee.serviceStartDate,
+        retiredDate: detailed.employee.retiredDate,
+        createdAt: detailed.employee.createdAt,
+        updatedAt: detailed.employee.updatedAt,
+        deletedAt: detailed.employee.deletedAt,
+        nationIdNumber: detailed.employee.nationIdNumber,
+        user: detailed.employee.user,
+      },
+    };
+  }
+
+  // Convert detailed employee data to EmployeeDetails format (with appraisal data)
+  convertDetailedEmployeeToEmployeeDetails(employee: any): EmployeeDetails {
+    return {
+      id: employee.id,
+      employeeId: employee.employeeId,
+      title: employee.title,
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      middleName: employee.middleName,
+      gender: employee.gender,
+      profferedName: employee.profferedName,
+      primaryPhone: employee.primaryPhone,
+      primaryPhoneType: employee.primaryPhoneType,
+      altPhone: employee.altPhone,
+      altPhoneType: employee.altPhoneType,
+      dob: employee.dob,
+      maritalStatus: employee.maritalStatus,
+      everDivorced: employee.everDivorced,
+      beenConvicted: employee.beenConvicted,
+      hasQuestionableBackground: employee.hasQuestionableBackground,
+      hasBeenInvestigatedForMisconductOrAbuse:
+        employee.hasBeenInvestigatedForMisconductOrAbuse,
+      photoUrl: employee.photoUrl,
+      altEmail: employee.altEmail,
+      employeeStatus: employee.employeeStatus,
+      employmentType: employee.employmentType,
+      serviceStartDate: employee.serviceStartDate,
+      retiredDate: employee.retiredDate,
+      createdAt: employee.createdAt,
+      updatedAt: employee.updatedAt,
+      deletedAt: employee.deletedAt,
+      nationIdNumber: employee.nationIdNumber,
+      recentCredentialsNameArea: null,
+      user: employee.user
+        ? {
+            id: employee.user.id,
+            email: employee.user.email,
+            password: employee.user.password,
+            verifyEmailOTP: employee.user.verifyEmailOTP,
+            isEmailVerified: employee.user.isEmailVerified,
+            passwordResetOTP: employee.user.passwordResetOTP,
+            isLoggedIn: employee.user.isLoggedIn,
+            createdAt: employee.user.createdAt,
+            updatedAt: employee.user.updatedAt,
+            deletedAt: employee.user.deletedAt,
+            role: {
+              id: 0,
+              name: 'Employee',
+              createdAt: employee.user.createdAt,
+              updatedAt: employee.user.updatedAt,
+              deletedAt: null,
+              permissions: [],
+            },
+          }
+        : null,
+      spouse: null,
+      children: [],
+      payrolls: [],
+      documents: [],
+      credentials: [],
+      departments: [],
       homeAddress: null,
       mailingAddress: null,
       departmentHeads: [],

@@ -51,6 +51,25 @@ export class EmployeeService {
   }
 
   /**
+   * Search employees by name
+   * @param name Search term for employee name
+   * @returns Observable of matching employees
+   */
+  searchEmployeesByName(
+    name: string
+  ): Observable<{ status: string; message: string; data: EmployeeDetails[] }> {
+    const endpoint = environment.routes.employees.searchByName.replace(
+      '{name}',
+      encodeURIComponent(name)
+    );
+    return this.apiService.get<{
+      status: string;
+      message: string;
+      data: EmployeeDetails[];
+    }>(endpoint);
+  }
+
+  /**
    * Create new employee
    * @param employeeData Employee data to create
    * @returns Observable of created employee

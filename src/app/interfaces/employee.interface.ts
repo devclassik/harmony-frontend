@@ -1,3 +1,5 @@
+import { DisciplineType } from '../dto/discipline.dto';
+
 export interface TableData {
   id: string;
   name?: string;
@@ -12,7 +14,8 @@ export interface TableData {
     | 'Pending'
     | 'Rejected';
   imageUrl?: string;
-  disciplineType?: 'Suspension' | 'Warning';
+  disciplineType?: DisciplineType | string;
+  originalDisciplineType?: DisciplineType;
   offenseCategory?: string;
   disciplineDuration?: string;
   transferType?: string;

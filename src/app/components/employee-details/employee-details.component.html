@@ -187,7 +187,10 @@
         </div>
       </div>
       <!-- Contact Information Section - Hidden in promotion view -->
-      <div class="employee-section mb-4" *ngIf="!promotionData">
+      <div
+        class="employee-section mb-4"
+        *ngIf="!promotionData && !disciplineData"
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -288,7 +291,10 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4" *ngIf="!promotionData">
+      <div
+        class="employee-section mb-4"
+        *ngIf="!promotionData && !disciplineData"
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -352,7 +358,10 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4" *ngIf="!promotionData">
+      <div
+        class="employee-section mb-4"
+        *ngIf="!promotionData && !disciplineData"
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -401,7 +410,10 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4" *ngIf="!promotionData">
+      <div
+        class="employee-section mb-4"
+        *ngIf="!promotionData && !disciplineData"
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -460,7 +472,10 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4" *ngIf="!promotionData">
+      <div
+        class="employee-section mb-4"
+        *ngIf="!promotionData && !disciplineData"
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -509,7 +524,10 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4" *ngIf="!promotionData">
+      <div
+        class="employee-section mb-4"
+        *ngIf="!promotionData && !disciplineData"
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -557,7 +575,7 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4">
+      <div class="employee-section mb-4" *ngIf="!disciplineData">
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -586,24 +604,205 @@
           *ngIf="openSection === 'appraisalHistory'"
           class="mt-4 bg-white p-6 animate-fade-in"
         >
-          <div class="grid grid-cols-2 gap-x-8 gap-y-4">
-            <div>
-              <div class="text-xs text-gray-400">Last Appraisal Date</div>
-              <div class="font-medium text-gray-900">N/A</div>
-            </div>
-            <div>
-              <div class="text-xs text-gray-400">Overall Rating</div>
-              <div class="font-medium text-gray-900">N/A</div>
-            </div>
-            <div>
-              <div class="text-xs text-gray-400">Next Appraisal Due</div>
-              <div class="font-medium text-gray-900">N/A</div>
-            </div>
-            <div>
-              <div class="text-xs text-gray-400">Performance Goals</div>
-              <div class="font-medium text-gray-900">N/A</div>
+          <div
+            *ngIf="appraisalData && appraisalData.length > 0; else noAppraisals"
+          >
+            <div
+              *ngFor="let appraisal of appraisalData; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4"
+            >
+              <div class="grid grid-cols-2 gap-x-8 gap-y-4 mb-4">
+                <div>
+                  <div class="text-xs text-gray-400">Start Date</div>
+                  <div class="font-medium text-gray-900">
+                    {{ appraisal.startDate | date : "shortDate" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400">End Date</div>
+                  <div class="font-medium text-gray-900">
+                    {{ appraisal.endDate | date : "shortDate" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400">Average Score</div>
+                  <div class="font-medium text-gray-900">
+                    {{ appraisal.averageScore }}%
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400">Total Criteria</div>
+                  <div class="font-medium text-gray-900">
+                    {{ appraisal.scores?.length || 0 }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Individual Scores -->
+              <div
+                *ngIf="appraisal.scores && appraisal.scores.length > 0"
+                class="mt-4"
+              >
+                <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                  Individual Scores
+                </h4>
+                <div class="grid grid-cols-3 gap-4">
+                  <div
+                    *ngFor="let score of appraisal.scores"
+                    class="bg-gray-50 p-3 rounded-lg"
+                  >
+                    <div class="text-xs text-gray-500 mb-1">
+                      {{ formatCriteria(score.criterial) }}
+                    </div>
+                    <div class="text-lg font-semibold text-gray-900">
+                      {{ score.score }}%
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <ng-template #noAppraisals>
+            <div class="text-center py-8 text-gray-500">
+              <p>No evaluation history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Discipline History Section - Shows discipline history for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          disciplineData &&
+          ((allDisciplines && allDisciplines.length > 0) ||
+            (disciplineHistory && disciplineHistory.length > 0))
+        "
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'disciplineHistory'
+              ? (openSection = null)
+              : (openSection = 'disciplineHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'disciplineHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Discipline History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'disciplineHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="
+              allDisciplines && allDisciplines.length > 0;
+              else noDisciplineHistory
+            "
+          >
+            <div
+              *ngFor="let discipline of allDisciplines; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+              [class.border-blue-500]="discipline.id === disciplineData?.id"
+            >
+              <div class="grid grid-cols-2 gap-4">
+                <!-- Left Column - New Position -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">Date</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ discipline.createdAt | date : "shortDate" }}
+                  </div>
+                </div>
+
+                <!-- Right Column - Status -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Type of Discipline
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ formatDisciplineType(discipline.disciplineType) }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <!-- Left Column - New Position -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Status
+                  </div>
+                  <div>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-amber-100 text-amber-800':
+                          discipline.status === 'PENDING',
+                        'bg-green-100 text-green-800':
+                          discipline.status === 'APPROVED',
+                        'bg-orange-100 text-orange-800':
+                          discipline.status === 'REJECTED'
+                      }"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full mr-2"
+                        [ngClass]="{
+                          'bg-amber-500': discipline.status === 'PENDING',
+                          'bg-green-500': discipline.status === 'APPROVED',
+                          'bg-orange-500': discipline.status === 'REJECTED'
+                        }"
+                      ></span>
+                      {{
+                        discipline.status === "PENDING"
+                          ? "Pending"
+                          : discipline.status === "APPROVED"
+                          ? "Approved"
+                          : "Rejected"
+                      }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Right Column - Status -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Duration of Discipline
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ discipline.duration }}
+                    {{ formatDurationUnit(discipline.durationUnit) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reason -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ discipline.reason }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noDisciplineHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No discipline history available</p>
+            </div>
+          </ng-template>
         </div>
       </div>
 
@@ -702,13 +901,22 @@
       </div>
       <div class="flex gap-3 w-2/3 m-auto" *ngIf="showButton">
         <button
-          class="flex-1 px-4 py-3 border border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+          class="flex-1 px-4 py-3 border border-green-600 text-green-600 rounded-lg font-medium transition-colors"
+          [class.opacity-50]="noButtonDisabled"
+          [class.cursor-not-allowed]="noButtonDisabled"
+          [class.hover:bg-green-50]="!noButtonDisabled"
+          [disabled]="noButtonDisabled"
           (click)="onConfirm(false)"
         >
           {{ noButtonText }}
         </button>
         <button
-          class="flex-1 px-4 py-3 bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F] text-white rounded-lg font-medium transition-colors"
+          class="flex-1 px-4 py-3 bg-gradient-to-r from-[#12C16F] to-[#0A8754] text-white rounded-lg font-medium transition-colors"
+          [class.opacity-50]="yesButtonDisabled"
+          [class.cursor-not-allowed]="yesButtonDisabled"
+          [class.hover:from-[#0A8754]]="!yesButtonDisabled"
+          [class.hover:to-[#12C16F]]="!yesButtonDisabled"
+          [disabled]="yesButtonDisabled"
           (click)="onConfirm(true)"
         >
           {{ yesButtonText }}

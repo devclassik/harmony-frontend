@@ -14,7 +14,6 @@ interface Employee {
   id: number;
   name: string;
   employeeId: string;
-  department?: string;
   currentPosition?: string;
 }
 
@@ -47,6 +46,7 @@ export class LeaveDetailsComponent implements OnInit {
   @Input() data: any;
   @Input() mode: 'view' | 'create' = 'view';
   @Input() isPromotion: boolean = false; // New input for promotion mode
+  @Input() isDiscipline: boolean = false; // New input for discipline mode
   @Output() close = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() submit = new EventEmitter<any>();
@@ -55,17 +55,28 @@ export class LeaveDetailsComponent implements OnInit {
   showConfirmModal: boolean = false;
 
   // Promotion-specific properties
-  employees: Employee[] = [];
   filteredEmployees: Employee[] = [];
   searchTerm: string = '';
   showEmployeeDropdown: boolean = false;
   searchingEmployees: boolean = false;
 
   positions: Position[] = [
-    { label: 'Minister', value: 'MINISTER' },
     { label: 'Pastor', value: 'PASTOR' },
-    { label: 'Zonal Pastor', value: 'ZONAL_PASTOR' },
-    { label: 'District Pastor', value: 'DISTRICT_PASTOR' },
+    { label: 'Senior Pastor', value: 'SENIOR_PASTOR' },
+    { label: 'Cleaner', value: 'CLEANER' },
+    { label: 'HOD', value: 'HOD' },
+    { label: 'Worker', value: 'WORKER' },
+    { label: 'Minister', value: 'MINISTER' },
+    { label: 'Overseer', value: 'OVERSEER' },
+  ];
+
+  disciplineTypes: Position[] = [
+    { label: 'Verbal', value: 'VERBAL' },
+    { label: 'Written', value: 'WRITTEN' },
+    { label: 'Suspension', value: 'SUSPENSION' },
+    { label: 'Termination', value: 'TERMINATION' },
+    { label: 'Demotion', value: 'DEMOTION' },
+    { label: 'Promotion', value: 'PROMOTION' },
   ];
 
   constructor(
@@ -89,6 +100,8 @@ export class LeaveDetailsComponent implements OnInit {
     employeeId: '',
     employeeName: '',
     newPosition: '',
+    // Discipline-specific fields
+    disciplineType: '',
   };
 
   // Track uploaded files with progress
@@ -105,51 +118,41 @@ export class LeaveDetailsComponent implements OnInit {
   durationUnits = FORM_OPTIONS.leaveDurationUnits;
 
   ngOnInit() {
-    if (this.isPromotion && this.mode === 'create') {
-      this.loadEmployees();
-    }
+    // Removed loadEmployees() call - we now search employees dynamically via API
   }
 
   // Promotion methods
-  loadEmployees() {
-    this.searchingEmployees = true;
-    this.employeeService.getAllEmployees(1, 50).subscribe({
-      next: (response) => {
-        if (
-          response.status === 'success' &&
-          response.data &&
-          response.data.data
-        ) {
-          this.employees = response.data.data.map((emp: EmployeeDetails) => ({
-            id: emp.id,
-            name: `${emp.firstName} ${emp.lastName}`,
-            employeeId: emp.employeeId || emp.id.toString(),
-            department: emp.departments?.[0]?.name || 'N/A',
-            currentPosition: emp.user?.role?.name || 'N/A',
-          }));
-          this.filteredEmployees = this.employees;
-        }
-        this.searchingEmployees = false;
-      },
-      error: (error) => {
-        this.alertService.error('Failed to load employees');
-        this.searchingEmployees = false;
-      },
-    });
-  }
-
   onEmployeeSearch(event: any) {
     this.searchTerm = event.target.value;
     this.showEmployeeDropdown = true;
 
-    if (this.searchTerm.length > 0) {
-      this.filteredEmployees = this.employees.filter(
-        (emp) =>
-          emp.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          emp.employeeId.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-    } else {
-      this.filteredEmployees = this.employees.slice(0, 5);
+    if (this.searchTerm.length > 2) {
+      // Only search when user has typed at least 3 characters
+      this.searchingEmployees = true;
+      this.employeeService.searchEmployeesByName(this.searchTerm).subscribe({
+        next: (response) => {
+          if (response.status === 'success' && response.data) {
+            this.filteredEmployees = response.data.map(
+              (emp: EmployeeDetails) => ({
+                id: emp.id,
+                name: `${emp.firstName} ${emp.lastName}`,
+                employeeId: emp.employeeId || emp.id.toString(),
+                currentPosition: emp.user?.role?.name || 'N/A',
+              })
+            );
+          } else {
+            this.filteredEmployees = [];
+          }
+          this.searchingEmployees = false;
+        },
+        error: (error) => {
+          console.error('Error searching employees:', error);
+          this.filteredEmployees = [];
+          this.searchingEmployees = false;
+        },
+      });
+    } else if (this.searchTerm.length === 0) {
+      this.filteredEmployees = [];
     }
   }
 
@@ -279,6 +282,19 @@ export class LeaveDetailsComponent implements OnInit {
         const submissionData = {
           employeeId: parseInt(this.formData.employeeId),
           newPosition: this.formData.newPosition,
+        };
+        this.submit.emit(submissionData);
+        return;
+      }
+
+      // Handle discipline submission
+      if (this.isDiscipline) {
+        const submissionData = {
+          employeeId: parseInt(this.formData.employeeId),
+          disciplineType: this.formData.disciplineType,
+          reason: this.formData.reason,
+          duration: this.formData.duration.value,
+          durationUnit: this.formData.duration.unit.toUpperCase(),
         };
         this.submit.emit(submissionData);
         return;
@@ -435,6 +451,9 @@ export class LeaveDetailsComponent implements OnInit {
     if (this.isPromotion) {
       return !!(this.formData.employeeId && this.formData.newPosition);
     }
+    if (this.isDiscipline) {
+      return !!(this.formData.employeeId && this.formData.disciplineType);
+    }
 
     // Base validation - always required
     if (!this.formData.startDate || !this.formData.reason) {
@@ -486,6 +505,8 @@ export class LeaveDetailsComponent implements OnInit {
       employeeId: '',
       employeeName: '',
       newPosition: '',
+      // Discipline-specific fields
+      disciplineType: '',
     };
     this.uploadedFiles = [];
   }
