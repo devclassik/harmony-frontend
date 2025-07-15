@@ -1,7 +1,15 @@
 import { Component } from '@angular/core';
-import { FilterTab, MenuItem, TableComponent, TableHeader } from '../../components/table/table.component';
+import {
+  FilterTab,
+  MenuItem,
+  TableComponent,
+  TableHeader,
+} from '../../components/table/table.component';
 import { TableData } from '../../interfaces/employee.interface';
-import { ConfirmPromptComponent, PromptConfig } from '../../components/confirm-prompt/confirm-prompt.component';
+import {
+  ConfirmPromptComponent,
+  PromptConfig,
+} from '../../components/confirm-prompt/confirm-prompt.component';
 import { CommonModule } from '@angular/common';
 import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
 import { SuccessModalComponent } from '../../components/success-modal/success-modal.component';
@@ -16,10 +24,9 @@ import { SuccessModalComponent } from '../../components/success-modal/success-mo
     SuccessModalComponent,
   ],
   templateUrl: './employee-retrenchment.component.html',
-  styleUrl: './employee-retrenchment.component.css'
+  styleUrl: './employee-retrenchment.component.css',
 })
 export class EmployeeRetrenchmentComponent {
-
   selectedStatus: string = '';
   selectedFilter: string = '';
   searchValue: string = '';
@@ -45,7 +52,6 @@ export class EmployeeRetrenchmentComponent {
       retrenchmentType: '02/05/2025',
       status: 'Pending',
       imageUrl: 'assets/svg/profilePix.svg',
-
     },
     {
       id: '124 - 01',
@@ -53,7 +59,6 @@ export class EmployeeRetrenchmentComponent {
       retrenchmentType: '05/05/2025',
       status: 'Approved',
       imageUrl: 'assets/svg/profilePix.svg',
-
     },
   ];
 
@@ -140,7 +145,6 @@ export class EmployeeRetrenchmentComponent {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to approve this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -149,7 +153,6 @@ export class EmployeeRetrenchmentComponent {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to reject this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -161,5 +164,4 @@ export class EmployeeRetrenchmentComponent {
     this.selectedStatus = value;
     this.applyFilters();
   }
-
 }

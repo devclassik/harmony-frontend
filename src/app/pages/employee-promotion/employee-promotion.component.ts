@@ -388,7 +388,6 @@ export class EmployeePromotionComponent implements OnInit, OnDestroy {
       this.promptConfig = {
         title: 'Confirm',
         text: `Are you sure you want to approve the promotion request for ${employeeName}?`,
-        imageUrl: employeeImage,
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -399,7 +398,6 @@ export class EmployeePromotionComponent implements OnInit, OnDestroy {
       this.promptConfig = {
         title: 'Confirm',
         text: `Are you sure you want to reject the promotion request for ${employeeName}?`,
-        imageUrl: employeeImage,
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };

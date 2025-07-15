@@ -304,7 +304,6 @@ export class EmployeeRecordsComponent implements OnInit {
       this.promptConfig = {
         title: 'Delete',
         text: `Are you sure you want to delete ${event.row.name}?`,
-        imageUrl: event.row.imageUrl || 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -476,7 +475,6 @@ export class EmployeeRecordsComponent implements OnInit {
     this.promptConfig = {
       title: 'Confirm',
       text: `Are you sure you want to submit this appraisal for ${this.selectedEmployee?.name}?`,
-      imageUrl: this.selectedEmployee?.imageUrl || 'assets/svg/profilePix.svg',
       yesButtonText: 'Yes',
       noButtonText: 'No',
     };

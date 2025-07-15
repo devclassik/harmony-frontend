@@ -1,17 +1,32 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { ComponentsModule } from '../../components/components.module';
-import { FilterTab, MenuItem, TableComponent, TableHeader } from '../../components/table/table.component';
+import {
+  FilterTab,
+  MenuItem,
+  TableComponent,
+  TableHeader,
+} from '../../components/table/table.component';
 import { TableData } from '../../interfaces/employee.interface';
 import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
-import { ConfirmPromptComponent, PromptConfig } from '../../components/confirm-prompt/confirm-prompt.component';
+import {
+  ConfirmPromptComponent,
+  PromptConfig,
+} from '../../components/confirm-prompt/confirm-prompt.component';
 import { SuccessModalComponent } from '../../components/success-modal/success-modal.component';
 
 @Component({
   selector: 'app-employee-transfer',
-  imports: [CommonModule, ComponentsModule, TableComponent, EmployeeDetailsComponent, ConfirmPromptComponent, SuccessModalComponent],
+  imports: [
+    CommonModule,
+    ComponentsModule,
+    TableComponent,
+    EmployeeDetailsComponent,
+    ConfirmPromptComponent,
+    SuccessModalComponent,
+  ],
   templateUrl: './employee-transfer.component.html',
-  styleUrl: './employee-transfer.component.css'
+  styleUrl: './employee-transfer.component.css',
 })
 export class EmployeeTransferComponent {
   selectedStatus: string = '';
@@ -23,8 +38,6 @@ export class EmployeeTransferComponent {
   successModal: boolean = false;
   showAppraisal: boolean = false;
   promptConfig: PromptConfig | null = null;
-
-
 
   tableHeader: TableHeader[] = [
     { key: 'id', label: 'DISCIPLINE ID' },
@@ -43,7 +56,6 @@ export class EmployeeTransferComponent {
       destination: 'Ikeja',
       status: 'Pending',
       imageUrl: 'assets/svg/profilePix.svg',
-
     },
     {
       id: '124 - 01',
@@ -52,7 +64,6 @@ export class EmployeeTransferComponent {
       destination: 'Technical Team',
       status: 'Approved',
       imageUrl: 'assets/svg/profilePix.svg',
-
     },
   ];
 
@@ -73,7 +84,6 @@ export class EmployeeTransferComponent {
     },
     { label: 'Department', value: 'Department', icon: 'M5 13l4 4L19 7' },
     { label: 'Location', value: 'Location', icon: 'M5 13l4 4L19 7' },
-
   ];
 
   onFilterTabChange(value: string) {
@@ -129,7 +139,7 @@ export class EmployeeTransferComponent {
   showEmployeeDetailsModal() {
     this.showEmployeeDetails = true;
   }
-  
+
   onModalConfirm(confirmed: boolean) {
     console.log(confirmed);
     this.showModal = false;
@@ -146,7 +156,6 @@ export class EmployeeTransferComponent {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to approve this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -155,12 +164,10 @@ export class EmployeeTransferComponent {
       this.promptConfig = {
         title: 'Confirm',
         text: 'Are you sure you want to reject this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
       this.showModal = true;
     }
   }
-
 }
