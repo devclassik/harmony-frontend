@@ -29,15 +29,22 @@
 
 <app-employee-details
   [view]="showEmployeeDetails"
-  [showButton]="selectedPromotionRecord?.status?.toUpperCase() === 'PENDING'"
+  [showButton]="true"
   [noButtonText]="'Reject'"
   [yesButtonText]="'Approve'"
+  [yesButtonDisabled]="
+    selectedPromotionRecord?.status?.toUpperCase() === 'APPROVED'
+  "
+  [noButtonDisabled]="
+    selectedPromotionRecord?.status?.toUpperCase() === 'REJECTED'
+  "
   (confirm)="actionToPerform($event)"
   (close)="showEmployeeDetails = false"
   [employee]="selectedEmployeeRecord"
   [employeeDetails]="selectedEmployeeDetails"
   [promotionData]="selectedPromotionRecord"
-  [allPromotions]="allPromotions"
+  [allPromotions]="selectedEmployeePromotions"
+  [appraisalData]="selectedAppraisalData"
 ></app-employee-details>
 
 <app-confirm-prompt
@@ -55,6 +62,8 @@
 <!-- Loading Overlay -->
 <app-loading-overlay
   *ngIf="isLoading"
+  [isVisible]="isLoading"
+  [title]="loadingTitle"
   [message]="getLoadingMessage"
 ></app-loading-overlay>
 

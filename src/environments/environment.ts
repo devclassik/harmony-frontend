@@ -28,6 +28,7 @@ export const environment = {
     employees: {
       getAll: '/employee',
       getById: '/employee/{id}',
+      searchByName: '/employee/name/{name}',
       create: '/employee',
       update: '/employee/{id}',
       delete: '/employee/{id}',
@@ -74,11 +75,21 @@ export const environment = {
     },
     promotion: {
       getAll: '/promotion',
+      getById: '/promotion/{id}',
       create: '/promotion',
       update: '/promotion/{id}',
       delete: '/promotion/{id}',
       approve: '/promotion/{id}',
       reject: '/promotion/{id}',
+    },
+    discipline: {
+      getAll: '/discipline',
+      getById: '/discipline/{id}',
+      create: '/discipline',
+      update: '/discipline/{id}',
+      delete: '/discipline/{id}',
+      approve: '/discipline/{id}',
+      reject: '/discipline/{id}',
     },
     posts: {
       getAll: 'posts',

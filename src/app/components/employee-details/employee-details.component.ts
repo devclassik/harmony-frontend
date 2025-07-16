@@ -5,6 +5,8 @@ import {
   Input,
   Output,
   OnInit,
+  OnChanges,
+  SimpleChanges,
   output,
 } from '@angular/core';
 import { TableData } from '../../interfaces/employee.interface';
@@ -17,7 +19,7 @@ import { PromotionRecord } from '../../dto/promotion.dto';
   templateUrl: './employee-details.component.html',
   styleUrl: './employee-details.component.css',
 })
-export class EmployeeDetailsComponent implements OnInit {
+export class EmployeeDetailsComponent implements OnInit, OnChanges {
   openSection: string | null = null;
 
   @Input() view = false;
@@ -25,12 +27,18 @@ export class EmployeeDetailsComponent implements OnInit {
   @Input() employeeDetails: EmployeeDetails | null = null;
   @Input() promotionData: PromotionRecord | null = null;
   @Input() allPromotions: PromotionRecord[] = [];
+  @Input() appraisalData: any[] = []; // Add input for appraisal data
+  @Input() disciplineData: any = null; // Add input for discipline data
+  @Input() allDisciplines: any[] = []; // Add input for all discipline records
+  @Input() disciplineHistory: any[] = []; // Add input for discipline history
 
   @Output() close = new EventEmitter<void>();
 
   @Input() showButton: boolean = false;
   @Input() yesButtonText: string = 'Ok';
   @Input() noButtonText: string = 'Close';
+  @Input() yesButtonDisabled: boolean = false;
+  @Input() noButtonDisabled: boolean = false;
 
   @Output() confirm = new EventEmitter<any>();
 
@@ -40,7 +48,13 @@ export class EmployeeDetailsComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    // Removed debug logging
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    // Removed debug logging
+  }
 
   // Helper function to properly format image URLs
   formatImageUrl(url: string | null | undefined): string {
@@ -99,5 +113,23 @@ export class EmployeeDetailsComponent implements OnInit {
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
+  }
+
+  // Helper function to format criteria names
+  formatCriteria(criteria: string): string {
+    return criteria
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
+
+  // Helper function to format discipline type
+  formatDisciplineType(type: string): string {
+    return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+  }
+
+  // Helper function to format duration unit
+  formatDurationUnit(unit: string): string {
+    return unit.charAt(0).toUpperCase() + unit.slice(1).toLowerCase();
   }
 }
