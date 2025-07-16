@@ -47,6 +47,7 @@ export class LeaveDetailsComponent implements OnInit {
   @Input() mode: 'view' | 'create' = 'view';
   @Input() isPromotion: boolean = false; // New input for promotion mode
   @Input() isDiscipline: boolean = false; // New input for discipline mode
+  @Input() isTransfer: boolean = false;
   @Output() close = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() submit = new EventEmitter<any>();
@@ -79,6 +80,13 @@ export class LeaveDetailsComponent implements OnInit {
     { label: 'Promotion', value: 'PROMOTION' },
   ];
 
+  transferTypes: Position[] = [
+    { label: 'Internal Transfer', value: 'INTERNAL' },
+    { label: 'External Transfer', value: 'EXTERNAL' },
+    { label: 'Department Transfer', value: 'DEPARTMENT' },
+    { label: 'Location Transfer', value: 'LOCATION' },
+  ];
+
   constructor(
     private fileUploadService: FileUploadService,
     private employeeService: EmployeeService,
@@ -102,6 +110,9 @@ export class LeaveDetailsComponent implements OnInit {
     newPosition: '',
     // Discipline-specific fields
     disciplineType: '',
+    // Transfer-specific fields
+    transferType: '',
+    destination: '',
   };
 
   // Track uploaded files with progress
@@ -284,6 +295,7 @@ export class LeaveDetailsComponent implements OnInit {
           newPosition: this.formData.newPosition,
         };
         this.submit.emit(submissionData);
+        this.close.emit();
         return;
       }
 
@@ -297,6 +309,21 @@ export class LeaveDetailsComponent implements OnInit {
           durationUnit: this.formData.duration.unit.toUpperCase(),
         };
         this.submit.emit(submissionData);
+        this.close.emit();
+        return;
+      }
+
+      // Handle transfer submission
+      if (this.isTransfer) {
+        const submissionData = {
+          employeeId: parseInt(this.formData.employeeId),
+          newPosition: this.formData.newPosition,
+          reason: this.formData.reason,
+          destination: this.formData.destination,
+          transferType: this.formData.transferType,
+        };
+        this.submit.emit(submissionData);
+        this.close.emit();
         return;
       }
 
@@ -309,6 +336,7 @@ export class LeaveDetailsComponent implements OnInit {
           reason: this.formData.reason,
         };
         this.submit.emit(submissionData);
+        this.close.emit();
       } else {
         // Leave of absence or sick leave - use duration, location, etc.
         const calculatedDuration = this.calculateDurationInDays(
@@ -339,6 +367,7 @@ export class LeaveDetailsComponent implements OnInit {
         console.log('File URLs:', fileUrls);
 
         this.submit.emit(submissionData);
+        this.close.emit();
       }
     } else {
       this.showConfirmModal = false;
@@ -454,6 +483,15 @@ export class LeaveDetailsComponent implements OnInit {
     if (this.isDiscipline) {
       return !!(this.formData.employeeId && this.formData.disciplineType);
     }
+    if (this.isTransfer) {
+      return !!(
+        this.formData.employeeId &&
+        this.formData.transferType &&
+        this.formData.newPosition &&
+        this.formData.destination &&
+        this.formData.reason
+      );
+    }
 
     // Base validation - always required
     if (!this.formData.startDate || !this.formData.reason) {
@@ -484,6 +522,15 @@ export class LeaveDetailsComponent implements OnInit {
   }
 
   get confirmationText(): string {
+    if (this.isTransfer) {
+      return `Are you sure you want to create this transfer request for ${this.formData.employeeName}?`;
+    }
+    if (this.isPromotion) {
+      return `Are you sure you want to create this promotion request for ${this.formData.employeeName}?`;
+    }
+    if (this.isDiscipline) {
+      return `Are you sure you want to create this discipline request for ${this.formData.employeeName}?`;
+    }
     if (this.showEndDate && !this.showDuration) {
       return `Are you sure you want to create this ${this.leaveType.toLowerCase()} request?`;
     }
@@ -507,8 +554,14 @@ export class LeaveDetailsComponent implements OnInit {
       newPosition: '',
       // Discipline-specific fields
       disciplineType: '',
+      // Transfer-specific fields
+      transferType: '',
+      destination: '',
     };
     this.uploadedFiles = [];
+    this.searchTerm = '';
+    this.filteredEmployees = [];
+    this.showEmployeeDropdown = false;
   }
 
   downloadDocument(doc: any) {

@@ -17,21 +17,12 @@ import {
 export class PromotionService {
   constructor(private apiService: ApiService) {}
 
-  /**
-   * Get all promotion requests
-   * @returns Observable<GetPromotionsResponse>
-   */
   getAllPromotions(): Observable<GetPromotionsResponse> {
     return this.apiService.get<GetPromotionsResponse>(
       environment.routes.promotion.getAll
     );
   }
 
-  /**
-   * Get detailed promotion information by ID
-   * @param promotionId - The promotion ID
-   * @returns Observable<GetPromotionDetailResponse>
-   */
   getPromotionDetails(
     promotionId: number
   ): Observable<GetPromotionDetailResponse> {
@@ -42,11 +33,6 @@ export class PromotionService {
     return this.apiService.get<GetPromotionDetailResponse>(endpoint);
   }
 
-  /**
-   * Create a new promotion request
-   * @param request - The promotion request data
-   * @returns Observable<CreatePromotionResponse>
-   */
   createPromotion(
     request: CreatePromotionRequest
   ): Observable<CreatePromotionResponse> {
@@ -56,12 +42,6 @@ export class PromotionService {
     );
   }
 
-  /**
-   * Update promotion status
-   * @param promotionId - The promotion ID
-   * @param request - The status update request
-   * @returns Observable<UpdatePromotionResponse>
-   */
   updatePromotionStatus(
     promotionId: number,
     request: UpdatePromotionStatusRequest
@@ -73,20 +53,10 @@ export class PromotionService {
     return this.apiService.put<UpdatePromotionResponse>(endpoint, request);
   }
 
-  /**
-   * Approve a promotion request
-   * @param promotionId - The promotion ID
-   * @returns Observable<UpdatePromotionResponse>
-   */
   approvePromotion(promotionId: number): Observable<UpdatePromotionResponse> {
     return this.updatePromotionStatus(promotionId, { status: 'APPROVED' });
   }
 
-  /**
-   * Reject a promotion request
-   * @param promotionId - The promotion ID
-   * @returns Observable<UpdatePromotionResponse>
-   */
   rejectPromotion(promotionId: number): Observable<UpdatePromotionResponse> {
     return this.updatePromotionStatus(promotionId, { status: 'REJECTED' });
   }

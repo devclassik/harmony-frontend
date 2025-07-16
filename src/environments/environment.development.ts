@@ -88,6 +88,15 @@ export const environment = {
       approve: '/discipline/{id}',
       reject: '/discipline/{id}',
     },
+    transfer: {
+      getAll: '/transfer',
+      getById: '/transfer/{id}',
+      create: '/transfer',
+      update: '/transfer/{id}',
+      delete: '/transfer/{id}',
+      approve: '/transfer/{id}',
+      reject: '/transfer/{id}',
+    },
     campMeeting: {
       getAll: '/camp-meeting',
     },

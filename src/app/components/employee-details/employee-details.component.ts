@@ -12,6 +12,8 @@ import {
 import { TableData } from '../../interfaces/employee.interface';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { PromotionRecord } from '../../dto/promotion.dto';
+import { TransferRecord } from '../../dto/transfer.dto';
+import { DisciplineRecord } from '../../dto/discipline.dto';
 
 @Component({
   selector: 'app-employee-details',
@@ -27,10 +29,13 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   @Input() employeeDetails: EmployeeDetails | null = null;
   @Input() promotionData: PromotionRecord | null = null;
   @Input() allPromotions: PromotionRecord[] = [];
+  @Input() transferData: TransferRecord | null = null; // Add input for transfer data
+  @Input() allTransfers: TransferRecord[] = []; // Add input for all transfer records
+  @Input() transferHistory: TransferRecord[] = []; // Add input for transfer history
   @Input() appraisalData: any[] = []; // Add input for appraisal data
-  @Input() disciplineData: any = null; // Add input for discipline data
-  @Input() allDisciplines: any[] = []; // Add input for all discipline records
-  @Input() disciplineHistory: any[] = []; // Add input for discipline history
+  @Input() disciplineData: DisciplineRecord | null = null; // Add input for discipline data
+  @Input() allDisciplines: DisciplineRecord[] = []; // Add input for all discipline records
+  @Input() disciplineHistory: DisciplineRecord[] = []; // Add input for discipline history
 
   @Output() close = new EventEmitter<void>();
 
