@@ -69,12 +69,6 @@ export class EmployeeDisciplineComponent implements OnInit, OnDestroy {
     return userRole === 'pastor' || userRole === 'hod';
   }
 
-  // Separate visibility logic for approve/reject buttons in modal
-  get shouldShowModalButtons(): boolean {
-    const userRole = this.authService.getWorkerRole()?.toLowerCase();
-    return userRole === 'pastor' || userRole === 'hod';
-  }
-
   // Filter disciplines to show only those for the selected employee
   get selectedEmployeeDisciplines(): DisciplineRecord[] {
     if (!this.selectedDisciplineRecord || !this.allDisciplines) {
