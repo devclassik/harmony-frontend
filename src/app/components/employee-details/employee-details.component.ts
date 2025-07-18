@@ -14,6 +14,8 @@ import { EmployeeDetails } from '../../dto/employee.dto';
 import { PromotionRecord } from '../../dto/promotion.dto';
 import { TransferRecord } from '../../dto/transfer.dto';
 import { DisciplineRecord } from '../../dto/discipline.dto';
+import { RetirementRecord } from '../../dto/retirement.dto';
+import { RetrenchmentRecord } from '../../dto/retrenchment.dto';
 
 @Component({
   selector: 'app-employee-details',
@@ -36,6 +38,10 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   @Input() disciplineData: DisciplineRecord | null = null; // Add input for discipline data
   @Input() allDisciplines: DisciplineRecord[] = []; // Add input for all discipline records
   @Input() disciplineHistory: DisciplineRecord[] = []; // Add input for discipline history
+  @Input() retirementData: RetirementRecord | null = null; // Add input for retirement data
+  @Input() allRetirements: RetirementRecord[] = []; // Add input for all retirement records
+  @Input() retrenchmentData: RetrenchmentRecord | null = null; // Add input for retrenchment data
+  @Input() allRetrenchments: RetrenchmentRecord[] = []; // Add input for all retrenchment records
 
   @Output() close = new EventEmitter<void>();
 
@@ -54,6 +60,7 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   constructor() {}
 
   ngOnInit() {
+    console.log(this.employeeDetails);
     // Removed debug logging
   }
 
@@ -136,5 +143,21 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   // Helper function to format duration unit
   formatDurationUnit(unit: string): string {
     return unit.charAt(0).toUpperCase() + unit.slice(1).toLowerCase();
+  }
+
+  // Helper function to format transfer type
+  formatTransferType(type: string): string {
+    return type
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
+
+  // Helper function to format retrenchment type
+  formatRetrenchmentType(type: string): string {
+    return type
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 }

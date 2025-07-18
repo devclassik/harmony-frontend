@@ -1,53 +1,76 @@
 <div class="p-2">
-    <app-table
-      [tableTitle]="'Retirement'"
-      [tableHeader]="tableHeader"
-      [tableData]="employees"
-      [showViewAll]="false"
-      [showFilter]="true"
-      [showStatusTab]="true"
-      [statusTabs]="statusTabs"
-      [activeStatusTab]="selectedStatus"
-      (statusTabChange)="onStatusTabChange($event)"
-      [filterTabs]="filterTabs"
-      [activeFilterTab]="selectedFilter"
-      (filterTabChange)="onFilterTabChange($event)"
-      [searchValue]="searchValue"
-      (search)="onSearch($event)"
-      [tableData]="filteredEmployees"
-      [menuItems]="actionButton"
-      (menuAction)="onMenuAction($event)"
-    ></app-table>
-  </div>
-  
-  <app-employee-details
-    [view]="showEmployeeDetails"
-    [showButton]="true"
-    [noButtonText]="'Reject'"
-    [yesButtonText]="'Accept'"
-    (confirm)="actionToPerform($event)"
-    (close)="showEmployeeDetails = false"
-    [employee]="selectedEmployeeRecord"
-  ></app-employee-details>
-  
-  <app-confirm-prompt
-    *ngIf="showModal"
-    [title]="promptConfig?.title || ''"
-    [text]="promptConfig?.text || ''"
-    [imageUrl]="promptConfig?.imageUrl || null"
-    [yesButtonText]="promptConfig?.yesButtonText || ''"
-    [noButtonText]="promptConfig?.noButtonText || ''"
-    (confirmed)="onModalConfirm($event)"
-    (closed)="onModalClose()"
-    [data]="selectedEmployeeRecord"
-  ></app-confirm-prompt>
-  
-  <app-success-modal
-    *ngIf="successModal"
-    [title]="'Operation Successful!'"
-    [showOkButton]="false"
-    [okButtonText]="'Click Ok'"
-    [okButtonLink]="'/dashboard'"
-    (closed)="successModal = false"
-  ></app-success-modal>
-  
+  <app-table
+    [tableTitle]="'Retirement'"
+    [tableHeader]="tableHeader"
+    [tableData]="employees"
+    [showViewAll]="false"
+    [showFilter]="false"
+    [showStatusTab]="true"
+    [statusTabs]="statusTabs"
+    [activeStatusTab]="selectedStatus"
+    (statusTabChange)="onStatusTabChange($event)"
+    [filterTabs]="filterTabs"
+    [activeFilterTab]="selectedFilter"
+    (filterTabChange)="onFilterTabChange($event)"
+    [searchValue]="searchValue"
+    (search)="onSearch($event)"
+    [tableData]="filteredEmployees"
+    [menuItems]="actionButton"
+    (menuAction)="onMenuAction($event)"
+    [showCalendar]="false"
+    [showButton]="shouldShowCreateButton"
+    showButtonText="Create Request"
+    showButtonIcon="assets/svg/add.svg"
+    showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+    (showButtonActionClick)="onCreateRetirementRequest()"
+    [showList]="false"
+  ></app-table>
+</div>
+
+<app-employee-details
+  [view]="showEmployeeDetails"
+  [showButton]="true"
+  [noButtonText]="'Reject'"
+  [yesButtonText]="'Approve'"
+  [yesButtonDisabled]="
+    selectedRetirementRecord?.status?.toUpperCase() === 'APPROVED'
+  "
+  [noButtonDisabled]="
+    selectedRetirementRecord?.status?.toUpperCase() === 'REJECTED'
+  "
+  (confirm)="actionToPerform($event)"
+  (close)="showEmployeeDetails = false"
+  [employee]="selectedEmployeeRecord"
+  [employeeDetails]="selectedEmployeeDetails"
+  [retirementData]="selectedRetirementRecord"
+  [allRetirements]="selectedEmployeeRetirements"
+></app-employee-details>
+
+<app-confirm-prompt
+  *ngIf="showModal"
+  [title]="promptConfig?.title || ''"
+  [text]="promptConfig?.text || ''"
+  [imageUrl]="promptConfig?.imageUrl || null"
+  [yesButtonText]="promptConfig?.yesButtonText || ''"
+  [noButtonText]="promptConfig?.noButtonText || ''"
+  (confirmed)="onModalConfirm($event)"
+  (closed)="onModalClose()"
+  [data]="selectedEmployeeRecord"
+></app-confirm-prompt>
+
+<app-loading-overlay
+  [isVisible]="isLoading"
+  [title]="loadingTitle"
+  [message]="getLoadingMessage"
+></app-loading-overlay>
+
+<!-- Create Retirement Request Component -->
+<app-leave-details
+  [view]="showCreateRetirementRequest"
+  [isRetirement]="true"
+  [mode]="'create'"
+  [title]="'Create Retirement Request'"
+  [leaveType]="'Retirement'"
+  (close)="onCloseCreateRetirementRequest()"
+  (submit)="onCreateRetirementRequestSubmitted($event)"
+></app-leave-details>

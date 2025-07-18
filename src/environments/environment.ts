@@ -100,6 +100,15 @@ export const environment = {
       approve: '/transfer/{id}',
       reject: '/transfer/{id}',
     },
+    retirement: {
+      getAll: '/retirement',
+      getById: '/retirement/{id}',
+      create: '/retirement',
+      update: '/retirement/{id}',
+      delete: '/retirement/{id}',
+      approve: '/retirement/{id}',
+      reject: '/retirement/{id}',
+    },
     posts: {
       getAll: 'posts',
       getById: 'posts/{id}',

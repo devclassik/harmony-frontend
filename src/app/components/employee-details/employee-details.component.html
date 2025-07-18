@@ -35,9 +35,7 @@
           {{ employeeDetails?.departments?.[0]?.name || "N/A" }}
         </div>
         <div class="text-xs text-gray-500">
-          {{
-            employeeDetails?.user?.role?.name || employeeDetails?.title || "N/A"
-          }}
+          {{ employeeDetails?.user?.role?.name || "N/A" }}
         </div>
       </div>
     </div>
@@ -189,7 +187,13 @@
       <!-- Contact Information Section - Hidden in promotion view -->
       <div
         class="employee-section mb-4"
-        *ngIf="!promotionData && !disciplineData"
+        *ngIf="
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData
+        "
       >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
@@ -293,7 +297,13 @@
       </div>
       <div
         class="employee-section mb-4"
-        *ngIf="!promotionData && !disciplineData"
+        *ngIf="
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData
+        "
       >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
@@ -360,7 +370,13 @@
       </div>
       <div
         class="employee-section mb-4"
-        *ngIf="!promotionData && !disciplineData"
+        *ngIf="
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData
+        "
       >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
@@ -412,7 +428,13 @@
       </div>
       <div
         class="employee-section mb-4"
-        *ngIf="!promotionData && !disciplineData"
+        *ngIf="
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData
+        "
       >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
@@ -474,7 +496,13 @@
       </div>
       <div
         class="employee-section mb-4"
-        *ngIf="!promotionData && !disciplineData"
+        *ngIf="
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData
+        "
       >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
@@ -526,7 +554,13 @@
       </div>
       <div
         class="employee-section mb-4"
-        *ngIf="!promotionData && !disciplineData"
+        *ngIf="
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData
+        "
       >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
@@ -575,7 +609,16 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4" *ngIf="!disciplineData">
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !promotionData &&
+          !retrenchmentData
+        "
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -897,6 +940,543 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Transfer History Section - Shows transfer history for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !retirementData &&
+          !retrenchmentData &&
+          !promotionData &&
+          !disciplineData
+        "
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'transferHistory'
+              ? (openSection = null)
+              : (openSection = 'transferHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'transferHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Transfer History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'transferHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="
+              transferHistory && transferHistory.length > 0;
+              else noTransferHistory
+            "
+          >
+            <div
+              *ngFor="let transfer of transferHistory; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+              [class.border-blue-500]="transfer.id === transferData?.id"
+            >
+              <!-- Date and Transfer Type on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">Date</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ transfer.createdAt | date : "shortDate" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Transfer Type
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ formatTransferType(transfer.transferType) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Destination on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Destination
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ transfer.destination || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Reason on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ transfer.reason || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Status on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        transfer.status === 'PENDING',
+                      'bg-green-100 text-green-800':
+                        transfer.status === 'APPROVED',
+                      'bg-orange-100 text-orange-800':
+                        transfer.status === 'REJECTED'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': transfer.status === 'PENDING',
+                        'bg-green-500': transfer.status === 'APPROVED',
+                        'bg-orange-500': transfer.status === 'REJECTED'
+                      }"
+                    ></span>
+                    {{
+                      transfer.status === "PENDING"
+                        ? "Pending"
+                        : transfer.status === "APPROVED"
+                        ? "Approved"
+                        : "Rejected"
+                    }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noTransferHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No transfer history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Transfer Request Section - Shows all transfer requests for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="allTransfers && allTransfers.length > 0"
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'transferRequest'
+              ? (openSection = null)
+              : (openSection = 'transferRequest')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'transferRequest' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Transfer Request</span>
+        </button>
+        <div
+          *ngIf="openSection === 'transferRequest'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            class="space-y-4"
+            *ngFor="let transfer of allTransfers; let i = index"
+          >
+            <div
+              class="border border-gray-200 rounded-lg p-4"
+              [class.border-blue-500]="transfer.id === transferData?.id"
+            >
+              <!-- Date and Transfer Type on same line -->
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">Date</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ transfer.createdAt | date : "shortDate" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Transfer Type
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ formatTransferType(transfer.transferType) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Destination on next line -->
+              <div class="mb-4">
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Destination
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ transfer.destination || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Reason on next line -->
+              <div class="mb-4">
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ transfer.reason || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Status on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        transfer.status === 'PENDING',
+                      'bg-green-100 text-green-800':
+                        transfer.status === 'APPROVED',
+                      'bg-orange-100 text-orange-800':
+                        transfer.status === 'REJECTED'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': transfer.status === 'PENDING',
+                        'bg-green-500': transfer.status === 'APPROVED',
+                        'bg-orange-500': transfer.status === 'REJECTED'
+                      }"
+                    ></span>
+                    {{
+                      transfer.status === "PENDING"
+                        ? "Pending"
+                        : transfer.status === "APPROVED"
+                        ? "Approved"
+                        : "Rejected"
+                    }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retirement History Section - Shows retirement history for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !retrenchmentData &&
+          !transferData &&
+          !promotionData &&
+          !disciplineData
+        "
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'retirementHistory'
+              ? (openSection = null)
+              : (openSection = 'retirementHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'retirementHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Retirement History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'retirementHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="
+              allRetirements && allRetirements.length > 0;
+              else noRetirementHistory
+            "
+          >
+            <div
+              *ngFor="let retirement of allRetirements; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+              [class.border-blue-500]="retirement.id === retirementData?.id"
+            >
+              <!-- Leave ID and Employee Name on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Leave ID
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ retirement.retirementId || "N/A" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Employee Name
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ retirement.employee?.firstName }}
+                    {{ retirement.employee?.lastName }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Replacement Recommendation and Request Date on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Replacement Recommendation
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ retirement.recommendedReplacement || "N/A" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Request Date
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ retirement.createdAt | date : "shortDate" }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reason on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ retirement.reason || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Status on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        retirement.status === 'PENDING',
+                      'bg-green-100 text-green-800':
+                        retirement.status === 'APPROVED',
+                      'bg-orange-100 text-orange-800':
+                        retirement.status === 'REJECTED'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': retirement.status === 'PENDING',
+                        'bg-green-500': retirement.status === 'APPROVED',
+                        'bg-orange-500': retirement.status === 'REJECTED'
+                      }"
+                    ></span>
+                    {{
+                      retirement.status === "PENDING"
+                        ? "Pending"
+                        : retirement.status === "APPROVED"
+                        ? "Approved"
+                        : "Rejected"
+                    }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Documents section - only show if status is not rejected -->
+              <div
+                *ngIf="
+                  retirement.status !== 'REJECTED' &&
+                  retirement.documents &&
+                  retirement.documents.length > 0
+                "
+              >
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Documents
+                </div>
+                <div class="space-y-2">
+                  <div
+                    *ngFor="
+                      let document of retirement.documents;
+                      let docIndex = index
+                    "
+                    class="flex items-center justify-between p-2 bg-gray-50 rounded border"
+                  >
+                    <span class="text-sm text-gray-700">
+                      Document {{ docIndex + 1 }}
+                    </span>
+                    <button
+                      class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      (click)="openPdfModal(document)"
+                    >
+                      View
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noRetirementHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No retirement history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Retrenchment History Section - Shows retrenchment history for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !retirementData && !transferData && !promotionData && !disciplineData
+        "
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'retrenchmentHistory'
+              ? (openSection = null)
+              : (openSection = 'retrenchmentHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'retrenchmentHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Retrenchment History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'retrenchmentHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="
+              allRetrenchments && allRetrenchments.length > 0;
+              else noRetrenchmentHistory
+            "
+          >
+            <div
+              *ngFor="let retrenchment of allRetrenchments; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+              [class.border-blue-500]="retrenchment.id === retrenchmentData?.id"
+            >
+              <!-- Employee Name and Retrenchment Type on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Employee Name
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ retrenchment.employee?.firstName }}
+                    {{ retrenchment.employee?.lastName }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Retrenchment Type
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ formatRetrenchmentType(retrenchment.retrenchmentType) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reason on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ retrenchment.reason || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Status on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        retrenchment.status === 'PENDING',
+                      'bg-green-100 text-green-800':
+                        retrenchment.status === 'APPROVED',
+                      'bg-orange-100 text-orange-800':
+                        retrenchment.status === 'REJECTED'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': retrenchment.status === 'PENDING',
+                        'bg-green-500': retrenchment.status === 'APPROVED',
+                        'bg-orange-500': retrenchment.status === 'REJECTED'
+                      }"
+                    ></span>
+                    {{
+                      retrenchment.status === "PENDING"
+                        ? "Pending"
+                        : retrenchment.status === "APPROVED"
+                        ? "Approved"
+                        : "Rejected"
+                    }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noRetrenchmentHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No retrenchment history available</p>
+            </div>
+          </ng-template>
         </div>
       </div>
       <div class="flex gap-3 w-2/3 m-auto" *ngIf="showButton">
