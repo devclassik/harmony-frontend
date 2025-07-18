@@ -264,9 +264,22 @@ export class EmployeeDisciplineComponent implements OnInit, OnDestroy {
     let filtered = this.employees;
 
     if (this.selectedStatus) {
-      filtered = filtered.filter(
-        (employee) => employee.status === this.selectedStatus
-      );
+      filtered = filtered.filter((employee) => {
+        // Convert back to API format for comparison
+        const apiStatus =
+          this.selectedStatus === 'Pending'
+            ? 'PENDING'
+            : this.selectedStatus === 'Approved'
+            ? 'APPROVED'
+            : this.selectedStatus === 'Rejected'
+            ? 'REJECTED'
+            : this.selectedStatus;
+
+        const discipline = this.allDisciplines.find(
+          (p) => p.id.toString() === employee.id
+        );
+        return discipline && discipline.status === apiStatus;
+      });
     }
 
     if (this.selectedFilter) {

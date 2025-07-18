@@ -48,6 +48,8 @@ export class LeaveDetailsComponent implements OnInit {
   @Input() isPromotion: boolean = false; // New input for promotion mode
   @Input() isDiscipline: boolean = false; // New input for discipline mode
   @Input() isTransfer: boolean = false;
+  @Input() isRetirement: boolean = false; // New input for retirement mode
+  @Input() isRetrenchment: boolean = false; // New input for retrenchment mode
   @Output() close = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() submit = new EventEmitter<any>();
@@ -60,6 +62,12 @@ export class LeaveDetailsComponent implements OnInit {
   searchTerm: string = '';
   showEmployeeDropdown: boolean = false;
   searchingEmployees: boolean = false;
+
+  // Retirement-specific properties
+  filteredReplacementEmployees: Employee[] = [];
+  replacementSearchTerm: string = '';
+  showReplacementDropdown: boolean = false;
+  searchingReplacementEmployees: boolean = false;
 
   positions: Position[] = [
     { label: 'Pastor', value: 'PASTOR' },
@@ -85,6 +93,16 @@ export class LeaveDetailsComponent implements OnInit {
     { label: 'External Transfer', value: 'EXTERNAL' },
     { label: 'Department Transfer', value: 'DEPARTMENT' },
     { label: 'Location Transfer', value: 'LOCATION' },
+  ];
+
+  retrenchmentTypes: Position[] = [
+    { label: 'Pastor', value: 'PASTOR' },
+    { label: 'Senior Pastor', value: 'SENIOR_PASTOR' },
+    { label: 'Cleaner', value: 'CLEANER' },
+    { label: 'HOD', value: 'HOD' },
+    { label: 'Worker', value: 'WORKER' },
+    { label: 'Minister', value: 'MINISTER' },
+    { label: 'Overseer', value: 'OVERSEER' },
   ];
 
   constructor(
@@ -113,6 +131,12 @@ export class LeaveDetailsComponent implements OnInit {
     // Transfer-specific fields
     transferType: '',
     destination: '',
+    // Retirement-specific fields
+    recommendedReplacement: '',
+    replacementName: '',
+    requestDate: '',
+    // Retrenchment-specific fields
+    retrenchmentType: '',
   };
 
   // Track uploaded files with progress
@@ -177,6 +201,55 @@ export class LeaveDetailsComponent implements OnInit {
   onEmployeeInputBlur() {
     setTimeout(() => {
       this.showEmployeeDropdown = false;
+    }, 200);
+  }
+
+  // Retirement-specific methods
+  onReplacementSearch(event: any) {
+    this.replacementSearchTerm = event.target.value;
+    this.showReplacementDropdown = true;
+
+    if (this.replacementSearchTerm.length > 2) {
+      this.searchingReplacementEmployees = true;
+      this.employeeService
+        .searchEmployeesByName(this.replacementSearchTerm)
+        .subscribe({
+          next: (response) => {
+            if (response.status === 'success' && response.data) {
+              this.filteredReplacementEmployees = response.data.map(
+                (emp: EmployeeDetails) => ({
+                  id: emp.id,
+                  name: `${emp.firstName} ${emp.lastName}`,
+                  employeeId: emp.employeeId || emp.id.toString(),
+                  currentPosition: emp.user?.role?.name || 'N/A',
+                })
+              );
+            } else {
+              this.filteredReplacementEmployees = [];
+            }
+            this.searchingReplacementEmployees = false;
+          },
+          error: (error) => {
+            console.error('Error searching replacement employees:', error);
+            this.filteredReplacementEmployees = [];
+            this.searchingReplacementEmployees = false;
+          },
+        });
+    } else if (this.replacementSearchTerm.length === 0) {
+      this.filteredReplacementEmployees = [];
+    }
+  }
+
+  selectReplacementEmployee(employee: Employee) {
+    this.formData.recommendedReplacement = employee.id.toString();
+    this.formData.replacementName = employee.name;
+    this.replacementSearchTerm = employee.name;
+    this.showReplacementDropdown = false;
+  }
+
+  onReplacementInputBlur() {
+    setTimeout(() => {
+      this.showReplacementDropdown = false;
     }, 200);
   }
 
@@ -266,6 +339,7 @@ export class LeaveDetailsComponent implements OnInit {
   }
 
   onClose() {
+    console.log('Close button clicked');
     this.close.emit();
   }
 
@@ -321,6 +395,40 @@ export class LeaveDetailsComponent implements OnInit {
           reason: this.formData.reason,
           destination: this.formData.destination,
           transferType: this.formData.transferType,
+        };
+        this.submit.emit(submissionData);
+        this.close.emit();
+        return;
+      }
+
+      // Handle retirement submission
+      if (this.isRetirement) {
+        // Get URLs from successfully uploaded files
+        const fileUrls = this.uploadedFiles
+          .filter((file) => file.uploadStatus === 'completed' && file.url)
+          .map((file) => file.url!);
+
+        const submissionData = {
+          employeeId: parseInt(this.formData.employeeId),
+          recommendedReplacement: parseInt(
+            this.formData.recommendedReplacement
+          ),
+          reason: this.formData.reason,
+          requestDate: this.formData.requestDate,
+          destination: this.formData.destination,
+          documents: fileUrls,
+        };
+        this.submit.emit(submissionData);
+        this.close.emit();
+        return;
+      }
+
+      // Handle retrenchment submission
+      if (this.isRetrenchment) {
+        const submissionData = {
+          employeeId: parseInt(this.formData.employeeId),
+          reason: this.formData.reason,
+          retrenchmentType: this.formData.retrenchmentType,
         };
         this.submit.emit(submissionData);
         this.close.emit();
@@ -492,6 +600,20 @@ export class LeaveDetailsComponent implements OnInit {
         this.formData.reason
       );
     }
+    if (this.isRetirement) {
+      return !!(
+        this.formData.employeeId &&
+        this.formData.recommendedReplacement &&
+        this.formData.reason
+      );
+    }
+    if (this.isRetrenchment) {
+      return !!(
+        this.formData.employeeId &&
+        this.formData.retrenchmentType &&
+        this.formData.reason
+      );
+    }
 
     // Base validation - always required
     if (!this.formData.startDate || !this.formData.reason) {
@@ -531,6 +653,12 @@ export class LeaveDetailsComponent implements OnInit {
     if (this.isDiscipline) {
       return `Are you sure you want to create this discipline request for ${this.formData.employeeName}?`;
     }
+    if (this.isRetirement) {
+      return `Are you sure you want to create this retirement request for ${this.formData.employeeName}?`;
+    }
+    if (this.isRetrenchment) {
+      return `Are you sure you want to create this retrenchment request for ${this.formData.employeeName}?`;
+    }
     if (this.showEndDate && !this.showDuration) {
       return `Are you sure you want to create this ${this.leaveType.toLowerCase()} request?`;
     }
@@ -557,11 +685,20 @@ export class LeaveDetailsComponent implements OnInit {
       // Transfer-specific fields
       transferType: '',
       destination: '',
+      // Retirement-specific fields
+      recommendedReplacement: '',
+      replacementName: '',
+      requestDate: '',
+      // Retrenchment-specific fields
+      retrenchmentType: '',
     };
     this.uploadedFiles = [];
     this.searchTerm = '';
     this.filteredEmployees = [];
     this.showEmployeeDropdown = false;
+    this.replacementSearchTerm = '';
+    this.filteredReplacementEmployees = [];
+    this.showReplacementDropdown = false;
   }
 
   downloadDocument(doc: any) {

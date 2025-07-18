@@ -255,9 +255,22 @@ export class EmployeeTransferComponent implements OnInit, OnDestroy {
     let filtered = this.employees;
 
     if (this.selectedStatus) {
-      filtered = filtered.filter(
-        (employee) => employee.status === this.selectedStatus
-      );
+      filtered = filtered.filter((employee) => {
+        // Convert back to API format for comparison
+        const apiStatus =
+          this.selectedStatus === 'Pending'
+            ? 'PENDING'
+            : this.selectedStatus === 'Approved'
+            ? 'APPROVED'
+            : this.selectedStatus === 'Rejected'
+            ? 'REJECTED'
+            : this.selectedStatus;
+
+        const transfer = this.allTransfers.find(
+          (p) => p.id.toString() === employee.id
+        );
+        return transfer && transfer.status === apiStatus;
+      });
     }
 
     if (this.selectedFilter) {
