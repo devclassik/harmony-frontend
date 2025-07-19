@@ -62,10 +62,20 @@
   [view]="showEmployeeDetails"
   [showButton]="true"
   [noButtonText]="'Reject'"
-  [yesButtonText]="'Accept'"
+  [yesButtonText]="'Approve'"
+  [yesButtonDisabled]="
+    selectedSickLeaveRecord?.status?.toUpperCase() === 'APPROVED'
+  "
+  [noButtonDisabled]="
+    selectedSickLeaveRecord?.status?.toUpperCase() === 'REJECTED'
+  "
   (confirm)="actionToPerform($event)"
   (close)="showEmployeeDetails = false"
   [employee]="selectedEmployeeRecord"
+  [employeeDetails]="selectedEmployeeDetails"
+  [sickData]="selectedSickLeaveData"
+  [allSickLeaves]="selectedEmployeeSickLeaves"
+  [sickHistory]="selectedSickLeaveHistory"
 ></app-employee-details>
 
 <app-confirm-prompt
@@ -79,15 +89,6 @@
   (closed)="onModalClose()"
   [data]="selectedEmployeeRecord"
 ></app-confirm-prompt>
-
-<app-success-modal
-  *ngIf="successModal"
-  [title]="'Operation Successful!'"
-  [showOkButton]="false"
-  [okButtonText]="'Click Ok'"
-  [okButtonLink]="'/dashboard'"
-  (closed)="successModal = false"
-></app-success-modal>
 
 <!-- Sick Leave Details Component (handles both view and create modes) -->
 <app-leave-details
@@ -118,15 +119,27 @@
 
 <!-- Loading Overlay -->
 <app-loading-overlay
-  [isVisible]="isLoading || isCreating"
+  [isVisible]="isLoading || isCreating || isApprovingLeave || isRejectingLeave"
   [title]="
     isLoading
       ? 'Loading Sick Leave Requests...'
-      : 'Creating Sick Leave Request...'
+      : isCreating
+      ? 'Creating Sick Leave Request...'
+      : isApprovingLeave
+      ? 'Approving Sick Leave Request...'
+      : isRejectingLeave
+      ? 'Rejecting Sick Leave Request...'
+      : 'Loading...'
   "
   [message]="
     isLoading
       ? 'Please wait while we fetch your sick leave requests.'
-      : 'Please wait while we process your sick leave request.'
+      : isCreating
+      ? 'Please wait while we process your sick leave request.'
+      : isApprovingLeave
+      ? 'Please wait while we approve the sick leave request.'
+      : isRejectingLeave
+      ? 'Please wait while we reject the sick leave request.'
+      : 'Please wait...'
   "
 ></app-loading-overlay>

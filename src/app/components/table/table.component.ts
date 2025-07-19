@@ -422,7 +422,7 @@ export class TableComponent implements OnInit, OnChanges {
     height: 600,
     contentHeight: 600,
     aspectRatio: 1.35,
-    dayMaxEvents: 3,
+    dayMaxEvents: 5, // Increased to show more events
     moreLinkClick: 'popover',
     eventDisplay: 'block',
     displayEventTime: false,
@@ -436,6 +436,9 @@ export class TableComponent implements OnInit, OnChanges {
       center: 'title',
       right: '',
     },
+    // Custom event rendering
+    eventDidMount: (info) => this.handleEventDidMount(info),
+    eventContent: (arg) => this.renderEventContent(arg),
   };
 
   handleCalendarEventClick(info: any) {
@@ -444,6 +447,52 @@ export class TableComponent implements OnInit, OnChanges {
     } else {
       alert('Event: ' + info.event.title);
     }
+  }
+
+  // Custom event mounting handler
+  handleEventDidMount(info: any) {
+    // Add custom styling or behavior when events are mounted
+    const eventEl = info.el;
+    const eventData = info.event.extendedProps;
+
+    if (eventData && eventData.originalData) {
+      // Add custom classes based on event data
+      eventEl.classList.add('custom-event');
+      if (eventData.status) {
+        eventEl.classList.add(`status-${eventData.status.toLowerCase()}`);
+      }
+    }
+  }
+
+  // Custom event content renderer
+  renderEventContent(arg: any) {
+    const eventData = arg.event.extendedProps;
+
+    if (eventData && eventData.originalData) {
+      // Check if this is an annual leave event (has employee data)
+      const employee = eventData.originalData.employee;
+      const imageUrl = eventData.employeePhotoUrl || employee?.photoUrl;
+
+      if (employee && imageUrl) {
+        // Annual Leave: Show employee image (bigger size)
+        const eventHtml = document.createElement('div');
+        eventHtml.className = 'custom-event-content';
+        eventHtml.innerHTML = `
+          <img src="${this.formatImageUrl(imageUrl)}" 
+               alt="Employee" 
+               class="w-12 h-12 rounded-full object-cover border border-gray-200 flex-shrink-0"
+               onerror="this.src='assets/images/default-avatar.png'">
+        `;
+
+        return { domNodes: [eventHtml] };
+      } else {
+        // Camp Meeting: Show text (revert to original behavior)
+        return { html: `<div class="default-event">${arg.event.title}</div>` };
+      }
+    }
+
+    // Fallback to default rendering
+    return { html: `<div class="default-event">${arg.event.title}</div>` };
   }
 
   viewDate: Date = new Date();
