@@ -14,66 +14,90 @@
       <h3 class="font-medium text-[#0f0f0f] mb-4">Substitution Information</h3>
       <div class="flex flex-col gap-4">
         <div class="w-full" #dropdownWrapper>
-          <label class="block text-sm mb-1">Employee Name</label>
+          <label class="block text-sm mb-1">Employee</label>
           <div class="relative w-full">
+            <input
+              type="text"
+              [(ngModel)]="searchTerm"
+              (keyup)="onSearchKeyPress($event)"
+              (blur)="onEmployeeInputBlur()"
+              placeholder="Type employee name and press Enter to search..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+
+            <!-- Loading indicator -->
             <div
-              class="border border-green-600 rounded px-3 py-2 ring-0 cursor-pointer flex justify-between items-center"
-              (click)="toggleDropdown()"
+              class="absolute right-2 top-1/2 transform -translate-y-1/2"
+              *ngIf="searchingEmployees"
             >
-              {{ selectedName || "Select" }}
               <svg
-                class="w-4 h-4 ml-2"
+                class="animate-spin h-4 w-4 text-gray-400"
                 fill="none"
-                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 9l-7 7-7-7"
-                />
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
             </div>
 
-            <!-- Dropdown panel -->
+            <!-- Employee Dropdown -->
             <div
-              *ngIf="dropdownOpen"
-              class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded"
+              *ngIf="dropdownOpen && filteredEmployees.length > 0"
+              class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
             >
               <div
-                class="flex items-center py-2 px-2 border rounded border-gray-200"
+                *ngFor="let employee of filteredEmployees"
+                (click)="selectEmployee(employee)"
+                class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
               >
-                <svg
-                  class="w-4 h-4 text-gray-500 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
-                  />
-                </svg>
-                <input
-                  type="text"
-                  [(ngModel)]="searchTerm"
-                  (input)="onSearch(searchTerm)"
-                  placeholder="Search"
-                  class="w-full outline-none text-sm px-2 py-1"
-                />
-              </div>
-
-              <div
-                *ngFor="let name of filteredList"
-                (click)="selectName(name)"
-                class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-              >
-                {{ name }}
+                <div class="font-medium text-gray-900">
+                  {{ employee.firstName }} {{ employee.lastName }}
+                </div>
+                <div class="text-sm text-gray-500">
+                  ID: {{ employee.employeeId }}
+                </div>
               </div>
             </div>
+
+            <!-- No results message -->
+            <div
+              *ngIf="
+                dropdownOpen &&
+                filteredEmployees.length === 0 &&
+                searchTerm.length >= 3 &&
+                !searchingEmployees
+              "
+              class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+            >
+              No employees found matching "{{ searchTerm }}"
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected Employee Display -->
+        <div
+          *ngIf="selectedEmployee"
+          class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg"
+        >
+          <div class="text-sm font-medium text-green-800 mb-2">
+            Selected Employee:
+          </div>
+          <div class="text-green-900">
+            <div class="font-semibold">
+              {{ selectedEmployee.firstName }} {{ selectedEmployee.lastName }}
+            </div>
+            <div class="text-sm">ID: {{ selectedEmployee.employeeId }}</div>
           </div>
         </div>
       </div>
@@ -88,6 +112,9 @@
       <button
         class="bg-green-600 text-white rounded-lg px-8 py-2 font-medium transition hover:bg-green-700"
         (click)="onSubmit()"
+        [disabled]="!selectedEmployee"
+        [class.opacity-50]="!selectedEmployee"
+        [class.cursor-not-allowed]="!selectedEmployee"
       >
         Submit
       </button>

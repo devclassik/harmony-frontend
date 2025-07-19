@@ -24,6 +24,7 @@ import {
 } from '../../services/leave.service';
 import { AlertService } from '../../services/alert.service';
 import { Subscription } from 'rxjs';
+import { EmployeeDetails } from '../../dto/employee.dto';
 
 @Component({
   selector: 'app-annual-leave',
@@ -62,13 +63,31 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
   // Loading states
   isLoadingLeaves: boolean = false;
   isCreatingLeave: boolean = false;
+  isApprovingLeave: boolean = false;
+  isRejectingLeave: boolean = false;
 
   // Add mode control for leave-details component
   leaveDetailsMode: 'view' | 'create' = 'view';
 
+  // View state
+  currentView: 'table' | 'calendar' = 'table';
+
+  // Store selected leave for approval/rejection
+  selectedLeaveForAction: any = null;
+  pendingAction: 'approve' | 'reject' | null = null;
+
   // Real data arrays
   leaveRequests: TableData[] = [];
   filteredLeaveRequests: TableData[] = [];
+
+  // Calendar events for display
+  leaveCalendarEvents: any[] = [];
+
+  // Admin role properties for accordion view
+  selectedEmployeeDetails: EmployeeDetails | null = null;
+  selectedLeaveRecord: LeaveRecord | null = null;
+  selectedEmployeeLeaves: LeaveRecord[] = [];
+  selectedLeaveHistory: any[] = [];
 
   // Subscriptions for cleanup
   private subscriptions: Subscription[] = [];
@@ -114,6 +133,8 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
 
           // Transform API data to table format
           this.leaveRequests = this.leaveService.transformToTableData(leaves);
+
+          // Apply filters (this will also filter calendar events)
           this.applyLeaveFilters();
         }
       },
@@ -131,9 +152,9 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
 
   tableHeader: TableHeader[] = [
     { key: 'id', label: 'ID' },
-    { key: 'name', label: 'NAME' },
-    { key: 'department', label: 'DEPARTMENT' },
-    { key: 'role', label: 'ROLE' },
+    { key: 'name', label: 'EMPLOYEE NAME' },
+    { key: 'startDate', label: 'START DATE' },
+    { key: 'endDate', label: 'END DATE' },
     { key: 'status', label: 'STATUS' },
     { key: 'action', label: 'ACTION' },
   ];
@@ -224,6 +245,62 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
       );
     }
     this.filteredLeaveRequests = filtered;
+
+    // Also filter calendar events based on the same criteria
+    this.applyCalendarFilters();
+  }
+
+  applyCalendarFilters() {
+    // Get the original leave data that matches the current filters
+    const filteredOriginalData = this.leaveRequests
+      .map((req) => (req as any).originalData)
+      .filter(Boolean)
+      .filter((leave: any) => {
+        // Apply status filter
+        if (this.selectedStatus && this.selectedStatus !== '') {
+          const leaveStatus = this.transformStatus(leave.status);
+          if (leaveStatus !== this.selectedStatus) {
+            return false;
+          }
+        }
+
+        // Apply search filter
+        if (this.searchValue) {
+          const search = this.searchValue.toLowerCase();
+          const employeeName =
+            `${leave.employee.firstName} ${leave.employee.lastName}`.toLowerCase();
+          const leaveId = leave.id.toString().toLowerCase();
+          const startDate = leave.startDate.toLowerCase();
+
+          if (
+            !employeeName.includes(search) &&
+            !leaveId.includes(search) &&
+            !startDate.includes(search)
+          ) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+    // Transform filtered data to calendar events
+    this.leaveCalendarEvents =
+      this.leaveService.transformToCalendarEvents(filteredOriginalData);
+  }
+
+  // Helper method to transform status for filtering
+  private transformStatus(status: string): string {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return 'Pending';
+      case 'APPROVED':
+        return 'Approved';
+      case 'REJECTED':
+        return 'Rejected';
+      default:
+        return status;
+    }
   }
 
   onSearch(value: string) {
@@ -235,22 +312,58 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
     console.log(event);
 
     if (event.action === 'View') {
-      this.showAnnualLeaveDetailsModal();
+      // Check if user is admin/HOD/pastor
+      const isAdminRole =
+        this.userRole?.toLowerCase() === 'admin' ||
+        this.userRole?.toLowerCase() === 'hod' ||
+        this.userRole?.toLowerCase() === 'pastor';
 
-      // Get the original API data and transform it for the leave-details component
-      const originalData = (event.row as any).originalData;
-      if (originalData) {
-        // Get all leave records from the current data to calculate balance and history
-        const allUserLeaves = this.leaveRequests
-          .map((req) => (req as any).originalData)
-          .filter(Boolean);
-        this.selectedLeaveData = this.leaveService.transformForLeaveDetails(
-          originalData,
-          allUserLeaves
-        );
+      if (isAdminRole) {
+        // For admin roles, show employee details with accordion view
+        this.showEmployeeDetailsModal();
+        this.selectedEmployeeRecord = event.row;
+        this.selectedLeaveRecord = (event.row as any).originalData;
+
+        // Set selectedLeaveData for the employee details component
+        const originalData = (event.row as any).originalData;
+        if (originalData) {
+          // Get all leave records from the current data to calculate balance and history
+          const allUserLeaves = this.leaveRequests
+            .map((req) => (req as any).originalData)
+            .filter(Boolean);
+          this.selectedLeaveData = this.leaveService.transformForLeaveDetails(
+            originalData,
+            allUserLeaves
+          );
+        } else {
+          // Fallback to the table data if originalData is not available
+          this.selectedLeaveData = event.row;
+        }
+
+        // Get employee details and leave history
+        if (this.selectedLeaveRecord && this.selectedLeaveRecord.employee) {
+          this.loadEmployeeDetails(this.selectedLeaveRecord.employee.id);
+          this.loadEmployeeLeaveHistory(this.selectedLeaveRecord.employee.id);
+        }
       } else {
-        // Fallback to the table data if originalData is not available
-        this.selectedLeaveData = event.row;
+        // For worker/minister, show regular leave details
+        this.showAnnualLeaveDetailsModal();
+
+        // Get the original API data and transform it for the leave-details component
+        const originalData = (event.row as any).originalData;
+        if (originalData) {
+          // Get all leave records from the current data to calculate balance and history
+          const allUserLeaves = this.leaveRequests
+            .map((req) => (req as any).originalData)
+            .filter(Boolean);
+          this.selectedLeaveData = this.leaveService.transformForLeaveDetails(
+            originalData,
+            allUserLeaves
+          );
+        } else {
+          // Fallback to the table data if originalData is not available
+          this.selectedLeaveData = event.row;
+        }
       }
     }
   }
@@ -258,6 +371,66 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
   actionButton: MenuItem[] = [
     { label: 'View', action: 'View', icon: '/public/assets/svg/eyeOpen.svg' },
   ];
+
+  // View change handler
+  onViewChange(viewType: string) {
+    this.currentView = viewType as 'table' | 'calendar';
+  }
+
+  // Calendar event click handler
+  handleCalendarEventClick = (info: any) => {
+    const leaveData = info.event.extendedProps?.originalData;
+
+    if (leaveData) {
+      // Check if user is admin/HOD/pastor
+      const isAdminRole =
+        this.userRole?.toLowerCase() === 'admin' ||
+        this.userRole?.toLowerCase() === 'hod' ||
+        this.userRole?.toLowerCase() === 'pastor';
+
+      if (isAdminRole) {
+        // For admin roles, show employee details with accordion view
+        this.showEmployeeDetailsModal();
+
+        // Find the corresponding table row data
+        const tableRow = this.leaveRequests.find(
+          (req) => (req as any).originalData?.id === leaveData.id
+        );
+
+        if (tableRow) {
+          this.selectedEmployeeRecord = tableRow;
+          this.selectedLeaveRecord = leaveData;
+
+          // Set selectedLeaveData for the employee details component
+          const allUserLeaves = this.leaveRequests
+            .map((req) => (req as any).originalData)
+            .filter(Boolean);
+          this.selectedLeaveData = this.leaveService.transformForLeaveDetails(
+            leaveData,
+            allUserLeaves
+          );
+
+          // Get employee details and leave history
+          if (this.selectedLeaveRecord && this.selectedLeaveRecord.employee) {
+            this.loadEmployeeDetails(this.selectedLeaveRecord.employee.id);
+            this.loadEmployeeLeaveHistory(this.selectedLeaveRecord.employee.id);
+          }
+        }
+      } else {
+        // For worker/minister, show regular leave details
+        this.showAnnualLeaveDetailsModal();
+
+        // Get all leave records from the current data to calculate balance and history
+        const allUserLeaves = this.leaveRequests
+          .map((req) => (req as any).originalData)
+          .filter(Boolean);
+        this.selectedLeaveData = this.leaveService.transformForLeaveDetails(
+          leaveData,
+          allUserLeaves
+        );
+      }
+    }
+  };
 
   showEmployeeDetailsModal() {
     this.showEmployeeDetails = true;
@@ -269,10 +442,14 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
   }
 
   actionToPerform(result: boolean) {
+    this.pendingAction = result ? 'approve' : 'reject';
+    this.selectedLeaveForAction =
+      this.selectedLeaveRecord || this.selectedLeaveData;
+
     if (result) {
       this.promptConfig = {
         title: 'Confirm',
-        text: 'Are you sure you want to approve this promotion request',
+        text: 'Are you sure you want to approve this leave request?',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -280,7 +457,7 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
     } else {
       this.promptConfig = {
         title: 'Confirm',
-        text: 'Are you sure you want to reject this promotion request',
+        text: 'Are you sure you want to reject this leave request?',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -305,14 +482,66 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
   }
 
   handleSubstitution(form: any) {
-    console.log(form);
-    this.promptConfig = {
-      title: 'Confirm',
-      text: 'Are you sure you want to submit this appraisal?',
-      yesButtonText: 'Yes',
-      noButtonText: 'No',
-    };
-    this.showModal = true;
+    if (!this.selectedLeaveForAction) {
+      this.alertService.error('No leave request selected for action.');
+      this.showSubstitution = false;
+      return;
+    }
+
+    const leaveId = this.selectedLeaveForAction.id;
+    const isApproving = this.pendingAction === 'approve';
+
+    // Set loading state
+    if (isApproving) {
+      this.isApprovingLeave = true;
+    } else {
+      this.isRejectingLeave = true;
+    }
+
+    this.showSubstitution = false;
+
+    // Call the appropriate API method with substitution data
+    const apiCall = isApproving
+      ? this.leaveService.approveLeave(leaveId, form)
+      : this.leaveService.rejectLeave(leaveId);
+
+    const actionSub = apiCall.subscribe({
+      next: (response) => {
+        // Reset loading states
+        this.isApprovingLeave = false;
+        this.isRejectingLeave = false;
+
+        if (response.status === 'success') {
+          // Show success message
+          const action = isApproving ? 'approved' : 'rejected';
+          this.alertService.success(
+            `Annual leave request ${action} successfully!`
+          );
+
+          // Close employee details modal
+          this.showEmployeeDetails = false;
+
+          // Reload leave requests to show updated status
+          this.loadLeaveRequests();
+        }
+      },
+      error: (error) => {
+        // Reset loading states
+        this.isApprovingLeave = false;
+        this.isRejectingLeave = false;
+
+        console.error(
+          `Error ${isApproving ? 'approving' : 'rejecting'} leave request:`,
+          error
+        );
+        const action = isApproving ? 'approving' : 'rejecting';
+        this.alertService.error(
+          `Failed to ${action} leave request. Please try again.`
+        );
+      },
+    });
+
+    this.subscriptions.push(actionSub);
   }
 
   onShowListClick(event: string) {
@@ -382,5 +611,97 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
   onCloseAnnualLeaveDetails() {
     this.showAnnualLeaveDetails = false;
     this.leaveDetailsMode = 'view';
+  }
+
+  // Load employee details for accordion view
+  loadEmployeeDetails(employeeId: number) {
+    // For now, we'll use the employee data from the leave record
+    // In a real implementation, you might want to fetch detailed employee info
+    const leaveRecord = this.selectedLeaveRecord;
+    if (leaveRecord && leaveRecord.employee) {
+      this.selectedEmployeeDetails = {
+        id: leaveRecord.employee.id,
+        employeeId: leaveRecord.employee.employeeId,
+        title: leaveRecord.employee.title || null,
+        firstName: leaveRecord.employee.firstName,
+        lastName: leaveRecord.employee.lastName,
+        middleName: leaveRecord.employee.middleName || null,
+        gender: leaveRecord.employee.gender || null,
+        profferedName: leaveRecord.employee.profferedName || null,
+        primaryPhone: leaveRecord.employee.primaryPhone || null,
+        primaryPhoneType: leaveRecord.employee.primaryPhoneType || null,
+        altPhone: leaveRecord.employee.altPhone || null,
+        altPhoneType: leaveRecord.employee.altPhoneType || null,
+        dob: leaveRecord.employee.dob || null,
+        maritalStatus: leaveRecord.employee.maritalStatus || null,
+        nationIdNumber: null,
+        everDivorced: leaveRecord.employee.everDivorced,
+        beenConvicted: leaveRecord.employee.beenConvicted,
+        hasQuestionableBackground:
+          leaveRecord.employee.hasQuestionableBackground,
+        hasBeenInvestigatedForMisconductOrAbuse:
+          leaveRecord.employee.hasBeenInvestigatedForMisconductOrAbuse,
+        photoUrl: leaveRecord.employee.photoUrl || null,
+        altEmail: leaveRecord.employee.altEmail || null,
+        employeeStatus: leaveRecord.employee.employeeStatus || null,
+        employmentType: leaveRecord.employee.employmentType || null,
+        serviceStartDate: leaveRecord.employee.serviceStartDate || null,
+        retiredDate: leaveRecord.employee.retiredDate || null,
+        recentCredentialsNameArea: null,
+        createdAt: leaveRecord.employee.createdAt,
+        updatedAt: leaveRecord.employee.updatedAt,
+        deletedAt: leaveRecord.employee.deletedAt || null,
+        user: leaveRecord.employee.user
+          ? {
+              id: leaveRecord.employee.user.id,
+              email: leaveRecord.employee.user.email,
+              password: leaveRecord.employee.user.password,
+              verifyEmailOTP: leaveRecord.employee.user.verifyEmailOTP,
+              isEmailVerified: leaveRecord.employee.user.isEmailVerified,
+              passwordResetOTP:
+                leaveRecord.employee.user.passwordResetOTP || null,
+              isLoggedIn: leaveRecord.employee.user.isLoggedIn,
+              createdAt: leaveRecord.employee.user.createdAt,
+              updatedAt: leaveRecord.employee.user.updatedAt,
+              deletedAt: leaveRecord.employee.user.deletedAt || null,
+              role: {
+                id: 1,
+                name: 'Worker',
+                createdAt: '',
+                updatedAt: '',
+                deletedAt: null,
+                permissions: [],
+              },
+            }
+          : null,
+        spouse: null,
+        children: [],
+        payrolls: [],
+        documents: [],
+        credentials: [],
+        departments: [],
+        homeAddress: null,
+        mailingAddress: null,
+        departmentHeads: [],
+        previousPositions: [],
+        spiritualHistory: null,
+      };
+    }
+  }
+
+  // Load employee leave history for accordion view
+  loadEmployeeLeaveHistory(employeeId: number) {
+    // Filter leaves for this specific employee
+    this.selectedEmployeeLeaves = this.leaveRequests
+      .map((req) => (req as any).originalData)
+      .filter(
+        (leave: any) =>
+          leave && leave.employee && leave.employee.id === employeeId
+      );
+
+    // Transform to history format
+    this.selectedLeaveHistory = this.leaveService.getLeaveHistory(
+      this.selectedEmployeeLeaves
+    );
   }
 }

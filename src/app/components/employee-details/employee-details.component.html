@@ -192,7 +192,10 @@
           !disciplineData &&
           !transferData &&
           !retirementData &&
-          !retrenchmentData
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
         "
       >
         <button
@@ -302,7 +305,10 @@
           !disciplineData &&
           !transferData &&
           !retirementData &&
-          !retrenchmentData
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
         "
       >
         <button
@@ -375,7 +381,10 @@
           !disciplineData &&
           !transferData &&
           !retirementData &&
-          !retrenchmentData
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
         "
       >
         <button
@@ -433,7 +442,10 @@
           !disciplineData &&
           !transferData &&
           !retirementData &&
-          !retrenchmentData
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
         "
       >
         <button
@@ -501,7 +513,10 @@
           !disciplineData &&
           !transferData &&
           !retirementData &&
-          !retrenchmentData
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
         "
       >
         <button
@@ -559,7 +574,10 @@
           !disciplineData &&
           !transferData &&
           !retirementData &&
-          !retrenchmentData
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
         "
       >
         <button
@@ -616,7 +634,10 @@
           !transferData &&
           !retirementData &&
           !promotionData &&
-          !retrenchmentData
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
         "
       >
         <button
@@ -950,7 +971,10 @@
           !retirementData &&
           !retrenchmentData &&
           !promotionData &&
-          !disciplineData
+          !disciplineData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
         "
       >
         <button
@@ -1194,7 +1218,10 @@
           !retrenchmentData &&
           !transferData &&
           !promotionData &&
-          !disciplineData
+          !disciplineData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
         "
       >
         <button
@@ -1251,8 +1278,8 @@
                     Employee Name
                   </div>
                   <div class="font-semibold text-gray-900">
-                    {{ retirement.employee?.firstName }}
-                    {{ retirement.employee?.lastName }}
+                    {{ retirement.employee.firstName }}
+                    {{ retirement.employee.lastName }}
                   </div>
                 </div>
               </div>
@@ -1264,7 +1291,8 @@
                     Replacement Recommendation
                   </div>
                   <div class="font-semibold text-gray-900">
-                    {{ retirement.recommendedReplacement || "N/A" }}
+                    {{ retirement.recommendedReplacement.firstName }}
+                    {{ retirement.recommendedReplacement.lastName }}
                   </div>
                 </div>
                 <div>
@@ -1365,7 +1393,13 @@
       <div
         class="employee-section mb-4"
         *ngIf="
-          !retirementData && !transferData && !promotionData && !disciplineData
+          !retirementData &&
+          !transferData &&
+          !promotionData &&
+          !disciplineData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
         "
       >
         <button
@@ -1414,8 +1448,8 @@
                     Employee Name
                   </div>
                   <div class="font-semibold text-gray-900">
-                    {{ retrenchment.employee?.firstName }}
-                    {{ retrenchment.employee?.lastName }}
+                    {{ retrenchment.employee.firstName }}
+                    {{ retrenchment.employee.lastName }}
                   </div>
                 </div>
                 <div>
@@ -1479,6 +1513,737 @@
           </ng-template>
         </div>
       </div>
+
+      <!-- Leave History Section -->
+      <div class="employee-section mb-4" *ngIf="leaveData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'leaveHistory'
+              ? (openSection = null)
+              : (openSection = 'leaveHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'leaveHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">{{ leaveType }} History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'leaveHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div *ngIf="allLeaves && allLeaves.length > 0; else noLeaveHistory">
+            <div
+              *ngFor="let leave of allLeaves; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+              [class.border-blue-500]="leave.id === leaveData?.id"
+            >
+              <!-- Leave Type and Status on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Leave Type
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leave.type || "Annual Leave" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Status
+                  </div>
+                  <div>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-amber-100 text-amber-800':
+                          leave.status === 'PENDING',
+                        'bg-green-100 text-green-800':
+                          leave.status === 'APPROVED',
+                        'bg-red-100 text-red-800': leave.status === 'REJECTED'
+                      }"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full mr-2"
+                        [ngClass]="{
+                          'bg-amber-500': leave.status === 'PENDING',
+                          'bg-green-500': leave.status === 'APPROVED',
+                          'bg-red-500': leave.status === 'REJECTED'
+                        }"
+                      ></span>
+                      {{
+                        leave.status === "PENDING"
+                          ? "Pending"
+                          : leave.status === "APPROVED"
+                          ? "Approved"
+                          : "Rejected"
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Start Date and Duration on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Start Date
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leave.startDate | date : "shortDate" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Duration
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leave.duration }} {{ leave.durationUnit }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reason -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ leave.reason || "N/A" }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noLeaveHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No leave history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Annual Leave Request Section -->
+      <div class="employee-section mb-4" *ngIf="leaveData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'leaveRequest'
+              ? (openSection = null)
+              : (openSection = 'leaveRequest')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'leaveRequest' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">{{ leaveType }} Request</span>
+        </button>
+        <div
+          *ngIf="openSection === 'leaveRequest'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="space-y-4">
+            <!-- Employee Name and Leave Type on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Employee Name
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ leaveData.employeeName || "N/A" }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Leave Type
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ leaveData.requestType || leaveType }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Start Date and End Date on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Start Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ leaveData.startDate }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  End Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ leaveData.endDate }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Duration and Status on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Duration
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ leaveData.duration }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        leaveData.status === 'Pending',
+                      'bg-green-100 text-green-800':
+                        leaveData.status === 'Approved',
+                      'bg-red-100 text-red-800': leaveData.status === 'Rejected'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': leaveData.status === 'Pending',
+                        'bg-green-500': leaveData.status === 'Approved',
+                        'bg-red-500': leaveData.status === 'Rejected'
+                      }"
+                    ></span>
+                    {{ leaveData.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reason -->
+            <div>
+              <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+              <div class="font-semibold text-gray-900">
+                {{ leaveData.reason || "N/A" }}
+              </div>
+            </div>
+
+            <!-- Leave Balance Information -->
+            <div
+              *ngIf="leaveData.totalLeaveDays !== undefined"
+              class="bg-gray-50 p-4 rounded-lg"
+            >
+              <div class="text-sm font-medium text-gray-600 mb-3">
+                Leave Balance
+              </div>
+              <div class="grid grid-cols-3 gap-4">
+                <div>
+                  <div class="text-xs text-gray-500">Total Allowance</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leaveData.totalLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Used Days</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leaveData.usedLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Remaining</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leaveData.remainingLeaveDays }} days
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leave of Absence History Section -->
+      <div class="employee-section mb-4" *ngIf="absenceData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'absenceHistory'
+              ? (openSection = null)
+              : (openSection = 'absenceHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'absenceHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Leave of Absence History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'absenceHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="allAbsences && allAbsences.length > 0; else noAbsenceHistory"
+          >
+            <div class="space-y-4">
+              <div
+                *ngFor="let absence of allAbsences"
+                class="border border-gray-200 rounded-lg p-4 cursor-pointer transition-colors"
+                [class.border-blue-500]="absence.id === absenceData?.id"
+              >
+                <!-- Start Date and Duration on same line -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="text-sm font-medium text-gray-600 mb-2">
+                      Start Date
+                    </div>
+                    <div class="font-semibold text-gray-900">
+                      {{ absence.startDate | date : "shortDate" }}
+                    </div>
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium text-gray-600 mb-2">
+                      Duration
+                    </div>
+                    <div class="font-semibold text-gray-900">
+                      {{ absence.duration }} {{ absence.durationUnit }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Reason -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Reason
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ absence.reason || "N/A" }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noAbsenceHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No leave of absence history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Leave of Absence Request Section -->
+      <div class="employee-section mb-4" *ngIf="absenceData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'absenceRequest'
+              ? (openSection = null)
+              : (openSection = 'absenceRequest')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'absenceRequest' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Leave of Absence Request</span>
+        </button>
+        <div
+          *ngIf="openSection === 'absenceRequest'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="space-y-4">
+            <!-- Employee Name and Leave Type on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Employee Name
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ absenceData.employeeName || "N/A" }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Leave Type
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ absenceData.requestType || "Leave of Absence" }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Start Date and End Date on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Start Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ absenceData.startDate }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  End Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ absenceData.endDate }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Duration and Status on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Duration
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ absenceData.duration }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        absenceData.status === 'Pending',
+                      'bg-green-100 text-green-800':
+                        absenceData.status === 'Approved',
+                      'bg-red-100 text-red-800':
+                        absenceData.status === 'Rejected'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': absenceData.status === 'Pending',
+                        'bg-green-500': absenceData.status === 'Approved',
+                        'bg-red-500': absenceData.status === 'Rejected'
+                      }"
+                    ></span>
+                    {{ absenceData.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reason -->
+            <div>
+              <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+              <div class="font-semibold text-gray-900">
+                {{ absenceData.reason || "N/A" }}
+              </div>
+            </div>
+
+            <!-- Leave Balance Information -->
+            <div
+              *ngIf="absenceData.totalLeaveDays !== undefined"
+              class="bg-gray-50 p-4 rounded-lg"
+            >
+              <div class="text-sm font-medium text-gray-600 mb-3">
+                Leave Balance
+              </div>
+              <div class="grid grid-cols-3 gap-4">
+                <div>
+                  <div class="text-xs text-gray-500">Total Allowance</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ absenceData.totalLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Used Days</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ absenceData.usedLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Remaining</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ absenceData.remainingLeaveDays }} days
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sick Leave History Section -->
+      <div class="employee-section mb-4" *ngIf="sickData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'sickHistory'
+              ? (openSection = null)
+              : (openSection = 'sickHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'sickHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Sick Leave History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'sickHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="
+              allSickLeaves && allSickLeaves.length > 0;
+              else noSickHistory
+            "
+          >
+            <div class="space-y-4">
+              <div
+                *ngFor="let sickLeave of allSickLeaves"
+                class="border border-gray-200 rounded-lg p-4 cursor-pointer transition-colors"
+                [class.border-blue-500]="sickLeave.id === sickData?.id"
+              >
+                <!-- Start Date and Duration on same line -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="text-sm font-medium text-gray-600 mb-2">
+                      Start Date
+                    </div>
+                    <div class="font-semibold text-gray-900">
+                      {{ sickLeave.startDate | date : "shortDate" }}
+                    </div>
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium text-gray-600 mb-2">
+                      Duration
+                    </div>
+                    <div class="font-semibold text-gray-900">
+                      {{ sickLeave.duration }} {{ sickLeave.durationUnit }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Reason -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Reason
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ sickLeave.reason || "N/A" }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noSickHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No sick leave history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Sick Leave Request Section -->
+      <div class="employee-section mb-4" *ngIf="sickData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'sickRequest'
+              ? (openSection = null)
+              : (openSection = 'sickRequest')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'sickRequest' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Sick Leave Request</span>
+        </button>
+        <div
+          *ngIf="openSection === 'sickRequest'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="space-y-4">
+            <!-- Employee Name and Leave Type on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Employee Name
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ sickData.employeeName || "N/A" }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Leave Type
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ sickData.requestType || "Sick Leave" }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Start Date and End Date on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Start Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ sickData.startDate }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  End Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ sickData.endDate }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Duration and Status on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Duration
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ sickData.duration }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        sickData.status === 'Pending',
+                      'bg-green-100 text-green-800':
+                        sickData.status === 'Approved',
+                      'bg-red-100 text-red-800': sickData.status === 'Rejected'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': sickData.status === 'Pending',
+                        'bg-green-500': sickData.status === 'Approved',
+                        'bg-red-500': sickData.status === 'Rejected'
+                      }"
+                    ></span>
+                    {{ sickData.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reason -->
+            <div>
+              <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+              <div class="font-semibold text-gray-900">
+                {{ sickData.reason || "N/A" }}
+              </div>
+            </div>
+
+            <!-- Leave Balance Information -->
+            <div
+              *ngIf="sickData.totalLeaveDays !== undefined"
+              class="bg-gray-50 p-4 rounded-lg"
+            >
+              <div class="text-sm font-medium text-gray-600 mb-3">
+                Leave Balance
+              </div>
+              <div class="grid grid-cols-3 gap-4">
+                <div>
+                  <div class="text-xs text-gray-500">Total Allowance</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ sickData.totalLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Used Days</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ sickData.usedLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Remaining</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ sickData.remainingLeaveDays }} days
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="flex gap-3 w-2/3 m-auto" *ngIf="showButton">
         <button
           class="flex-1 px-4 py-3 border border-green-600 text-green-600 rounded-lg font-medium transition-colors"

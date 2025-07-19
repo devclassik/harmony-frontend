@@ -1,6 +1,6 @@
 export interface CreateRetirementRequest {
   employeeId: number;
-  recommendedReplacement: number;
+  recommendedReplacementId: number;
   reason: string;
   documents: string[];
 }
@@ -65,7 +65,7 @@ export interface RetirementRecord {
   updatedAt: string;
   deletedAt: string | null;
   employee: RetirementEmployee;
-  recommendedReplacement: number | null;
+  recommendedReplacement: RetirementEmployee;
 }
 
 // Detailed retirement record for individual view
@@ -79,7 +79,7 @@ export interface RetirementRecordDetailed {
   updatedAt: string;
   deletedAt: string | null;
   employee: RetirementEmployee;
-  recommendedReplacement: number | null;
+  recommendedReplacement: RetirementEmployee;
   history: any[]; // Can be more specific if history structure is known
 }
 

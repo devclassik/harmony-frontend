@@ -14,7 +14,6 @@ import {
 import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 import { LeaveDetailsComponent } from '../../components/leave-details/leave-details.component';
-import { RetirementService } from '../../services/retirement.service';
 import { AlertService } from '../../services/alert.service';
 import { AuthService } from '../../services/auth.service';
 import {
@@ -24,6 +23,7 @@ import {
 } from '../../dto/retirement.dto';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { Subscription } from 'rxjs';
+import { RetirementService } from '../../services/retirement.service';
 
 @Component({
   selector: 'app-employee-retirement',
@@ -494,7 +494,7 @@ export class EmployeeRetirementComponent implements OnInit, OnDestroy {
     // Transform the data from leave-details component to match API expectations
     const retirementData = {
       employeeId: parseInt(data.employeeId),
-      recommendedReplacement: parseInt(data.recommendedReplacement),
+      recommendedReplacementId: parseInt(data.recommendedReplacement),
       reason: data.reason,
       documents: data.documents || [],
     };

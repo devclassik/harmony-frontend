@@ -1,23 +1,45 @@
 <!-- Loading Overlay -->
 <app-loading-overlay
-  [isVisible]="isLoadingLeaves || isCreatingLeave"
+  [isVisible]="
+    isLoadingLeaves || isCreatingLeave || isApprovingLeave || isRejectingLeave
+  "
   [title]="
-    isLoadingLeaves ? 'Loading Leave Requests...' : 'Creating Leave Request...'
+    isLoadingLeaves
+      ? 'Loading Leave Requests...'
+      : isCreatingLeave
+      ? 'Creating Leave Request...'
+      : isApprovingLeave
+      ? 'Approving Leave Request...'
+      : isRejectingLeave
+      ? 'Rejecting Leave Request...'
+      : 'Loading...'
   "
   [message]="
     isLoadingLeaves
       ? 'Please wait while we fetch your leave requests.'
-      : 'Please wait while we process your leave request.'
+      : isCreatingLeave
+      ? 'Please wait while we process your leave request.'
+      : isApprovingLeave
+      ? 'Please wait while we approve the leave request.'
+      : isRejectingLeave
+      ? 'Please wait while we reject the leave request.'
+      : 'Please wait...'
   "
 ></app-loading-overlay>
 
-<!-- Admin/Manager View -->
-<div *ngIf="userRole?.toLowerCase() === 'admin'">
+<!-- Admin/HOD/Pastor View -->
+<div
+  *ngIf="
+    userRole?.toLowerCase() === 'admin' ||
+    userRole?.toLowerCase() === 'hod' ||
+    userRole?.toLowerCase() === 'pastor'
+  "
+>
   <div class="p-2">
     <app-table
       [tableTitle]="'Annual Leave'"
-      [tableHeader]="leaveRequestsHeader"
-      [tableData]="leaveRequests"
+      [tableHeader]="tableHeader"
+      [tableData]="filteredLeaveRequests"
       [showViewAll]="false"
       [showFilter]="showFilterTabFromParent"
       [showStatusTab]="true"
@@ -29,16 +51,41 @@
       (filterTabChange)="onFilterTabChange($event)"
       [searchValue]="searchValue"
       (search)="onSearch($event)"
-      [tableData]="filteredLeaveRequests"
       [menuItems]="actionButton"
       (menuAction)="onMenuAction($event)"
       [showCalendar]="true"
       showCalendarIcon="assets/svg/calender2.svg"
       [showList]="true"
       showListIcon="assets/svg/list.svg"
-      (showListCalendarClick)="onShowListClick($event)"
+      [calendarEvents]="leaveCalendarEvents"
+      [customEventClick]="handleCalendarEventClick"
+      [currentView]="currentView"
+      (viewChange)="onViewChange($event)"
+      [showList]="false"
     ></app-table>
   </div>
+
+  <!-- Employee Details with Accordion View -->
+  <app-employee-details
+    [view]="showEmployeeDetails"
+    [showButton]="true"
+    [noButtonText]="'Reject'"
+    [yesButtonText]="'Approve'"
+    [yesButtonDisabled]="
+      selectedLeaveRecord?.status?.toUpperCase() === 'APPROVED'
+    "
+    [noButtonDisabled]="
+      selectedLeaveRecord?.status?.toUpperCase() === 'REJECTED'
+    "
+    (confirm)="actionToPerform($event)"
+    (close)="showEmployeeDetails = false"
+    [employee]="selectedEmployeeRecord"
+    [employeeDetails]="selectedEmployeeDetails"
+    [leaveData]="selectedLeaveData"
+    [allLeaves]="selectedEmployeeLeaves"
+    [leaveHistory]="selectedLeaveHistory"
+    [leaveType]="'Annual Leave'"
+  ></app-employee-details>
 </div>
 
 <!-- Worker View -->
@@ -97,16 +144,6 @@
   "
   (submit)="onCreateLeaveRequestSubmitted($event)"
 ></app-leave-details>
-
-<app-employee-details
-  [view]="showEmployeeDetails"
-  [showButton]="true"
-  [noButtonText]="'Reject'"
-  [yesButtonText]="'Accept'"
-  (confirm)="actionToPerform($event)"
-  (close)="showEmployeeDetails = false"
-  [employee]="selectedEmployeeRecord"
-></app-employee-details>
 
 <app-confirm-prompt
   *ngIf="showModal"

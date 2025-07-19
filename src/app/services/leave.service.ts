@@ -349,13 +349,39 @@ export class LeaveService {
         name: `${leave.employee.firstName} ${leave.employee.lastName}`,
         employeeId: leave.employee.employeeId,
         type: leave.type,
-        requestType: this.getRequestTypeDisplay(leave.type), // Map ABSENCE to display value
+        requestType: this.getRequestTypeDisplay(leave.type),
+        imageUrl: this.formatImageUrl(leave.employee?.photoUrl || null),
         location: leave.location,
         createdAt: leave.createdAt,
         // Original data for details view
         originalData: leave,
       };
     });
+  }
+
+  // Helper function to properly format image URLs
+  formatImageUrl(url: string | null): string {
+    // First try to get the photo URL from localStorage if no URL is provided
+    if (!url) {
+      const storedPhotoUrl = localStorage.getItem('workerPhotoUrl');
+      if (storedPhotoUrl && storedPhotoUrl !== '') {
+        url = storedPhotoUrl;
+      }
+    }
+
+    // If still no URL, use a generic avatar fallback
+    if (!url || url === '') {
+      return 'assets/svg/gender.svg'; // Use gender.svg as fallback instead of profilePix.svg
+    }
+
+    // If it's already a complete URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // If it's a relative path, prepend the base URL
+    const baseUrl = 'https://harmoney-backend.onrender.com';
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 
   // Helper method to get display-friendly request type
@@ -380,5 +406,105 @@ export class LeaveService {
       downloadUrl: note.downloadUrl,
       documentId: note.documentId || note.id.toString(),
     }));
+  }
+
+  // Transform leave data for calendar display
+  transformToCalendarEvents(leaves: LeaveRecord[]): any[] {
+    return leaves.map((leave) => {
+      // Calculate end date from start date and duration
+      const startDate = new Date(leave.startDate);
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + (leave.duration - 1)); // -1 because the start date counts as day 1
+
+      // Determine color based on status
+      let backgroundColor = 'transparent'; // No background color
+      let borderColor = 'transparent'; // No border color
+
+      switch (leave.status.toUpperCase()) {
+        case 'APPROVED':
+          backgroundColor = 'transparent';
+          borderColor = 'transparent';
+          break;
+        case 'REJECTED':
+          backgroundColor = 'transparent';
+          borderColor = 'transparent';
+          break;
+        case 'PENDING':
+        default:
+          backgroundColor = 'transparent';
+          borderColor = 'transparent';
+          break;
+      }
+
+      return {
+        id: leave.id.toString(),
+        title: `${leave.employee.firstName} ${leave.employee.lastName} - ${leave.type}`,
+        start: leave.startDate,
+        end: endDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        textColor: '#ffffff',
+        extendedProps: {
+          originalData: leave,
+          employeeName: `${leave.employee.firstName} ${leave.employee.lastName}`,
+          employeePhotoUrl: leave.employee.photoUrl,
+          leaveType: leave.type,
+          status: leave.status,
+          reason: leave.reason,
+          duration: leave.duration,
+          durationUnit: leave.durationUnit,
+        },
+      };
+    });
+  }
+
+  // Approve leave request
+  approveLeave(
+    leaveId: number,
+    substitutionData?: any
+  ): Observable<LeaveApiResponse> {
+    const endpoint = `${environment.routes.leave.getAll}/${leaveId}/approve`;
+    const requestData = substitutionData
+      ? { substitution: substitutionData }
+      : {};
+    return this.apiService.put<LeaveApiResponse>(endpoint, requestData);
+  }
+
+  // Reject leave request
+  rejectLeave(leaveId: number): Observable<LeaveApiResponse> {
+    const endpoint = `${environment.routes.leave.getAll}/${leaveId}/reject`;
+    return this.apiService.put<LeaveApiResponse>(endpoint, {});
+  }
+
+  // Approve sick leave request
+  approveSickLeave(leaveId: number): Observable<LeaveApiResponse> {
+    const endpoint = `/leave/sick/${leaveId}`;
+    return this.apiService.put<LeaveApiResponse>(endpoint, {
+      status: 'APPROVED',
+    });
+  }
+
+  // Reject sick leave request
+  rejectSickLeave(leaveId: number): Observable<LeaveApiResponse> {
+    const endpoint = `/leave/sick/${leaveId}`;
+    return this.apiService.put<LeaveApiResponse>(endpoint, {
+      status: 'REJECTED',
+    });
+  }
+
+  // Approve leave of absence request
+  approveAbsenceLeave(leaveId: number): Observable<LeaveApiResponse> {
+    const endpoint = `/leave/absence/${leaveId}`;
+    return this.apiService.put<LeaveApiResponse>(endpoint, {
+      status: 'APPROVED',
+    });
+  }
+
+  // Reject leave of absence request
+  rejectAbsenceLeave(leaveId: number): Observable<LeaveApiResponse> {
+    const endpoint = `/leave/absence/${leaveId}`;
+    return this.apiService.put<LeaveApiResponse>(endpoint, {
+      status: 'REJECTED',
+    });
   }
 }

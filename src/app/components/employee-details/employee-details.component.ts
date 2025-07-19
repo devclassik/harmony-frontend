@@ -42,6 +42,20 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   @Input() allRetirements: RetirementRecord[] = []; // Add input for all retirement records
   @Input() retrenchmentData: RetrenchmentRecord | null = null; // Add input for retrenchment data
   @Input() allRetrenchments: RetrenchmentRecord[] = []; // Add input for all retrenchment records
+  @Input() leaveData: any = null; // Add input for leave data
+  @Input() allLeaves: any[] = []; // Add input for all leave records
+  @Input() leaveHistory: any[] = []; // Add input for leave history
+  @Input() leaveType: string = 'Annual Leave'; // Add input for leave type
+
+  // Leave of Absence specific inputs
+  @Input() absenceData: any = null; // Add input for leave of absence data
+  @Input() allAbsences: any[] = []; // Add input for all absence records
+  @Input() absenceHistory: any[] = []; // Add input for absence history
+
+  // Sick Leave specific inputs
+  @Input() sickData: any = null; // Add input for sick leave data
+  @Input() allSickLeaves: any[] = []; // Add input for all sick leave records
+  @Input() sickHistory: any[] = []; // Add input for sick leave history
 
   @Output() close = new EventEmitter<void>();
 
@@ -102,6 +116,7 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   }
 
   openPdfModal(url: string) {
+    console.log(url);
     this.selectedPdfUrl = url;
     this.pdfModalOpen = true;
   }

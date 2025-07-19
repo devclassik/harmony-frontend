@@ -1,27 +1,47 @@
 <!-- Loading Overlay -->
 <app-loading-overlay
-  [isVisible]="isLoadingLeaves || isCreatingLeave"
+  [isVisible]="
+    isLoadingLeaves || isCreatingLeave || isApprovingLeave || isRejectingLeave
+  "
   [title]="
     isLoadingLeaves
       ? 'Loading Leave of Absence Requests...'
-      : 'Creating Leave of Absence Request...'
+      : isCreatingLeave
+      ? 'Creating Leave of Absence Request...'
+      : isApprovingLeave
+      ? 'Approving Leave of Absence Request...'
+      : isRejectingLeave
+      ? 'Rejecting Leave of Absence Request...'
+      : 'Loading...'
   "
   [message]="
     isLoadingLeaves
       ? 'Please wait while we fetch your leave requests.'
-      : 'Please wait while we process your leave request.'
+      : isCreatingLeave
+      ? 'Please wait while we process your leave request.'
+      : isApprovingLeave
+      ? 'Please wait while we approve the leave request.'
+      : isRejectingLeave
+      ? 'Please wait while we reject the leave request.'
+      : 'Please wait...'
   "
 ></app-loading-overlay>
 
-<!-- Admin/Manager View -->
-<div *ngIf="userRole?.toLowerCase() === 'admin'">
+<!-- Admin/HOD/Pastor View -->
+<div
+  *ngIf="
+    userRole?.toLowerCase() === 'admin' ||
+    userRole?.toLowerCase() === 'hod' ||
+    userRole?.toLowerCase() === 'pastor'
+  "
+>
   <div class="p-2">
     <app-table
       [tableTitle]="'Leave of Absence'"
-      [tableHeader]="leaveRequestsHeader"
-      [tableData]="leaveRequests"
+      [tableHeader]="tableHeader"
+      [tableData]="filteredLeaveRequests"
       [showViewAll]="false"
-      [showFilter]="true"
+      [showFilter]="showFilterTabFromParent"
       [showStatusTab]="true"
       [statusTabs]="statusTabs"
       [activeStatusTab]="selectedStatus"
@@ -31,11 +51,33 @@
       (filterTabChange)="onFilterTabChange($event)"
       [searchValue]="searchValue"
       (search)="onSearch($event)"
-      [tableData]="filteredLeaveRequests"
       [menuItems]="actionButton"
       (menuAction)="onMenuAction($event)"
+      [showCalendar]="false"
+      [showList]="false"
     ></app-table>
   </div>
+
+  <!-- Employee Details with Accordion View -->
+  <app-employee-details
+    [view]="showEmployeeDetails"
+    [showButton]="true"
+    [noButtonText]="'Reject'"
+    [yesButtonText]="'Approve'"
+    [yesButtonDisabled]="
+      selectedLeaveRecord?.status?.toUpperCase() === 'APPROVED'
+    "
+    [noButtonDisabled]="
+      selectedLeaveRecord?.status?.toUpperCase() === 'REJECTED'
+    "
+    (confirm)="actionToPerform($event)"
+    (close)="showEmployeeDetails = false"
+    [employee]="selectedEmployeeRecord"
+    [employeeDetails]="selectedEmployeeDetails"
+    [absenceData]="selectedLeaveData"
+    [allAbsences]="selectedEmployeeLeaves"
+    [absenceHistory]="selectedLeaveHistory"
+  ></app-employee-details>
 </div>
 
 <!-- Worker View -->
@@ -99,16 +141,6 @@
   (submit)="onCreateRequestSubmitted($event)"
   (cancel)="onCloseCreateLeaveRequest()"
 ></app-leave-details>
-
-<app-employee-details
-  [view]="showEmployeeDetails"
-  [showButton]="true"
-  [noButtonText]="'Reject'"
-  [yesButtonText]="'Accept'"
-  (confirm)="actionToPerform($event)"
-  (close)="showEmployeeDetails = false"
-  [employee]="selectedEmployeeRecord"
-></app-employee-details>
 
 <app-confirm-prompt
   *ngIf="showModal"
