@@ -7,13 +7,62 @@
     class="bg-white w-full max-w-xl h-full shadow-lg p-8 overflow-y-auto relative animate-slide-in-right"
     (click)="$event.stopPropagation()"
   >
-    <button
-      class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl font-bold cursor-pointer z-10"
-      (click)="onClose()"
-      type="button"
-    >
-      &times;
-    </button>
+    <!-- Close/Edit/Delete buttons -->
+    <div class="absolute top-6 right-6 flex items-center gap-2 z-10">
+      <!-- Edit and Delete buttons for camp meeting view mode -->
+      <ng-container *ngIf="isCampMeeting && mode === 'view' && canEdit">
+        <button
+          class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+          (click)="onEdit()"
+          type="button"
+          title="Edit"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+            ></path>
+          </svg>
+        </button>
+        <button
+          class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+          (click)="onDelete()"
+          type="button"
+          title="Delete"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            ></path>
+          </svg>
+        </button>
+      </ng-container>
+
+      <!-- Close button for other modes -->
+      <button
+        *ngIf="!(isCampMeeting && mode === 'view' && canEdit)"
+        class="text-gray-400 hover:text-black text-2xl font-bold cursor-pointer"
+        (click)="onClose()"
+        type="button"
+      >
+        &times;
+      </button>
+    </div>
 
     <!-- CREATE MODE -->
     <div *ngIf="mode === 'create'">
@@ -44,11 +93,11 @@
                 <input
                   type="text"
                   [(ngModel)]="searchTerm"
-                  (input)="onEmployeeSearch($event)"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
                   (focus)="showEmployeeDropdown = true"
                   (blur)="onEmployeeInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search employee..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -171,11 +220,11 @@
                 <input
                   type="text"
                   [(ngModel)]="searchTerm"
-                  (input)="onEmployeeSearch($event)"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
                   (focus)="showEmployeeDropdown = true"
                   (blur)="onEmployeeInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search employee..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -307,11 +356,11 @@
                 <input
                   type="text"
                   [(ngModel)]="searchTerm"
-                  (input)="onEmployeeSearch($event)"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
                   (focus)="showEmployeeDropdown = true"
                   (blur)="onEmployeeInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search employee..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -453,11 +502,11 @@
                 <input
                   type="text"
                   [(ngModel)]="searchTerm"
-                  (input)="onEmployeeSearch($event)"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
                   (focus)="showEmployeeDropdown = true"
                   (blur)="onEmployeeInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search employee..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -528,11 +577,11 @@
                 <input
                   type="text"
                   [(ngModel)]="replacementSearchTerm"
-                  (input)="onReplacementSearch($event)"
+                  (keyup)="onReplacementSearchKeyPress($event)"
                   (focus)="showReplacementDropdown = true"
                   (blur)="onReplacementInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search replacement..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -639,11 +688,11 @@
                 <input
                   type="text"
                   [(ngModel)]="searchTerm"
-                  (input)="onEmployeeSearch($event)"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
                   (focus)="showEmployeeDropdown = true"
                   (blur)="onEmployeeInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search employee..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -1008,7 +1057,7 @@
         </div>
 
         <!-- Reason (common for both) -->
-        <div *ngIf="!isDocument">
+        <div *ngIf="!isDocument && !isCampMeeting">
           <label class="block text-sm font-medium text-gray-700 mb-2"
             >Reason</label
           >
@@ -1181,6 +1230,131 @@
           </div>
         </div>
 
+        <!-- Camp Meeting Create Fields -->
+        <div *ngIf="isCampMeeting && mode === 'create'" class="space-y-8">
+          <!-- Date and Agenda on the same line -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Date
+              </label>
+              <input
+                type="date"
+                [(ngModel)]="formData.startDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Agenda
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="formData.agenda"
+                placeholder="Enter agenda..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Attendees Selection -->
+          <div *ngIf="showAttendees">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Attendees
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                [(ngModel)]="searchTerm"
+                (keyup)="onEmployeeSearchKeyPress($event)"
+                (focus)="showEmployeeDropdown = true"
+                (blur)="onEmployeeInputBlur()"
+                placeholder="Type employee name and press Enter to search..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <div
+                class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                *ngIf="searchingEmployees"
+              >
+                <svg
+                  class="animate-spin h-4 w-4 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Employee Dropdown -->
+            <div
+              *ngIf="showEmployeeDropdown && filteredEmployees.length > 0"
+              class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            >
+              <div
+                *ngFor="let employee of filteredEmployees"
+                (click)="selectEmployee(employee)"
+                class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+              >
+                <div class="font-medium text-gray-900">
+                  {{ employee.name }}
+                </div>
+                <div class="text-sm text-gray-500">
+                  ID: {{ employee.employeeId }}
+                </div>
+                <div class="text-xs text-gray-400">
+                  {{ employee.currentPosition }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected Attendees Tags -->
+            <div
+              class="mt-3 flex flex-wrap gap-2"
+              *ngIf="selectedAttendees.length > 0"
+            >
+              <div
+                *ngFor="let attendee of selectedAttendees"
+                class="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+              >
+                <span>{{ attendee.name }}</span>
+                <button
+                  (click)="removeAttendee(attendee.id)"
+                  class="text-green-600 hover:text-green-800"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Buttons -->
         <div class="flex gap-3 pt-4">
           <button
@@ -1198,7 +1372,7 @@
             [class.opacity-50]="!isFormValid()"
             [class.cursor-not-allowed]="!isFormValid()"
           >
-            Submit
+            {{ isEditMode ? "Update" : "Submit" }}
           </button>
         </div>
       </div>

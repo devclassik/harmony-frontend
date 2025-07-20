@@ -4,10 +4,12 @@ import { CommonModule } from '@angular/common';
 import { TableComponent } from '../../components/table/table.component';
 import { LeaveDetailsComponent } from '../../components/leave-details/leave-details.component';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+import { ConfirmPromptComponent } from '../../components/confirm-prompt/confirm-prompt.component';
 import {
   CampMeetingService,
   CampMeetingRecord,
   CampMeetingApiResponse,
+  CreateCampMeetingRequest,
 } from '../../services/camp-meeting.service';
 import { AlertService } from '../../services/alert.service';
 import { Subscription } from 'rxjs';
@@ -20,6 +22,7 @@ import { finalize } from 'rxjs/operators';
     TableComponent,
     LeaveDetailsComponent,
     LoadingOverlayComponent,
+    ConfirmPromptComponent,
   ],
   templateUrl: './camp-meeting.component.html',
   styleUrl: './camp-meeting.component.css',
@@ -32,8 +35,19 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
   showSlideIn = false;
   selectedMeetingData: CampMeetingRecord | null = null;
 
+  // Create/Edit slide-out state
+  showCreateSlideOut = false;
+  isEditMode = false;
+  editingMeetingId: number | null = null;
+
   // Loading states
   isLoading = false;
+  isCreating = false;
+  isDeleting = false;
+
+  // Delete confirmation state
+  showDeleteConfirmation = false;
+  meetingToDelete: CampMeetingRecord | null = null;
 
   // Real data from API
   campMeetings: CampMeetingRecord[] = [];
@@ -43,6 +57,15 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
 
   // Calendar events for display
   campMeetingCalendarEvents: any[] = [];
+
+  // Role-based button visibility
+  get shouldShowCreateButton(): boolean {
+    return (
+      this.userRole?.toLowerCase() === 'admin' ||
+      this.userRole?.toLowerCase() === 'hod' ||
+      this.userRole?.toLowerCase() === 'pastor'
+    );
+  }
 
   constructor(
     private authService: AuthService,
@@ -111,6 +134,135 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
         this.showSlideIn = true;
       }
     }
+  }
+
+  // Handle create button click
+  onCreateButtonClick() {
+    this.showCreateSlideOut = true;
+  }
+
+  // Handle create slide-out close
+  onCreateSlideOutClose() {
+    this.showCreateSlideOut = false;
+    this.isEditMode = false;
+    this.editingMeetingId = null;
+    this.selectedMeetingData = null; // Clear the selected meeting data
+  }
+
+  // Handle edit button click
+  onEditButtonClick(meeting: CampMeetingRecord) {
+    this.isEditMode = true;
+    this.editingMeetingId = meeting.id;
+    this.selectedMeetingData = meeting; // Set the meeting data for edit mode
+    this.showCreateSlideOut = true;
+  }
+
+  // Handle delete button click
+  onDeleteButtonClick(meeting: CampMeetingRecord) {
+    // Store the meeting data for deletion
+    this.meetingToDelete = meeting;
+    this.showDeleteConfirmation = true;
+  }
+
+  // Handle delete confirmation
+  onDeleteConfirmed(confirmed: boolean) {
+    this.showDeleteConfirmation = false;
+
+    if (confirmed && this.meetingToDelete) {
+      this.isDeleting = true;
+
+      // Close the slide-out immediately
+      this.showSlideIn = false;
+      this.selectedMeetingData = null;
+
+      const deleteSub = this.campMeetingService
+        .deleteCampMeeting(this.meetingToDelete.id)
+        .subscribe({
+          next: (response) => {
+            this.isDeleting = false;
+            this.meetingToDelete = null;
+            if (response.status === 'success') {
+              this.alertService.success('Camp meeting deleted successfully!');
+              this.loadCampMeetings(); // Reload the list
+            } else {
+              this.alertService.error(
+                'Failed to delete camp meeting. Please try again.'
+              );
+            }
+          },
+          error: (error) => {
+            this.isDeleting = false;
+            this.meetingToDelete = null;
+            console.error('Error deleting camp meeting:', error);
+            this.alertService.error(
+              'Failed to delete camp meeting. Please try again.'
+            );
+          },
+        });
+
+      this.subscriptions.push(deleteSub);
+    }
+  }
+
+  // Handle create/update form submission
+  onCreateFormSubmitted(formData: any) {
+    this.isCreating = true;
+
+    // Store edit mode state before clearing
+    const isEditMode = this.isEditMode;
+    const editingMeetingId = this.editingMeetingId;
+
+    // Close the slide-out immediately
+    this.showCreateSlideOut = false;
+    this.isEditMode = false;
+    this.editingMeetingId = null;
+    this.selectedMeetingData = null;
+
+    // Transform form data to match API requirements
+    const requestData: CreateCampMeetingRequest = {
+      agenda: formData.agenda || formData.reason,
+      startDate: formData.startDate,
+      endDate: formData.startDate, // Use same date as start date since no end date
+      attendees: formData.attendees || [],
+    };
+
+    let apiCall;
+    if (isEditMode && editingMeetingId) {
+      // Update existing camp meeting
+      apiCall = this.campMeetingService.updateCampMeeting(
+        editingMeetingId,
+        requestData
+      );
+    } else {
+      // Create new camp meeting
+      apiCall = this.campMeetingService.createCampMeeting(requestData);
+    }
+
+    const subscription = apiCall.subscribe({
+      next: (response: any) => {
+        this.isCreating = false;
+        if (response.status === 'success') {
+          const action = isEditMode ? 'updated' : 'created';
+          this.alertService.success(`Camp meeting ${action} successfully!`);
+          this.loadCampMeetings(); // Reload the list
+        } else {
+          const action = isEditMode ? 'update' : 'create';
+          this.alertService.error(
+            `Failed to ${action} camp meeting. Please try again.`
+          );
+        }
+      },
+      error: (error: any) => {
+        this.isCreating = false;
+        const action = isEditMode ? 'updating' : 'creating';
+        console.error(`Error ${action} camp meeting:`, error);
+        this.alertService.error(
+          `Failed to ${action} camp meeting. Please try again.`
+        );
+      },
+    });
+
+    this.subscriptions.push(subscription);
   }
 
   onSlideInClose() {

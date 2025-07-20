@@ -66,6 +66,22 @@ export interface CampMeetingApiResponse {
   data: CampMeetingRecord[];
 }
 
+// Interface for creating camp meeting
+export interface CreateCampMeetingRequest {
+  agenda: string;
+  startDate: string;
+  endDate: string;
+  attendees: number[];
+  documents?: string[];
+}
+
+// Interface for create response
+export interface CreateCampMeetingResponse {
+  status: string;
+  message: string;
+  data: CampMeetingRecord;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -76,6 +92,34 @@ export class CampMeetingService {
   getCampMeetings(): Observable<CampMeetingApiResponse> {
     return this.apiService.get<CampMeetingApiResponse>(
       environment.routes.campMeeting.getAll
+    );
+  }
+
+  // Create new camp meeting
+  createCampMeeting(
+    request: CreateCampMeetingRequest
+  ): Observable<CreateCampMeetingResponse> {
+    return this.apiService.post<CreateCampMeetingResponse>(
+      environment.routes.campMeeting.create,
+      request
+    );
+  }
+
+  // Update camp meeting
+  updateCampMeeting(
+    id: number,
+    request: CreateCampMeetingRequest
+  ): Observable<CreateCampMeetingResponse> {
+    return this.apiService.put<CreateCampMeetingResponse>(
+      `${environment.routes.campMeeting.update}/${id}`,
+      request
+    );
+  }
+
+  // Delete camp meeting
+  deleteCampMeeting(id: number): Observable<CreateCampMeetingResponse> {
+    return this.apiService.delete<CreateCampMeetingResponse>(
+      `${environment.routes.campMeeting.delete}/${id}`
     );
   }
 
