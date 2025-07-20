@@ -9,9 +9,16 @@ import { TableData } from '../../interfaces/employee.interface';
 import { DocumentViewerComponent } from '../../components/document-viewer/document-viewer.component';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 import { CommonModule } from '@angular/common';
-import { TemplateService, Template } from '../../services/template.service';
+import {
+  TemplateService,
+  Template,
+  CreateTemplateRequest,
+} from '../../services/template.service';
 import { AlertService } from '../../services/alert.service';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
+import { LeaveDetailsComponent } from '../../components/leave-details/leave-details.component';
+import { ConfirmPromptComponent } from '../../components/confirm-prompt/confirm-prompt.component';
 
 @Component({
   selector: 'app-index-of-file',
@@ -20,6 +27,8 @@ import { Subscription } from 'rxjs';
     TableComponent,
     DocumentViewerComponent,
     LoadingOverlayComponent,
+    LeaveDetailsComponent,
+    ConfirmPromptComponent,
   ],
   templateUrl: './index-of-file.component.html',
   styleUrl: './index-of-file.component.css',
@@ -32,6 +41,12 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   // Loading states
   isLoadingTemplates: boolean = false;
   isCreatingTemplate: boolean = false;
+  isDeletingTemplate: boolean = false;
+
+  // Create document modal
+  showCreateDocument: boolean = false;
+  showDeleteConfirm: boolean = false;
+  templateToDelete: Template | null = null;
 
   // Document viewer properties
   showDocumentViewer: boolean = false;
@@ -82,13 +97,15 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   ];
 
   actionButton: MenuItem[] = [
-    { label: 'View', action: 'view', icon: 'assets/svg/eyeOpen.svg' },
-    { label: 'Download', action: 'download', icon: 'assets/svg/download.svg' },
+    { label: 'View', action: 'view', icon: '' },
+    { label: 'Download', action: 'download', icon: '' },
+    { label: 'Delete', action: 'delete', icon: '' },
   ];
 
   constructor(
     private templateService: TemplateService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private authService: AuthService
   ) {
     this.updateCurrentData();
   }
@@ -125,18 +142,27 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   }
 
   transformTemplateData() {
-    this.documentsData = this.templates.map((template) => ({
-      id: template.id.toString(),
-      documentName: template.name,
-      date: this.formatDate(template.createdAt),
-      documentType: template.fileType,
-      downloadUrl: template.downloadUrl,
-      templateType: template.fileType,
-    }));
+    this.documentsData = this.templates.map((template) => {
+      console.log('Template data:', template); // Debug log
+      return {
+        id: template.id.toString(),
+        documentName: template.name,
+        date: this.formatDate(template.createdAt),
+        documentType: template.fileType,
+        downloadUrl: template.downloadUrl,
+        templateType: template.fileType,
+      };
+    });
 
     // For now, keeping training data empty as it's not part of the template API
     // If you have a separate training API endpoint, you can implement it similarly
     this.trainingData = [];
+  }
+
+  // Role-based button visibility - only show for HOD/Pastor
+  get shouldShowCreateButton(): boolean {
+    const userRole = this.authService.getWorkerRole()?.toLowerCase();
+    return userRole === 'admin';
   }
 
   formatDate(dateString: string): string {
@@ -297,6 +323,15 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
       case 'download':
         this.downloadDocument(employee);
         break;
+      case 'delete':
+        // Find the template by ID
+        const template = this.templates.find(
+          (t) => t.id.toString() === employee.id
+        );
+        if (template) {
+          this.onDeleteTemplate(template);
+        }
+        break;
       default:
         console.log('Unknown action:', action);
     }
@@ -320,14 +355,40 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
       case 'download':
         this.downloadDocument(employee);
         break;
+      case 'delete':
+        // Find the template by ID
+        const template = this.templates.find(
+          (t) => t.id.toString() === employee.id
+        );
+        if (template) {
+          this.onDeleteTemplate(template);
+        }
+        break;
       default:
         console.log('Unknown action:', action);
     }
   }
 
   viewDocument(document: TableData): void {
-    this.selectedDocument = document;
-    this.showDocumentViewer = true;
+    // Find the template by ID to get the correct download URL
+    const template = this.templates.find(
+      (t) => t.id.toString() === document.id
+    );
+    if (template) {
+      console.log('Template found for viewing:', template); // Debug log
+      this.selectedDocument = {
+        id: template.id.toString(),
+        documentName: template.name,
+        documentType: template.fileType,
+        downloadUrl: template.downloadUrl,
+        date: template.createdAt || new Date().toLocaleDateString(),
+      };
+      console.log('Selected document for viewer:', this.selectedDocument); // Debug log
+      this.showDocumentViewer = true;
+    } else {
+      console.error('Template not found for document:', document);
+      this.alertService.error('Document not found.');
+    }
   }
 
   onDocumentViewerClose(): void {
@@ -336,12 +397,22 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   }
 
   onDocumentViewerDownload(document: TableData): void {
-    this.downloadDocument(document);
+    // Find the template by ID to get the correct download URL
+    const template = this.templates.find(
+      (t) => t.id.toString() === document.id
+    );
+    if (template && template.downloadUrl) {
+      this.templateService.downloadTemplate(template.downloadUrl);
+    } else {
+      this.alertService.error('Download URL not available for this template.');
+    }
   }
 
   downloadDocument(doc: TableData): void {
-    if (doc.downloadUrl) {
-      this.templateService.downloadTemplate(doc.downloadUrl);
+    // Find the template by ID to get the correct download URL
+    const template = this.templates.find((t) => t.id.toString() === doc.id);
+    if (template && template.downloadUrl) {
+      this.templateService.downloadTemplate(template.downloadUrl);
     } else {
       this.alertService.error('Download URL not available for this template.');
     }
@@ -394,6 +465,112 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
       this.switchToTableView();
     } else if (viewType === 'card') {
       this.switchToCardView();
+    }
+  }
+
+  // Create document methods
+  openCreateDocument(): void {
+    this.showCreateDocument = true;
+  }
+
+  onCloseCreateDocument(): void {
+    this.showCreateDocument = false;
+  }
+
+  onCreateDocumentSubmitted(formData: any): void {
+    this.isCreatingTemplate = true;
+
+    const request: CreateTemplateRequest = {
+      name: formData.name,
+      downloadUrl: formData.downloadUrl,
+      fileType: formData.fileType,
+    };
+
+    const createSub = this.templateService.createTemplate(request).subscribe({
+      next: (response) => {
+        this.isCreatingTemplate = false;
+        if (response.status === 'success') {
+          this.alertService.success('Document created successfully!');
+          this.loadTemplates(); // Reload the list
+        } else {
+          this.alertService.error(
+            'Failed to create document. Please try again.'
+          );
+        }
+      },
+      error: (error) => {
+        this.isCreatingTemplate = false;
+        console.error('Error creating document:', error);
+        this.alertService.error('Failed to create document. Please try again.');
+      },
+    });
+
+    this.subscriptions.push(createSub);
+  }
+
+  // Delete methods
+  onDeleteTemplate(template: Template): void {
+    this.templateToDelete = template;
+    this.showDeleteConfirm = true;
+  }
+
+  onConfirmDelete(confirmed: boolean): void {
+    if (confirmed && this.templateToDelete) {
+      this.isDeletingTemplate = true;
+
+      const deleteSub = this.templateService
+        .deleteTemplate(this.templateToDelete.id)
+        .subscribe({
+          next: (response) => {
+            this.isDeletingTemplate = false;
+            if (response.status === 'success') {
+              this.alertService.success('Document deleted successfully!');
+              this.loadTemplates(); // Reload the list
+            } else {
+              this.alertService.error(
+                'Failed to delete document. Please try again.'
+              );
+            }
+          },
+          error: (error) => {
+            this.isDeletingTemplate = false;
+            console.error('Error deleting document:', error);
+            this.alertService.error(
+              'Failed to delete document. Please try again.'
+            );
+          },
+        });
+
+      this.subscriptions.push(deleteSub);
+    }
+
+    this.showDeleteConfirm = false;
+    this.templateToDelete = null;
+  }
+
+  onCancelDelete(): void {
+    this.showDeleteConfirm = false;
+    this.templateToDelete = null;
+  }
+
+  // Loading methods
+  getLoadingTitle(): string {
+    if (this.isCreatingTemplate) {
+      return 'Creating Document...';
+    } else if (this.isDeletingTemplate) {
+      return 'Deleting Document...';
+    } else {
+      return 'Loading Templates...';
+    }
+  }
+
+  getLoadingMessage(): string {
+    if (this.isCreatingTemplate) {
+      return 'Please wait while we create your document.';
+    } else if (this.isDeletingTemplate) {
+      return 'Please wait while we delete the document.';
+    } else {
+      return 'Please wait while we fetch your template files.';
     }
   }
 }

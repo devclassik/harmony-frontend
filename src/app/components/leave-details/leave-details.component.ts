@@ -50,6 +50,7 @@ export class LeaveDetailsComponent implements OnInit {
   @Input() isTransfer: boolean = false;
   @Input() isRetirement: boolean = false; // New input for retirement mode
   @Input() isRetrenchment: boolean = false; // New input for retrenchment mode
+  @Input() isDocument: boolean = false; // New input for document mode
   @Output() close = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() submit = new EventEmitter<any>();
@@ -137,6 +138,10 @@ export class LeaveDetailsComponent implements OnInit {
     requestDate: '',
     // Retrenchment-specific fields
     retrenchmentType: '',
+    // Document-specific fields
+    documentName: '',
+    downloadUrl: '',
+    fileType: '',
   };
 
   // Track uploaded files with progress
@@ -435,6 +440,25 @@ export class LeaveDetailsComponent implements OnInit {
         return;
       }
 
+      // Handle document submission
+      if (this.isDocument) {
+        // Get the uploaded file URL
+        const uploadedFile = this.uploadedFiles.find(
+          (file) => file.uploadStatus === 'completed'
+        );
+        if (uploadedFile && uploadedFile.url) {
+          const submissionData = {
+            name: this.formData.documentName,
+            downloadUrl: uploadedFile.url,
+            fileType: this.getFileTypeFromFileName(uploadedFile.name),
+          };
+          this.submit.emit(submissionData);
+          this.resetForm();
+          this.close.emit();
+          return;
+        }
+      }
+
       // Handle submission based on leave type
       if (this.showEndDate && !this.showDuration) {
         // Annual leave - use start date, end date, and reason
@@ -614,6 +638,13 @@ export class LeaveDetailsComponent implements OnInit {
         this.formData.reason
       );
     }
+    if (this.isDocument) {
+      return !!(
+        this.formData.documentName &&
+        this.uploadedFiles.length > 0 &&
+        this.uploadedFiles.some((file) => file.uploadStatus === 'completed')
+      );
+    }
 
     // Base validation - always required
     if (!this.formData.startDate || !this.formData.reason) {
@@ -659,6 +690,9 @@ export class LeaveDetailsComponent implements OnInit {
     if (this.isRetrenchment) {
       return `Are you sure you want to create this retrenchment request for ${this.formData.employeeName}?`;
     }
+    if (this.isDocument) {
+      return `Are you sure you want to create this document "${this.formData.documentName}"?`;
+    }
     if (this.showEndDate && !this.showDuration) {
       return `Are you sure you want to create this ${this.leaveType.toLowerCase()} request?`;
     }
@@ -691,6 +725,10 @@ export class LeaveDetailsComponent implements OnInit {
       requestDate: '',
       // Retrenchment-specific fields
       retrenchmentType: '',
+      // Document-specific fields
+      documentName: '',
+      downloadUrl: '',
+      fileType: '',
     };
     this.uploadedFiles = [];
     this.searchTerm = '';
@@ -787,6 +825,34 @@ export class LeaveDetailsComponent implements OnInit {
     }
   }
 
+  // Helper method to get file type from filename
+  private getFileTypeFromFileName(fileName: string): string {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return 'PDF';
+      case 'doc':
+      case 'docx':
+        return 'DOC';
+      case 'xls':
+      case 'xlsx':
+        return 'XLS';
+      case 'jpg':
+      case 'jpeg':
+        return 'JPG';
+      case 'png':
+        return 'PNG';
+      case 'mp4':
+        return 'MP4';
+      case 'avi':
+        return 'AVI';
+      case 'mov':
+        return 'MOV';
+      default:
+        return 'FILE';
+    }
+  }
+
   // Download uploaded file
   downloadFile(file: any) {
     console.log('Download file called with:', file); // Debug log
@@ -866,11 +932,24 @@ export class LeaveDetailsComponent implements OnInit {
   previewFile(file: any) {
     if (file.url) {
       const extension = file.name.split('.').pop()?.toLowerCase();
-      if (extension === 'pdf') {
-        // Open PDF in new tab
+
+      // Create a document object for the viewer
+      const documentData = {
+        id: file.name,
+        documentName: file.name,
+        documentType: this.getFileTypeFromFileName(file.name),
+        downloadUrl: file.url,
+        date: new Date().toLocaleDateString(),
+      };
+
+      // For PDFs and images, open in new tab for preview
+      if (
+        extension === 'pdf' ||
+        ['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(extension)
+      ) {
         window.open(file.url, '_blank');
       } else {
-        // For other files, just download
+        // For other files, trigger download
         this.downloadFile(file);
       }
     }
