@@ -28,6 +28,7 @@ import { NotificationsComponent } from './pages/notifications/notifications.comp
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ProfileCreateComponent } from './pages/profile-create/profile-create.component';
 import { ProfileViewComponent } from './pages/profile-view/profile-view.component';
+import { SettingsComponent } from './pages/settings/settings.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
@@ -161,6 +162,11 @@ export const routes: Routes = [
         path: 'notifications',
         component: NotificationsComponent,
         canActivate: [authGuard], // Notifications access for all authenticated users
+      },
+      {
+        path: 'settings',
+        component: SettingsComponent,
+        canActivate: [adminGuard], // Settings access for admin users only
       },
       {
         path: 'admin',

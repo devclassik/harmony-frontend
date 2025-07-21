@@ -57,6 +57,10 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   @Input() allSickLeaves: any[] = []; // Add input for all sick leave records
   @Input() sickHistory: any[] = []; // Add input for sick leave history
 
+  // Team Members specific inputs
+  @Input() teamMembers: any[] = []; // Add input for team members
+  @Input() departmentName: string = ''; // Add input for department name
+
   @Output() close = new EventEmitter<void>();
 
   @Input() showButton: boolean = false;
@@ -112,6 +116,32 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
     const target = event.target as HTMLImageElement;
     if (target) {
       target.src = 'assets/svg/gender.svg';
+    }
+  }
+
+  // Helper methods for team members
+  getEmployeeFullName(employee: any): string {
+    if (!employee) return 'Unknown';
+    const firstName = employee.firstName || '';
+    const lastName = employee.lastName || '';
+    return `${firstName} ${lastName}`.trim() || 'Unknown';
+  }
+
+  hasValidPhotoUrl(employee: any): boolean {
+    return employee && employee.photoUrl && employee.photoUrl.trim() !== '';
+  }
+
+  // Get default image based on gender
+  getDefaultImage(employee: any): string {
+    if (!employee || !employee.gender) {
+      return 'assets/svg/male.svg'; // Default to male if no gender specified
+    }
+
+    const gender = employee.gender.toLowerCase();
+    if (gender === 'female' || gender === 'f') {
+      return 'assets/svg/female.svg';
+    } else {
+      return 'assets/svg/male.svg';
     }
   }
 
