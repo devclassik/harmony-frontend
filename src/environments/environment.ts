@@ -60,6 +60,9 @@ export const environment = {
     },
     campMeeting: {
       getAll: '/camp-meeting',
+      create: '/camp-meeting',
+      update: '/camp-meeting',
+      delete: '/camp-meeting',
     },
     analytics: {
       getAnalyticsOverview: '/analytics/overview',

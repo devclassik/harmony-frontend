@@ -7,13 +7,62 @@
     class="bg-white w-full max-w-xl h-full shadow-lg p-8 overflow-y-auto relative animate-slide-in-right"
     (click)="$event.stopPropagation()"
   >
-    <button
-      class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl font-bold cursor-pointer z-10"
-      (click)="onClose()"
-      type="button"
-    >
-      &times;
-    </button>
+    <!-- Close/Edit/Delete buttons -->
+    <div class="absolute top-6 right-6 flex items-center gap-2 z-10">
+      <!-- Edit and Delete buttons for camp meeting view mode -->
+      <ng-container *ngIf="isCampMeeting && mode === 'view' && canEdit">
+        <button
+          class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+          (click)="onEdit()"
+          type="button"
+          title="Edit"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+            ></path>
+          </svg>
+        </button>
+        <button
+          class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+          (click)="onDelete()"
+          type="button"
+          title="Delete"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            ></path>
+          </svg>
+        </button>
+      </ng-container>
+
+      <!-- Close button for other modes -->
+      <button
+        *ngIf="!(isCampMeeting && mode === 'view' && canEdit)"
+        class="text-gray-400 hover:text-black text-2xl font-bold cursor-pointer"
+        (click)="onClose()"
+        type="button"
+      >
+        &times;
+      </button>
+    </div>
 
     <!-- CREATE MODE -->
     <div *ngIf="mode === 'create'">
@@ -44,11 +93,11 @@
                 <input
                   type="text"
                   [(ngModel)]="searchTerm"
-                  (input)="onEmployeeSearch($event)"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
                   (focus)="showEmployeeDropdown = true"
                   (blur)="onEmployeeInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search employee..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -171,11 +220,11 @@
                 <input
                   type="text"
                   [(ngModel)]="searchTerm"
-                  (input)="onEmployeeSearch($event)"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
                   (focus)="showEmployeeDropdown = true"
                   (blur)="onEmployeeInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search employee..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -307,11 +356,11 @@
                 <input
                   type="text"
                   [(ngModel)]="searchTerm"
-                  (input)="onEmployeeSearch($event)"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
                   (focus)="showEmployeeDropdown = true"
                   (blur)="onEmployeeInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search employee..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -453,11 +502,11 @@
                 <input
                   type="text"
                   [(ngModel)]="searchTerm"
-                  (input)="onEmployeeSearch($event)"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
                   (focus)="showEmployeeDropdown = true"
                   (blur)="onEmployeeInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search employee..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -528,11 +577,11 @@
                 <input
                   type="text"
                   [(ngModel)]="replacementSearchTerm"
-                  (input)="onReplacementSearch($event)"
+                  (keyup)="onReplacementSearchKeyPress($event)"
                   (focus)="showReplacementDropdown = true"
                   (blur)="onReplacementInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search replacement..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -639,11 +688,11 @@
                 <input
                   type="text"
                   [(ngModel)]="searchTerm"
-                  (input)="onEmployeeSearch($event)"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
                   (focus)="showEmployeeDropdown = true"
                   (blur)="onEmployeeInputBlur()"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Search employee..."
+                  placeholder="Type employee name and press Enter to search..."
                 />
                 <div
                   class="absolute right-2 top-1/2 transform -translate-y-1/2"
@@ -843,8 +892,172 @@
           </div>
         </div>
 
+        <!-- Document Fields -->
+        <div *ngIf="isDocument">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Document Name</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="formData.documentName"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Enter document name"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Upload Document</label
+            >
+
+            <div
+              class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors"
+            >
+              <input
+                type="file"
+                (change)="onFileSelect($event)"
+                class="hidden"
+                #fileInput
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.mp4,.avi,.mov"
+              />
+              <div class="flex flex-col items-center">
+                <svg
+                  class="w-8 h-8 text-gray-400 mb-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <button
+                  type="button"
+                  (click)="fileInput.click()"
+                  class="text-green-600 hover:text-green-700 font-medium"
+                >
+                  Browse files to Upload
+                </button>
+                <p class="text-xs text-gray-500 mt-1">
+                  PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, MP4, AVI, MOV up to 10MB
+                </p>
+              </div>
+            </div>
+
+            <!-- Enhanced File List with Preview and Download -->
+            <div *ngIf="uploadedFiles.length > 0" class="mt-4 space-y-2">
+              <div
+                *ngFor="let file of uploadedFiles; let i = index"
+                class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+              >
+                <!-- File Icon -->
+                <div
+                  class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-medium"
+                  [class]="getFileTypeColor(file.name)"
+                >
+                  {{ getFileTypeIcon(file.name).toUpperCase() }}
+                </div>
+
+                <!-- File Details -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-gray-900 text-sm truncate">{{
+                      file.name
+                    }}</span>
+                    <span class="text-xs text-gray-500"
+                      >({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span
+                    >
+                    <!-- Status Badge -->
+                    <span
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                      [ngClass]="{
+                        'bg-blue-100 text-blue-800':
+                          file.uploadStatus === 'uploading',
+                        'bg-green-100 text-green-800':
+                          file.uploadStatus === 'completed',
+                        'bg-red-100 text-red-800': file.uploadStatus === 'error'
+                      }"
+                    >
+                      {{ file.uploadStatus | titlecase }}
+                    </span>
+                  </div>
+
+                  <!-- Progress Bar -->
+                  <div
+                    *ngIf="file.uploadStatus === 'uploading'"
+                    class="mt-1 w-full bg-gray-200 rounded-full h-1"
+                  >
+                    <div
+                      class="bg-blue-600 h-1 rounded-full transition-all duration-300"
+                      [style.width.%]="file.progress"
+                    ></div>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-2">
+                  <!-- Preview Button -->
+                  <button
+                    *ngIf="file.uploadStatus === 'completed' && file.url"
+                    type="button"
+                    (click)="previewFile(file)"
+                    class="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
+                    title="Preview"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  </button>
+
+                  <!-- Remove Button -->
+                  <button
+                    type="button"
+                    (click)="removeFile(i)"
+                    class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                    title="Remove"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Reason (common for both) -->
-        <div>
+        <div *ngIf="!isDocument && !isCampMeeting">
           <label class="block text-sm font-medium text-gray-700 mb-2"
             >Reason</label
           >
@@ -1017,6 +1230,131 @@
           </div>
         </div>
 
+        <!-- Camp Meeting Create Fields -->
+        <div *ngIf="isCampMeeting && mode === 'create'" class="space-y-8">
+          <!-- Date and Agenda on the same line -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Date
+              </label>
+              <input
+                type="date"
+                [(ngModel)]="formData.startDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Agenda
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="formData.agenda"
+                placeholder="Enter agenda..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Attendees Selection -->
+          <div *ngIf="showAttendees">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Attendees
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                [(ngModel)]="searchTerm"
+                (keyup)="onEmployeeSearchKeyPress($event)"
+                (focus)="showEmployeeDropdown = true"
+                (blur)="onEmployeeInputBlur()"
+                placeholder="Type employee name and press Enter to search..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <div
+                class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                *ngIf="searchingEmployees"
+              >
+                <svg
+                  class="animate-spin h-4 w-4 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Employee Dropdown -->
+            <div
+              *ngIf="showEmployeeDropdown && filteredEmployees.length > 0"
+              class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            >
+              <div
+                *ngFor="let employee of filteredEmployees"
+                (click)="selectEmployee(employee)"
+                class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+              >
+                <div class="font-medium text-gray-900">
+                  {{ employee.name }}
+                </div>
+                <div class="text-sm text-gray-500">
+                  ID: {{ employee.employeeId }}
+                </div>
+                <div class="text-xs text-gray-400">
+                  {{ employee.currentPosition }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected Attendees Tags -->
+            <div
+              class="mt-3 flex flex-wrap gap-2"
+              *ngIf="selectedAttendees.length > 0"
+            >
+              <div
+                *ngFor="let attendee of selectedAttendees"
+                class="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+              >
+                <span>{{ attendee.name }}</span>
+                <button
+                  (click)="removeAttendee(attendee.id)"
+                  class="text-green-600 hover:text-green-800"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Buttons -->
         <div class="flex gap-3 pt-4">
           <button
@@ -1034,7 +1372,7 @@
             [class.opacity-50]="!isFormValid()"
             [class.cursor-not-allowed]="!isFormValid()"
           >
-            Submit
+            {{ isEditMode ? "Update" : "Submit" }}
           </button>
         </div>
       </div>

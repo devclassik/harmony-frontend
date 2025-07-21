@@ -1,7 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { OnInit } from '@angular/core';
 import { FORM_OPTIONS } from '../../shared/constants/form-options';
 import { FileUploadService } from '../../shared/services/file-upload.service';
 import { EmployeeService } from '../../services/employee.service';
@@ -29,7 +36,7 @@ interface Position {
   templateUrl: './leave-details.component.html',
   styleUrl: './leave-details.component.css',
 })
-export class LeaveDetailsComponent implements OnInit {
+export class LeaveDetailsComponent implements OnInit, OnChanges {
   @Input() view: boolean = false;
   @Input() leaveData: any = {};
   @Input() title: string = 'Leave Details';
@@ -50,9 +57,15 @@ export class LeaveDetailsComponent implements OnInit {
   @Input() isTransfer: boolean = false;
   @Input() isRetirement: boolean = false; // New input for retirement mode
   @Input() isRetrenchment: boolean = false; // New input for retrenchment mode
+  @Input() isDocument: boolean = false; // New input for document mode
+  @Input() isEditMode: boolean = false; // New input for edit mode
+  @Input() canEdit: boolean = false; // New input for edit permissions
+  @Input() selectedMeetingData: any = null; // New input for meeting data
   @Output() close = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() submit = new EventEmitter<any>();
+  @Output() edit = new EventEmitter<any>();
+  @Output() delete = new EventEmitter<any>();
 
   openSection: string | null = null;
   showConfirmModal: boolean = false;
@@ -68,6 +81,9 @@ export class LeaveDetailsComponent implements OnInit {
   replacementSearchTerm: string = '';
   showReplacementDropdown: boolean = false;
   searchingReplacementEmployees: boolean = false;
+
+  // Camp Meeting attendee properties
+  selectedAttendees: Employee[] = [];
 
   positions: Position[] = [
     { label: 'Pastor', value: 'PASTOR' },
@@ -137,6 +153,13 @@ export class LeaveDetailsComponent implements OnInit {
     requestDate: '',
     // Retrenchment-specific fields
     retrenchmentType: '',
+    // Document-specific fields
+    documentName: '',
+    downloadUrl: '',
+    fileType: '',
+    // Camp Meeting-specific fields
+    agenda: '',
+    attendees: [] as number[],
   };
 
   // Track uploaded files with progress
@@ -154,6 +177,120 @@ export class LeaveDetailsComponent implements OnInit {
 
   ngOnInit() {
     // Removed loadEmployees() call - we now search employees dynamically via API
+
+    // Populate form data if in edit mode
+    if (this.isEditMode && this.leaveData) {
+      this.populateFormData();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    // Check if leaveData or isEditMode changed
+    if (
+      (changes['leaveData'] || changes['isEditMode']) &&
+      this.isEditMode &&
+      this.leaveData
+    ) {
+      this.populateFormData();
+    }
+  }
+
+  // Populate form data from existing data for edit mode
+  populateFormData() {
+    if (!this.leaveData) return;
+
+    console.log('Populating form data for edit mode:', this.leaveData);
+
+    // For camp meetings
+    if (this.isCampMeeting) {
+      this.formData.agenda = this.leaveData.agenda || '';
+
+      // Format date for HTML date input (YYYY-MM-DD)
+      if (this.leaveData.startDate) {
+        const date = new Date(this.leaveData.startDate);
+        this.formData.startDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      } else {
+        this.formData.startDate = '';
+      }
+
+      // Handle attendees - they come as objects with id property
+      if (this.leaveData.attendees && this.leaveData.attendees.length > 0) {
+        // Extract attendee IDs and populate selectedAttendees for display
+        this.formData.attendees = this.leaveData.attendees.map(
+          (attendee: any) => attendee.id
+        );
+        this.selectedAttendees = this.leaveData.attendees.map(
+          (attendee: any) => ({
+            id: attendee.id,
+            name: `${attendee.firstName} ${attendee.lastName}`,
+            employeeId: attendee.employeeId || attendee.id.toString(),
+            currentPosition: attendee.user?.role?.name || 'N/A',
+          })
+        );
+      } else {
+        this.formData.attendees = [];
+        this.selectedAttendees = [];
+      }
+    }
+
+    // For other leave types
+    else {
+      this.formData.requestType = this.leaveData.requestType || '';
+      this.formData.startDate = this.leaveData.startDate || '';
+      this.formData.endDate = this.leaveData.endDate || '';
+      this.formData.reason = this.leaveData.reason || '';
+      this.formData.location = this.leaveData.location || '';
+
+      // Handle duration
+      if (this.leaveData.duration) {
+        const durationStr = this.leaveData.duration.toString();
+        const match = durationStr.match(/(\d+)\s*(day|week|month|year)s?/i);
+        if (match) {
+          this.formData.duration.value = parseInt(match[1]);
+          this.formData.duration.unit =
+            match[2].charAt(0).toUpperCase() + match[2].slice(1) + 's';
+        }
+      }
+
+      // Handle specific types
+      if (this.isPromotion) {
+        this.formData.employeeId = this.leaveData.employeeId?.toString() || '';
+        this.formData.employeeName = this.leaveData.employeeName || '';
+        this.formData.newPosition = this.leaveData.newPosition || '';
+      }
+
+      if (this.isDiscipline) {
+        this.formData.employeeId = this.leaveData.employeeId?.toString() || '';
+        this.formData.employeeName = this.leaveData.employeeName || '';
+        this.formData.disciplineType = this.leaveData.disciplineType || '';
+      }
+
+      if (this.isTransfer) {
+        this.formData.employeeId = this.leaveData.employeeId?.toString() || '';
+        this.formData.employeeName = this.leaveData.employeeName || '';
+        this.formData.transferType = this.leaveData.transferType || '';
+        this.formData.destination = this.leaveData.destination || '';
+        this.formData.newPosition = this.leaveData.newPosition || '';
+      }
+
+      if (this.isRetirement) {
+        this.formData.employeeId = this.leaveData.employeeId?.toString() || '';
+        this.formData.employeeName = this.leaveData.employeeName || '';
+        this.formData.recommendedReplacement =
+          this.leaveData.recommendedReplacement?.toString() || '';
+        this.formData.replacementName = this.leaveData.replacementName || '';
+        this.formData.requestDate = this.leaveData.requestDate || '';
+        this.formData.destination = this.leaveData.destination || '';
+      }
+
+      if (this.isRetrenchment) {
+        this.formData.employeeId = this.leaveData.employeeId?.toString() || '';
+        this.formData.employeeName = this.leaveData.employeeName || '';
+        this.formData.retrenchmentType = this.leaveData.retrenchmentType || '';
+      }
+    }
+
+    console.log('Final form data after population:', this.formData);
   }
 
   // Promotion methods
@@ -191,17 +328,55 @@ export class LeaveDetailsComponent implements OnInit {
     }
   }
 
+  // Handle Enter key press for employee search (for camp meeting attendees)
+  onEmployeeSearchKeyPress(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.onEmployeeSearch({ target: { value: this.searchTerm } });
+    }
+  }
+
+  // Handle Enter key press for replacement employee search
+  onReplacementSearchKeyPress(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.onReplacementSearch({
+        target: { value: this.replacementSearchTerm },
+      });
+    }
+  }
+
   selectEmployee(employee: Employee) {
-    this.formData.employeeId = employee.id.toString();
-    this.formData.employeeName = employee.name;
-    this.searchTerm = employee.name;
-    this.showEmployeeDropdown = false;
+    if (this.isCampMeeting && this.mode === 'create') {
+      // For camp meeting create mode, add to attendees
+      if (!this.selectedAttendees.some((a) => a.id === employee.id)) {
+        this.selectedAttendees.push(employee);
+        this.formData.attendees.push(employee.id);
+      }
+      this.searchTerm = '';
+      this.filteredEmployees = [];
+      this.showEmployeeDropdown = false;
+    } else {
+      // For other modes, set as selected employee
+      this.formData.employeeId = employee.id.toString();
+      this.formData.employeeName = employee.name;
+      this.searchTerm = employee.name;
+      this.showEmployeeDropdown = false;
+      this.filteredEmployees = [];
+    }
   }
 
   onEmployeeInputBlur() {
     setTimeout(() => {
       this.showEmployeeDropdown = false;
     }, 200);
+  }
+
+  removeAttendee(attendeeId: number) {
+    this.selectedAttendees = this.selectedAttendees.filter(
+      (a) => a.id !== attendeeId
+    );
+    this.formData.attendees = this.formData.attendees.filter(
+      (id) => id !== attendeeId
+    );
   }
 
   // Retirement-specific methods
@@ -343,6 +518,16 @@ export class LeaveDetailsComponent implements OnInit {
     this.close.emit();
   }
 
+  onEdit() {
+    console.log('Edit button clicked');
+    this.edit.emit(this.selectedMeetingData);
+  }
+
+  onDelete() {
+    console.log('Delete button clicked');
+    this.delete.emit(this.selectedMeetingData);
+  }
+
   // New methods for create mode
   onCancel() {
     if (this.mode === 'create') {
@@ -361,6 +546,20 @@ export class LeaveDetailsComponent implements OnInit {
   onConfirmSubmit(confirmed: boolean) {
     if (confirmed) {
       this.showConfirmModal = false;
+
+      // Handle camp meeting submission
+      if (this.isCampMeeting && this.mode === 'create') {
+        const submissionData = {
+          agenda: this.formData.agenda,
+          startDate: this.formData.startDate,
+          endDate: this.formData.startDate, // Use same date as start date since no end date
+          attendees: this.formData.attendees,
+        };
+        this.submit.emit(submissionData);
+        this.resetForm();
+        this.close.emit();
+        return;
+      }
 
       // Handle promotion submission
       if (this.isPromotion) {
@@ -433,6 +632,25 @@ export class LeaveDetailsComponent implements OnInit {
         this.submit.emit(submissionData);
         this.close.emit();
         return;
+      }
+
+      // Handle document submission
+      if (this.isDocument) {
+        // Get the uploaded file URL
+        const uploadedFile = this.uploadedFiles.find(
+          (file) => file.uploadStatus === 'completed'
+        );
+        if (uploadedFile && uploadedFile.url) {
+          const submissionData = {
+            name: this.formData.documentName,
+            downloadUrl: uploadedFile.url,
+            fileType: this.getFileTypeFromFileName(uploadedFile.name),
+          };
+          this.submit.emit(submissionData);
+          this.resetForm();
+          this.close.emit();
+          return;
+        }
       }
 
       // Handle submission based on leave type
@@ -584,6 +802,15 @@ export class LeaveDetailsComponent implements OnInit {
   }
 
   isFormValid(): boolean {
+    // Camp Meeting validation
+    if (this.isCampMeeting && this.mode === 'create') {
+      return !!(
+        this.formData.startDate &&
+        this.formData.agenda &&
+        this.formData.attendees.length > 0
+      );
+    }
+
     // Promotion validation
     if (this.isPromotion) {
       return !!(this.formData.employeeId && this.formData.newPosition);
@@ -612,6 +839,13 @@ export class LeaveDetailsComponent implements OnInit {
         this.formData.employeeId &&
         this.formData.retrenchmentType &&
         this.formData.reason
+      );
+    }
+    if (this.isDocument) {
+      return !!(
+        this.formData.documentName &&
+        this.uploadedFiles.length > 0 &&
+        this.uploadedFiles.some((file) => file.uploadStatus === 'completed')
       );
     }
 
@@ -644,6 +878,9 @@ export class LeaveDetailsComponent implements OnInit {
   }
 
   get confirmationText(): string {
+    if (this.isCampMeeting && this.mode === 'create') {
+      return `Are you sure you want to create this camp meeting?`;
+    }
     if (this.isTransfer) {
       return `Are you sure you want to create this transfer request for ${this.formData.employeeName}?`;
     }
@@ -658,6 +895,9 @@ export class LeaveDetailsComponent implements OnInit {
     }
     if (this.isRetrenchment) {
       return `Are you sure you want to create this retrenchment request for ${this.formData.employeeName}?`;
+    }
+    if (this.isDocument) {
+      return `Are you sure you want to create this document "${this.formData.documentName}"?`;
     }
     if (this.showEndDate && !this.showDuration) {
       return `Are you sure you want to create this ${this.leaveType.toLowerCase()} request?`;
@@ -691,6 +931,13 @@ export class LeaveDetailsComponent implements OnInit {
       requestDate: '',
       // Retrenchment-specific fields
       retrenchmentType: '',
+      // Document-specific fields
+      documentName: '',
+      downloadUrl: '',
+      fileType: '',
+      // Camp Meeting-specific fields
+      agenda: '',
+      attendees: [],
     };
     this.uploadedFiles = [];
     this.searchTerm = '';
@@ -699,6 +946,7 @@ export class LeaveDetailsComponent implements OnInit {
     this.replacementSearchTerm = '';
     this.filteredReplacementEmployees = [];
     this.showReplacementDropdown = false;
+    this.selectedAttendees = [];
   }
 
   downloadDocument(doc: any) {
@@ -787,6 +1035,34 @@ export class LeaveDetailsComponent implements OnInit {
     }
   }
 
+  // Helper method to get file type from filename
+  private getFileTypeFromFileName(fileName: string): string {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return 'PDF';
+      case 'doc':
+      case 'docx':
+        return 'DOC';
+      case 'xls':
+      case 'xlsx':
+        return 'XLS';
+      case 'jpg':
+      case 'jpeg':
+        return 'JPG';
+      case 'png':
+        return 'PNG';
+      case 'mp4':
+        return 'MP4';
+      case 'avi':
+        return 'AVI';
+      case 'mov':
+        return 'MOV';
+      default:
+        return 'FILE';
+    }
+  }
+
   // Download uploaded file
   downloadFile(file: any) {
     console.log('Download file called with:', file); // Debug log
@@ -866,11 +1142,24 @@ export class LeaveDetailsComponent implements OnInit {
   previewFile(file: any) {
     if (file.url) {
       const extension = file.name.split('.').pop()?.toLowerCase();
-      if (extension === 'pdf') {
-        // Open PDF in new tab
+
+      // Create a document object for the viewer
+      const documentData = {
+        id: file.name,
+        documentName: file.name,
+        documentType: this.getFileTypeFromFileName(file.name),
+        downloadUrl: file.url,
+        date: new Date().toLocaleDateString(),
+      };
+
+      // For PDFs and images, open in new tab for preview
+      if (
+        extension === 'pdf' ||
+        ['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(extension)
+      ) {
         window.open(file.url, '_blank');
       } else {
-        // For other files, just download
+        // For other files, trigger download
         this.downloadFile(file);
       }
     }
