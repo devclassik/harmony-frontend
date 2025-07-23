@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { FORM_OPTIONS } from '../../shared/constants/form-options';
 import { FileUploadService } from '../../shared/services/file-upload.service';
 import { EmployeeService } from '../../services/employee.service';
+import { DepartmentService } from '../../services/department.service';
 import { AlertService } from '../../services/alert.service';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { finalize } from 'rxjs/operators';
@@ -61,6 +62,10 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   @Input() isEditMode: boolean = false; // New input for edit mode
   @Input() canEdit: boolean = false; // New input for edit permissions
   @Input() selectedMeetingData: any = null; // New input for meeting data
+  @Input() isAddEmployee: boolean = false; // New input for add employee mode
+  @Input() preFilledEmployeeData: any = null; // New input for pre-filled employee data in edit mode
+  @Input() isPermission: boolean = false; // New input for permission mode
+  @Input() permissionData: any = null; // New input for permission data
   @Output() close = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() submit = new EventEmitter<any>();
@@ -69,6 +74,9 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
 
   openSection: string | null = null;
   showConfirmModal: boolean = false;
+
+  // Permission-specific properties
+  showPermissionInfo = true;
 
   // Promotion-specific properties
   filteredEmployees: Employee[] = [];
@@ -121,9 +129,26 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     { label: 'Overseer', value: 'OVERSEER' },
   ];
 
+  // Add Employee-specific options
+  departmentOptions: any[] = [];
+  roleOptions: Position[] = [
+    { label: 'Pastor', value: 'PASTOR' },
+    { label: 'Senior Pastor', value: 'SENIOR_PASTOR' },
+    { label: 'Cleaner', value: 'CLEANER' },
+    { label: 'HOD', value: 'HOD' },
+    { label: 'Worker', value: 'WORKER' },
+    { label: 'Minister', value: 'MINISTER' },
+    { label: 'Overseer', value: 'OVERSEER' },
+  ];
+  employmentTypeOptions: Position[] = [
+    { label: 'staff', value: 'STAFF' },
+    { label: 'volunteer', value: 'VOLUNTEER' },
+  ];
+
   constructor(
     private fileUploadService: FileUploadService,
     private employeeService: EmployeeService,
+    private departmentService: DepartmentService,
     private alertService: AlertService
   ) {}
 
@@ -160,6 +185,15 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     // Camp Meeting-specific fields
     agenda: '',
     attendees: [] as number[],
+    // Add Employee-specific fields
+    newEmployeeId: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    departmentId: '',
+    role: '',
+    employmentType: '',
+    employeeLocation: '',
   };
 
   // Track uploaded files with progress
@@ -182,6 +216,16 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     if (this.isEditMode && this.leaveData) {
       this.populateFormData();
     }
+
+    // Populate form data if pre-filled employee data is provided
+    if (this.isAddEmployee && this.preFilledEmployeeData) {
+      this.populateEmployeeFormData();
+    }
+
+    // Load departments if in add employee mode
+    if (this.isAddEmployee) {
+      this.loadDepartments();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -192,6 +236,15 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       this.leaveData
     ) {
       this.populateFormData();
+    }
+
+    // Check if pre-filled employee data changed
+    if (
+      changes['preFilledEmployeeData'] &&
+      this.isAddEmployee &&
+      this.preFilledEmployeeData
+    ) {
+      this.populateEmployeeFormData();
     }
   }
 
@@ -291,6 +344,47 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     }
 
     console.log('Final form data after population:', this.formData);
+  }
+
+  // Populate employee form data for Add Employee mode
+  populateEmployeeFormData() {
+    if (!this.preFilledEmployeeData) return;
+
+    console.log('Populating employee form data:', this.preFilledEmployeeData);
+
+    this.formData.newEmployeeId =
+      this.preFilledEmployeeData.employeeId ||
+      this.preFilledEmployeeData.id?.toString() ||
+      '';
+    this.formData.firstName = this.preFilledEmployeeData.firstName || '';
+    this.formData.lastName = this.preFilledEmployeeData.lastName || '';
+    this.formData.email =
+      this.preFilledEmployeeData.email ||
+      this.preFilledEmployeeData.altEmail ||
+      '';
+    this.formData.departmentId =
+      this.preFilledEmployeeData.departmentId?.toString() || '';
+    this.formData.role = this.preFilledEmployeeData.role || '';
+    this.formData.employmentType =
+      this.preFilledEmployeeData.employmentType || '';
+    this.formData.employeeLocation = this.preFilledEmployeeData.location || '';
+
+    console.log('Employee form data populated:', this.formData);
+  }
+
+  // Add Employee methods
+  loadDepartments() {
+    this.departmentService.getAllDepartments().subscribe({
+      next: (response: any) => {
+        if (response.status === 'success' && response.data) {
+          this.departmentOptions = response.data;
+        }
+      },
+      error: (error: any) => {
+        console.error('Error loading departments:', error);
+        this.departmentOptions = [];
+      },
+    });
   }
 
   // Promotion methods
@@ -514,8 +608,11 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   }
 
   onClose() {
-    console.log('Close button clicked');
     this.close.emit();
+  }
+
+  togglePermissionInfo() {
+    this.showPermissionInfo = !this.showPermissionInfo;
   }
 
   onEdit() {
@@ -651,6 +748,24 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
           this.close.emit();
           return;
         }
+      }
+
+      // Handle Add Employee submission
+      if (this.isAddEmployee) {
+        const submissionData = {
+          employeeId: this.formData.newEmployeeId,
+          firstName: this.formData.firstName,
+          lastName: this.formData.lastName,
+          email: this.formData.email,
+          departmentId: this.formData.departmentId,
+          role: this.formData.role,
+          employmentType: this.formData.employmentType,
+          location: this.formData.employeeLocation,
+        };
+        this.submit.emit(submissionData);
+        this.resetForm();
+        this.close.emit();
+        return;
       }
 
       // Handle submission based on leave type
@@ -802,6 +917,20 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   }
 
   isFormValid(): boolean {
+    // Add Employee validation
+    if (this.isAddEmployee) {
+      return !!(
+        this.formData.newEmployeeId &&
+        this.formData.firstName &&
+        this.formData.lastName &&
+        this.formData.email &&
+        this.formData.departmentId &&
+        this.formData.role &&
+        this.formData.employmentType &&
+        this.formData.employeeLocation
+      );
+    }
+
     // Camp Meeting validation
     if (this.isCampMeeting && this.mode === 'create') {
       return !!(
@@ -878,6 +1007,9 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   }
 
   get confirmationText(): string {
+    if (this.isAddEmployee) {
+      return `Are you sure you want to create this employee "${this.formData.firstName} ${this.formData.lastName}"?`;
+    }
     if (this.isCampMeeting && this.mode === 'create') {
       return `Are you sure you want to create this camp meeting?`;
     }
@@ -938,6 +1070,15 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       // Camp Meeting-specific fields
       agenda: '',
       attendees: [],
+      // Add Employee-specific fields
+      newEmployeeId: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      departmentId: '',
+      role: '',
+      employmentType: '',
+      employeeLocation: '',
     };
     this.uploadedFiles = [];
     this.searchTerm = '';

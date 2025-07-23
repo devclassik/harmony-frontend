@@ -16,6 +16,9 @@ import { TransferRecord } from '../../dto/transfer.dto';
 import { DisciplineRecord } from '../../dto/discipline.dto';
 import { RetirementRecord } from '../../dto/retirement.dto';
 import { RetrenchmentRecord } from '../../dto/retrenchment.dto';
+import { Employee } from '../../dto';
+import { ApiService } from '../../services/api.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-employee-details',
@@ -58,8 +61,19 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   @Input() sickHistory: any[] = []; // Add input for sick leave history
 
   // Team Members specific inputs
-  @Input() teamMembers: any[] = []; // Add input for team members
+  @Input() teamMembers: any[] | null = null; // Add input for team members
   @Input() departmentName: string = ''; // Add input for department name
+
+  // User Management specific input
+  @Input() showOnlyContactInfo: boolean = false; // Show only contact info for user management
+
+  // Permission View specific inputs
+  @Input() isPermissionView: boolean = false; // Show permission view
+  @Input() permissionData: any = null; // Permission data for access control
+
+  // Permission editing properties
+  isEditingPermissions: boolean = false;
+  editedPermissionData: any = null;
 
   @Output() close = new EventEmitter<void>();
 
@@ -71,11 +85,16 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
 
   @Output() confirm = new EventEmitter<any>();
 
+  // User Management specific inputs for edit and delete
+  @Input() showEditDeleteButtons: boolean = false;
+  @Output() edit = new EventEmitter<void>();
+  @Output() delete = new EventEmitter<void>();
+
   documents: any[] = [];
   pdfModalOpen = false;
   selectedPdfUrl: string | null = null;
 
-  constructor() {}
+  constructor(private apiService: ApiService) {}
 
   ngOnInit() {
     console.log(this.employeeDetails);
@@ -162,6 +181,45 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
 
   onConfirm(result: boolean) {
     this.confirm.emit(result);
+  }
+
+  onEdit() {
+    this.edit.emit();
+  }
+
+  onDelete() {
+    this.delete.emit();
+  }
+
+  // Permission editing methods
+  onEditPermissions() {
+    this.isEditingPermissions = true;
+    // Create a deep copy of permission data for editing
+    this.editedPermissionData = JSON.parse(JSON.stringify(this.permissionData));
+  }
+
+  onCancelEditPermissions() {
+    this.isEditingPermissions = false;
+    this.editedPermissionData = null;
+  }
+
+  onSavePermissions() {
+    // Emit the edited permission data for confirmation
+    this.edit.emit(this.editedPermissionData);
+    this.isEditingPermissions = false;
+    this.editedPermissionData = null;
+  }
+
+  onPermissionChange(permission: any, action: string) {
+    if (action === 'create') {
+      permission.canCreate = !permission.canCreate;
+    } else if (action === 'view') {
+      permission.canView = !permission.canView;
+    } else if (action === 'edit') {
+      permission.canEdit = !permission.canEdit;
+    } else if (action === 'delete') {
+      permission.canDelete = !permission.canDelete;
+    }
   }
 
   // Helper function to format position names

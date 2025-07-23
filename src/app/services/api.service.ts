@@ -76,4 +76,16 @@ export class ApiService {
       })
       .pipe(catchError(this.handleError));
   }
+
+  // Permission update method
+  updateRolePermissions(roleId: number, permissions: any): Observable<any> {
+    const payload = {
+      roleId: roleId,
+      permissions: permissions,
+    };
+    return this.put<any>(
+      environment.routes.permissions.updateRolePermissions,
+      payload
+    );
+  }
 }

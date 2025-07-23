@@ -284,6 +284,16 @@
             employee.role
           }}</ng-container>
 
+          <!-- EMAIL -->
+          <ng-container *ngIf="col.key === 'email'">{{
+            employee.email
+          }}</ng-container>
+
+          <!-- FEATURES -->
+          <ng-container *ngIf="col.key === 'features'">
+            {{ employee.features }}
+          </ng-container>
+
           <!-- RETRENCHMENT TYPE -->
           <ng-container *ngIf="col.key === 'retrenchmentType'">{{
             employee.retrenchmentType

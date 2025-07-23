@@ -1,4 +1,15 @@
 <div class="bg-gray-50 min-h-screen">
+  <!-- Loading Overlay -->
+  <app-loading-overlay
+    [isVisible]="
+      isLoading ||
+      isLoadingEmployees ||
+      isLoadingPermissions ||
+      isUpdatingPermissions
+    "
+    [title]="getLoadingTitle()"
+    [message]="getLoadingMessage()"
+  ></app-loading-overlay>
   <!-- Navigation Tabs -->
   <div class="bg-white border-b border-gray-200">
     <div class="flex space-x-8 px-6 py-3">
@@ -29,14 +40,18 @@
       >
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
           <path
-            d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
+            d="M13 6a3 3 0 11-6 0 3 3 0 616 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
           ></path>
         </svg>
         <span>User Management</span>
       </button>
       <button
-        class="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed rounded-lg"
-        disabled
+        [class]="
+          activeTab === 'access-control'
+            ? 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg border border-green-200'
+            : 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors'
+        "
+        (click)="setActiveTab('access-control')"
       >
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
           <path
@@ -175,12 +190,15 @@
               >
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                   <path
-                    d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
+                    d="M13 6a3 3 0 11-6 0 3 3 0 616 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
                   />
                 </svg>
                 <span>View Team ({{ getDirectorTeamCount() }})</span>
               </button>
-              <button class="text-green-600 hover:text-green-700 text-xs">
+              <button
+                class="text-green-600 hover:text-green-700 text-xs"
+                (click)="openCreateDepartmentModal()"
+              >
                 + Add
               </button>
             </div>
@@ -260,7 +278,7 @@
               </div>
 
               <!-- Team Management Buttons -->
-              <div class="flex justify-between pt-3 border-t border-gray-200">
+              <!-- <div class="flex justify-between pt-3 border-t border-gray-200">
                 <button
                   class="flex items-center space-x-1 text-green-600 hover:text-green-700 text-xs"
                   (click)="openViewTeamModal(department)"
@@ -275,7 +293,7 @@
                 <button class="text-green-600 hover:text-green-700 text-xs">
                   + Add
                 </button>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -306,40 +324,78 @@
           Get started by creating your first department.
         </p>
       </div>
-
-      <!-- Loading State -->
-      <div *ngIf="isLoading" class="text-center py-12">
-        <div
-          class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"
-        ></div>
-        <p class="mt-2 text-gray-500">Loading organization structure...</p>
-      </div>
     </div>
   </div>
 
   <!-- User Management Tab Content -->
   <div *ngIf="activeTab === 'user-management'" class="bg-white min-h-screen">
-    <div class="px-6 py-6">
-      <div class="text-center py-12">
-        <svg
-          class="w-16 h-16 text-gray-400 mx-auto mb-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+    <!-- Header with controls -->
+    <div class="flex items-center justify-between py-2 px-6">
+      <div>
+        <h2 class="text-sm font-normal mb-1">
+          Showing All Employees ({{ getCurrentDataCount() }})
+        </h2>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Search -->
+        <div class="relative">
+          <input
+            type="text"
+            placeholder="Search"
+            [value]="searchValue"
+            (input)="onSearch($any($event.target).value)"
+            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#12C16F] focus:border-transparent w-64"
           />
-        </svg>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">User Management</h3>
-        <p class="text-gray-500">
-          User management functionality will be implemented here.
-        </p>
+          <svg
+            class="absolute left-3 top-3 w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </div>
+
+        <div class="flex gap-4">
+          <button
+            (click)="openAddEmployeeModal()"
+            class="flex items-center justify-center px-2 flex-1 text-white rounded-lg py-2 font-medium transition cursor-pointer"
+            [ngClass]="
+              'bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]'
+            "
+          >
+            <span class="flex items-center px-1">
+              <img src="assets/svg/add.svg" class="w-4 h-4 text-white" />
+            </span>
+            Add Employee
+          </button>
+        </div>
       </div>
     </div>
+
+    <!-- Table View using Table Component -->
+
+    <app-table
+      [tableHeader]="tableHeader"
+      [tableData]="getEmployeeTableData()"
+      [menuItems]="actionButton"
+      [showFilter]="false"
+      [showSearch]="false"
+      [showPagination]="true"
+      [showViewAll]="false"
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      [pageSize]="pageSize"
+      [currentView]="'table'"
+      (menuAction)="onMenuAction($event)"
+      (pageChange)="onPageChange($event)"
+    ></app-table>
   </div>
 
   <!-- Create Department Slide-out Modal -->
@@ -417,13 +473,15 @@
   <!-- Confirmation Prompt -->
   <app-confirm-prompt
     *ngIf="showConfirmPrompt"
+    [title]="promptConfig?.title || 'Confirm Action'"
     [text]="
+      promptConfig?.text ||
       'Are you sure you want to create the department ' +
-      newDepartment.name +
-      '?'
+        newDepartment.name +
+        '?'
     "
-    [yesButtonText]="'Yes, Create'"
-    [noButtonText]="'Cancel'"
+    [yesButtonText]="promptConfig?.yesButtonText || 'Yes, Create'"
+    [noButtonText]="promptConfig?.noButtonText || 'Cancel'"
     (confirmed)="onConfirmCreate()"
     (closed)="onCancelCreate()"
   ></app-confirm-prompt>
@@ -436,7 +494,7 @@
     message="Please wait while we create the department."
   ></app-loading-overlay>
 
-  <!-- Team Details Modal using Employee Details Component -->
+  <!-- Team Details Modal for Organization Structure -->
   <app-employee-details
     [view]="showTeamDetails"
     [employee]="selectedTeamData"
@@ -447,4 +505,95 @@
     [departmentName]="selectedTeamDepartment?.name || ''"
     (close)="closeViewTeamModal()"
   ></app-employee-details>
+
+  <!-- User Details Modal for User Management -->
+  <app-employee-details
+    [view]="showUserDetails"
+    [employee]="selectedUserData"
+    [employeeDetails]="selectedUserEmployee"
+    [showOnlyContactInfo]="true"
+    (close)="closeUserDetailsModal()"
+    (edit)="editEmployeeFromDetails()"
+    (delete)="deleteEmployeeFromDetails()"
+  ></app-employee-details>
+
+  <!-- Add Employee Modal using leave-details component -->
+  <app-leave-details
+    [view]="showAddEmployeeModal"
+    [mode]="'create'"
+    [isAddEmployee]="true"
+    [isEditMode]="isEditMode"
+    [preFilledEmployeeData]="isEditMode ? newEmployee : null"
+    [title]="isEditMode ? 'Edit Employee' : 'Add Employee'"
+    (close)="closeAddEmployeeModal()"
+    (submit)="onAddEmployeeSubmitted($event)"
+  ></app-leave-details>
+
+  <!-- Add Employee Confirmation Prompt -->
+  <app-confirm-prompt
+    *ngIf="showAddEmployeeConfirmPrompt"
+    [text]="'Are you sure you want to add this employee?'"
+    [yesButtonText]="'Yes, Add Employee'"
+    [noButtonText]="'Cancel'"
+    (confirmed)="onConfirmAddEmployee()"
+    (closed)="onCancelAddEmployee()"
+  ></app-confirm-prompt>
+
+  <!-- Loading Overlay for Add Employee -->
+  <app-loading-overlay
+    *ngIf="isAddingEmployee"
+    [isVisible]="isAddingEmployee"
+    title="Adding Employee..."
+    message="Please wait while we add the employee."
+  ></app-loading-overlay>
+
+  <!-- Permission Details using employee-details component -->
+  <app-employee-details
+    [view]="showPermissionDetails"
+    [employee]="null"
+    [employeeDetails]="null"
+    [showOnlyContactInfo]="false"
+    [isPermissionView]="true"
+    [permissionData]="selectedPermissionData"
+    (close)="closePermissionDetails()"
+    (edit)="onPermissionUpdateSubmitted($event)"
+  ></app-employee-details>
+
+  <!-- Permission Update Confirmation Prompt -->
+  <app-confirm-prompt
+    *ngIf="showPermissionUpdateConfirmPrompt"
+    [title]="'Update Permissions'"
+    [text]="
+      'Are you sure you want to update the permissions for this role? This action will modify the access rights for all users with this role.'
+    "
+    [yesButtonText]="'Yes, Update'"
+    [noButtonText]="'Cancel'"
+    (confirmed)="onConfirmPermissionUpdate()"
+    (closed)="onCancelPermissionUpdate()"
+  ></app-confirm-prompt>
+
+  <!-- Access Control Tab Content -->
+  <div *ngIf="activeTab === 'access-control'" class="bg-white min-h-screen">
+    <!-- Header Section -->
+    <div
+      class="flex items-center justify-between px-6 py-4 border-b border-gray-200"
+    >
+      <h2 class="text-sm font-normal mb-1">Showing All Permissions</h2>
+    </div>
+
+    <!-- Permissions Table -->
+    <div class="px-6 py-4">
+      <app-table
+        [tableHeader]="permissionsTableHeader"
+        [tableData]="permissionsTableData"
+        [menuItems]="permissionsActionButton"
+        [showFilter]="false"
+        [showSearch]="false"
+        [showPagination]="false"
+        [showViewAll]="false"
+        [currentView]="'table'"
+        (menuAction)="handlePermissionTableAction($event)"
+      ></app-table>
+    </div>
+  </div>
 </div>

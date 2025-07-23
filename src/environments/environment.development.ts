@@ -120,5 +120,9 @@ export const environment = {
       delete: 'posts/{id}',
       getByUser: 'posts/user/{userId}',
     },
+    permissions: {
+      getAll: '/permission',
+      updateRolePermissions: '/permission/update-role-permissions',
+    },
   },
 };

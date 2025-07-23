@@ -3,6 +3,7 @@ import { DisciplineType } from '../dto/discipline.dto';
 export interface TableData {
   id: string;
   name?: string;
+  email?: string;
   department?: string;
   role?: string;
   status?:
@@ -44,6 +45,8 @@ export interface TableData {
     name: string;
     image: string;
   };
+  features?: string; // For storing comma-separated features list
+  originalData?: any; // For storing original employee data
 }
 
 export interface EmployeeInfo {
