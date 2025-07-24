@@ -66,6 +66,8 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   @Input() preFilledEmployeeData: any = null; // New input for pre-filled employee data in edit mode
   @Input() isPermission: boolean = false; // New input for permission mode
   @Input() permissionData: any = null; // New input for permission data
+  @Input() isAccommodation: boolean = false; // New input for accommodation mode
+  @Input() preFilledAccommodationData: any = null; // New input for pre-filled accommodation data in edit mode
   @Output() close = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() submit = new EventEmitter<any>();
@@ -145,6 +147,13 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     { label: 'volunteer', value: 'VOLUNTEER' },
   ];
 
+  // Accommodation-specific options
+  accommodationTypeOptions: Position[] = [
+    { label: 'Hotel', value: 'HOTEL' },
+    { label: 'Guest House', value: 'GUEST_HOUSE' },
+    { label: 'Hostel', value: 'HOSTEL' },
+  ];
+
   constructor(
     private fileUploadService: FileUploadService,
     private employeeService: EmployeeService,
@@ -194,6 +203,11 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     role: '',
     employmentType: '',
     employeeLocation: '',
+    // Accommodation-specific fields
+    accommodationName: '',
+    accommodationType: '',
+    isPetAllowed: false,
+    rooms: [{ name: '', capacity: undefined as any }],
   };
 
   // Track uploaded files with progress
@@ -222,6 +236,16 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       this.populateEmployeeFormData();
     }
 
+    // Populate form data if pre-filled accommodation data is provided
+    if (this.isAccommodation) {
+      if (this.preFilledAccommodationData) {
+        this.populateAccommodationFormData();
+      } else {
+        // Reset accommodation form for create mode
+        this.resetAccommodationForm();
+      }
+    }
+
     // Load departments if in add employee mode
     if (this.isAddEmployee) {
       this.loadDepartments();
@@ -245,6 +269,16 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       this.preFilledEmployeeData
     ) {
       this.populateEmployeeFormData();
+    }
+
+    // Check if pre-filled accommodation data changed
+    if (changes['preFilledAccommodationData'] && this.isAccommodation) {
+      if (this.preFilledAccommodationData) {
+        this.populateAccommodationFormData();
+      } else {
+        // Reset accommodation form when no pre-filled data (create mode)
+        this.resetAccommodationForm();
+      }
     }
   }
 
@@ -370,6 +404,43 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     this.formData.employeeLocation = this.preFilledEmployeeData.location || '';
 
     console.log('Employee form data populated:', this.formData);
+  }
+
+  // Populate accommodation form data for Accommodation mode
+  populateAccommodationFormData() {
+    if (!this.preFilledAccommodationData) return;
+
+    console.log(
+      'Populating accommodation form data:',
+      this.preFilledAccommodationData
+    );
+
+    this.formData.accommodationName =
+      this.preFilledAccommodationData.name || '';
+    this.formData.accommodationType =
+      this.preFilledAccommodationData.type || 'HOTEL';
+    this.formData.isPetAllowed =
+      this.preFilledAccommodationData.isPetAllowed || false;
+    this.formData.rooms = this.preFilledAccommodationData.rooms?.map(
+      (room: any) => ({
+        name: room.name || '',
+        capacity: room.capacity || 1,
+        id: room.id,
+      })
+    ) || [{ name: '', capacity: 1 }];
+
+    console.log('Accommodation form data populated:', this.formData);
+  }
+
+  resetAccommodationForm() {
+    console.log('Resetting accommodation form for create mode');
+
+    this.formData.accommodationName = '';
+    this.formData.accommodationType = ''; // Empty instead of 'HOTEL'
+    this.formData.isPetAllowed = false;
+    this.formData.rooms = [{ name: '', capacity: undefined as any }]; // undefined instead of 1
+
+    console.log('Accommodation form reset:', this.formData);
   }
 
   // Add Employee methods
@@ -768,6 +839,19 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
         return;
       }
 
+      // Handle Accommodation submission
+      if (this.isAccommodation) {
+        const submissionData = {
+          accommodationName: this.formData.accommodationName,
+          accommodationType: this.formData.accommodationType,
+          isPetAllowed: this.formData.isPetAllowed,
+          rooms: this.formData.rooms,
+        };
+        this.submit.emit(submissionData);
+        this.close.emit();
+        return;
+      }
+
       // Handle submission based on leave type
       if (this.showEndDate && !this.showDuration) {
         // Annual leave - use start date, end date, and reason
@@ -817,6 +901,17 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
 
   onConfirmCancel() {
     this.showConfirmModal = false;
+  }
+
+  // Accommodation methods
+  addRoom() {
+    this.formData.rooms.push({ name: '', capacity: 1 });
+  }
+
+  removeRoom(index: number) {
+    if (this.formData.rooms.length > 1) {
+      this.formData.rooms.splice(index, 1);
+    }
   }
 
   // Calculate duration in days based on the selected unit
@@ -931,6 +1026,15 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       );
     }
 
+    // Accommodation validation
+    if (this.isAccommodation) {
+      return !!(
+        this.formData.accommodationName &&
+        this.formData.accommodationType &&
+        this.formData.rooms.every((room) => room.name && room.capacity > 0)
+      );
+    }
+
     // Camp Meeting validation
     if (this.isCampMeeting && this.mode === 'create') {
       return !!(
@@ -1010,6 +1114,11 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     if (this.isAddEmployee) {
       return `Are you sure you want to create this employee "${this.formData.firstName} ${this.formData.lastName}"?`;
     }
+    if (this.isAccommodation) {
+      return `Are you sure you want to ${
+        this.isEditMode ? 'update' : 'create'
+      } this accommodation "${this.formData.accommodationName}"?`;
+    }
     if (this.isCampMeeting && this.mode === 'create') {
       return `Are you sure you want to create this camp meeting?`;
     }
@@ -1079,6 +1188,11 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       role: '',
       employmentType: '',
       employeeLocation: '',
+      // Accommodation-specific fields
+      accommodationName: '',
+      accommodationType: 'HOTEL',
+      isPetAllowed: false,
+      rooms: [{ name: '', capacity: 1 }],
     };
     this.uploadedFiles = [];
     this.searchTerm = '';

@@ -3,6 +3,9 @@ import { DisciplineType } from '../dto/discipline.dto';
 export interface TableData {
   id: string;
   name?: string;
+  accommodationName?: string;
+  accommodationType?: string;
+  accommodationRoomCount?: string;
   email?: string;
   department?: string;
   role?: string;

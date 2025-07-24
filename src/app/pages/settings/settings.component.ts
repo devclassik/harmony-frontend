@@ -74,6 +74,40 @@ interface Permission {
   };
 }
 
+interface Room {
+  id?: number;
+  name: string;
+  capacity: number;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+interface Accommodation {
+  id: number;
+  name: string;
+  type: 'HOTEL' | 'GUEST_HOUSE' | 'HOSTEL';
+  isPetAllowed: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  rooms: Room[];
+}
+
+interface CreateAccommodationRequest {
+  name: string;
+  type: 'HOTEL' | 'GUEST_HOUSE' | 'HOSTEL';
+  isPetAllowed: boolean;
+  rooms: { name: string; capacity: number }[];
+}
+
+interface UpdateAccommodationRequest {
+  name: string;
+  type: 'HOTEL' | 'GUEST_HOUSE' | 'HOSTEL';
+  isPetAllowed: boolean;
+  rooms: { name: string; capacity: number; id?: number }[];
+}
+
 @Component({
   selector: 'app-settings',
   imports: [
@@ -151,6 +185,13 @@ export class SettingsComponent implements OnInit, OnDestroy {
     { label: 'member', value: 'MEMBER' },
   ];
 
+  // Accommodation type options
+  accommodationTypeOptions = [
+    { label: 'Hotel', value: 'HOTEL' },
+    { label: 'Guest House', value: 'GUEST_HOUSE' },
+    { label: 'Hostel', value: 'HOSTEL' },
+  ];
+
   getCurrentDataCount(): number {
     return this.filteredEmployees.length;
   }
@@ -202,6 +243,18 @@ export class SettingsComponent implements OnInit, OnDestroy {
   selectedPermissionData: any = null;
   showPermissionUpdateConfirmPrompt = false;
 
+  // Accommodation properties
+  accommodations: Accommodation[] = [];
+  isLoadingAccommodations = false;
+  isCreatingAccommodation = false;
+  isUpdatingAccommodation = false;
+  isDeletingAccommodation = false;
+  accommodationsTableData: TableData[] = [];
+  showCreateAccommodationModal = false;
+  showAccommodationDetails = false;
+  selectedAccommodationData: any = null;
+  showAccommodationDeleteConfirmPrompt = false;
+
   // Access Control table configuration
   permissionsTableHeader: TableHeader[] = [
     { key: 'id', label: 'PERMISSION ID' },
@@ -212,6 +265,21 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   permissionsActionButton: MenuItem[] = [
     { label: 'View', action: 'view', icon: 'eye' },
+  ];
+
+  // Accommodation table configuration
+  accommodationTableHeader: TableHeader[] = [
+    { key: 'id', label: 'ACCOMMODATION ID' },
+    { key: 'accommodationName', label: 'ACCOMMODATION NAME' },
+    { key: 'accommodationType', label: 'ACCOMMODATION TYPE' },
+    { key: 'accommodationRoomCount', label: 'NUMBER OF ROOMS' },
+    { key: 'action', label: 'ACTION' },
+  ];
+
+  accommodationActionButton: MenuItem[] = [
+    { label: 'View', action: 'view', icon: 'eye' },
+    { label: 'Edit', action: 'edit', icon: 'edit' },
+    { label: 'Delete', action: 'delete', icon: 'trash' },
   ];
 
   // Form data for new department
@@ -230,6 +298,19 @@ export class SettingsComponent implements OnInit, OnDestroy {
     role: '',
     employmentType: '',
     location: '',
+  };
+
+  // Form data for new accommodation
+  newAccommodation: {
+    name: string;
+    type: 'HOTEL' | 'GUEST_HOUSE' | 'HOSTEL';
+    isPetAllowed: boolean;
+    rooms: { name: string; capacity: number; id?: number }[];
+  } = {
+    name: '',
+    type: 'HOTEL',
+    isPetAllowed: false,
+    rooms: [{ name: '', capacity: 1 }],
   };
 
   // Removed HOD selection - using default values
@@ -254,6 +335,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.loadOrganizationStructure();
     this.loadEmployees();
     this.loadPermissions();
+    this.loadAccommodations();
   }
 
   ngOnDestroy() {
@@ -272,6 +354,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
     // Load employees when switching to user management tab
     if (tab === 'user-management') {
       this.loadEmployees();
+    }
+
+    // Load accommodations when switching to accommodation tab
+    if (tab === 'accommodation') {
+      this.loadAccommodations();
     }
   }
 
@@ -298,7 +385,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Error loading organization structure:', error);
           this.alertService.error(
             'Failed to load organization structure. Please try again.'
           );
@@ -341,7 +427,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Error loading employees:', error);
           this.alertService.error(
             'Failed to load employees. Please try again.'
           );
@@ -557,7 +642,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   // Handle page change
   onPageChange(page: number) {
-    console.log('Page changed to:', page);
     this.currentPage = page;
     this.loadEmployees(page);
   }
@@ -575,10 +659,18 @@ export class SettingsComponent implements OnInit, OnDestroy {
       return 'Loading Employees';
     } else if (this.isLoadingPermissions) {
       return 'Loading Permissions';
+    } else if (this.isLoadingAccommodations) {
+      return 'Loading Accommodations';
     } else if (this.isUpdatingPermissions) {
       return 'Updating Permissions';
     } else if (this.isCreatingDepartment) {
       return 'Creating Department';
+    } else if (this.isCreatingAccommodation) {
+      return 'Creating Accommodation';
+    } else if (this.isUpdatingAccommodation) {
+      return 'Updating Accommodation';
+    } else if (this.isDeletingAccommodation) {
+      return 'Deleting Accommodation';
     } else if (this.isAddingEmployee) {
       return 'Adding Employee';
     }
@@ -593,10 +685,18 @@ export class SettingsComponent implements OnInit, OnDestroy {
       return 'Please wait while we fetch employee data...';
     } else if (this.isLoadingPermissions) {
       return 'Please wait while we fetch permissions data...';
+    } else if (this.isLoadingAccommodations) {
+      return 'Please wait while we fetch accommodation data...';
     } else if (this.isUpdatingPermissions) {
       return 'Please wait while we update the permissions...';
     } else if (this.isCreatingDepartment) {
       return 'Please wait while we create the department...';
+    } else if (this.isCreatingAccommodation) {
+      return 'Please wait while we create the accommodation...';
+    } else if (this.isUpdatingAccommodation) {
+      return 'Please wait while we update the accommodation...';
+    } else if (this.isDeletingAccommodation) {
+      return 'Please wait while we delete the accommodation...';
     } else if (this.isAddingEmployee) {
       return 'Please wait while we add the employee...';
     }
@@ -784,7 +884,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Error loading departments:', error);
           this.alertService.error(
             'Failed to load departments. Please try again.'
           );
@@ -865,10 +964,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error(
-            `Error ${isUpdate ? 'updating' : 'creating'} employee:`,
-            error
-          );
           this.alertService.error(
             `Failed to ${
               isUpdate ? 'update' : 'create'
@@ -913,10 +1008,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error(
-            `Error ${isUpdate ? 'updating' : 'creating'} employee:`,
-            error
-          );
           this.alertService.error(
             `Failed to ${
               isUpdate ? 'update' : 'create'
@@ -1017,6 +1108,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.promptConfig?.title === 'Delete Employee'
     ) {
       this.performEmployeeDeletion();
+    }
+    // Check if this is for accommodation deletion
+    else if (
+      this.selectedEmployeeForEdit &&
+      this.selectedEmployeeForEdit.id &&
+      this.promptConfig?.title === 'Delete Accommodation'
+    ) {
+      this.performAccommodationDeletion();
     } else {
       // Default to department creation
       this.createDepartment();
@@ -1048,7 +1147,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Error deleting employee:', error);
         this.alertService.error(
           error.error?.message || 'Failed to delete employee. Please try again.'
         );
@@ -1091,7 +1189,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Error creating department:', error);
           this.alertService.error(
             error.error?.message ||
               'Failed to create department. Please try again.'
@@ -1214,7 +1311,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Error loading permissions:', error);
           this.alertService.error('Failed to load permissions');
         },
         complete: () => {
@@ -1317,31 +1413,17 @@ export class SettingsComponent implements OnInit, OnDestroy {
     // Get role ID from permission data
     const roleId = this.selectedPermissionData.roleId;
 
-    console.log('Sending permission update request:', {
-      roleId: roleId,
-      permissions: formattedPermissions,
-      endpoint: environment.routes.permissions.updateRolePermissions,
-    });
-
     // Call API to update permissions
     const sub = this.apiService
       .updateRolePermissions(roleId, formattedPermissions)
       .subscribe({
         next: (response) => {
-          console.log('Permissions updated successfully:', response);
           this.alertService.success('Permissions updated successfully');
           this.isUpdatingPermissions = false;
           // Refresh permissions data
           this.loadPermissions();
         },
         error: (error) => {
-          console.error('Error updating permissions:', error);
-          console.error('Error details:', {
-            status: error.status,
-            statusText: error.statusText,
-            url: error.url,
-            message: error.message,
-          });
           this.alertService.error('Failed to update permissions');
           this.isUpdatingPermissions = false;
         },
@@ -1352,5 +1434,330 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   onCancelPermissionUpdate() {
     this.showPermissionUpdateConfirmPrompt = false;
+  }
+
+  // Accommodation methods
+  loadAccommodations() {
+    this.isLoadingAccommodations = true;
+
+    const sub = this.apiService.getAccommodations().subscribe({
+      next: (response) => {
+        this.accommodations = response.data || [];
+        this.accommodationsTableData = this.transformAccommodationToTableData(
+          this.accommodations
+        );
+        this.isLoadingAccommodations = false;
+      },
+      error: (error) => {
+        this.alertService.error('Failed to load accommodations');
+        this.isLoadingAccommodations = false;
+      },
+    });
+
+    this.subscriptions.push(sub);
+  }
+
+  transformAccommodationToTableData(
+    accommodations: Accommodation[]
+  ): TableData[] {
+    return accommodations.map((accommodation) => ({
+      id: accommodation.id.toString(),
+      accommodationName: accommodation.name,
+      accommodationType: accommodation.type.replace('_', ' '),
+      accommodationRoomCount: accommodation.rooms.length.toString(),
+      totalCapacity: accommodation.rooms
+        .reduce((sum, room) => sum + room.capacity, 0)
+        .toString(),
+      petAllowed: accommodation.isPetAllowed ? 'Yes' : 'No',
+      originalData: accommodation,
+    }));
+  }
+
+  openCreateAccommodationModal() {
+    this.showCreateAccommodationModal = true;
+    this.isEditMode = false; // Ensure we're in create mode
+    this.resetNewAccommodationForm();
+  }
+
+  closeCreateAccommodationModal() {
+    this.showCreateAccommodationModal = false;
+    this.isEditMode = false; // Reset edit mode
+    this.selectedAccommodationData = null; // Clear selected data
+    this.resetNewAccommodationForm();
+  }
+
+  resetNewAccommodationForm() {
+    this.newAccommodation = {
+      name: '',
+      type: '' as any,
+      isPetAllowed: false,
+      rooms: [{ name: '', capacity: undefined as any }],
+    };
+  }
+
+  addRoom() {
+    this.newAccommodation.rooms.push({ name: '', capacity: undefined as any });
+  }
+
+  removeRoom(index: number) {
+    if (this.newAccommodation.rooms.length > 1) {
+      this.newAccommodation.rooms.splice(index, 1);
+    }
+  }
+
+  submitCreateAccommodation() {
+    // Validate form
+    if (!this.newAccommodation.name || !this.newAccommodation.name.trim()) {
+      this.alertService.error('Accommodation name is required');
+      return;
+    }
+
+    if (
+      this.newAccommodation.rooms.some(
+        (room) => !room.name || !room.name.trim()
+      )
+    ) {
+      this.alertService.error('All rooms must have a name');
+      return;
+    }
+
+    if (this.newAccommodation.rooms.some((room) => room.capacity <= 0)) {
+      this.alertService.error('All rooms must have a capacity greater than 0');
+      return;
+    }
+
+    this.isCreatingAccommodation = true;
+
+    const payload: CreateAccommodationRequest = {
+      name: this.newAccommodation.name ? this.newAccommodation.name.trim() : '',
+      type: this.newAccommodation.type,
+      isPetAllowed: this.newAccommodation.isPetAllowed,
+      rooms: this.newAccommodation.rooms.map((room) => ({
+        name: room.name ? room.name.trim() : '',
+        capacity: room.capacity,
+      })),
+    };
+
+    const sub = this.apiService.createAccommodation(payload).subscribe({
+      next: (response) => {
+        this.alertService.success('Accommodation created successfully');
+        this.isCreatingAccommodation = false;
+        this.closeCreateAccommodationModal();
+        this.loadAccommodations(); // Refresh the list
+      },
+      error: (error) => {
+        let errorMessage = 'Failed to create accommodation';
+        if (error.status === 502) {
+          errorMessage =
+            'Server is temporarily unavailable. Please try again later.';
+        } else if (error.status === 401) {
+          errorMessage = 'Authentication failed. Please log in again.';
+        } else if (error.status === 403) {
+          errorMessage = 'You do not have permission to create accommodations.';
+        }
+
+        this.alertService.error(errorMessage);
+        this.isCreatingAccommodation = false;
+      },
+    });
+
+    this.subscriptions.push(sub);
+  }
+
+  viewAccommodation(accommodation: TableData) {
+    this.selectedAccommodationData = accommodation.originalData;
+    this.showAccommodationDetails = true;
+  }
+
+  closeAccommodationDetails() {
+    this.showAccommodationDetails = false;
+    this.selectedAccommodationData = null;
+  }
+
+  handleAccommodationTableAction(event: { action: string; row: TableData }) {
+    if (event.action === 'view') {
+      this.viewAccommodation(event.row);
+    } else if (event.action === 'edit') {
+      this.editAccommodation(event.row);
+    } else if (event.action === 'delete') {
+      this.deleteAccommodation(event.row);
+    }
+  }
+
+  editAccommodation(accommodationRow: TableData) {
+    this.selectedAccommodationData = accommodationRow.originalData;
+    this.newAccommodation = {
+      name: this.selectedAccommodationData.name,
+      type: this.selectedAccommodationData.type,
+      isPetAllowed: this.selectedAccommodationData.isPetAllowed,
+      rooms: this.selectedAccommodationData.rooms.map((room: Room) => ({
+        name: room.name,
+        capacity: room.capacity,
+        id: room.id,
+      })),
+    };
+    this.showCreateAccommodationModal = true;
+    this.isEditMode = true;
+  }
+
+  deleteAccommodation(accommodationRow: TableData) {
+    const accommodation = accommodationRow.originalData;
+    const accommodationId = accommodation.id;
+    const accommodationName = accommodation.name;
+
+    // Store the accommodation ID for deletion
+    this.selectedEmployeeForEdit = {
+      id: accommodationId,
+      name: accommodationName,
+    };
+
+    // Show accommodation delete confirmation prompt
+    this.showAccommodationDeleteConfirmPrompt = true;
+  }
+
+  editAccommodationFromDetails() {
+    if (this.selectedAccommodationData) {
+      // Populate form for editing
+      this.newAccommodation = {
+        name: this.selectedAccommodationData.name,
+        type: this.selectedAccommodationData.type,
+        isPetAllowed: this.selectedAccommodationData.isPetAllowed,
+        rooms: this.selectedAccommodationData.rooms.map((room: Room) => ({
+          name: room.name,
+          capacity: room.capacity,
+          id: room.id,
+        })),
+      };
+      this.showAccommodationDetails = false;
+      this.showCreateAccommodationModal = true;
+      this.isEditMode = true;
+    }
+  }
+
+  deleteAccommodationFromDetails() {
+    if (this.selectedAccommodationData) {
+      const accommodationId = this.selectedAccommodationData.id;
+      const accommodationName = this.selectedAccommodationData.name;
+
+      // Store the accommodation ID for deletion
+      this.selectedEmployeeForEdit = {
+        id: accommodationId,
+        name: accommodationName,
+      };
+
+      // Show accommodation delete confirmation prompt
+      this.showAccommodationDeleteConfirmPrompt = true;
+    }
+  }
+
+  performAccommodationDeletion() {
+    if (this.selectedEmployeeForEdit) {
+      // Close the confirmation prompt immediately when starting the deletion
+      this.showAccommodationDeleteConfirmPrompt = false;
+
+      // Close the accommodation details slide-out
+      this.closeAccommodationDetails();
+
+      this.isDeletingAccommodation = true;
+
+      const sub = this.apiService
+        .deleteAccommodation(this.selectedEmployeeForEdit.id)
+        .subscribe({
+          next: (response) => {
+            this.alertService.success('Accommodation deleted successfully');
+            this.isDeletingAccommodation = false;
+            this.selectedEmployeeForEdit = null;
+            this.loadAccommodations(); // Refresh the list
+          },
+          error: (error) => {
+            this.alertService.error('Failed to delete accommodation');
+            this.isDeletingAccommodation = false;
+          },
+        });
+
+      this.subscriptions.push(sub);
+    }
+  }
+
+  updateAccommodation() {
+    if (!this.selectedAccommodationData) return;
+
+    // Validate form
+    if (!this.newAccommodation.name || !this.newAccommodation.name.trim()) {
+      this.alertService.error('Accommodation name is required');
+      return;
+    }
+
+    if (
+      this.newAccommodation.rooms.some(
+        (room) => !room.name || !room.name.trim()
+      )
+    ) {
+      this.alertService.error('All rooms must have a name');
+      return;
+    }
+
+    if (this.newAccommodation.rooms.some((room) => room.capacity <= 0)) {
+      this.alertService.error('All rooms must have a capacity greater than 0');
+      return;
+    }
+
+    this.isUpdatingAccommodation = true;
+
+    const payload: UpdateAccommodationRequest = {
+      name: this.newAccommodation.name ? this.newAccommodation.name.trim() : '',
+      type: this.newAccommodation.type,
+      isPetAllowed: this.newAccommodation.isPetAllowed,
+      rooms: this.newAccommodation.rooms.map((room) => ({
+        name: room.name ? room.name.trim() : '',
+        capacity: room.capacity,
+        ...(room.id && { id: room.id }),
+      })),
+    };
+
+    const sub = this.apiService
+      .updateAccommodation(this.selectedAccommodationData.id, payload)
+      .subscribe({
+        next: (response) => {
+          this.alertService.success('Accommodation updated successfully');
+          this.isUpdatingAccommodation = false;
+          this.closeCreateAccommodationModal();
+          this.loadAccommodations(); // Refresh the list
+        },
+        error: (error) => {
+          let errorMessage = 'Failed to update accommodation';
+          if (error.status === 502) {
+            errorMessage =
+              'Server is temporarily unavailable. Please try again later.';
+          } else if (error.status === 401) {
+            errorMessage = 'Authentication failed. Please log in again.';
+          } else if (error.status === 403) {
+            errorMessage =
+              'You do not have permission to update this accommodation.';
+          }
+
+          this.alertService.error(errorMessage);
+          this.isUpdatingAccommodation = false;
+        },
+      });
+
+    this.subscriptions.push(sub);
+  }
+
+  onAccommodationSubmitted(accommodationData: any) {
+    // Update the form data from the leave-details component
+    // Map the form field names to the expected API field names
+    this.newAccommodation = {
+      name: accommodationData.accommodationName || accommodationData.name,
+      type: accommodationData.accommodationType || accommodationData.type,
+      isPetAllowed: accommodationData.isPetAllowed,
+      rooms: accommodationData.rooms || [],
+    };
+
+    if (this.isEditMode) {
+      this.updateAccommodation();
+    } else {
+      this.submitCreateAccommodation();
+    }
   }
 }

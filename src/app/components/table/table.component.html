@@ -329,6 +329,21 @@
             employee.startDate
           }}</ng-container>
 
+          <!-- ACCOMMODATION NAME -->
+          <ng-container *ngIf="col.key === 'accommodationName'">{{
+            employee.accommodationName
+          }}</ng-container>
+
+          <!-- ACCOMMODATION TYPE -->
+          <ng-container *ngIf="col.key === 'accommodationType'">{{
+            employee.accommodationType
+          }}</ng-container>
+
+          <!-- ACCOMMODATION ROOM COUNT -->
+          <ng-container *ngIf="col.key === 'accommodationRoomCount'">{{
+            employee.accommodationRoomCount
+          }}</ng-container>
+
           <!-- END DATE -->
           <ng-container *ngIf="col.key === 'endDate'">{{
             employee.endDate

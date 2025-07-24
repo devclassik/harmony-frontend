@@ -70,6 +70,8 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   // Permission View specific inputs
   @Input() isPermissionView: boolean = false; // Show permission view
   @Input() permissionData: any = null; // Permission data for access control
+  @Input() isAccommodationView: boolean = false; // Show accommodation view
+  @Input() accommodationData: any = null; // Accommodation data for accommodation management
 
   // Permission editing properties
   isEditingPermissions: boolean = false;

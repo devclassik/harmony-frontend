@@ -88,4 +88,29 @@ export class ApiService {
       payload
     );
   }
+
+  // Accommodation methods
+  getAccommodations(): Observable<any> {
+    return this.get<any>(environment.routes.accommodation.getAll);
+  }
+
+  createAccommodation(data: any): Observable<any> {
+    return this.post<any>(environment.routes.accommodation.create, data);
+  }
+
+  updateAccommodation(id: number, data: any): Observable<any> {
+    const endpoint = environment.routes.accommodation.update.replace(
+      '{id}',
+      id.toString()
+    );
+    return this.put<any>(endpoint, data);
+  }
+
+  deleteAccommodation(id: number): Observable<any> {
+    const endpoint = environment.routes.accommodation.delete.replace(
+      '{id}',
+      id.toString()
+    );
+    return this.delete<any>(endpoint);
+  }
 }

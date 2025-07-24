@@ -18,11 +18,6 @@ import {
 export class EmployeeService {
   constructor(private apiService: ApiService) {}
 
-  /**
-   * Get employee by ID
-   * @param id Employee ID
-   * @returns Observable of employee details
-   */
   getEmployeeById(id: number): Observable<GetEmployeeResponse> {
     const endpoint = environment.routes.employees.getById.replace(
       '{id}',
@@ -31,12 +26,6 @@ export class EmployeeService {
     return this.apiService.get<GetEmployeeResponse>(endpoint);
   }
 
-  /**
-   * Get all employees
-   * @param page Page number (optional, defaults to 1)
-   * @param limit Items per page (optional, defaults to 10)
-   * @returns Observable of all employees with pagination
-   */
   getAllEmployees(
     page: number = 1,
     limit: number = 10
@@ -50,11 +39,6 @@ export class EmployeeService {
     );
   }
 
-  /**
-   * Search employees by name
-   * @param name Search term for employee name
-   * @returns Observable of matching employees
-   */
   searchEmployeesByName(
     name: string
   ): Observable<{ status: string; message: string; data: EmployeeDetails[] }> {
@@ -69,11 +53,6 @@ export class EmployeeService {
     }>(endpoint);
   }
 
-  /**
-   * Create new employee
-   * @param employeeData Employee data to create
-   * @returns Observable of created employee
-   */
   createEmployee(
     employeeData: CreateEmployeeRequest
   ): Observable<CreateEmployeeResponse> {
@@ -83,12 +62,6 @@ export class EmployeeService {
     );
   }
 
-  /**
-   * Update employee
-   * @param id Employee ID
-   * @param employeeData Updated employee data
-   * @returns Observable of updated employee
-   */
   updateEmployee(
     id: number,
     employeeData: UpdateEmployeeRequest

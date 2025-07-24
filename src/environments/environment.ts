@@ -124,5 +124,12 @@ export const environment = {
       getAll: '/permission',
       updateRolePermissions: '/permission/update-role-permissions',
     },
+    accommodation: {
+      getAll: '/accommodation',
+      getById: '/accommodation/{id}',
+      create: '/accommodation',
+      update: '/accommodation/{id}',
+      delete: '/accommodation/{id}',
+    },
   },
 };
