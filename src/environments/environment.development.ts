@@ -131,5 +131,12 @@ export const environment = {
       update: '/accommodation/{id}',
       delete: '/accommodation/{id}',
     },
+    template: {
+      getAll: '/template',
+      getById: '/template/{id}',
+      create: '/template',
+      update: '/template/{id}',
+      delete: '/template/{id}',
+    },
   },
 };

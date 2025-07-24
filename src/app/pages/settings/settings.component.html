@@ -6,10 +6,14 @@
       isLoadingEmployees ||
       isLoadingPermissions ||
       isLoadingAccommodations ||
+      isLoadingTemplates ||
       isUpdatingPermissions ||
       isCreatingAccommodation ||
       isUpdatingAccommodation ||
-      isDeletingAccommodation
+      isDeletingAccommodation ||
+      isCreatingTemplate ||
+      isUpdatingTemplate ||
+      isDeletingTemplate
     "
     [title]="getLoadingTitle()"
     [message]="getLoadingMessage()"
@@ -25,13 +29,7 @@
         "
         (click)="setActiveTab('organization-structure')"
       >
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fill-rule="evenodd"
-            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"
-            clip-rule="evenodd"
-          ></path>
-        </svg>
+        <mat-icon class="w-4 h-4">dashboard</mat-icon>
         <span>Organization Structure</span>
       </button>
       <button
@@ -42,11 +40,7 @@
         "
         (click)="setActiveTab('user-management')"
       >
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            d="M13 6a3 3 0 11-6 0 3 3 0 616 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
-          ></path>
-        </svg>
+        <mat-icon class="w-4 h-4">people</mat-icon>
         <span>User Management</span>
       </button>
       <button
@@ -57,13 +51,7 @@
         "
         (click)="setActiveTab('access-control')"
       >
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fill-rule="evenodd"
-            d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z"
-            clip-rule="evenodd"
-          ></path>
-        </svg>
+        <mat-icon class="w-4 h-4">security</mat-icon>
         <span>Access Control</span>
       </button>
       <button
@@ -74,26 +62,18 @@
         "
         (click)="setActiveTab('accommodation')"
       >
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fill-rule="evenodd"
-            d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 11-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15.586 13H14a1 1 0 01-1-1z"
-            clip-rule="evenodd"
-          ></path>
-        </svg>
+        <mat-icon class="w-4 h-4">home</mat-icon>
         <span>Accommodation</span>
       </button>
       <button
-        class="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed rounded-lg"
-        disabled
+        [class]="
+          activeTab === 'letter-template'
+            ? 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg border border-green-200'
+            : 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors'
+        "
+        (click)="setActiveTab('letter-template')"
       >
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fill-rule="evenodd"
-            d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z"
-            clip-rule="evenodd"
-          ></path>
-        </svg>
+        <mat-icon class="w-4 h-4">description</mat-icon>
         <span>Letter Template</span>
       </button>
     </div>
@@ -337,146 +317,78 @@
 
   <!-- User Management Tab Content -->
   <div *ngIf="activeTab === 'user-management'" class="bg-white min-h-screen">
-    <!-- Header with controls -->
-    <div class="flex items-center justify-between py-2 px-6">
-      <div>
-        <h2 class="text-sm font-normal mb-1">
-          Showing All Employees ({{ getCurrentDataCount() }})
-        </h2>
-      </div>
-
-      <div class="flex items-center gap-4">
-        <!-- Search -->
-        <div class="relative">
-          <input
-            type="text"
-            placeholder="Search"
-            [value]="searchValue"
-            (input)="onSearch($any($event.target).value)"
-            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#12C16F] focus:border-transparent w-64"
-          />
-          <svg
-            class="absolute left-3 top-3 w-4 h-4 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
-        </div>
-
-        <div class="flex gap-4">
-          <button
-            (click)="openAddEmployeeModal()"
-            class="flex items-center justify-center px-2 flex-1 text-white rounded-lg py-2 font-medium transition cursor-pointer"
-            [ngClass]="
-              'bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]'
-            "
-          >
-            <span class="flex items-center px-1">
-              <img src="assets/svg/add.svg" class="w-4 h-4 text-white" />
-            </span>
-            Add Employee
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Table View using Table Component -->
 
     <app-table
+      [tableTitle]="'Showing All Employees (' + getCurrentDataCount() + ')'"
       [tableHeader]="tableHeader"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
       [tableData]="getEmployeeTableData()"
       [menuItems]="actionButton"
       [showFilter]="false"
-      [showSearch]="false"
       [showPagination]="true"
       [showViewAll]="false"
       [currentPage]="currentPage"
       [totalPages]="totalPages"
       [pageSize]="pageSize"
-      [currentView]="'table'"
+      [showButton]="true"
+      showButtonText="Add Employee"
+      showButtonIcon="assets/svg/add.svg"
+      showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+      (showButtonActionClick)="openAddEmployeeModal()"
       (menuAction)="onMenuAction($event)"
       (pageChange)="onPageChange($event)"
     ></app-table>
   </div>
 
-  <!-- Create Department Slide-out Modal -->
-  <div
-    *ngIf="showCreateDepartmentModal"
-    class="fixed right-0 top-0 h-full w-96 bg-white shadow-xl transform transition-transform duration-300 z-50 border-l border-gray-200"
-  >
-    <!-- Modal Header -->
-    <div class="flex items-center justify-between p-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900">Add New Department</h3>
-      <button
-        (click)="closeCreateDepartmentModal()"
-        class="text-gray-400 hover:text-gray-600"
-      >
-        <svg
-          class="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
-          ></path>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Modal Body -->
-    <div class="p-4">
-      <!-- Department Name -->
-      <div class="mb-6">
-        <label
-          for="departmentName"
-          class="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Department Name *
-        </label>
-        <input
-          type="text"
-          id="departmentName"
-          [(ngModel)]="newDepartment.name"
-          placeholder="e.g., Marketing Department"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
-        />
-      </div>
-    </div>
-
-    <!-- Modal Footer -->
-    <div
-      class="absolute bottom-0 left-0 right-0 bg-gray-50 p-4 border-t border-gray-200"
-    >
-      <div class="flex space-x-3">
-        <button
-          type="button"
-          (click)="closeCreateDepartmentModal()"
-          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          (click)="submitCreateDepartment()"
-          [disabled]="!newDepartment.name"
-          class="flex-1 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Create Department
-        </button>
-      </div>
+  <!-- Letter Template Tab Content -->
+  <div *ngIf="activeTab === 'letter-template'" class="bg-white min-h-screen">
+    <div class="px-6 py-4">
+      <app-table
+        [tableTitle]="'Showing All Templates (' + templates.length + ')'"
+        [searchValue]="searchValue"
+        (search)="onSearch($event)"
+        [tableHeader]="templateTableHeader"
+        [tableData]="templatesTableData"
+        [menuItems]="templateActionButton"
+        [showFilter]="false"
+        [showPagination]="false"
+        [showViewAll]="false"
+        [currentView]="'table'"
+        [showButton]="true"
+        showButtonText="Add Template"
+        showButtonIcon="assets/svg/add.svg"
+        showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+        (showButtonActionClick)="openCreateTemplateModal()"
+        (menuAction)="handleTemplateTableAction($event)"
+      ></app-table>
     </div>
   </div>
+
+  <!-- Create Department Modal using leave-details component -->
+  <app-leave-details
+    [view]="showCreateDepartmentModal"
+    [mode]="'create'"
+    [isDepartment]="true"
+    [isEditMode]="isEditMode"
+    [preFilledDepartmentData]="isEditMode ? newDepartment : null"
+    [title]="isEditMode ? 'Edit Department' : 'Create Department'"
+    (close)="closeCreateDepartmentModal()"
+    (submit)="onDepartmentSubmitted($event)"
+  ></app-leave-details>
+
+  <!-- Create Template Modal using leave-details component -->
+  <app-leave-details
+    [view]="showCreateTemplateModal"
+    [mode]="'create'"
+    [isTemplate]="true"
+    [isEditMode]="isEditMode"
+    [preFilledTemplateData]="selectedTemplateData"
+    [title]="isEditMode ? 'Edit Template' : 'Add Letter Template'"
+    (close)="closeCreateTemplateModal()"
+    (submit)="onTemplateSubmitted($event)"
+  ></app-leave-details>
 
   <!-- Confirmation Prompt -->
   <app-confirm-prompt
@@ -523,6 +435,17 @@
     (close)="closeUserDetailsModal()"
     (edit)="editEmployeeFromDetails()"
     (delete)="deleteEmployeeFromDetails()"
+  ></app-employee-details>
+
+  <!-- Template Details Modal -->
+  <app-employee-details
+    [view]="showTemplateDetails"
+    [employee]="selectedTemplateData"
+    [isTemplateView]="true"
+    [templateData]="selectedTemplateData"
+    (close)="closeTemplateDetails()"
+    (edit)="editTemplateFromDetails()"
+    (delete)="deleteTemplateFromDetails()"
   ></app-employee-details>
 
   <!-- Add Employee Modal using leave-details component -->
@@ -582,16 +505,10 @@
 
   <!-- Access Control Tab Content -->
   <div *ngIf="activeTab === 'access-control'" class="bg-white min-h-screen">
-    <!-- Header Section -->
-    <div
-      class="flex items-center justify-between px-6 py-4 border-b border-gray-200"
-    >
-      <h2 class="text-sm font-normal mb-1">Showing All Permissions</h2>
-    </div>
-
     <!-- Permissions Table -->
     <div class="px-6 py-4">
       <app-table
+        [tableTitle]="'Showing All Permissions'"
         [tableHeader]="permissionsTableHeader"
         [tableData]="permissionsTableData"
         [menuItems]="permissionsActionButton"
@@ -607,68 +524,26 @@
 
   <!-- Accommodation Tab Content -->
   <div *ngIf="activeTab === 'accommodation'" class="bg-white min-h-screen">
-    <!-- Header Section -->
-    <!-- Header with controls -->
-    <div class="flex items-center justify-between py-2 px-6">
-      <div>
-        <h2 class="text-sm font-normal mb-1">
-          Showing All Accommodations ({{ accommodations.length }})
-        </h2>
-      </div>
-
-      <div class="flex items-center gap-4">
-        <!-- Search -->
-        <div class="relative">
-          <input
-            type="text"
-            placeholder="Search"
-            [value]="searchValue"
-            (input)="onSearch($any($event.target).value)"
-            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#12C16F] focus:border-transparent w-64"
-          />
-          <svg
-            class="absolute left-3 top-3 w-4 h-4 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
-        </div>
-
-        <div class="flex gap-4">
-          <button
-            (click)="openCreateAccommodationModal()"
-            class="flex items-center justify-center px-2 flex-1 text-white rounded-lg py-2 font-medium transition cursor-pointer"
-            [ngClass]="
-              'bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]'
-            "
-          >
-            <span class="flex items-center px-1">
-              <img src="assets/svg/add.svg" class="w-4 h-4 text-white" />
-            </span>
-            Add Accommodation
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Accommodations Table -->
     <div class="px-6 py-4">
       <app-table
+        [tableTitle]="
+          'Showing All Accommodations (' + accommodations.length + ')'
+        "
+        [searchValue]="searchValue"
+        (search)="onSearch($event)"
         [tableHeader]="accommodationTableHeader"
         [tableData]="accommodationsTableData"
         [menuItems]="accommodationActionButton"
         [showFilter]="false"
-        [showSearch]="false"
         [showPagination]="false"
         [showViewAll]="false"
         [currentView]="'table'"
+        [showButton]="true"
+        showButtonText="Add Accommodation"
+        showButtonIcon="assets/svg/add.svg"
+        showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+        (showButtonActionClick)="openCreateAccommodationModal()"
         (menuAction)="handleAccommodationTableAction($event)"
       ></app-table>
     </div>

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -27,6 +28,7 @@ import {
 import { TableData } from '../../interfaces/employee.interface';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { EmployeeDetails as Employee } from '../../dto';
+import { Template, TemplateType } from '../../dto/template.dto';
 
 interface Organization {
   id: number;
@@ -113,6 +115,7 @@ interface UpdateAccommodationRequest {
   imports: [
     CommonModule,
     FormsModule,
+    MatIconModule,
     LoadingOverlayComponent,
     ConfirmPromptComponent,
     EmployeeDetailsComponent,
@@ -192,6 +195,31 @@ export class SettingsComponent implements OnInit, OnDestroy {
     { label: 'Hostel', value: 'HOSTEL' },
   ];
 
+  templateTypeOptions = [
+    { label: 'Transfer Approval', value: 'TRANSFER_APPROVAL' },
+    { label: 'Transfer Request', value: 'TRANSFER_REQUEST' },
+    { label: 'Transfer Decline', value: 'TRANSFER_DECLINE' },
+    { label: 'Sick Leave Approval', value: 'SICK_LEAVE_APPROVAL' },
+    { label: 'Sick Leave Request', value: 'SICK_LEAVE_REQUEST' },
+    { label: 'Sick Leave Decline', value: 'SICK_LEAVE_DECLINE' },
+    { label: 'Annual Leave Approval', value: 'ANNUAL_LEAVE_APPROVAL' },
+    { label: 'Annual Leave Request', value: 'ANNUAL_LEAVE_REQUEST' },
+    { label: 'Annual Leave Decline', value: 'ANNUAL_LEAVE_DECLINE' },
+    { label: 'Absence Leave Approval', value: 'ABSENCE_LEAVE_APPROVAL' },
+    { label: 'Absence Leave Request', value: 'ABSENCE_LEAVE_REQUEST' },
+    { label: 'Absence Leave Decline', value: 'ABSENCE_LEAVE_DECLINE' },
+    { label: 'Promotion Approval', value: 'PROMOTION_APPROVAL' },
+    { label: 'Promotion Request', value: 'PROMOTION_REQUEST' },
+    { label: 'Promotion Decline', value: 'PROMOTION_DECLINE' },
+    { label: 'Retirement Approval', value: 'RETIREMENT_APPROVAL' },
+    { label: 'Retirement Request', value: 'RETIREMENT_REQUEST' },
+    { label: 'Retirement Decline', value: 'RETIREMENT_DECLINE' },
+    { label: 'Retrenchment Approval', value: 'RETRENCHMENT_APPROVAL' },
+    { label: 'Retrenchment Request', value: 'RETRENCHMENT_REQUEST' },
+    { label: 'Retrenchment Decline', value: 'RETRENCHMENT_DECLINE' },
+    { label: 'Discipline', value: 'DISCIPLINE' },
+  ];
+
   getCurrentDataCount(): number {
     return this.filteredEmployees.length;
   }
@@ -255,6 +283,18 @@ export class SettingsComponent implements OnInit, OnDestroy {
   selectedAccommodationData: any = null;
   showAccommodationDeleteConfirmPrompt = false;
 
+  // Template properties
+  templates: Template[] = [];
+  isLoadingTemplates = false;
+  isCreatingTemplate = false;
+  isUpdatingTemplate = false;
+  isDeletingTemplate = false;
+  templatesTableData: TableData[] = [];
+  showCreateTemplateModal = false;
+  showTemplateDetails = false;
+  selectedTemplateData: any = null;
+  showTemplateDeleteConfirmPrompt = false;
+
   // Access Control table configuration
   permissionsTableHeader: TableHeader[] = [
     { key: 'id', label: 'PERMISSION ID' },
@@ -278,8 +318,17 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   accommodationActionButton: MenuItem[] = [
     { label: 'View', action: 'view', icon: 'eye' },
-    { label: 'Edit', action: 'edit', icon: 'edit' },
-    { label: 'Delete', action: 'delete', icon: 'trash' },
+  ];
+
+  // Template table configuration
+  templateTableHeader: TableHeader[] = [
+    { key: 'id', label: 'TEMPLATE ID' },
+    { key: 'templateType', label: 'TEMPLATE TYPE' },
+    { key: 'action', label: 'ACTION' },
+  ];
+
+  templateActionButton: MenuItem[] = [
+    { label: 'View', action: 'view', icon: 'eye' },
   ];
 
   // Form data for new department
@@ -313,6 +362,15 @@ export class SettingsComponent implements OnInit, OnDestroy {
     rooms: [{ name: '', capacity: 1 }],
   };
 
+  // Form data for new template
+  newTemplate: {
+    type: TemplateType;
+    downloadUrl: string;
+  } = {
+    type: 'TRANSFER_APPROVAL' as TemplateType,
+    downloadUrl: '',
+  };
+
   // Removed HOD selection - using default values
 
   // Subscriptions
@@ -336,6 +394,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.loadEmployees();
     this.loadPermissions();
     this.loadAccommodations();
+    this.loadTemplates();
   }
 
   ngOnDestroy() {
@@ -345,6 +404,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
   // Tab switching
   setActiveTab(tab: string) {
     this.activeTab = tab;
+
+    // Clear search when switching tabs
+    this.searchValue = '';
 
     // Reload organization structure when switching to that tab
     if (tab === 'organization-structure') {
@@ -359,6 +421,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
     // Load accommodations when switching to accommodation tab
     if (tab === 'accommodation') {
       this.loadAccommodations();
+    }
+
+    // Load templates when switching to letter template tab
+    if (tab === 'letter-template') {
+      this.loadTemplates();
     }
   }
 
@@ -413,7 +480,13 @@ export class SettingsComponent implements OnInit, OnDestroy {
             const paginationMeta = response.data.pagination;
 
             this.employees = this.transformEmployeeToTableData(employeesArray);
-            this.filteredEmployees = [...this.employees];
+
+            // Apply search filter if there's a search value
+            if (this.searchValue) {
+              this.applyEmployeeSearch();
+            } else {
+              this.filteredEmployees = [...this.employees];
+            }
 
             // Update pagination state
             if (paginationMeta) {
@@ -595,7 +668,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   onSearch(value: string) {
     this.searchValue = value;
-    this.applyAdvancedFilters();
+
+    if (this.activeTab === 'user-management') {
+      this.applyEmployeeSearch();
+    } else if (this.activeTab === 'accommodation') {
+      this.applyAccommodationSearch();
+    } else if (this.activeTab === 'letter-template') {
+      this.applyTemplateSearch();
+    }
   }
 
   // Apply advanced filters (status, filter tabs, search)
@@ -629,6 +709,54 @@ export class SettingsComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Apply search filter for accommodations
+  applyAccommodationSearch() {
+    if (!this.searchValue) {
+      this.accommodationsTableData = this.transformAccommodationToTableData(
+        this.accommodations
+      );
+      return;
+    }
+
+    const search = this.searchValue.toLowerCase();
+    const filteredAccommodations = this.accommodations.filter(
+      (accommodation) => {
+        return (
+          accommodation.name.toLowerCase().includes(search) ||
+          accommodation.id.toString().includes(search) ||
+          accommodation.type.toLowerCase().includes(search) ||
+          accommodation.rooms.length.toString().includes(search)
+        );
+      }
+    );
+
+    this.accommodationsTableData = this.transformAccommodationToTableData(
+      filteredAccommodations
+    );
+  }
+
+  // Apply search filter for employees
+  applyEmployeeSearch() {
+    if (!this.searchValue) {
+      this.filteredEmployees = [...this.employees];
+      return;
+    }
+
+    const search = this.searchValue.toLowerCase();
+    const filteredEmployees = this.employees.filter((employee) => {
+      return (
+        (employee.name && employee.name.toLowerCase().includes(search)) ||
+        (employee.id && employee.id.toLowerCase().includes(search)) ||
+        (employee.department &&
+          employee.department.toLowerCase().includes(search)) ||
+        (employee.role && employee.role.toLowerCase().includes(search)) ||
+        (employee.email && employee.email.toLowerCase().includes(search))
+      );
+    });
+
+    this.filteredEmployees = filteredEmployees;
+  }
+
   // Check if create button should be shown
   get shouldShowCreateButton(): boolean {
     return this.userRole === 'admin' || this.userRole === 'super_admin';
@@ -636,7 +764,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   // Create discipline request (placeholder)
   onCreateDisciplineRequest() {
-    console.log('Create discipline request clicked');
     // Implement discipline request creation
   }
 
@@ -648,7 +775,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   // Convert employees to table data format
   getEmployeeTableData(): TableData[] {
-    return this.employees;
+    return this.filteredEmployees;
   }
 
   // Get dynamic loading title
@@ -661,6 +788,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
       return 'Loading Permissions';
     } else if (this.isLoadingAccommodations) {
       return 'Loading Accommodations';
+    } else if (this.isLoadingTemplates) {
+      return 'Loading Templates';
     } else if (this.isUpdatingPermissions) {
       return 'Updating Permissions';
     } else if (this.isCreatingDepartment) {
@@ -671,6 +800,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
       return 'Updating Accommodation';
     } else if (this.isDeletingAccommodation) {
       return 'Deleting Accommodation';
+    } else if (this.isCreatingTemplate) {
+      return 'Creating Template';
+    } else if (this.isUpdatingTemplate) {
+      return 'Updating Template';
+    } else if (this.isDeletingTemplate) {
+      return 'Deleting Template';
     } else if (this.isAddingEmployee) {
       return 'Adding Employee';
     }
@@ -687,6 +822,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
       return 'Please wait while we fetch permissions data...';
     } else if (this.isLoadingAccommodations) {
       return 'Please wait while we fetch accommodation data...';
+    } else if (this.isLoadingTemplates) {
+      return 'Please wait while we fetch template data...';
     } else if (this.isUpdatingPermissions) {
       return 'Please wait while we update the permissions...';
     } else if (this.isCreatingDepartment) {
@@ -697,6 +834,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
       return 'Please wait while we update the accommodation...';
     } else if (this.isDeletingAccommodation) {
       return 'Please wait while we delete the accommodation...';
+    } else if (this.isCreatingTemplate) {
+      return 'Please wait while we create the template...';
+    } else if (this.isUpdatingTemplate) {
+      return 'Please wait while we update the template...';
+    } else if (this.isDeletingTemplate) {
+      return 'Please wait while we delete the template...';
     } else if (this.isAddingEmployee) {
       return 'Please wait while we add the employee...';
     }
@@ -1099,14 +1242,22 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   // Handle confirm create/delete
   onConfirmCreate() {
-    this.showConfirmPrompt = false;
-
+    // Check if this is for template deletion first
+    if (this.promptConfig?.title === 'Delete Template') {
+      // Get the template data from the prompt config
+      const templateToDelete = this.promptConfig.templateData;
+      // Set loading state immediately before closing prompt
+      this.isDeletingTemplate = true;
+      this.showConfirmPrompt = false;
+      this.performTemplateDeletion(templateToDelete);
+    }
     // Check if this is for employee deletion
-    if (
+    else if (
       this.selectedEmployeeForEdit &&
       this.selectedEmployeeForEdit.id &&
       this.promptConfig?.title === 'Delete Employee'
     ) {
+      this.showConfirmPrompt = false;
       this.performEmployeeDeletion();
     }
     // Check if this is for accommodation deletion
@@ -1115,9 +1266,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.selectedEmployeeForEdit.id &&
       this.promptConfig?.title === 'Delete Accommodation'
     ) {
+      this.showConfirmPrompt = false;
       this.performAccommodationDeletion();
     } else {
       // Default to department creation
+      this.showConfirmPrompt = false;
       this.createDepartment();
     }
   }
@@ -1443,9 +1596,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
     const sub = this.apiService.getAccommodations().subscribe({
       next: (response) => {
         this.accommodations = response.data || [];
-        this.accommodationsTableData = this.transformAccommodationToTableData(
-          this.accommodations
-        );
+        // Apply search filter if there's a search value
+        if (this.searchValue) {
+          this.applyAccommodationSearch();
+        } else {
+          this.accommodationsTableData = this.transformAccommodationToTableData(
+            this.accommodations
+          );
+        }
         this.isLoadingAccommodations = false;
       },
       error: (error) => {
@@ -1759,5 +1917,291 @@ export class SettingsComponent implements OnInit, OnDestroy {
     } else {
       this.submitCreateAccommodation();
     }
+  }
+
+  onDepartmentSubmitted(departmentData: any) {
+    // Update the form data from the leave-details component
+    this.newDepartment = {
+      name: departmentData.departmentName || departmentData.name,
+      organizationId:
+        this.organizations.length > 0 ? this.organizations[0].id : 1,
+    };
+
+    if (this.isEditMode) {
+      // Handle edit mode if needed
+      this.submitCreateDepartment();
+    } else {
+      this.submitCreateDepartment();
+    }
+  }
+
+  // Template methods
+  loadTemplates() {
+    this.isLoadingTemplates = true;
+
+    const sub = this.apiService.getTemplates().subscribe({
+      next: (response) => {
+        this.templates = response.data || [];
+        // Apply search filter if there's a search value
+        if (this.searchValue) {
+          this.applyTemplateSearch();
+        } else {
+          this.templatesTableData = this.transformTemplateToTableData(
+            this.templates
+          );
+        }
+        this.isLoadingTemplates = false;
+      },
+      error: (error) => {
+        this.alertService.error('Failed to load templates');
+        this.isLoadingTemplates = false;
+      },
+    });
+
+    this.subscriptions.push(sub);
+  }
+
+  transformTemplateToTableData(templates: Template[]): TableData[] {
+    return templates.map((template) => ({
+      id: template.id.toString(),
+      templateType: template.type.replace(/_/g, ' '),
+      originalData: template,
+    }));
+  }
+
+  // Apply search filter for templates
+  applyTemplateSearch() {
+    if (!this.searchValue) {
+      this.templatesTableData = this.transformTemplateToTableData(
+        this.templates
+      );
+      return;
+    }
+
+    const search = this.searchValue.toLowerCase();
+    const filteredTemplates = this.templates.filter((template) => {
+      return (
+        template.id.toString().includes(search) ||
+        template.type.toLowerCase().includes(search)
+      );
+    });
+
+    this.templatesTableData =
+      this.transformTemplateToTableData(filteredTemplates);
+  }
+
+  openCreateTemplateModal() {
+    this.showCreateTemplateModal = true;
+    this.isEditMode = false;
+    this.resetNewTemplateForm();
+  }
+
+  closeCreateTemplateModal() {
+    this.showCreateTemplateModal = false;
+    this.isEditMode = false;
+    this.selectedTemplateData = null;
+    this.resetNewTemplateForm();
+  }
+
+  resetNewTemplateForm() {
+    this.newTemplate = {
+      type: 'TRANSFER_APPROVAL' as TemplateType,
+      downloadUrl: '',
+    };
+  }
+
+  viewTemplate(template: TableData) {
+    this.selectedTemplateData = template.originalData;
+    this.showTemplateDetails = true;
+  }
+
+  closeTemplateDetails() {
+    this.showTemplateDetails = false;
+    this.selectedTemplateData = null;
+  }
+
+  handleTemplateTableAction(event: { action: string; row: TableData }) {
+    if (event.action === 'view') {
+      this.viewTemplate(event.row);
+    }
+  }
+
+  editTemplate(templateRow: TableData) {
+    this.selectedTemplateData = templateRow.originalData;
+    this.isEditMode = true;
+    this.populateTemplateForm(templateRow.originalData);
+    this.showCreateTemplateModal = true;
+
+    // Close the template details modal if it's open, but don't reset selectedTemplateData
+    if (this.showTemplateDetails) {
+      this.showTemplateDetails = false;
+    }
+  }
+
+  deleteTemplate(templateRow: TableData) {
+    this.selectedTemplateData = templateRow.originalData;
+    this.promptConfig = {
+      title: 'Delete Template',
+      text: `Are you sure you want to delete this template? This action cannot be undone.`,
+      yesButtonText: 'Delete',
+      noButtonText: 'Cancel',
+    };
+    this.showConfirmPrompt = true;
+  }
+
+  editTemplateFromDetails() {
+    if (this.selectedTemplateData) {
+      this.editTemplate({
+        id: this.selectedTemplateData.id.toString(),
+        templateType: this.selectedTemplateData.type,
+        originalData: this.selectedTemplateData,
+      } as TableData);
+      // Don't close template details here - let the edit modal handle it
+    }
+  }
+
+  deleteTemplateFromDetails() {
+    if (this.selectedTemplateData) {
+      // Store the template data in the prompt config so it's preserved
+      this.promptConfig = {
+        title: 'Delete Template',
+        text: `Are you sure you want to delete this template? This action cannot be undone.`,
+        yesButtonText: 'Delete',
+        noButtonText: 'Cancel',
+        templateData: this.selectedTemplateData, // Store the template data here
+      };
+      this.showConfirmPrompt = true;
+    }
+  }
+
+  performTemplateDeletion(templateData?: any) {
+    const templateToDelete = templateData || this.selectedTemplateData;
+
+    if (templateToDelete) {
+      // Loading state is already set in onConfirmCreate()
+      // Close the template details slide-out
+      this.closeTemplateDetails();
+
+      const sub = this.apiService
+        .deleteTemplate(templateToDelete.id)
+        .subscribe({
+          next: (response) => {
+            this.alertService.success('Template deleted successfully');
+            this.isDeletingTemplate = false;
+            this.selectedTemplateData = null;
+            this.loadTemplates(); // Refresh the list
+          },
+          error: (error) => {
+            this.alertService.error('Failed to delete template');
+            this.isDeletingTemplate = false;
+          },
+        });
+
+      this.subscriptions.push(sub);
+    }
+  }
+
+  populateTemplateForm(template: Template) {
+    this.newTemplate = {
+      type: template.type,
+      downloadUrl: template.downloadUrl,
+    };
+  }
+
+  onTemplateSubmitted(templateData: any) {
+    // Update the form data from the leave-details component
+    this.newTemplate = {
+      type: templateData.templateType || templateData.type,
+      downloadUrl: templateData.downloadUrl || templateData.documentUrl,
+    };
+
+    if (this.isEditMode) {
+      this.updateTemplate();
+    } else {
+      this.submitCreateTemplate();
+    }
+  }
+
+  submitCreateTemplate() {
+    if (!this.newTemplate.type || !this.newTemplate.downloadUrl) {
+      this.alertService.error('Template type and document are required');
+      return;
+    }
+
+    this.isCreatingTemplate = true;
+
+    const payload = {
+      type: this.newTemplate.type,
+      downloadUrl: this.newTemplate.downloadUrl,
+    };
+
+    const sub = this.apiService.createTemplate(payload).subscribe({
+      next: (response) => {
+        this.alertService.success('Template created successfully');
+        this.isCreatingTemplate = false;
+        this.closeCreateTemplateModal();
+        this.loadTemplates();
+      },
+      error: (error) => {
+        let errorMessage = 'Failed to create template';
+        if (error.status === 502) {
+          errorMessage =
+            'Server is temporarily unavailable. Please try again later.';
+        } else if (error.status === 401) {
+          errorMessage = 'Authentication failed. Please log in again.';
+        } else if (error.status === 403) {
+          errorMessage = 'You do not have permission to create templates.';
+        }
+
+        this.alertService.error(errorMessage);
+        this.isCreatingTemplate = false;
+      },
+    });
+
+    this.subscriptions.push(sub);
+  }
+
+  updateTemplate() {
+    if (!this.selectedTemplateData) return;
+
+    if (!this.newTemplate.type || !this.newTemplate.downloadUrl) {
+      this.alertService.error('Template type and document are required');
+      return;
+    }
+
+    this.isUpdatingTemplate = true;
+
+    const payload = {
+      type: this.newTemplate.type,
+      downloadUrl: this.newTemplate.downloadUrl,
+    };
+
+    const sub = this.apiService
+      .updateTemplate(this.selectedTemplateData.id, payload)
+      .subscribe({
+        next: (response) => {
+          this.alertService.success('Template updated successfully');
+          this.isUpdatingTemplate = false;
+          this.closeCreateTemplateModal();
+          this.loadTemplates();
+        },
+        error: (error) => {
+          let errorMessage = 'Failed to update template';
+          if (error.status === 502) {
+            errorMessage =
+              'Server is temporarily unavailable. Please try again later.';
+          } else if (error.status === 401) {
+            errorMessage = 'Authentication failed. Please log in again.';
+          } else if (error.status === 403) {
+            errorMessage =
+              'You do not have permission to update this template.';
+          }
+
+          this.alertService.error(errorMessage);
+          this.isUpdatingTemplate = false;
+        },
+      });
+
+    this.subscriptions.push(sub);
   }
 }

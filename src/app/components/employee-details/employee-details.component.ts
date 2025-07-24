@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 import {
   Component,
   EventEmitter,
@@ -22,7 +23,7 @@ import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-employee-details',
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './employee-details.component.html',
   styleUrl: './employee-details.component.css',
 })
@@ -72,6 +73,8 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   @Input() permissionData: any = null; // Permission data for access control
   @Input() isAccommodationView: boolean = false; // Show accommodation view
   @Input() accommodationData: any = null; // Accommodation data for accommodation management
+  @Input() isTemplateView: boolean = false; // Show template view
+  @Input() templateData: any = null; // Template data for template management
 
   // Permission editing properties
   isEditingPermissions: boolean = false;
@@ -99,7 +102,6 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   constructor(private apiService: ApiService) {}
 
   ngOnInit() {
-    console.log(this.employeeDetails);
     // Removed debug logging
   }
 
@@ -167,7 +169,6 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   }
 
   openPdfModal(url: string) {
-    console.log(url);
     this.selectedPdfUrl = url;
     this.pdfModalOpen = true;
   }
@@ -264,5 +265,11 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
+  }
+
+  // Helper function to format template type
+  formatTemplateType(type: string): string {
+    if (!type) return '';
+    return type.replace(/_/g, ' ');
   }
 }

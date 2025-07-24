@@ -344,6 +344,11 @@
             employee.accommodationRoomCount
           }}</ng-container>
 
+          <!-- TEMPLATE TYPE -->
+          <ng-container *ngIf="col.key === 'templateType'">{{
+            employee.templateType
+          }}</ng-container>
+
           <!-- END DATE -->
           <ng-container *ngIf="col.key === 'endDate'">{{
             employee.endDate

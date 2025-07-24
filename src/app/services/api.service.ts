@@ -113,4 +113,29 @@ export class ApiService {
     );
     return this.delete<any>(endpoint);
   }
+
+  // Template methods
+  getTemplates(): Observable<any> {
+    return this.get<any>(environment.routes.template.getAll);
+  }
+
+  createTemplate(data: any): Observable<any> {
+    return this.post<any>(environment.routes.template.create, data);
+  }
+
+  updateTemplate(id: number, data: any): Observable<any> {
+    const endpoint = environment.routes.template.update.replace(
+      '{id}',
+      id.toString()
+    );
+    return this.put<any>(endpoint, data);
+  }
+
+  deleteTemplate(id: number): Observable<any> {
+    const endpoint = environment.routes.template.delete.replace(
+      '{id}',
+      id.toString()
+    );
+    return this.delete<any>(endpoint);
+  }
 }
