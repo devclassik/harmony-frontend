@@ -174,13 +174,7 @@ export class EmployeeRetirementComponent implements OnInit, OnDestroy {
       icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z',
     },
     { label: 'Minister', value: 'MINISTER', icon: 'M5 13l4 4L19 7' },
-    { label: 'Pastor', value: 'PASTOR', icon: 'M5 13l4 4L19 7' },
-    { label: 'Zonal Pastor', value: 'ZONAL_PASTOR', icon: 'M5 13l4 4L19 7' },
-    {
-      label: 'District Pastor',
-      value: 'DISTRICT_PASTOR',
-      icon: 'M5 13l4 4L19 7',
-    },
+    { label: 'Admin', value: 'ADMIN', icon: 'M5 13l4 4L19 7' },
   ];
 
   loadRetirements() {

@@ -71,8 +71,10 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
   // Attendees data
   attendees: CampMeetingAttendee[] = [];
   attendeesTableData: TableData[] = [];
+  filteredAttendeesTableData: TableData[] = [];
   isLoadingAttendees: boolean = false;
   selectedMeetingForAttendees: CampMeetingRecord | null = null;
+  searchTerm: string = '';
 
   // Attendee view action state
   selectedAttendee: CampMeetingAttendee | null = null;
@@ -87,6 +89,11 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
       label: 'View',
       icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
       action: 'view',
+    },
+    {
+      label: 'Assign',
+      icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6',
+      action: 'assign',
     },
   ];
 
@@ -178,6 +185,7 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
   // Load attendees for a specific camp meeting
   loadAttendees(meetingId: number) {
     this.isLoadingAttendees = true;
+    this.searchTerm = ''; // Reset search term when loading new attendees
 
     const attendeesSub = this.campMeetingService
       .getCampMeetingAttendees(meetingId)
@@ -215,6 +223,8 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
       this.selectedMeetingForAttendees = null;
       this.attendees = [];
       this.attendeesTableData = [];
+      this.filteredAttendeesTableData = [];
+      this.searchTerm = '';
     }
   }
 
@@ -252,6 +262,8 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
         `${attendee.firstName || ''} ${attendee.lastName || ''}`.trim() ||
         'N/A';
 
+      const status = hasAssignedRoom ? 'Assigned' : 'Unassigned';
+
       const row = {
         id: attendee.employeeId || 'N/A',
         name: employeeName,
@@ -261,13 +273,35 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
             : 'N/A',
         role: attendee.user?.role?.name || 'N/A',
         imageUrl: this.formatImageUrl(attendee.photoUrl || null),
-        status: (hasAssignedRoom ? 'Assigned' : 'Unassigned') as
-          | 'Assigned'
-          | 'Unassigned',
+        status: status as 'Assigned' | 'Unassigned',
         action: 'view',
+        originalData: attendee, // Store original attendee data for actions
       };
       return row;
     });
+    this.filterAttendees();
+  }
+
+  // Filter attendees based on search term
+  filterAttendees() {
+    if (!this.searchTerm || this.searchTerm.trim() === '') {
+      this.filteredAttendeesTableData = [...this.attendeesTableData];
+    } else {
+      const searchLower = this.searchTerm.toLowerCase().trim();
+      this.filteredAttendeesTableData = this.attendeesTableData.filter(
+        (attendee) =>
+          (attendee.name || '').toLowerCase().includes(searchLower) ||
+          (attendee.id || '').toLowerCase().includes(searchLower) ||
+          (attendee.department || '').toLowerCase().includes(searchLower) ||
+          (attendee.role || '').toLowerCase().includes(searchLower)
+      );
+    }
+  }
+
+  // Handle search input
+  onSearchChange(searchValue: string) {
+    this.searchTerm = searchValue;
+    this.filterAttendees();
   }
 
   // Helper function to properly format image URLs
@@ -393,6 +427,18 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
         if (meetingData) {
           this.selectedMeetingData = meetingData;
           this.showSlideIn = true;
+        }
+      }
+    } else if (event.action === 'assign') {
+      // Handle assign action for attendees
+      if (this.activeTab === 'attendees') {
+        // Find the attendee data from the attendees array
+        const attendee = this.attendees.find(
+          (a) => a.employeeId === event.row.id
+        );
+
+        if (attendee) {
+          this.onAttendeeAssignAction(attendee);
         }
       }
     }
@@ -548,6 +594,11 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
     this.showAttendeeSlideOut = true;
   }
 
+  onAttendeeAssignAction(attendee: CampMeetingAttendee) {
+    this.selectedAttendee = attendee;
+    this.onAssignAccommodation();
+  }
+
   onAttendeeDetailsClose() {
     this.showAttendeeSlideOut = false;
     this.selectedAttendee = null;
@@ -694,23 +745,30 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.isAssigningAccommodation = true;
+
+    // Close both slide-outs when loading starts
+    this.showAssignAccommodationSlideOut = false;
+    this.showAttendeeSlideOut = false;
+
     const requestBody = {
       meetingId: this.selectedMeetingForAttendees.id,
       roomId: this.selectedRoom.id,
       employeeId: this.selectedAttendee.id,
     };
 
-    this.apiService.post('/camp-meeting/assign-room', requestBody).subscribe({
+    this.apiService.put('/camp-meeting/assign-room', requestBody).subscribe({
       next: (response) => {
+        this.isAssigningAccommodation = false;
         this.alertService.success('Accommodation assigned successfully');
         this.onAssignAccommodationClose();
-        this.showAttendeeSlideOut = false;
         // Refresh attendees list to show updated status
         if (this.selectedMeetingForAttendees) {
           this.loadAttendees(this.selectedMeetingForAttendees.id);
         }
       },
       error: (error) => {
+        this.isAssigningAccommodation = false;
         this.alertService.error('Failed to assign accommodation');
         console.error('Error assigning room:', error);
       },

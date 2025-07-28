@@ -11,6 +11,7 @@ import { ApiService } from '../../services/api.service';
 import { EmployeeService } from '../../services/employee.service';
 import { AlertService } from '../../services/alert.service';
 import { AuthService } from '../../services/auth.service';
+import { TemplateService } from '../../services/template.service';
 
 // Components
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
@@ -28,7 +29,7 @@ import {
 import { TableData } from '../../interfaces/employee.interface';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { EmployeeDetails as Employee } from '../../dto';
-import { Template, TemplateType } from '../../dto/template.dto';
+import { Template } from '../../services/template.service';
 
 interface Organization {
   id: number;
@@ -178,7 +179,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
     { label: 'HOD', value: 'HOD' },
     { label: 'Worker', value: 'WORKER' },
     { label: 'Minister', value: 'MINISTER' },
-    { label: 'Pastor', value: 'PASTOR' },
     { label: 'Admin', value: 'ADMIN' },
   ];
 
@@ -283,15 +283,20 @@ export class SettingsComponent implements OnInit, OnDestroy {
   selectedAccommodationData: any = null;
   showAccommodationDeleteConfirmPrompt = false;
 
-  // Template properties
+  // Template data
   templates: Template[] = [];
-  isLoadingTemplates = false;
-  isCreatingTemplate = false;
-  isUpdatingTemplate = false;
-  isDeletingTemplate = false;
+  filteredTemplates: Template[] = [];
   templatesTableData: TableData[] = [];
-  showCreateTemplateModal = false;
+  isLoadingTemplates = false;
+  isCreatingTemplate: boolean = false;
+  isUpdatingTemplate: boolean = false;
+  isDeletingTemplate: boolean = false;
+  showCreateTemplateModal: boolean = false;
+  showUpdateTemplateModal: boolean = false;
   showTemplateDetails = false;
+  showDeleteTemplateConfirm: boolean = false;
+  templateToDelete: Template | null = null;
+  selectedTemplate: Template | null = null;
   selectedTemplateData: any = null;
   showTemplateDeleteConfirmPrompt = false;
 
@@ -322,8 +327,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   // Template table configuration
   templateTableHeader: TableHeader[] = [
-    { key: 'id', label: 'TEMPLATE ID' },
+    { key: 'id', label: 'ID' },
     { key: 'templateType', label: 'TEMPLATE TYPE' },
+
     { key: 'action', label: 'ACTION' },
   ];
 
@@ -364,11 +370,15 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   // Form data for new template
   newTemplate: {
-    type: TemplateType;
+    fileType: string;
     downloadUrl: string;
+    name: string;
+    isTraining: boolean;
   } = {
-    type: 'TRANSFER_APPROVAL' as TemplateType,
+    fileType: '',
     downloadUrl: '',
+    name: '',
+    isTraining: false,
   };
 
   // Removed HOD selection - using default values
@@ -383,7 +393,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private employeeService: EmployeeService,
     private alertService: AlertService,
-    private authService: AuthService
+    private authService: AuthService,
+    private templateService: TemplateService
   ) {
     this.userRole = this.authService.getWorkerRole();
   }
@@ -1939,24 +1950,29 @@ export class SettingsComponent implements OnInit, OnDestroy {
   loadTemplates() {
     this.isLoadingTemplates = true;
 
-    const sub = this.apiService.getTemplates().subscribe({
-      next: (response) => {
-        this.templates = response.data || [];
-        // Apply search filter if there's a search value
-        if (this.searchValue) {
-          this.applyTemplateSearch();
-        } else {
-          this.templatesTableData = this.transformTemplateToTableData(
-            this.templates
+    const sub = this.templateService
+      .getTemplates()
+      .pipe(
+        finalize(() => {
+          this.isLoadingTemplates = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.status === 'success' && response.data) {
+            this.templates = response.data;
+            this.templatesTableData = this.transformTemplateToTableData(
+              response.data
+            );
+          }
+        },
+        error: (error) => {
+          console.error('Error loading templates:', error);
+          this.alertService.error(
+            'Failed to load templates. Please try again.'
           );
-        }
-        this.isLoadingTemplates = false;
-      },
-      error: (error) => {
-        this.alertService.error('Failed to load templates');
-        this.isLoadingTemplates = false;
-      },
-    });
+        },
+      });
 
     this.subscriptions.push(sub);
   }
@@ -1964,30 +1980,32 @@ export class SettingsComponent implements OnInit, OnDestroy {
   transformTemplateToTableData(templates: Template[]): TableData[] {
     return templates.map((template) => ({
       id: template.id.toString(),
-      templateType: template.type.replace(/_/g, ' '),
+      templateType: template.type,
       originalData: template,
     }));
   }
 
-  // Apply search filter for templates
   applyTemplateSearch() {
-    if (!this.searchValue) {
-      this.templatesTableData = this.transformTemplateToTableData(
-        this.templates
+    if (!this.searchValue || this.searchValue.trim() === '') {
+      this.filteredTemplates = [...this.templates];
+    } else {
+      const searchLower = this.searchValue.toLowerCase().trim();
+      this.filteredTemplates = this.templates.filter((template) =>
+        template.type.toLowerCase().includes(searchLower)
       );
-      return;
     }
+    this.templatesTableData = this.transformTemplateToTableData(
+      this.filteredTemplates
+    );
+  }
 
-    const search = this.searchValue.toLowerCase();
-    const filteredTemplates = this.templates.filter((template) => {
-      return (
-        template.id.toString().includes(search) ||
-        template.type.toLowerCase().includes(search)
-      );
-    });
-
-    this.templatesTableData =
-      this.transformTemplateToTableData(filteredTemplates);
+  populateTemplateFormData(template: Template) {
+    this.newTemplate = {
+      fileType: template.type,
+      downloadUrl: template.downloadUrl,
+      name: template.type,
+      isTraining: false,
+    };
   }
 
   openCreateTemplateModal() {
@@ -2005,8 +2023,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   resetNewTemplateForm() {
     this.newTemplate = {
-      type: 'TRANSFER_APPROVAL' as TemplateType,
+      fileType: '',
       downloadUrl: '',
+      name: '',
+      isTraining: false,
     };
   }
 
@@ -2077,65 +2097,69 @@ export class SettingsComponent implements OnInit, OnDestroy {
   performTemplateDeletion(templateData?: any) {
     const templateToDelete = templateData || this.selectedTemplateData;
 
-    if (templateToDelete) {
-      // Loading state is already set in onConfirmCreate()
-      // Close the template details slide-out
-      this.closeTemplateDetails();
-
-      const sub = this.apiService
-        .deleteTemplate(templateToDelete.id)
-        .subscribe({
-          next: (response) => {
-            this.alertService.success('Template deleted successfully');
-            this.isDeletingTemplate = false;
-            this.selectedTemplateData = null;
-            this.loadTemplates(); // Refresh the list
-          },
-          error: (error) => {
-            this.alertService.error('Failed to delete template');
-            this.isDeletingTemplate = false;
-          },
-        });
-
-      this.subscriptions.push(sub);
+    if (!templateToDelete) {
+      this.alertService.error('No template selected for deletion');
+      return;
     }
+
+    this.isDeletingTemplate = true;
+
+    const sub = this.templateService
+      .deleteTemplate(templateToDelete.id)
+      .subscribe({
+        next: (response) => {
+          this.alertService.success('Template deleted successfully');
+          this.isDeletingTemplate = false;
+          this.showTemplateDeleteConfirmPrompt = false;
+          this.selectedTemplateData = null;
+          this.loadTemplates();
+        },
+        error: (error) => {
+          this.alertService.error('Failed to delete template');
+          this.isDeletingTemplate = false;
+        },
+      });
+
+    this.subscriptions.push(sub);
   }
 
   populateTemplateForm(template: Template) {
     this.newTemplate = {
-      type: template.type,
+      fileType: template.type,
       downloadUrl: template.downloadUrl,
+      name: template.type,
+      isTraining: false,
     };
   }
 
   onTemplateSubmitted(templateData: any) {
-    // Update the form data from the leave-details component
-    this.newTemplate = {
-      type: templateData.templateType || templateData.type,
-      downloadUrl: templateData.downloadUrl || templateData.documentUrl,
-    };
+    // Get the template type and uploaded file from the form
+    const templateType =
+      templateData.templateType || templateData.fileType || templateData.type;
+    const uploadedFile =
+      templateData.uploadedFiles?.[0]?.file || templateData.file;
+
+    if (!templateType || !uploadedFile) {
+      this.alertService.error('Template type and file are required');
+      return;
+    }
 
     if (this.isEditMode) {
       this.updateTemplate();
     } else {
-      this.submitCreateTemplate();
+      this.submitCreateTemplate(templateType, uploadedFile);
     }
   }
 
-  submitCreateTemplate() {
-    if (!this.newTemplate.type || !this.newTemplate.downloadUrl) {
-      this.alertService.error('Template type and document are required');
-      return;
-    }
-
+  submitCreateTemplate(templateType: string, uploadedFile: File) {
     this.isCreatingTemplate = true;
 
-    const payload = {
-      type: this.newTemplate.type,
-      downloadUrl: this.newTemplate.downloadUrl,
+    const request = {
+      type: templateType,
+      file: uploadedFile,
     };
 
-    const sub = this.apiService.createTemplate(payload).subscribe({
+    const sub = this.templateService.createTemplate(request).subscribe({
       next: (response) => {
         this.alertService.success('Template created successfully');
         this.isCreatingTemplate = false;
@@ -2164,7 +2188,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   updateTemplate() {
     if (!this.selectedTemplateData) return;
 
-    if (!this.newTemplate.type || !this.newTemplate.downloadUrl) {
+    if (!this.newTemplate.fileType || !this.newTemplate.downloadUrl) {
       this.alertService.error('Template type and document are required');
       return;
     }
@@ -2172,8 +2196,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.isUpdatingTemplate = true;
 
     const payload = {
-      type: this.newTemplate.type,
+      name: this.newTemplate.name || `Template ${this.newTemplate.fileType}`,
+      fileType: this.newTemplate.fileType,
       downloadUrl: this.newTemplate.downloadUrl,
+      isTraining: this.newTemplate.isTraining,
     };
 
     const sub = this.apiService

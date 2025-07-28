@@ -25,6 +25,12 @@ import {
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { Subscription } from 'rxjs';
 
+interface Position {
+  label: string;
+  value: string;
+  icon?: string;
+}
+
 @Component({
   selector: 'app-employee-promotion',
   imports: [
@@ -149,20 +155,19 @@ export class EmployeePromotionComponent implements OnInit, OnDestroy {
     { label: 'Rejected', value: 'REJECTED' },
   ];
 
-  filterTabs = [
-    {
-      label: 'All',
-      value: '',
-      icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z',
-    },
+  filterTabs: FilterTab[] = [
+    { label: 'All', value: '' },
+    { label: 'HOD', value: 'HOD' },
+    { label: 'Worker', value: 'WORKER' },
+    { label: 'Minister', value: 'MINISTER' },
+    { label: 'Admin', value: 'ADMIN' },
+  ];
+
+  positions: Position[] = [
+    { label: 'HOD', value: 'HOD', icon: 'M5 13l4 4L19 7' },
+    { label: 'Worker', value: 'WORKER', icon: 'M5 13l4 4L19 7' },
     { label: 'Minister', value: 'MINISTER', icon: 'M5 13l4 4L19 7' },
-    { label: 'Pastor', value: 'PASTOR', icon: 'M5 13l4 4L19 7' },
-    { label: 'Zonal Pastor', value: 'ZONAL_PASTOR', icon: 'M5 13l4 4L19 7' },
-    {
-      label: 'District Pastor',
-      value: 'DISTRICT_PASTOR',
-      icon: 'M5 13l4 4L19 7',
-    },
+    { label: 'Admin', value: 'ADMIN', icon: 'M5 13l4 4L19 7' },
   ];
 
   loadPromotions() {

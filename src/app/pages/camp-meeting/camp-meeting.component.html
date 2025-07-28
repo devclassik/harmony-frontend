@@ -104,7 +104,7 @@
               'Camp Meeting ' + selectedMeetingForAttendees.id)
           "
           [tableHeader]="attendeesTableHeader"
-          [tableData]="attendeesTableData"
+          [tableData]="filteredAttendeesTableData"
           [menuItems]="attendeesMenuItems"
           [currentView]="'table'"
           [showSearch]="true"
@@ -114,6 +114,7 @@
           [showViewAll]="false"
           [showButton]="false"
           (menuAction)="onTableMenuAction($event)"
+          (search)="onSearchChange($event)"
         ></app-table>
       </div>
 

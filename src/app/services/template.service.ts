@@ -5,11 +5,9 @@ import { environment } from '../../environments/environment';
 
 export interface Template {
   id: number;
-  documentId: string | null;
-  name: string;
   downloadUrl: string;
-  fileType: string;
-  isTraining: boolean;
+  type: string;
+  templateId: number | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -28,10 +26,8 @@ export interface CreateTemplateResponse {
 }
 
 export interface CreateTemplateRequest {
-  name: string;
-  downloadUrl: string;
-  fileType: string;
-  isTraining: boolean;
+  type: string;
+  file: File;
 }
 
 @Injectable({
@@ -46,7 +42,7 @@ export class TemplateService {
    * Get all templates
    */
   getTemplates(): Observable<TemplateResponse> {
-    return this.http.get<TemplateResponse>(`${this.apiUrl}/file-index`);
+    return this.http.get<TemplateResponse>(`${this.apiUrl}/template`);
   }
 
   /**
@@ -73,9 +69,13 @@ export class TemplateService {
   createTemplate(
     request: CreateTemplateRequest
   ): Observable<CreateTemplateResponse> {
+    const formData = new FormData();
+    formData.append('type', request.type);
+    formData.append('file', request.file);
+
     return this.http.post<CreateTemplateResponse>(
-      `${this.apiUrl}/file-index`,
-      request
+      `${this.apiUrl}/template`,
+      formData
     );
   }
 
@@ -86,7 +86,7 @@ export class TemplateService {
     templateId: number
   ): Observable<{ status: string; message: string }> {
     return this.http.delete<{ status: string; message: string }>(
-      `${this.apiUrl}/file-index/${templateId}`
+      `${this.apiUrl}/template/${templateId}`
     );
   }
 }

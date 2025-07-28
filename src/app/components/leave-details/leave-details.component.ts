@@ -100,51 +100,40 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   selectedAttendees: Employee[] = [];
 
   positions: Position[] = [
-    { label: 'Pastor', value: 'PASTOR' },
-    { label: 'Senior Pastor', value: 'SENIOR_PASTOR' },
-    { label: 'Cleaner', value: 'CLEANER' },
     { label: 'HOD', value: 'HOD' },
     { label: 'Worker', value: 'WORKER' },
     { label: 'Minister', value: 'MINISTER' },
-    { label: 'Overseer', value: 'OVERSEER' },
+    { label: 'Admin', value: 'ADMIN' },
   ];
 
   disciplineTypes: Position[] = [
-    { label: 'Verbal', value: 'VERBAL' },
-    { label: 'Written', value: 'WRITTEN' },
-    { label: 'Suspension', value: 'SUSPENSION' },
-    { label: 'Termination', value: 'TERMINATION' },
-    { label: 'Demotion', value: 'DEMOTION' },
-    { label: 'Promotion', value: 'PROMOTION' },
-  ];
-
-  transferTypes: Position[] = [
-    { label: 'Internal Transfer', value: 'INTERNAL' },
-    { label: 'External Transfer', value: 'EXTERNAL' },
-    { label: 'Department Transfer', value: 'DEPARTMENT' },
-    { label: 'Location Transfer', value: 'LOCATION' },
-  ];
-
-  retrenchmentTypes: Position[] = [
-    { label: 'Pastor', value: 'PASTOR' },
-    { label: 'Senior Pastor', value: 'SENIOR_PASTOR' },
-    { label: 'Cleaner', value: 'CLEANER' },
     { label: 'HOD', value: 'HOD' },
     { label: 'Worker', value: 'WORKER' },
     { label: 'Minister', value: 'MINISTER' },
-    { label: 'Overseer', value: 'OVERSEER' },
+    { label: 'Admin', value: 'ADMIN' },
+  ];
+
+  transferTypes: Position[] = [
+    { label: 'HOD', value: 'HOD' },
+    { label: 'Worker', value: 'WORKER' },
+    { label: 'Minister', value: 'MINISTER' },
+    { label: 'Admin', value: 'ADMIN' },
+  ];
+
+  retrenchmentTypes: Position[] = [
+    { label: 'HOD', value: 'HOD' },
+    { label: 'Worker', value: 'WORKER' },
+    { label: 'Minister', value: 'MINISTER' },
+    { label: 'Admin', value: 'ADMIN' },
   ];
 
   // Add Employee-specific options
   departmentOptions: any[] = [];
   roleOptions: Position[] = [
-    { label: 'Pastor', value: 'PASTOR' },
-    { label: 'Senior Pastor', value: 'SENIOR_PASTOR' },
-    { label: 'Cleaner', value: 'CLEANER' },
     { label: 'HOD', value: 'HOD' },
     { label: 'Worker', value: 'WORKER' },
     { label: 'Minister', value: 'MINISTER' },
-    { label: 'Overseer', value: 'OVERSEER' },
+    { label: 'Admin', value: 'ADMIN' },
   ];
   employmentTypeOptions: Position[] = [
     { label: 'staff', value: 'STAFF' },
@@ -196,6 +185,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     downloadUrl: '',
     fileType: '',
     isTraining: false,
+    templateName: '',
     // Camp Meeting-specific fields
     agenda: '',
     attendees: [] as number[],
@@ -497,6 +487,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     if (this.preFilledTemplateData) {
       this.formData.templateType = this.preFilledTemplateData.type || '';
       this.formData.downloadUrl = this.preFilledTemplateData.downloadUrl || '';
+      this.formData.templateName = this.preFilledTemplateData.name || '';
 
       // If there's a download URL, create a virtual uploaded file for display
       if (this.preFilledTemplateData.downloadUrl) {
@@ -520,6 +511,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   resetTemplateForm() {
     this.formData.templateType = '';
     this.formData.downloadUrl = '';
+    this.formData.templateName = '';
     this.uploadedFiles = [];
   }
 
@@ -966,14 +958,15 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
 
       // Handle Template submission
       if (this.isTemplate) {
-        // Get the uploaded file URL
+        // Get the uploaded file
         const uploadedFile = this.uploadedFiles.find(
           (file) => file.uploadStatus === 'completed'
         );
-        if (uploadedFile && uploadedFile.url) {
+        if (uploadedFile && uploadedFile.file) {
           const submissionData = {
             templateType: this.formData.templateType,
-            downloadUrl: uploadedFile.url,
+            uploadedFiles: this.uploadedFiles,
+            file: uploadedFile.file,
           };
           this.submit.emit(submissionData);
           this.resetForm();
@@ -1068,7 +1061,28 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
         return;
       }
 
-      // Add file to uploaded files with initial status
+      // For templates, don't upload immediately - just store the file
+      if (this.isTemplate) {
+        const uploadedFile: {
+          name: string;
+          size: number;
+          file: File;
+          uploadStatus: 'uploading' | 'completed' | 'error';
+          progress: number;
+          url?: string;
+        } = {
+          name: file.name,
+          size: file.size,
+          file: file,
+          uploadStatus: 'completed', // Mark as completed since we're not uploading yet
+          progress: 100,
+        };
+
+        this.uploadedFiles = [uploadedFile]; // Replace any existing files
+        return;
+      }
+
+      // For other forms, upload immediately as before
       const uploadedFile: {
         name: string;
         size: number;
@@ -1142,7 +1156,28 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
         return;
       }
 
-      // Add file to uploaded files with initial status
+      // For templates, don't upload immediately - just store the file
+      if (this.isTemplate) {
+        const uploadedFile: {
+          name: string;
+          size: number;
+          file: File;
+          uploadStatus: 'uploading' | 'completed' | 'error';
+          progress: number;
+          url?: string;
+        } = {
+          name: file.name,
+          size: file.size,
+          file: file,
+          uploadStatus: 'completed', // Mark as completed since we're not uploading yet
+          progress: 100,
+        };
+
+        this.uploadedFiles = [uploadedFile]; // Replace any existing files
+        return;
+      }
+
+      // For other forms, upload immediately as before
       const uploadedFile: {
         name: string;
         size: number;
@@ -1399,6 +1434,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       downloadUrl: '',
       fileType: '',
       isTraining: false,
+      templateName: '',
       // Camp Meeting-specific fields
       agenda: '',
       attendees: [],

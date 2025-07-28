@@ -45,10 +45,10 @@ export class CreatePromotionRequestComponent implements OnInit {
   searchTerm: string = '';
 
   positions: Position[] = [
+    { label: 'HOD', value: 'HOD' },
+    { label: 'Worker', value: 'WORKER' },
     { label: 'Minister', value: 'MINISTER' },
-    { label: 'Pastor', value: 'PASTOR' },
-    { label: 'Zonal Pastor', value: 'ZONAL_PASTOR' },
-    { label: 'District Pastor', value: 'DISTRICT_PASTOR' },
+    { label: 'Admin', value: 'ADMIN' },
   ];
 
   constructor(
