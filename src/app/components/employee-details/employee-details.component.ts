@@ -75,6 +75,7 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   @Input() accommodationData: any = null; // Accommodation data for accommodation management
   @Input() isTemplateView: boolean = false; // Show template view
   @Input() templateData: any = null; // Template data for template management
+  @Input() isAttendeeView: boolean = false; // Show attendee view (only Employee Info and Accommodation Details)
 
   // Permission editing properties
   isEditingPermissions: boolean = false;
@@ -94,6 +95,7 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   @Input() showEditDeleteButtons: boolean = false;
   @Output() edit = new EventEmitter<void>();
   @Output() delete = new EventEmitter<void>();
+  @Output() assignAccommodation = new EventEmitter<void>();
 
   documents: any[] = [];
   pdfModalOpen = false;
@@ -192,6 +194,35 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
 
   onDelete() {
     this.delete.emit();
+  }
+
+  onAssignAccommodation() {
+    this.assignAccommodation.emit();
+  }
+
+  // Getter methods for accommodation properties to avoid type casting in template
+  get hasAssignedRoom(): boolean {
+    return (this.employeeDetails as any)?.hasAssignedRoom || false;
+  }
+
+  get assignedRoom(): any {
+    return (this.employeeDetails as any)?.assignedRoom || null;
+  }
+
+  get accommodationName(): string {
+    return this.assignedRoom?.name || 'N/A';
+  }
+
+  get accommodationType(): string {
+    return this.assignedRoom?.type || 'N/A';
+  }
+
+  get roomNumber(): string {
+    return this.assignedRoom?.roomNumber || 'N/A';
+  }
+
+  get petsAllowed(): string {
+    return this.assignedRoom?.petsAllowed ? 'Yes' : 'No';
   }
 
   // Permission editing methods

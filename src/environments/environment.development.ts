@@ -111,6 +111,7 @@ export const environment = {
       create: '/camp-meeting',
       update: '/camp-meeting',
       delete: '/camp-meeting',
+      attendees: '/camp-meeting/attendees',
     },
     posts: {
       getAll: 'posts',

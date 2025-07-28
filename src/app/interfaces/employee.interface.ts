@@ -16,7 +16,9 @@ export interface TableData {
     | 'On Discipline'
     | 'Approved'
     | 'Pending'
-    | 'Rejected';
+    | 'Rejected'
+    | 'Assigned'
+    | 'Unassigned';
   imageUrl?: string;
   disciplineType?: DisciplineType | string;
   originalDisciplineType?: DisciplineType;

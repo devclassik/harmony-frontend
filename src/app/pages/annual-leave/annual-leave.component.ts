@@ -374,7 +374,12 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
 
   // View change handler
   onViewChange(viewType: string) {
-    this.currentView = viewType as 'table' | 'calendar';
+    // Handle view switching
+    if (viewType === 'table') {
+      this.currentView = 'table';
+    } else if (viewType === 'calendar') {
+      this.currentView = 'calendar';
+    }
   }
 
   // Calendar event click handler

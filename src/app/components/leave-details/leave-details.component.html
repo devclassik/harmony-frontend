@@ -916,6 +916,21 @@
             />
           </div>
 
+          <!-- Is Training Checkbox -->
+          <div class="mb-4">
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="isTraining"
+                [(ngModel)]="formData.isTraining"
+                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              />
+              <label for="isTraining" class="ml-2 block text-sm text-gray-700">
+                This is a training document
+              </label>
+            </div>
+          </div>
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2"
               >Upload Document</label
@@ -1073,7 +1088,8 @@
             !isCampMeeting &&
             !isAddEmployee &&
             !isAccommodation &&
-            !isTemplate
+            !isTemplate &&
+            !isDepartment
           "
         >
           <label class="block text-sm font-medium text-gray-700 mb-2"
@@ -1728,15 +1744,26 @@
 
         <!-- Camp Meeting Create Fields -->
         <div *ngIf="isCampMeeting && mode === 'create'" class="space-y-8">
-          <!-- Date and Agenda on the same line -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Date Range and Agenda -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Date
+                Start Date
               </label>
               <input
                 type="date"
                 [(ngModel)]="formData.startDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                End Date
+              </label>
+              <input
+                type="date"
+                [(ngModel)]="formData.endDate"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
               />
@@ -2653,7 +2680,7 @@
             </div>
 
             <!-- Attendees -->
-            <div>
+            <!-- <div>
               <div class="text-sm text-gray-500 mb-2">Attendees</div>
               <div class="font-medium text-gray-900 leading-relaxed">
                 <span
@@ -2663,7 +2690,7 @@
                   }}<span *ngIf="i < leaveData.attendees.length - 1">, </span>
                 </span>
               </div>
-            </div>
+            </div> -->
           </div>
           <!-- Documents Section -->
           <div
@@ -2729,279 +2756,281 @@
           </div>
         </ng-container>
       </div>
-    </div>
 
-    <!-- PERMISSION MODE -->
-    <div *ngIf="isPermission && mode === 'view'">
-      <!-- Header -->
-      <div class="flex items-center gap-2 mb-6">
-        <h2 class="text-xl font-semibold text-gray-900">
-          {{ title }}
-        </h2>
-      </div>
+      <!-- PERMISSION MODE -->
+      <div *ngIf="isPermission && mode === 'view'">
+        <!-- Header -->
+        <div class="flex items-center gap-2 mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            {{ title }}
+          </h2>
+        </div>
 
-      <div class="border-b border-gray-200 mb-8"></div>
+        <div class="border-b border-gray-200 mb-8"></div>
 
-      <!-- Permission Information Section -->
-      <div class="space-y-6">
-        <!-- Permission Information Accordion -->
-        <div class="border border-gray-200 rounded-lg">
-          <button
-            type="button"
-            class="w-full px-4 py-3 text-left flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
-            (click)="togglePermissionInfo()"
-          >
-            <span class="text-lg font-medium text-gray-900"
-              >Permission Information</span
+        <!-- Permission Information Section -->
+        <div class="space-y-6">
+          <!-- Permission Information Accordion -->
+          <div class="border border-gray-200 rounded-lg">
+            <button
+              type="button"
+              class="w-full px-4 py-3 text-left flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+              (click)="togglePermissionInfo()"
             >
-            <svg
-              class="w-5 h-5 text-gray-500 transition-transform"
-              [class.rotate-180]="showPermissionInfo"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-          </button>
-
-          <div *ngIf="showPermissionInfo" class="p-4 space-y-4">
-            <!-- Role -->
-            <div>
-              <label class="block text-sm font-medium text-gray-500 mb-1"
-                >Role</label
+              <span class="text-lg font-medium text-gray-900"
+                >Permission Information</span
               >
-              <p class="text-sm font-medium text-gray-900">
-                {{ permissionData?.roleName }}
-              </p>
-            </div>
-
-            <!-- Permissions Table -->
-            <div>
-              <label class="block text-sm font-medium text-gray-500 mb-2"
-                >Permissions</label
+              <svg
+                class="w-5 h-5 text-gray-500 transition-transform"
+                [class.rotate-180]="showPermissionInfo"
+                fill="currentColor"
+                viewBox="0 0 20 20"
               >
+                <path
+                  fill-rule="evenodd"
+                  d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
 
-              <!-- Search Filter -->
-              <div class="mb-4">
-                <div class="relative">
-                  <input
-                    type="text"
-                    placeholder="Filter by features..."
-                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                  />
-                  <svg
-                    class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    ></path>
-                  </svg>
-                </div>
+            <div *ngIf="showPermissionInfo" class="p-4 space-y-4">
+              <!-- Role -->
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1"
+                  >Role</label
+                >
+                <p class="text-sm font-medium text-gray-900">
+                  {{ permissionData?.roleName }}
+                </p>
               </div>
 
-              <!-- Permissions Grid -->
-              <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                  <thead class="bg-gray-50">
-                    <tr>
-                      <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              <!-- Permissions Table -->
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-2"
+                  >Permissions</label
+                >
+
+                <!-- Search Filter -->
+                <div class="mb-4">
+                  <div class="relative">
+                    <input
+                      type="text"
+                      placeholder="Filter by features..."
+                      class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                    />
+                    <svg
+                      class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      ></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Permissions Grid -->
+                <div class="overflow-x-auto">
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Feature
+                        </th>
+                        <th
+                          class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Create
+                        </th>
+                        <th
+                          class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          View
+                        </th>
+                        <th
+                          class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Edit
+                        </th>
+                        <th
+                          class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Delete
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      <tr
+                        *ngFor="let permission of permissionData?.permissions"
                       >
-                        Feature
-                      </th>
-                      <th
-                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Create
-                      </th>
-                      <th
-                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        View
-                      </th>
-                      <th
-                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Edit
-                      </th>
-                      <th
-                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Delete
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="bg-white divide-y divide-gray-200">
-                    <tr *ngFor="let permission of permissionData?.permissions">
-                      <td
-                        class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                      >
-                        {{ permission.feature }}
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <div class="flex justify-center">
-                          <svg
-                            *ngIf="permission.canCreate"
-                            class="w-5 h-5 text-green-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                          <svg
-                            *ngIf="!permission.canCreate"
-                            class="w-5 h-5 text-gray-300"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                        </div>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <div class="flex justify-center">
-                          <svg
-                            *ngIf="permission.canView"
-                            class="w-5 h-5 text-green-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                          <svg
-                            *ngIf="!permission.canView"
-                            class="w-5 h-5 text-gray-300"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                        </div>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <div class="flex justify-center">
-                          <svg
-                            *ngIf="permission.canEdit"
-                            class="w-5 h-5 text-green-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                          <svg
-                            *ngIf="!permission.canEdit"
-                            class="w-5 h-5 text-gray-300"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                        </div>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <div class="flex justify-center">
-                          <svg
-                            *ngIf="permission.canDelete"
-                            class="w-5 h-5 text-green-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                          <svg
-                            *ngIf="!permission.canDelete"
-                            class="w-5 h-5 text-gray-300"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                        >
+                          {{ permission.feature }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                          <div class="flex justify-center">
+                            <svg
+                              *ngIf="permission.canCreate"
+                              class="w-5 h-5 text-green-500"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                            <svg
+                              *ngIf="!permission.canCreate"
+                              class="w-5 h-5 text-gray-300"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                          <div class="flex justify-center">
+                            <svg
+                              *ngIf="permission.canView"
+                              class="w-5 h-5 text-green-500"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                            <svg
+                              *ngIf="!permission.canView"
+                              class="w-5 h-5 text-gray-300"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                          <div class="flex justify-center">
+                            <svg
+                              *ngIf="permission.canEdit"
+                              class="w-5 h-5 text-green-500"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                            <svg
+                              *ngIf="!permission.canEdit"
+                              class="w-5 h-5 text-gray-300"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                          <div class="flex justify-center">
+                            <svg
+                              *ngIf="permission.canDelete"
+                              class="w-5 h-5 text-green-500"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                            <svg
+                              *ngIf="!permission.canDelete"
+                              class="w-5 h-5 text-gray-300"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Slide Arrow Button - positioned to work for both create and view modes -->
+    <button
+      (click)="mode === 'create' ? onCancel() : onClose()"
+      class="fixed top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center border border-gray-200 hover:bg-green-50 z-50 transition-all duration-200"
+      [style.right.px]="590"
+      aria-label="Close"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5 text-gray-500"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 5l7 7-7 7"
+        />
+      </svg>
+    </button>
   </div>
 
-  <!-- Slide Arrow Button - positioned to work for both create and view modes -->
-  <button
-    (click)="mode === 'create' ? onCancel() : onClose()"
-    class="fixed top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center border border-gray-200 hover:bg-green-50 z-50 transition-all duration-200"
-    [style.right.px]="590"
-    aria-label="Close"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5 text-gray-500"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M9 5l7 7-7 7"
-      />
-    </svg>
-  </button>
+  <!-- Confirmation Modal -->
+  <app-confirm-prompt
+    *ngIf="showConfirmModal"
+    [title]="'Confirm'"
+    [text]="confirmationText"
+    [yesButtonText]="'Yes'"
+    [noButtonText]="'No'"
+    (confirmed)="onConfirmSubmit($event)"
+    (closed)="onConfirmCancel()"
+  ></app-confirm-prompt>
 </div>
-
-<!-- Confirmation Modal -->
-<app-confirm-prompt
-  *ngIf="showConfirmModal"
-  [title]="'Confirm'"
-  [text]="confirmationText"
-  [yesButtonText]="'Yes'"
-  [noButtonText]="'No'"
-  (confirmed)="onConfirmSubmit($event)"
-  (closed)="onConfirmCancel()"
-></app-confirm-prompt>

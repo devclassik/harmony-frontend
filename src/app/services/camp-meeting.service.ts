@@ -3,8 +3,36 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { environment } from '../../environments/environment';
 
+// Interface for camp meeting attendance
+export interface CampMeetingAttendance {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+  campMeeting: {
+    id: number;
+    name?: string;
+    agenda: string;
+    startDate: string;
+    endDate: string;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt?: string;
+    documents?: string;
+  };
+  assignedRoom?: {
+    id: number;
+    name: string;
+    capacity: number;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt?: string;
+  } | null;
+}
+
 // Interface for camp meeting attendee
 export interface CampMeetingAttendee {
+  departments: any;
   id: number;
   employeeId: string;
   title?: string;
@@ -32,11 +60,16 @@ export interface CampMeetingAttendee {
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;
+  campMeetingAttendances?: CampMeetingAttendance[];
   user?: {
     id: number;
     email: string;
     password: string;
     verifyEmailOTP: string;
+    role: {
+      id: number;
+      name: string;
+    };
     isEmailVerified: boolean;
     passwordResetOTP?: string;
     isLoggedIn: boolean;
@@ -82,6 +115,13 @@ export interface CreateCampMeetingResponse {
   data: CampMeetingRecord;
 }
 
+// Interface for attendees API response
+export interface AttendeesApiResponse {
+  status: string;
+  message: string;
+  data: CampMeetingAttendee[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -121,6 +161,12 @@ export class CampMeetingService {
     return this.apiService.delete<CreateCampMeetingResponse>(
       `${environment.routes.campMeeting.delete}/${id}`
     );
+  }
+
+  // Get attendees for a specific camp meeting
+  getCampMeetingAttendees(meetingId: number): Observable<AttendeesApiResponse> {
+    const url = `${environment.routes.campMeeting.attendees}/${meetingId}`;
+    return this.apiService.get<AttendeesApiResponse>(url);
   }
 
   // Transform camp meeting data for calendar display

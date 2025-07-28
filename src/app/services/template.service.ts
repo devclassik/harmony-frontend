@@ -9,6 +9,7 @@ export interface Template {
   name: string;
   downloadUrl: string;
   fileType: string;
+  isTraining: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -30,6 +31,7 @@ export interface CreateTemplateRequest {
   name: string;
   downloadUrl: string;
   fileType: string;
+  isTraining: boolean;
 }
 
 @Injectable({

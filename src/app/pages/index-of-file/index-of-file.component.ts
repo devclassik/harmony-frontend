@@ -142,8 +142,13 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   }
 
   transformTemplateData() {
-    this.documentsData = this.templates.map((template) => {
-      console.log('Template data:', template); // Debug log
+    // Separate documents and training materials based on isTraining flag
+    const documents = this.templates.filter((template) => !template.isTraining);
+    const trainingMaterials = this.templates.filter(
+      (template) => template.isTraining
+    );
+
+    this.documentsData = documents.map((template) => {
       return {
         id: template.id.toString(),
         documentName: template.name,
@@ -154,9 +159,16 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
       };
     });
 
-    // For now, keeping training data empty as it's not part of the template API
-    // If you have a separate training API endpoint, you can implement it similarly
-    this.trainingData = [];
+    this.trainingData = trainingMaterials.map((template) => {
+      return {
+        id: template.id.toString(),
+        documentName: template.name,
+        date: this.formatDate(template.createdAt),
+        documentType: template.fileType,
+        downloadUrl: template.downloadUrl,
+        templateType: template.fileType,
+      };
+    });
   }
 
   // Role-based button visibility - only show for HOD/Pastor
@@ -484,6 +496,7 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
       name: formData.name,
       downloadUrl: formData.downloadUrl,
       fileType: formData.fileType,
+      isTraining: formData.isTraining || false,
     };
 
     const createSub = this.templateService.createTemplate(request).subscribe({

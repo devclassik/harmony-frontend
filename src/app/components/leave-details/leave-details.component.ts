@@ -195,6 +195,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     documentName: '',
     downloadUrl: '',
     fileType: '',
+    isTraining: false,
     // Camp Meeting-specific fields
     agenda: '',
     attendees: [] as number[],
@@ -339,12 +340,20 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     if (this.isCampMeeting) {
       this.formData.agenda = this.leaveData.agenda || '';
 
-      // Format date for HTML date input (YYYY-MM-DD)
+      // Format start date for HTML date input (YYYY-MM-DD)
       if (this.leaveData.startDate) {
         const date = new Date(this.leaveData.startDate);
         this.formData.startDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
       } else {
         this.formData.startDate = '';
+      }
+
+      // Format end date for HTML date input (YYYY-MM-DD)
+      if (this.leaveData.endDate) {
+        const date = new Date(this.leaveData.endDate);
+        this.formData.endDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      } else {
+        this.formData.endDate = '';
       }
 
       // Handle attendees - they come as objects with id property
@@ -444,7 +453,8 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     this.formData.role = this.preFilledEmployeeData.role || '';
     this.formData.employmentType =
       this.preFilledEmployeeData.employmentType || '';
-    this.formData.employeeLocation = this.preFilledEmployeeData.location || '';
+    this.formData.employeeLocation =
+      this.preFilledEmployeeData.mailingAddress?.address || '';
   }
 
   // Populate accommodation form data for Accommodation mode
@@ -761,7 +771,40 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   }
 
   onDelete() {
-    this.delete.emit(this.selectedMeetingData);
+    this.delete.emit(this.leaveData);
+  }
+
+  // Helper function to properly format image URLs
+  formatImageUrl(url: string | null | undefined): string {
+    // First try to get the photo URL from localStorage if no URL is provided
+    if (!url) {
+      const storedPhotoUrl = localStorage.getItem('workerPhotoUrl');
+      if (storedPhotoUrl && storedPhotoUrl !== '') {
+        url = storedPhotoUrl;
+      }
+    }
+
+    // If still no URL, use a generic avatar fallback
+    if (!url || url === '') {
+      return 'assets/svg/gender.svg';
+    }
+
+    // If it's already a complete URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // If it's a relative path, prepend the base URL
+    const baseUrl = 'https://harmoney-backend.onrender.com';
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+  }
+
+  // Handle image loading errors
+  handleImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'assets/svg/gender.svg';
+    }
   }
 
   // New methods for create mode
@@ -881,6 +924,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
             name: this.formData.documentName,
             downloadUrl: uploadedFile.url,
             fileType: this.getFileTypeFromFileName(uploadedFile.name),
+            isTraining: this.formData.isTraining,
           };
           this.submit.emit(submissionData);
           this.resetForm();
@@ -1172,8 +1216,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
         this.formData.email &&
         this.formData.departmentId &&
         this.formData.role &&
-        this.formData.employmentType &&
-        this.formData.employeeLocation
+        this.formData.employmentType
       );
     }
 
@@ -1206,6 +1249,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     if (this.isCampMeeting && this.mode === 'create') {
       return !!(
         this.formData.startDate &&
+        this.formData.endDate &&
         this.formData.agenda &&
         this.formData.attendees.length > 0
       );
@@ -1354,6 +1398,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       documentName: '',
       downloadUrl: '',
       fileType: '',
+      isTraining: false,
       // Camp Meeting-specific fields
       agenda: '',
       attendees: [],
