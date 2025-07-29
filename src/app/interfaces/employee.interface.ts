@@ -3,6 +3,10 @@ import { DisciplineType } from '../dto/discipline.dto';
 export interface TableData {
   id: string;
   name?: string;
+  accommodationName?: string;
+  accommodationType?: string;
+  accommodationRoomCount?: string;
+  email?: string;
   department?: string;
   role?: string;
   status?:
@@ -12,7 +16,9 @@ export interface TableData {
     | 'On Discipline'
     | 'Approved'
     | 'Pending'
-    | 'Rejected';
+    | 'Rejected'
+    | 'Assigned'
+    | 'Unassigned';
   imageUrl?: string;
   disciplineType?: DisciplineType | string;
   originalDisciplineType?: DisciplineType;
@@ -44,6 +50,8 @@ export interface TableData {
     name: string;
     image: string;
   };
+  features?: string; // For storing comma-separated features list
+  originalData?: any; // For storing original employee data
 }
 
 export interface EmployeeInfo {

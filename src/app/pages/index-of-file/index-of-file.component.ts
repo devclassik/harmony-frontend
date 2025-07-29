@@ -10,10 +10,10 @@ import { DocumentViewerComponent } from '../../components/document-viewer/docume
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 import { CommonModule } from '@angular/common';
 import {
-  TemplateService,
-  Template,
-  CreateTemplateRequest,
-} from '../../services/template.service';
+  FileIndexService,
+  FileIndex,
+  CreateFileIndexRequest,
+} from '../../services/file-index.service';
 import { AlertService } from '../../services/alert.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
@@ -46,7 +46,7 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   // Create document modal
   showCreateDocument: boolean = false;
   showDeleteConfirm: boolean = false;
-  templateToDelete: Template | null = null;
+  templateToDelete: FileIndex | null = null;
 
   // Document viewer properties
   showDocumentViewer: boolean = false;
@@ -80,7 +80,7 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   ];
 
   // Template data from API
-  templates: Template[] = [];
+  templates: FileIndex[] = [];
   documentsData: TableData[] = [];
   trainingData: TableData[] = [];
 
@@ -103,7 +103,7 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private templateService: TemplateService,
+    private fileIndexService: FileIndexService,
     private alertService: AlertService,
     private authService: AuthService
   ) {
@@ -121,8 +121,8 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   loadTemplates() {
     this.isLoadingTemplates = true;
 
-    const loadSub = this.templateService.getTemplates().subscribe({
-      next: (response) => {
+    const loadSub = this.fileIndexService.getFileIndex().subscribe({
+      next: (response: any) => {
         this.isLoadingTemplates = false;
         if (response.status === 'success') {
           this.templates = response.data;
@@ -131,7 +131,7 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
           this.applyFilters();
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         this.isLoadingTemplates = false;
         console.error('Error loading templates:', error);
         this.alertService.error('Failed to load templates. Please try again.');
@@ -142,8 +142,8 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   }
 
   transformTemplateData() {
+    // All templates are documents, no training materials
     this.documentsData = this.templates.map((template) => {
-      console.log('Template data:', template); // Debug log
       return {
         id: template.id.toString(),
         documentName: template.name,
@@ -154,8 +154,7 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
       };
     });
 
-    // For now, keeping training data empty as it's not part of the template API
-    // If you have a separate training API endpoint, you can implement it similarly
+    // No training materials
     this.trainingData = [];
   }
 
@@ -397,22 +396,20 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   }
 
   onDocumentViewerDownload(document: TableData): void {
-    // Find the template by ID to get the correct download URL
     const template = this.templates.find(
       (t) => t.id.toString() === document.id
     );
     if (template && template.downloadUrl) {
-      this.templateService.downloadTemplate(template.downloadUrl);
+      this.fileIndexService.downloadFileIndex(template.downloadUrl);
     } else {
       this.alertService.error('Download URL not available for this template.');
     }
   }
 
   downloadDocument(doc: TableData): void {
-    // Find the template by ID to get the correct download URL
     const template = this.templates.find((t) => t.id.toString() === doc.id);
     if (template && template.downloadUrl) {
-      this.templateService.downloadTemplate(template.downloadUrl);
+      this.fileIndexService.downloadFileIndex(template.downloadUrl);
     } else {
       this.alertService.error('Download URL not available for this template.');
     }
@@ -480,14 +477,15 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   onCreateDocumentSubmitted(formData: any): void {
     this.isCreatingTemplate = true;
 
-    const request: CreateTemplateRequest = {
+    const request: CreateFileIndexRequest = {
       name: formData.name,
       downloadUrl: formData.downloadUrl,
       fileType: formData.fileType,
+      isTraining: formData.isTraining || false,
     };
 
-    const createSub = this.templateService.createTemplate(request).subscribe({
-      next: (response) => {
+    const createSub = this.fileIndexService.createFileIndex(request).subscribe({
+      next: (response: any) => {
         this.isCreatingTemplate = false;
         if (response.status === 'success') {
           this.alertService.success('Document created successfully!');
@@ -498,7 +496,7 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
           );
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         this.isCreatingTemplate = false;
         console.error('Error creating document:', error);
         this.alertService.error('Failed to create document. Please try again.');
@@ -509,7 +507,7 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
   }
 
   // Delete methods
-  onDeleteTemplate(template: Template): void {
+  onDeleteTemplate(template: FileIndex): void {
     this.templateToDelete = template;
     this.showDeleteConfirm = true;
   }
@@ -518,10 +516,10 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
     if (confirmed && this.templateToDelete) {
       this.isDeletingTemplate = true;
 
-      const deleteSub = this.templateService
-        .deleteTemplate(this.templateToDelete.id)
+      const deleteSub = this.fileIndexService
+        .deleteFileIndex(this.templateToDelete.id)
         .subscribe({
-          next: (response) => {
+          next: (response: any) => {
             this.isDeletingTemplate = false;
             if (response.status === 'success') {
               this.alertService.success('Document deleted successfully!');
@@ -532,7 +530,7 @@ export class IndexOfFileComponent implements OnInit, OnDestroy {
               );
             }
           },
-          error: (error) => {
+          error: (error: any) => {
             this.isDeletingTemplate = false;
             console.error('Error deleting document:', error);
             this.alertService.error(

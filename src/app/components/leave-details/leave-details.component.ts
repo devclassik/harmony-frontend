@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { FORM_OPTIONS } from '../../shared/constants/form-options';
 import { FileUploadService } from '../../shared/services/file-upload.service';
 import { EmployeeService } from '../../services/employee.service';
+import { DepartmentService } from '../../services/department.service';
 import { AlertService } from '../../services/alert.service';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { finalize } from 'rxjs/operators';
@@ -61,6 +62,16 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   @Input() isEditMode: boolean = false; // New input for edit mode
   @Input() canEdit: boolean = false; // New input for edit permissions
   @Input() selectedMeetingData: any = null; // New input for meeting data
+  @Input() isAddEmployee: boolean = false; // New input for add employee mode
+  @Input() preFilledEmployeeData: any = null; // New input for pre-filled employee data in edit mode
+  @Input() isPermission: boolean = false; // New input for permission mode
+  @Input() permissionData: any = null; // New input for permission data
+  @Input() isAccommodation: boolean = false; // New input for accommodation mode
+  @Input() preFilledAccommodationData: any = null; // New input for pre-filled accommodation data in edit mode
+  @Input() isDepartment: boolean = false; // New input for department mode
+  @Input() preFilledDepartmentData: any = null; // New input for pre-filled department data in edit mode
+  @Input() isTemplate: boolean = false; // New input for template mode
+  @Input() preFilledTemplateData: any = null; // New input for pre-filled template data in edit mode
   @Output() close = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() submit = new EventEmitter<any>();
@@ -69,6 +80,9 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
 
   openSection: string | null = null;
   showConfirmModal: boolean = false;
+
+  // Permission-specific properties
+  showPermissionInfo = true;
 
   // Promotion-specific properties
   filteredEmployees: Employee[] = [];
@@ -86,44 +100,57 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   selectedAttendees: Employee[] = [];
 
   positions: Position[] = [
-    { label: 'Pastor', value: 'PASTOR' },
-    { label: 'Senior Pastor', value: 'SENIOR_PASTOR' },
-    { label: 'Cleaner', value: 'CLEANER' },
     { label: 'HOD', value: 'HOD' },
     { label: 'Worker', value: 'WORKER' },
     { label: 'Minister', value: 'MINISTER' },
-    { label: 'Overseer', value: 'OVERSEER' },
+    { label: 'Admin', value: 'ADMIN' },
   ];
 
   disciplineTypes: Position[] = [
-    { label: 'Verbal', value: 'VERBAL' },
-    { label: 'Written', value: 'WRITTEN' },
-    { label: 'Suspension', value: 'SUSPENSION' },
-    { label: 'Termination', value: 'TERMINATION' },
-    { label: 'Demotion', value: 'DEMOTION' },
-    { label: 'Promotion', value: 'PROMOTION' },
-  ];
-
-  transferTypes: Position[] = [
-    { label: 'Internal Transfer', value: 'INTERNAL' },
-    { label: 'External Transfer', value: 'EXTERNAL' },
-    { label: 'Department Transfer', value: 'DEPARTMENT' },
-    { label: 'Location Transfer', value: 'LOCATION' },
-  ];
-
-  retrenchmentTypes: Position[] = [
-    { label: 'Pastor', value: 'PASTOR' },
-    { label: 'Senior Pastor', value: 'SENIOR_PASTOR' },
-    { label: 'Cleaner', value: 'CLEANER' },
     { label: 'HOD', value: 'HOD' },
     { label: 'Worker', value: 'WORKER' },
     { label: 'Minister', value: 'MINISTER' },
-    { label: 'Overseer', value: 'OVERSEER' },
+    { label: 'Admin', value: 'ADMIN' },
+  ];
+
+  transferTypes: Position[] = [
+    { label: 'HOD', value: 'HOD' },
+    { label: 'Worker', value: 'WORKER' },
+    { label: 'Minister', value: 'MINISTER' },
+    { label: 'Admin', value: 'ADMIN' },
+  ];
+
+  retrenchmentTypes: Position[] = [
+    { label: 'HOD', value: 'HOD' },
+    { label: 'Worker', value: 'WORKER' },
+    { label: 'Minister', value: 'MINISTER' },
+    { label: 'Admin', value: 'ADMIN' },
+  ];
+
+  // Add Employee-specific options
+  departmentOptions: any[] = [];
+  roleOptions: Position[] = [
+    { label: 'HOD', value: 'HOD' },
+    { label: 'Worker', value: 'WORKER' },
+    { label: 'Minister', value: 'MINISTER' },
+    { label: 'Admin', value: 'ADMIN' },
+  ];
+  employmentTypeOptions: Position[] = [
+    { label: 'staff', value: 'STAFF' },
+    { label: 'volunteer', value: 'VOLUNTEER' },
+  ];
+
+  // Accommodation-specific options
+  accommodationTypeOptions: Position[] = [
+    { label: 'Hotel', value: 'HOTEL' },
+    { label: 'Guest House', value: 'GUEST_HOUSE' },
+    { label: 'Hostel', value: 'HOSTEL' },
   ];
 
   constructor(
     private fileUploadService: FileUploadService,
     private employeeService: EmployeeService,
+    private departmentService: DepartmentService,
     private alertService: AlertService
   ) {}
 
@@ -157,9 +184,28 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     documentName: '',
     downloadUrl: '',
     fileType: '',
+    isTraining: false,
+    templateName: '',
     // Camp Meeting-specific fields
     agenda: '',
     attendees: [] as number[],
+    // Add Employee-specific fields
+    newEmployeeId: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    departmentId: '',
+    role: '',
+    employmentType: '',
+    employeeLocation: '',
+    // Accommodation-specific fields
+    accommodationName: '',
+    accommodationType: '',
+    isPetAllowed: false,
+    rooms: [{ name: '', capacity: undefined as any }],
+    // Department-specific fields
+    departmentName: '',
+    templateType: '',
   };
 
   // Track uploaded files with progress
@@ -182,6 +228,46 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     if (this.isEditMode && this.leaveData) {
       this.populateFormData();
     }
+
+    // Populate form data if pre-filled employee data is provided
+    if (this.isAddEmployee && this.preFilledEmployeeData) {
+      this.populateEmployeeFormData();
+    }
+
+    // Populate form data if pre-filled accommodation data is provided
+    if (this.isAccommodation) {
+      if (this.preFilledAccommodationData) {
+        this.populateAccommodationFormData();
+      } else {
+        // Reset accommodation form for create mode
+        this.resetAccommodationForm();
+      }
+    }
+
+    // Populate form data if pre-filled department data is provided
+    if (this.isDepartment) {
+      if (this.preFilledDepartmentData) {
+        this.populateDepartmentFormData();
+      } else {
+        // Reset department form for create mode
+        this.resetDepartmentForm();
+      }
+    }
+
+    // Populate form data if pre-filled template data is provided
+    if (this.isTemplate) {
+      if (this.preFilledTemplateData && this.isEditMode) {
+        this.populateTemplateFormData();
+      } else {
+        // Reset template form for create mode
+        this.resetTemplateForm();
+      }
+    }
+
+    // Load departments if in add employee mode
+    if (this.isAddEmployee) {
+      this.loadDepartments();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -193,24 +279,71 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     ) {
       this.populateFormData();
     }
+
+    // Check if pre-filled employee data changed
+    if (
+      changes['preFilledEmployeeData'] &&
+      this.isAddEmployee &&
+      this.preFilledEmployeeData
+    ) {
+      this.populateEmployeeFormData();
+    }
+
+    // Check if pre-filled accommodation data changed
+    if (changes['preFilledAccommodationData'] && this.isAccommodation) {
+      if (this.preFilledAccommodationData) {
+        this.populateAccommodationFormData();
+      } else {
+        // Reset accommodation form when no pre-filled data (create mode)
+        this.resetAccommodationForm();
+      }
+    }
+
+    // Check if pre-filled template data changed
+    if (changes['preFilledTemplateData'] && this.isTemplate) {
+      if (this.preFilledTemplateData && this.isEditMode) {
+        this.populateTemplateFormData();
+      } else {
+        // Reset template form when no pre-filled data (create mode)
+        this.resetTemplateForm();
+      }
+    }
+
+    // Check if view changed and we need to populate template form
+    if (
+      changes['view'] &&
+      this.isTemplate &&
+      this.isEditMode &&
+      this.preFilledTemplateData
+    ) {
+      setTimeout(() => {
+        this.populateTemplateFormData();
+      }, 100);
+    }
   }
 
   // Populate form data from existing data for edit mode
   populateFormData() {
     if (!this.leaveData) return;
 
-    console.log('Populating form data for edit mode:', this.leaveData);
-
     // For camp meetings
     if (this.isCampMeeting) {
       this.formData.agenda = this.leaveData.agenda || '';
 
-      // Format date for HTML date input (YYYY-MM-DD)
+      // Format start date for HTML date input (YYYY-MM-DD)
       if (this.leaveData.startDate) {
         const date = new Date(this.leaveData.startDate);
         this.formData.startDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
       } else {
         this.formData.startDate = '';
+      }
+
+      // Format end date for HTML date input (YYYY-MM-DD)
+      if (this.leaveData.endDate) {
+        const date = new Date(this.leaveData.endDate);
+        this.formData.endDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      } else {
+        this.formData.endDate = '';
       }
 
       // Handle attendees - they come as objects with id property
@@ -289,8 +422,112 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
         this.formData.retrenchmentType = this.leaveData.retrenchmentType || '';
       }
     }
+  }
 
-    console.log('Final form data after population:', this.formData);
+  // Populate employee form data for Add Employee mode
+  populateEmployeeFormData() {
+    if (!this.preFilledEmployeeData) return;
+
+    this.formData.newEmployeeId =
+      this.preFilledEmployeeData.employeeId ||
+      this.preFilledEmployeeData.id?.toString() ||
+      '';
+    this.formData.firstName = this.preFilledEmployeeData.firstName || '';
+    this.formData.lastName = this.preFilledEmployeeData.lastName || '';
+    this.formData.email =
+      this.preFilledEmployeeData.email ||
+      this.preFilledEmployeeData.altEmail ||
+      '';
+    this.formData.departmentId =
+      this.preFilledEmployeeData.departmentId?.toString() || '';
+    this.formData.role = this.preFilledEmployeeData.role || '';
+    this.formData.employmentType =
+      this.preFilledEmployeeData.employmentType || '';
+    this.formData.employeeLocation =
+      this.preFilledEmployeeData.mailingAddress?.address || '';
+  }
+
+  // Populate accommodation form data for Accommodation mode
+  populateAccommodationFormData() {
+    if (!this.preFilledAccommodationData) return;
+
+    this.formData.accommodationName =
+      this.preFilledAccommodationData.name || '';
+    this.formData.accommodationType =
+      this.preFilledAccommodationData.type || 'HOTEL';
+    this.formData.isPetAllowed =
+      this.preFilledAccommodationData.isPetAllowed || false;
+    this.formData.rooms = this.preFilledAccommodationData.rooms?.map(
+      (room: any) => ({
+        name: room.name || '',
+        capacity: room.capacity || 1,
+        id: room.id,
+      })
+    ) || [{ name: '', capacity: 1 }];
+  }
+
+  resetAccommodationForm() {
+    this.formData.accommodationName = '';
+    this.formData.accommodationType = ''; // Empty instead of 'HOTEL'
+    this.formData.isPetAllowed = false;
+    this.formData.rooms = [{ name: '', capacity: undefined as any }]; // undefined instead of 1
+  }
+
+  populateDepartmentFormData() {
+    if (this.preFilledDepartmentData) {
+      this.formData.departmentName = this.preFilledDepartmentData.name || '';
+    }
+  }
+
+  resetDepartmentForm() {
+    this.formData.departmentName = '';
+  }
+
+  populateTemplateFormData() {
+    if (this.preFilledTemplateData) {
+      this.formData.templateType = this.preFilledTemplateData.type || '';
+      this.formData.downloadUrl = this.preFilledTemplateData.downloadUrl || '';
+      this.formData.templateName = this.preFilledTemplateData.name || '';
+
+      // If there's a download URL, create a virtual uploaded file for display
+      if (this.preFilledTemplateData.downloadUrl) {
+        const fileName =
+          this.preFilledTemplateData.downloadUrl.split('/').pop() ||
+          'document.pdf';
+        this.uploadedFiles = [
+          {
+            name: fileName,
+            size: 0, // We don't have the actual file size
+            file: null as any,
+            uploadStatus: 'completed' as const,
+            progress: 100,
+            url: this.preFilledTemplateData.downloadUrl,
+          },
+        ];
+      }
+    }
+  }
+
+  resetTemplateForm() {
+    this.formData.templateType = '';
+    this.formData.downloadUrl = '';
+    this.formData.templateName = '';
+    this.uploadedFiles = [];
+  }
+
+  // Add Employee methods
+  loadDepartments() {
+    this.departmentService.getAllDepartments().subscribe({
+      next: (response: any) => {
+        if (response.status === 'success' && response.data) {
+          this.departmentOptions = response.data;
+        }
+      },
+      error: (error: any) => {
+        console.error('Error loading departments:', error);
+        this.departmentOptions = [];
+      },
+    });
   }
 
   // Promotion methods
@@ -514,18 +751,52 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   }
 
   onClose() {
-    console.log('Close button clicked');
     this.close.emit();
   }
 
+  togglePermissionInfo() {
+    this.showPermissionInfo = !this.showPermissionInfo;
+  }
+
   onEdit() {
-    console.log('Edit button clicked');
     this.edit.emit(this.selectedMeetingData);
   }
 
   onDelete() {
-    console.log('Delete button clicked');
-    this.delete.emit(this.selectedMeetingData);
+    this.delete.emit(this.leaveData);
+  }
+
+  // Helper function to properly format image URLs
+  formatImageUrl(url: string | null | undefined): string {
+    // First try to get the photo URL from localStorage if no URL is provided
+    if (!url) {
+      const storedPhotoUrl = localStorage.getItem('workerPhotoUrl');
+      if (storedPhotoUrl && storedPhotoUrl !== '') {
+        url = storedPhotoUrl;
+      }
+    }
+
+    // If still no URL, use a generic avatar fallback
+    if (!url || url === '') {
+      return 'assets/svg/gender.svg';
+    }
+
+    // If it's already a complete URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // If it's a relative path, prepend the base URL
+    const baseUrl = 'https://harmoney-backend.onrender.com';
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+  }
+
+  // Handle image loading errors
+  handleImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'assets/svg/gender.svg';
+    }
   }
 
   // New methods for create mode
@@ -645,10 +916,64 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
             name: this.formData.documentName,
             downloadUrl: uploadedFile.url,
             fileType: this.getFileTypeFromFileName(uploadedFile.name),
+            isTraining: this.formData.isTraining,
           };
           this.submit.emit(submissionData);
           this.resetForm();
           this.close.emit();
+          return;
+        }
+      }
+
+      // Handle Add Employee submission
+      if (this.isAddEmployee) {
+        const submissionData = {
+          employeeId: this.formData.newEmployeeId,
+          firstName: this.formData.firstName,
+          lastName: this.formData.lastName,
+          email: this.formData.email,
+          departmentId: this.formData.departmentId,
+          role: this.formData.role,
+          employmentType: this.formData.employmentType,
+          location: this.formData.employeeLocation,
+        };
+        this.submit.emit(submissionData);
+        this.resetForm();
+        this.close.emit();
+        return;
+      }
+
+      // Handle Accommodation submission
+      if (this.isAccommodation) {
+        const submissionData = {
+          accommodationName: this.formData.accommodationName,
+          accommodationType: this.formData.accommodationType,
+          isPetAllowed: this.formData.isPetAllowed,
+          rooms: this.formData.rooms,
+        };
+        this.submit.emit(submissionData);
+        this.close.emit();
+        return;
+      }
+
+      // Handle Template submission
+      if (this.isTemplate) {
+        // Get the uploaded file
+        const uploadedFile = this.uploadedFiles.find(
+          (file) => file.uploadStatus === 'completed'
+        );
+        if (uploadedFile && uploadedFile.file) {
+          const submissionData = {
+            templateType: this.formData.templateType,
+            uploadedFiles: this.uploadedFiles,
+            file: uploadedFile.file,
+          };
+          this.submit.emit(submissionData);
+          this.resetForm();
+          this.close.emit();
+          return;
+        } else {
+          this.alertService.error('Please upload a document');
           return;
         }
       }
@@ -686,12 +1011,6 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
           leaveNotesUrls: fileUrls,
         };
 
-        console.log('Submitting leave request:', submissionData);
-        console.log(
-          `Duration: ${this.formData.duration.value} ${this.formData.duration.unit} = ${calculatedDuration} days`
-        );
-        console.log('File URLs:', fileUrls);
-
         this.submit.emit(submissionData);
         this.close.emit();
       }
@@ -702,6 +1021,17 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
 
   onConfirmCancel() {
     this.showConfirmModal = false;
+  }
+
+  // Accommodation methods
+  addRoom() {
+    this.formData.rooms.push({ name: '', capacity: 1 });
+  }
+
+  removeRoom(index: number) {
+    if (this.formData.rooms.length > 1) {
+      this.formData.rooms.splice(index, 1);
+    }
   }
 
   // Calculate duration in days based on the selected unit
@@ -731,7 +1061,28 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
         return;
       }
 
-      // Add file to uploaded files with initial status
+      // For templates, don't upload immediately - just store the file
+      if (this.isTemplate) {
+        const uploadedFile: {
+          name: string;
+          size: number;
+          file: File;
+          uploadStatus: 'uploading' | 'completed' | 'error';
+          progress: number;
+          url?: string;
+        } = {
+          name: file.name,
+          size: file.size,
+          file: file,
+          uploadStatus: 'completed', // Mark as completed since we're not uploading yet
+          progress: 100,
+        };
+
+        this.uploadedFiles = [uploadedFile]; // Replace any existing files
+        return;
+      }
+
+      // For other forms, upload immediately as before
       const uploadedFile: {
         name: string;
         size: number;
@@ -775,16 +1126,105 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     event.target.value = '';
   }
 
+  // Drag and drop methods
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const files = Array.from(event.dataTransfer?.files || []);
+    if (files.length > 0) {
+      this.handleFileUpload(files);
+    }
+  }
+
+  handleFileUpload(files: File[]) {
+    files.forEach((file) => {
+      // Validate file
+      const validation = this.fileUploadService.validateFile(file);
+      if (!validation.isValid) {
+        console.error(validation.error);
+        return;
+      }
+
+      // For templates, don't upload immediately - just store the file
+      if (this.isTemplate) {
+        const uploadedFile: {
+          name: string;
+          size: number;
+          file: File;
+          uploadStatus: 'uploading' | 'completed' | 'error';
+          progress: number;
+          url?: string;
+        } = {
+          name: file.name,
+          size: file.size,
+          file: file,
+          uploadStatus: 'completed', // Mark as completed since we're not uploading yet
+          progress: 100,
+        };
+
+        this.uploadedFiles = [uploadedFile]; // Replace any existing files
+        return;
+      }
+
+      // For other forms, upload immediately as before
+      const uploadedFile: {
+        name: string;
+        size: number;
+        file: File;
+        uploadStatus: 'uploading' | 'completed' | 'error';
+        progress: number;
+        url?: string;
+      } = {
+        name: file.name,
+        size: file.size,
+        file: file,
+        uploadStatus: 'uploading',
+        progress: 0,
+      };
+
+      this.uploadedFiles.push(uploadedFile);
+
+      // Start upload immediately
+      this.fileUploadService.uploadSingleFileWithProgress(file).subscribe({
+        next: (event) => {
+          if (event.progress !== undefined) {
+            // Update progress
+            uploadedFile.progress = event.progress;
+          }
+          if (event.response) {
+            // Upload completed
+            uploadedFile.uploadStatus = 'completed';
+            uploadedFile.progress = 100;
+            uploadedFile.url = event.response.file;
+          }
+        },
+        error: (error) => {
+          console.error('Upload failed:', error);
+          uploadedFile.uploadStatus = 'error';
+          uploadedFile.progress = 0;
+        },
+      });
+    });
+  }
+
   removeFile(index: number) {
     const file = this.uploadedFiles[index];
 
     // If file has a URL (successfully uploaded), call delete API
     if (file.url) {
-      console.log('Deleting file from server:', file.url);
-
       this.fileUploadService.deleteFile(file.url).subscribe({
         next: (response) => {
-          console.log('File deleted successfully:', response);
           // Remove from local array after successful deletion
           this.uploadedFiles.splice(index, 1);
         },
@@ -802,10 +1242,49 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   }
 
   isFormValid(): boolean {
+    // Add Employee validation
+    if (this.isAddEmployee) {
+      return !!(
+        this.formData.newEmployeeId &&
+        this.formData.firstName &&
+        this.formData.lastName &&
+        this.formData.email &&
+        this.formData.departmentId &&
+        this.formData.role &&
+        this.formData.employmentType
+      );
+    }
+
+    // Accommodation validation
+    if (this.isAccommodation) {
+      return !!(
+        this.formData.accommodationName &&
+        this.formData.accommodationType &&
+        this.formData.rooms.every((room) => room.name && room.capacity > 0)
+      );
+    }
+
+    // Department validation
+    if (this.isDepartment) {
+      return !!(
+        this.formData.departmentName && this.formData.departmentName.trim()
+      );
+    }
+
+    // Template validation
+    if (this.isTemplate) {
+      return !!(
+        this.formData.templateType &&
+        this.uploadedFiles.length > 0 &&
+        this.uploadedFiles.some((file) => file.uploadStatus === 'completed')
+      );
+    }
+
     // Camp Meeting validation
     if (this.isCampMeeting && this.mode === 'create') {
       return !!(
         this.formData.startDate &&
+        this.formData.endDate &&
         this.formData.agenda &&
         this.formData.attendees.length > 0
       );
@@ -878,6 +1357,25 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   }
 
   get confirmationText(): string {
+    if (this.isAddEmployee) {
+      return `Are you sure you want to create this employee "${this.formData.firstName} ${this.formData.lastName}"?`;
+    }
+    if (this.isAccommodation) {
+      return `Are you sure you want to ${
+        this.isEditMode ? 'update' : 'create'
+      } this accommodation "${this.formData.accommodationName}"?`;
+    }
+    if (this.isDepartment) {
+      return `Are you sure you want to ${
+        this.isEditMode ? 'update' : 'create'
+      } this department "${this.formData.departmentName}"?`;
+    }
+
+    if (this.isTemplate) {
+      return `Are you sure you want to ${
+        this.isEditMode ? 'update' : 'create'
+      } this template "${this.formData.templateType}"?`;
+    }
     if (this.isCampMeeting && this.mode === 'create') {
       return `Are you sure you want to create this camp meeting?`;
     }
@@ -935,9 +1433,29 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       documentName: '',
       downloadUrl: '',
       fileType: '',
+      isTraining: false,
+      templateName: '',
       // Camp Meeting-specific fields
       agenda: '',
       attendees: [],
+      // Add Employee-specific fields
+      newEmployeeId: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      departmentId: '',
+      role: '',
+      employmentType: '',
+      employeeLocation: '',
+      // Accommodation-specific fields
+      accommodationName: '',
+      accommodationType: 'HOTEL',
+      isPetAllowed: false,
+      rooms: [{ name: '', capacity: 1 }],
+      // Department-specific fields
+      departmentName: '',
+      // Template-specific fields
+      templateType: '',
     };
     this.uploadedFiles = [];
     this.searchTerm = '';
@@ -950,7 +1468,10 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   }
 
   downloadDocument(doc: any) {
-    console.log('Download document called with:', doc); // Debug log
+    if (!doc || !doc.downloadUrl) {
+      console.error('No download URL found for document:', doc);
+      return;
+    }
 
     // Try to find the actual download URL
     let downloadUrl = '';
@@ -966,13 +1487,6 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       console.error('No download URL found for document:', doc);
       return;
     }
-
-    console.log(
-      'Downloading from URL:',
-      downloadUrl,
-      'with filename:',
-      filename
-    ); // Debug log
 
     // Use the same download logic as uploadFile
     try {
@@ -1065,33 +1579,31 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
 
   // Download uploaded file
   downloadFile(file: any) {
-    console.log('Download file called with:', file); // Debug log
-
-    if (file.url) {
-      try {
-        // Ensure we have a valid filename
-        const filename = file.name || 'downloaded-file';
-        console.log('Downloading file:', filename, 'from URL:', file.url); // Debug log
-
-        // For Firebase storage URLs, we need to handle CORS properly
-        if (file.url.includes('firebasestorage.googleapis.com')) {
-          // Method 1: Try adding download parameter to Firebase URL
-          const downloadUrl = this.getFirebaseDownloadUrl(file.url, filename);
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.target = '_blank';
-          link.click();
-        } else {
-          // Method 2: For other URLs, use fetch and blob
-          this.downloadFileViaFetch(file.url, filename);
-        }
-      } catch (error) {
-        console.error('Download failed:', error);
-        // Fallback: Just open in new tab
-        window.open(file.url, '_blank');
-      }
-    } else {
+    if (!file || !file.url) {
       console.error('No URL found for file:', file);
+      return;
+    }
+
+    try {
+      // Ensure we have a valid filename
+      const filename = file.name || 'downloaded-file';
+
+      // For Firebase storage URLs, we need to handle CORS properly
+      if (file.url.includes('firebasestorage.googleapis.com')) {
+        // Method 1: Try adding download parameter to Firebase URL
+        const downloadUrl = this.getFirebaseDownloadUrl(file.url, filename);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.target = '_blank';
+        link.click();
+      } else {
+        // Method 2: For other URLs, use fetch and blob
+        this.downloadFileViaFetch(file.url, filename);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: Just open in new tab
+      window.open(file.url, '_blank');
     }
   }
 

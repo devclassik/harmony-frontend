@@ -110,8 +110,8 @@
         <button
           class="flex items-center justify-center px-2 flex-1 rounded-lg py-2 font-medium transition cursor-pointer"
           [ngClass]="{
-            'bg-[#12C16F] text-white': activeView === 'list',
-            'bg-[#dddddd] text-[#12C16F]': activeView !== 'list'
+            'bg-[#12C16F] text-white': currentView === 'table',
+            'bg-[#dddddd] text-[#12C16F]': currentView !== 'table'
           }"
           (click)="toggleListCalendar('list')"
         >
@@ -124,8 +124,8 @@
         <button
           class="flex items-center justify-center px-2 flex-1 rounded-lg py-2 font-medium transition cursor-pointer"
           [ngClass]="{
-            'bg-[#12C16F] text-white': activeView === 'calendar',
-            'bg-[#dddddd] text-[#12C16F]': activeView !== 'calendar'
+            'bg-[#12C16F] text-white': currentView === 'calendar',
+            'bg-[#dddddd] text-[#12C16F]': currentView !== 'calendar'
           }"
           (click)="toggleListCalendar('calendar')"
         >
@@ -138,8 +138,8 @@
         <button
           class="flex items-center justify-center px-2 flex-1 rounded-lg py-2 font-medium transition cursor-pointer"
           [ngClass]="{
-            'bg-[#12C16F] text-white': activeView === 'card',
-            'bg-[#dddddd] text-[#12C16F]': activeView !== 'card'
+            'bg-[#12C16F] text-white': currentView === 'card',
+            'bg-[#dddddd] text-[#12C16F]': currentView !== 'card'
           }"
           (click)="toggleListCalendar('card')"
         >
@@ -284,6 +284,16 @@
             employee.role
           }}</ng-container>
 
+          <!-- EMAIL -->
+          <ng-container *ngIf="col.key === 'email'">{{
+            employee.email
+          }}</ng-container>
+
+          <!-- FEATURES -->
+          <ng-container *ngIf="col.key === 'features'">
+            {{ employee.features }}
+          </ng-container>
+
           <!-- RETRENCHMENT TYPE -->
           <ng-container *ngIf="col.key === 'retrenchmentType'">{{
             employee.retrenchmentType
@@ -319,9 +329,34 @@
             employee.startDate
           }}</ng-container>
 
+          <!-- ACCOMMODATION NAME -->
+          <ng-container *ngIf="col.key === 'accommodationName'">{{
+            employee.accommodationName
+          }}</ng-container>
+
+          <!-- ACCOMMODATION TYPE -->
+          <ng-container *ngIf="col.key === 'accommodationType'">{{
+            employee.accommodationType
+          }}</ng-container>
+
+          <!-- ACCOMMODATION ROOM COUNT -->
+          <ng-container *ngIf="col.key === 'accommodationRoomCount'">{{
+            employee.accommodationRoomCount
+          }}</ng-container>
+
+          <!-- TEMPLATE TYPE -->
+          <ng-container *ngIf="col.key === 'templateType'">{{
+            employee.templateType
+          }}</ng-container>
+
           <!-- END DATE -->
           <ng-container *ngIf="col.key === 'endDate'">{{
             employee.endDate
+          }}</ng-container>
+
+          <!-- TEMPLATE TYPE -->
+          <ng-container *ngIf="col.key === 'templateType'">{{
+            employee.templateType
           }}</ng-container>
 
           <!-- DATE UPLOADED -->
@@ -341,10 +376,12 @@
                 'flex items-center gap-2 px-3 py-1 rounded-full text-sm w-fit': true,
                 'bg-[#DDFFE0] text-[#049914]':
                   employee.status === 'Active' ||
-                  employee.status === 'Approved',
+                  employee.status === 'Approved' ||
+                  employee.status === 'Assigned',
                 'bg-[#FEF9EA] text-[#E0A800]':
                   employee.status === 'On leave' ||
-                  employee.status === 'Pending',
+                  employee.status === 'Pending' ||
+                  employee.status === 'Unassigned',
                 'bg-[#E8FAFF] text-[#008FBD]': employee.status === 'Retired',
                 'bg-[#FFDEDE] text-[#DD1212]':
                   employee.status === 'On Discipline' ||
@@ -356,10 +393,12 @@
                 [ngClass]="{
                   'bg-[#049914]':
                     employee.status === 'Active' ||
-                    employee.status === 'Approved',
+                    employee.status === 'Approved' ||
+                    employee.status === 'Assigned',
                   'bg-[#E0A800]':
                     employee.status === 'On leave' ||
-                    employee.status === 'Pending',
+                    employee.status === 'Pending' ||
+                    employee.status === 'Unassigned',
                   'bg-[#008FBD]': employee.status === 'Retired',
                   'bg-[#DD1212]':
                     employee.status === 'On Discipline' ||
@@ -400,6 +439,9 @@
                     [ngClass]="{
                       'hover:bg-red-500 ': item.action === 'Delete',
                     }"
+                    [hidden]="
+                      item.action === 'assign' && employee.status === 'Assigned'
+                    "
                   >
                     <svg
                       *ngIf="item.action === 'view'"
@@ -448,6 +490,21 @@
                         stroke-linejoin="round"
                         stroke-width="2"
                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                    <svg
+                      *ngIf="item.action === 'assign'"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                       />
                     </svg>
                     {{ item.label }}

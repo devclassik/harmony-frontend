@@ -138,7 +138,7 @@ export class TableComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     // Synchronize activeView with currentView input
-    this.activeView = this.currentView === 'table' ? 'list' : this.currentView;
+    this.activeView = this.currentView;
 
     // Set calendar events with a small delay to ensure component is ready
     setTimeout(() => {
@@ -181,7 +181,7 @@ export class TableComponent implements OnInit, OnChanges {
 
   ngOnChanges() {
     // Update activeView when currentView input changes
-    this.activeView = this.currentView === 'table' ? 'list' : this.currentView;
+    this.activeView = this.currentView;
 
     // Update calendar events when calendarEvents input changes
     this.updateCalendarEvents();
@@ -311,8 +311,8 @@ export class TableComponent implements OnInit, OnChanges {
   toggleListCalendar(event: string) {
     if (event === 'list') {
       this.activeView = event;
-      this.currentView = 'list';
-      this.viewChange.emit('list');
+      this.currentView = 'table';
+      this.viewChange.emit('table');
     } else if (event === 'card') {
       this.activeView = event;
       this.currentView = 'card';

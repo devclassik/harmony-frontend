@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  hostingAPI: 'https://harmoney-backend.onrender.com',
   apiUrl: 'https://harmoney-backend.onrender.com/api/v1',
   routes: {
     auth: {
@@ -58,6 +59,15 @@ export const environment = {
       uploadAll: '/upload/all',
       delete: '/upload/delete',
     },
+    campMeeting: {
+      getAll: '/camp-meeting',
+      create: '/camp-meeting',
+      update: '/camp-meeting',
+      delete: '/camp-meeting',
+      attendees: '/camp-meeting/attendees',
+      assignRoom: '/camp-meeting/room/assign-room',
+      unAssignRoom: '/camp-meeting/room/unassign-room',
+    },
     analytics: {
       getAnalyticsOverview: '/analytics/overview',
       getLeaveStatistics: '/analytics/leave-stat',
@@ -106,12 +116,6 @@ export const environment = {
       approve: '/retirement/{id}',
       reject: '/retirement/{id}',
     },
-    campMeeting: {
-      getAll: '/camp-meeting',
-      create: '/camp-meeting',
-      update: '/camp-meeting',
-      delete: '/camp-meeting',
-    },
     posts: {
       getAll: 'posts',
       getById: 'posts/{id}',
@@ -119,6 +123,24 @@ export const environment = {
       update: 'posts/{id}',
       delete: 'posts/{id}',
       getByUser: 'posts/user/{userId}',
+    },
+    permissions: {
+      getAll: '/permission',
+      updateRolePermissions: '/permission/update-role-permissions',
+    },
+    accommodation: {
+      getAll: '/accommodation',
+      getById: '/accommodation/{id}',
+      create: '/accommodation',
+      update: '/accommodation/{id}',
+      delete: '/accommodation/{id}',
+    },
+    template: {
+      getAll: '/template',
+      getById: '/template/{id}',
+      create: '/template',
+      update: '/template/{id}',
+      delete: '/template/{id}',
     },
   },
 };
