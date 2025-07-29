@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  hostingAPI: 'https://harmoney-backend.onrender.com',
   apiUrl: 'https://harmoney-backend.onrender.com/api/v1',
   routes: {
     auth: {
@@ -64,6 +65,8 @@ export const environment = {
       update: '/camp-meeting',
       delete: '/camp-meeting',
       attendees: '/camp-meeting/attendees',
+      assignRoom: '/camp-meeting/room/assign-room',
+      unAssignRoom: '/camp-meeting/room/unassign-room',
     },
     analytics: {
       getAnalyticsOverview: '/analytics/overview',

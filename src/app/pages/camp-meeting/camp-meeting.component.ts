@@ -24,6 +24,7 @@ import {
   CampMeetingAttendance,
 } from '../../services/camp-meeting.service';
 import { AlertService } from '../../services/alert.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-camp-meeting',
@@ -325,7 +326,9 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
     }
 
     // If it's a relative path, prepend the base URL
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+
+    // 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 
@@ -757,7 +760,7 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
       employeeId: this.selectedAttendee.id,
     };
 
-    this.apiService.put('/camp-meeting/assign-room', requestBody).subscribe({
+    this.apiService.put('/camp-meeting/room/assign-room', requestBody).subscribe({
       next: (response) => {
         this.isAssigningAccommodation = false;
         this.alertService.success('Accommodation assigned successfully');

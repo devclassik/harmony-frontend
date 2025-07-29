@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  hostingAPI: 'https://harmoney-backend.onrender.com',
   apiUrl: 'https://harmoney-backend.onrender.com/api/v1',
   routes: {
     auth: {
@@ -58,6 +59,15 @@ export const environment = {
       uploadAll: '/upload/all',
       delete: '/upload/delete',
     },
+    campMeeting: {
+      getAll: '/camp-meeting',
+      create: '/camp-meeting',
+      update: '/camp-meeting',
+      delete: '/camp-meeting',
+      attendees: '/camp-meeting/attendees',
+      assignRoom: '/camp-meeting/room/assign-room',
+      unAssignRoom: '/camp-meeting/room/unassign-room',
+    },
     analytics: {
       getAnalyticsOverview: '/analytics/overview',
       getLeaveStatistics: '/analytics/leave-stat',
@@ -105,13 +115,6 @@ export const environment = {
       delete: '/retirement/{id}',
       approve: '/retirement/{id}',
       reject: '/retirement/{id}',
-    },
-    campMeeting: {
-      getAll: '/camp-meeting',
-      create: '/camp-meeting',
-      update: '/camp-meeting',
-      delete: '/camp-meeting',
-      attendees: '/camp-meeting/attendees',
     },
     posts: {
       getAll: 'posts',
