@@ -1,14 +1,14 @@
 <div class="flex h-screen">
   <!-- Sidebar -->
-  <app-side-bar/>
+  <app-side-bar [sidebarToggle]="sidebarToggle" />
 
   <!-- Main Content -->
-  <div class="flex flex-col flex-1">
+  <div class="flex flex-col flex-1 h-screen">
     <!-- Navbar -->
-    <app-top-nav/>
+    <app-top-nav (sidebarToggleEvent)="onSidebarToggle()" />
 
     <!-- Dynamic Content -->
-    <main class="flex-1 px-2 py-3">
+    <main class="flex-1 px-2 py-3 overflow-y-auto">
       <router-outlet />
     </main>
 

@@ -1,0 +1,47 @@
+<!-- Loading Overlay -->
+<app-loading-overlay
+  [isVisible]="isLoading"
+  [title]="'Loading Camp Meetings...'"
+  [message]="'Please wait while we fetch camp meeting data.'"
+></app-loading-overlay>
+
+<div class="min-h-screen p-4">
+  <div class="mx-auto max-w-full">
+    <!-- Calendar Container -->
+    <div class="rounded-lg">
+      <app-table
+        [tableTitle]="'Camp Meeting Calendar'"
+        [currentView]="'calendar'"
+        [showSearch]="false"
+        [showFilter]="false"
+        [showStatusTab]="false"
+        [showPagination]="false"
+        [showButton]="false"
+        [showViewAll]="false"
+        [showSelectCheckbox]="false"
+        [tableData]="[]"
+        [calendarEvents]="campMeetingCalendarEvents"
+        [customEventClick]="handleCalendarEventClick"
+        (menuAction)="onTableMenuAction($event)"
+      ></app-table>
+    </div>
+  </div>
+
+  <!-- Camp Meeting Details using Leave Details Component -->
+  <app-leave-details
+    [view]="showSlideIn"
+    [leaveData]="getMeetingAsLeaveData()"
+    [title]="'Pre Campmeeting Information'"
+    [leaveType]="'Camp Meeting'"
+    [totalLeaveDays]="0"
+    [showRequestType]="false"
+    [showDuration]="false"
+    [showLocation]="false"
+    [showEndDate]="false"
+    [showSubstitution]="false"
+    [showAttendees]="false"
+    [showDocuments]="true"
+    [isCampMeeting]="true"
+    (close)="onSlideInClose()"
+  ></app-leave-details>
+</div>

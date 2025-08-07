@@ -1,29 +1,102 @@
-<div class="p-2">
-  <app-table
-    [tableTitle]="'Annual Leave'"
-    [tableHeader]="tableHeader"
-    [tableData]="employees"
-    [showViewAll]="false"
-    [showFilter]="showFilterTabFromParent"
-    [showStatusTab]="true"
-    [statusTabs]="statusTabs"
-    [activeStatusTab]="selectedStatus"
-    (statusTabChange)="onStatusTabChange($event)"
-    [filterTabs]="filterTabs"
-    [activeFilterTab]="selectedFilter"
-    (filterTabChange)="onFilterTabChange($event)"
-    [searchValue]="searchValue"
-    (search)="onSearch($event)"
-    [tableData]="filteredEmployees"
-    [menuItems]="actionButton"
-    (menuAction)="onMenuAction($event)"
-    [showCalendar]="true"
-    showCalendarIcon="assets/svg/calender2.svg"
-    [showList]="true"
-    showListIcon="assets/svg/list.svg"
-    (showListCalendarClick)="onShowListClick($event)"
-  ></app-table>
+<!-- Loading Overlay -->
+<app-loading-overlay
+  [isVisible]="isLoadingLeaves || isCreatingLeave"
+  [title]="
+    isLoadingLeaves ? 'Loading Leave Requests...' : 'Creating Leave Request...'
+  "
+  [message]="
+    isLoadingLeaves
+      ? 'Please wait while we fetch your leave requests.'
+      : 'Please wait while we process your leave request.'
+  "
+></app-loading-overlay>
+
+<!-- Admin/Manager View -->
+<div *ngIf="userRole?.toLowerCase() === 'admin'">
+  <div class="p-2">
+    <app-table
+      [tableTitle]="'Annual Leave'"
+      [tableHeader]="leaveRequestsHeader"
+      [tableData]="leaveRequests"
+      [showViewAll]="false"
+      [showFilter]="showFilterTabFromParent"
+      [showStatusTab]="true"
+      [statusTabs]="statusTabs"
+      [activeStatusTab]="selectedStatus"
+      (statusTabChange)="onStatusTabChange($event)"
+      [filterTabs]="filterTabs"
+      [activeFilterTab]="selectedFilter"
+      (filterTabChange)="onFilterTabChange($event)"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="filteredLeaveRequests"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+      [showCalendar]="true"
+      showCalendarIcon="assets/svg/calender2.svg"
+      [showList]="true"
+      showListIcon="assets/svg/list.svg"
+      (showListCalendarClick)="onShowListClick($event)"
+    ></app-table>
+  </div>
 </div>
+
+<!-- Worker View -->
+<div
+  *ngIf="
+    userRole?.toLowerCase() === 'worker' ||
+    userRole?.toLowerCase() === 'minister'
+  "
+>
+  <div class="p-2">
+    <app-table
+      [tableTitle]="'Annual Leave'"
+      [tableHeader]="leaveRequestsHeader"
+      [tableData]="leaveRequests"
+      [showViewAll]="false"
+      [showFilter]="showFilterTabFromParent"
+      [showStatusTab]="true"
+      [statusTabs]="statusTabs"
+      [activeStatusTab]="selectedStatus"
+      (statusTabChange)="onStatusTabChange($event)"
+      [filterTabs]="filterTabs"
+      [activeFilterTab]="selectedFilter"
+      (filterTabChange)="onFilterTabChange($event)"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="filteredLeaveRequests"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+      [showCalendar]="false"
+      [showButton]="true"
+      showButtonText="Create Request"
+      showButtonIcon="assets/svg/add.svg"
+      showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+      (showButtonActionClick)="onCreateLeaveRequest()"
+      [showList]="false"
+    ></app-table>
+  </div>
+</div>
+
+<!-- Leave Details Component (handles both view and create modes) -->
+<app-leave-details
+  [view]="showAnnualLeaveDetails || showCreateLeaveRequest"
+  [leaveData]="selectedLeaveData"
+  [title]="
+    leaveDetailsMode === 'create'
+      ? 'Create Annual Leave Request'
+      : 'Annual Leave Details'
+  "
+  [leaveType]="'Annual Leave'"
+  [showSubstitution]="false"
+  [mode]="leaveDetailsMode"
+  (close)="
+    leaveDetailsMode === 'create'
+      ? onCloseCreateLeaveRequest()
+      : onCloseAnnualLeaveDetails()
+  "
+  (submit)="onCreateLeaveRequestSubmitted($event)"
+></app-leave-details>
 
 <app-employee-details
   [view]="showEmployeeDetails"

@@ -1,5 +1,14 @@
 <div class="flex flex-col bg-[#fcfcfc] border border-[#f2f2f2] rounded-xl p-4">
   <div
+    *ngIf="
+      tableTitle ||
+      showSearch ||
+      showFilter ||
+      showButton ||
+      showList ||
+      showCalendar ||
+      showViewAll
+    "
     class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-4"
   >
     <h2 class="text-lg font-medium">{{ tableTitle }}</h2>
@@ -87,7 +96,8 @@
       </div>
       <div class="flex gap-4" *ngIf="showButton">
         <button
-          class="flex items-center justify-center px-2 flex-1 bg-green-600 text-white rounded-lg py-2 font-medium transition hover:bg-green-700 cursor-pointer"
+          class="flex items-center justify-center px-2 flex-1 text-white rounded-lg py-2 font-medium transition cursor-pointer"
+          [ngClass]="showButtonStyle"
           (click)="onButtonClick(true)"
         >
           <span class="flex items-center px-1">
@@ -124,6 +134,20 @@
           </span>
         </button>
       </div>
+      <div class="flex gap-4" *ngIf="showCard">
+        <button
+          class="flex items-center justify-center px-2 flex-1 rounded-lg py-2 font-medium transition cursor-pointer"
+          [ngClass]="{
+            'bg-[#12C16F] text-white': activeView === 'card',
+            'bg-[#dddddd] text-[#12C16F]': activeView !== 'card'
+          }"
+          (click)="toggleListCalendar('card')"
+        >
+          <span class="flex items-center px-1">
+            <img [src]="showCardIcon" class="w-4 h-4 text-white" />
+          </span>
+        </button>
+      </div>
 
       <a
         *ngIf="showViewAll"
@@ -134,20 +158,19 @@
     </div>
   </div>
 
+  <!-- Angular Calendar - Removed to use only FullCalendar -->
+  <!--
   <mwl-calendar-month-view
-    *ngIf="activeView === 'calendar'"
+    *ngIf="currentView === 'calendar'"
     [viewDate]="viewDate"
     [events]="events"
     (dayClicked)="dayClicked($event.day)"
   >
   </mwl-calendar-month-view>
+  -->
 
-  <div class="flex mb-4">
-    <full-calendar
-      *ngIf="activeView === 'calendar'"
-      [options]="calendarOptions"
-      class="w-full"
-    >
+  <div *ngIf="currentView === 'calendar'" class="flex mb-4">
+    <full-calendar #calendar [options]="calendarOptions" class="w-full">
     </full-calendar>
   </div>
 
@@ -169,8 +192,8 @@
   </div>
 
   <table
-    class="w-full border-separate border-spacing-0 my-4 bg-[#ededed]"
-    *ngIf="tableData.length > 0"
+    class="w-full border-separate border-spacing-0 bg-[#ededed]"
+    *ngIf="tableData.length > 0 && currentView === 'table'"
   >
     <thead>
       <tr>
@@ -431,7 +454,178 @@
       </tr>
     </tbody>
   </table>
-  <div *ngIf="!tableData.length" class="py-8 text-center text-gray-400">
+
+  <!-- Card View -->
+  <div
+    *ngIf="currentView === 'card'"
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+  >
+    <div
+      *ngFor="let item of tableData; let i = index"
+      class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer"
+    >
+      <!-- Document Preview -->
+      <div
+        class="mb-4 h-48 bg-gray-100 rounded-lg flex items-center justify-center"
+      >
+        <div class="text-center">
+          <div
+            [class]="getFileIconClass(item.documentType || 'UNKNOWN')"
+            class="w-16 h-16 mx-auto mb-2 rounded-lg flex items-center justify-center"
+          >
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+              <path
+                d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+              />
+            </svg>
+          </div>
+          <span class="text-xs text-gray-500">{{ item.documentType }}</span>
+        </div>
+      </div>
+
+      <!-- Document Info -->
+      <div class="space-y-2">
+        <h3 class="font-medium text-gray-900 text-sm">
+          {{ item.documentName || item.name }}
+        </h3>
+        <p class="text-xs text-gray-500">{{ item.date }}</p>
+        <div class="flex items-center justify-between pt-2">
+          <span
+            [class]="getFileTypeClass(item.documentType || 'UNKNOWN')"
+            class="px-2 py-1 text-xs font-medium rounded"
+          >
+            {{ item.documentType }}
+          </span>
+          <div class="relative">
+            <button
+              class="text-gray-400 hover:text-gray-500 p-1 rounded-full hover:bg-gray-100 cursor-pointer"
+              (click)="toggleCardDropdown(item, i)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z"
+                />
+              </svg>
+            </button>
+            <!-- Dropdown Menu -->
+            <div
+              *ngIf="activeCardDropdownKey === getCardDropdownKey(item, i)"
+              class="absolute right-0 top-full mt-1 w-32 bg-white rounded-md shadow-lg z-20 border border-gray-100"
+            >
+              <div class="py-1">
+                <button
+                  *ngFor="let menuItem of menuItems"
+                  (click)="handleCardAction(menuItem.action, item)"
+                  class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left cursor-pointer"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      *ngIf="menuItem.action === 'view'"
+                      d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                    ></path>
+                    <circle
+                      *ngIf="menuItem.action === 'view'"
+                      cx="12"
+                      cy="12"
+                      r="3"
+                    ></circle>
+                    <path
+                      *ngIf="menuItem.action === 'download'"
+                      d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                    ></path>
+                    <polyline
+                      *ngIf="menuItem.action === 'download'"
+                      points="7,10 12,15 17,10"
+                    ></polyline>
+                    <line
+                      *ngIf="menuItem.action === 'download'"
+                      x1="12"
+                      y1="15"
+                      x2="12"
+                      y2="3"
+                    ></line>
+                  </svg>
+                  {{ menuItem.label }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- List View for Notifications -->
+  <div
+    *ngIf="currentView === 'list'"
+    class="bg-white rounded-lg border border-gray-200 overflow-hidden"
+  >
+    <div class="flex flex-col">
+      <!-- List Items -->
+      <div class="flex-1">
+        <div
+          *ngFor="let item of tableData; let i = index"
+          class="flex items-center gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+          (click)="handleAction('markAsRead', item)"
+        >
+          <!-- Unread Indicator -->
+          <div
+            class="w-2 h-2 rounded-full flex-shrink-0"
+            [class.bg-green-500]="!item.isRead"
+            [class.bg-transparent]="item.isRead"
+          ></div>
+
+          <!-- Profile Image -->
+          <img
+            [src]="formatImageUrl(item.imageUrl || item.worker?.image)"
+            [alt]="item.name || item.worker?.name"
+            class="w-10 h-10 rounded-full flex-shrink-0"
+            (error)="handleImageError($event)"
+          />
+
+          <!-- Notification Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1 text-sm">
+              <span class="font-semibold text-gray-900">
+                {{ item.type || item.requestType || "Notification" }}
+              </span>
+            </div>
+            <div class="flex items-center gap-1 text-sm text-gray-600 mt-1">
+              <span class="font-medium">{{
+                item.name || item.worker?.name
+              }}</span>
+              <span>{{ item.message || "has submitted a request" }}</span>
+              <span class="font-medium text-gray-900" *ngIf="item.targetWorker">
+                {{ item.targetWorker }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Timestamp -->
+          <div class="text-xs text-gray-500 flex-shrink-0">
+            {{ item.timestamp || item.date || item.requestDate }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    *ngIf="!tableData.length && currentView !== 'calendar'"
+    class="py-8 text-center text-gray-400"
+  >
     <ng-container *ngIf="emptyStateTemplate; else defaultEmpty">
       <ng-container *ngTemplateOutlet="emptyStateTemplate"></ng-container>
     </ng-container>
@@ -445,7 +639,9 @@
     </ng-template>
   </div>
 
-  <div class="flex flex-col md:flex-row md:items-center md:justify-end gap-2">
+  <div
+    class="flex flex-col md:flex-row md:items-center md:justify-end gap-2 mt-6"
+  >
     <div
       *ngIf="showPagination"
       class="flex items-center gap-2 justify-center md:justify-end"

@@ -1,32 +1,128 @@
-<div class="flex flex-col gap-4 p-2">
-  <app-dashboard-greetings
-    [userName]="'John 👋🏼'"
-    [showSubText]="true"
-    [subText]="'Here is a brief overview of the employees.'"
-  ></app-dashboard-greetings>
-</div>
-<div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
-  <div class="lg:col-span-6">
-    <app-bar-chart></app-bar-chart>
+<!-- Welcome Screen Animation -->
+<app-welcome-screen-animation
+  [show]="showWelcomeAnimation"
+  [userName]="workerName"
+  (close)="onWelcomeAnimationClose()"
+>
+</app-welcome-screen-animation>
+
+<!-- Dashboard Content -->
+<div>
+  <!-- Admin Dashboard View -->
+  <div *ngIf="workerRole?.toLowerCase() === 'admin'">
+    <div class="flex flex-col gap-4 p-2">
+      <app-dashboard-greetings
+        [userName]="workerName"
+        [showSubText]="true"
+        [subText]="'Here is a brief overview of the employees.'"
+        [analyticsData]="analyticsData"
+      ></app-dashboard-greetings>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-10 gap-4 p-2">
+      <div class="lg:col-span-6">
+        <app-bar-chart
+          [leaveData]="leaveStatisticsData"
+          [selectedYear]="selectedYear"
+          (yearChange)="onYearChange($event)"
+        ></app-bar-chart>
+      </div>
+      <div class="lg:col-span-4">
+        <app-doughnut-chart
+          [demographicsData]="demographicsData"
+        ></app-doughnut-chart>
+      </div>
+    </div>
+    <div class="p-2 relative">
+      <!-- Loading Overlay for Employee Records -->
+      <app-loading-overlay
+        [isVisible]="isLoadingEmployees"
+        title="Loading Employee Records"
+        message="Fetching employee data from the system..."
+      ></app-loading-overlay>
+
+      <app-table
+        [tableTitle]="'Employee Records'"
+        [viewAllLink]="'employee-records'"
+        [tableData]="employees"
+        [tableHeader]="employeeRecordsHeader"
+        [showViewAll]="true"
+        [showSearch]="false"
+        [showFilter]="false"
+        [showPagination]="false"
+        [showStatusTab]="false"
+      ></app-table>
+    </div>
   </div>
-  <div class="lg:col-span-4">
-    <app-doughnut-chart></app-doughnut-chart>
+
+  <!-- Worker Dashboard View -->
+  <div
+    *ngIf="
+      workerRole?.toLowerCase() === 'worker' ||
+      workerRole?.toLowerCase() === 'minister'
+    "
+    class="py-4 bg-white min-h-screen"
+  >
+    <!-- Loading Overlay -->
+    <app-loading-overlay
+      [isVisible]="isLoadingProfile"
+      title="Loading Dashboard"
+      message="Fetching your employee data and dashboard information..."
+    ></app-loading-overlay>
+
+    <!-- Main Content -->
+    <div *ngIf="!isLoadingProfile">
+      <!-- Greeting Section -->
+      <app-dashboard-greetings
+        [userName]="workerName"
+        [showSubText]="true"
+        [subText]="'Here is a brief summary of your employment.'"
+        [showMetrics]="false"
+        [analyticsData]="analyticsData"
+      ></app-dashboard-greetings>
+
+      <!-- Employee Information Section -->
+      <div class="py-4" *ngIf="employeeInfo">
+        <app-dashboard-information
+          [title]="'Employee Information'"
+          [employeeData]="employeeInfo"
+          [personalTitle]="employeeInfo.title"
+        ></app-dashboard-information>
+      </div>
+
+      <!-- Leave Requests Table -->
+      <div class="relative">
+        <!-- Loading Overlay for Leave Requests -->
+        <app-loading-overlay
+          [isVisible]="isLoadingLeaveRequests"
+          title="Loading Leave Requests"
+          message="Fetching your leave request data..."
+        ></app-loading-overlay>
+
+        <app-table
+          [tableTitle]="'Leave Requests'"
+          [viewAllLink]="'leave-management/annual-leave'"
+          [tableData]="leaveRequests"
+          [tableHeader]="leaveRequestsHeader"
+          [showViewAll]="true"
+          [menuItems]="actionButton"
+          (menuAction)="onMenuAction($event)"
+          [showSearch]="false"
+          [showFilter]="false"
+          [showPagination]="true"
+          [showStatusTab]="false"
+        ></app-table>
+      </div>
+    </div>
   </div>
+
+  <!-- Leave Details Modal -->
+  <app-leave-details
+    [view]="showLeaveDetails"
+    [leaveData]="selectedLeaveData"
+    [title]="'Leave Request Details'"
+    [leaveType]="'Annual Leave'"
+    [totalLeaveDays]="30"
+    [mode]="'view'"
+    (close)="onCloseLeaveDetails()"
+  ></app-leave-details>
 </div>
-<div class="p-2">
-  <app-table
-    [tableTitle]="'Employee Records'"
-    [viewAllLink]="'employee-records'"
-    [tableData]="employees"
-    [showViewAll]="true"
-    [showSearch]="false"
-    [showFilter]="false"
-    [showPagination]="false"
-    [showStatusTab]="false"
-  ></app-table>
-</div>
-<!-- <div class="p-6">
-  <h2 class="text-2xl font-bold">Dashboard user</h2>
-  <p *ngIf="userRole === 'Admin'">Welcome, Admin! Here is your overview.</p>
-  <p *ngIf="userRole === 'User'">Welcome, User! Here is your dashboard.</p>
-</div> -->

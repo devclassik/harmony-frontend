@@ -1,24 +1,61 @@
-<div class="p-2">
-  <app-table
-    [tableTitle]="'Sick Leave'"
-    [tableHeader]="tableHeader"
-    [tableData]="employees"
-    [showViewAll]="false"
-    [showFilter]="false"
-    [showStatusTab]="true"
-    [statusTabs]="statusTabs"
-    [activeStatusTab]="selectedStatus"
-    (statusTabChange)="onStatusTabChange($event)"
-    [filterTabs]="filterTabs"
-    [activeFilterTab]="selectedFilter"
-    (filterTabChange)="onFilterTabChange($event)"
-    [searchValue]="searchValue"
-    (search)="onSearch($event)"
-    [tableData]="filteredEmployees"
-    [menuItems]="actionButton"
-    (menuAction)="onMenuAction($event)"
+<div *ngIf="userRole?.toLowerCase() === 'admin'">
+  <div class="p-2">
+    <app-table
+      [tableTitle]="'Sick Leave'"
+      [tableHeader]="tableHeader"
+      [tableData]="employees"
+      [showViewAll]="false"
+      [showFilter]="false"
+      [showStatusTab]="true"
+      [statusTabs]="statusTabs"
+      [activeStatusTab]="selectedStatus"
+      (statusTabChange)="onStatusTabChange($event)"
+      [filterTabs]="filterTabs"
+      [activeFilterTab]="selectedFilter"
+      (filterTabChange)="onFilterTabChange($event)"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="filteredEmployees"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+    ></app-table>
+  </div>
+</div>
 
-  ></app-table>
+<div
+  *ngIf="
+    userRole?.toLowerCase() === 'worker' ||
+    userRole?.toLowerCase() === 'minister'
+  "
+>
+  <div class="p-2">
+    <app-table
+      [tableTitle]="'Sick Leave'"
+      [tableHeader]="sickLeaveRequestsHeader"
+      [tableData]="sickLeaveRequests"
+      [showViewAll]="false"
+      [showFilter]="showFilterTabFromParent"
+      [showStatusTab]="true"
+      [statusTabs]="statusTabs"
+      [activeStatusTab]="selectedStatus"
+      (statusTabChange)="onStatusTabChange($event)"
+      [filterTabs]="filterTabs"
+      [activeFilterTab]="selectedFilter"
+      (filterTabChange)="onFilterTabChange($event)"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="filteredSickLeaveRequests"
+      [menuItems]="actionButton"
+      (menuAction)="onMenuAction($event)"
+      [showCalendar]="false"
+      [showButton]="true"
+      showButtonText="Create Request"
+      showButtonIcon="assets/svg/add.svg"
+      showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+      (showButtonActionClick)="openCreateRequest()"
+      [showList]="false"
+    ></app-table>
+  </div>
 </div>
 
 <app-employee-details
@@ -51,3 +88,45 @@
   [okButtonLink]="'/dashboard'"
   (closed)="successModal = false"
 ></app-success-modal>
+
+<!-- Sick Leave Details Component (handles both view and create modes) -->
+<app-leave-details
+  [view]="showSickLeaveDetails || showCreateRequest"
+  [leaveData]="selectedSickLeaveData"
+  [title]="
+    leaveDetailsMode === 'create'
+      ? 'Create Sick Leave Request'
+      : 'Sick Leave Details'
+  "
+  [leaveType]="'Sick Leave'"
+  [totalLeaveDays]="30"
+  [showRequestType]="true"
+  [showDuration]="true"
+  [showLocation]="true"
+  [showEndDate]="false"
+  [showSubstitution]="true"
+  [showDocuments]="true"
+  [mode]="leaveDetailsMode"
+  (close)="
+    leaveDetailsMode === 'create'
+      ? onCloseCreateSickLeaveRequest()
+      : onCloseSickLeaveDetails()
+  "
+  (submit)="onCreateRequestSubmitted($event)"
+  (cancel)="onCloseCreateSickLeaveRequest()"
+></app-leave-details>
+
+<!-- Loading Overlay -->
+<app-loading-overlay
+  [isVisible]="isLoading || isCreating"
+  [title]="
+    isLoading
+      ? 'Loading Sick Leave Requests...'
+      : 'Creating Sick Leave Request...'
+  "
+  [message]="
+    isLoading
+      ? 'Please wait while we fetch your sick leave requests.'
+      : 'Please wait while we process your sick leave request.'
+  "
+></app-loading-overlay>

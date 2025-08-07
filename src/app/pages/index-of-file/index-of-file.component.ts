@@ -1,63 +1,225 @@
-import { Component } from '@angular/core';
-import { FilterTab, MenuItem, TableHeader, TableComponent } from '../../components/table/table.component';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import {
+  FilterTab,
+  MenuItem,
+  TableHeader,
+  TableComponent,
+} from '../../components/table/table.component';
 import { TableData } from '../../interfaces/employee.interface';
-import { PromptConfig, ConfirmPromptComponent } from '../../components/confirm-prompt/confirm-prompt.component';
-import { SuccessModalComponent } from "../../components/success-modal/success-modal.component";
-import { EmployeeDetailsComponent } from "../../components/employee-details/employee-details.component";
+import { DocumentViewerComponent } from '../../components/document-viewer/document-viewer.component';
+import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+import { CommonModule } from '@angular/common';
+import {
+  TemplateService,
+  Template,
+  TemplateType,
+} from '../../services/template.service';
+import { AlertService } from '../../services/alert.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-index-of-file',
-  imports: [SuccessModalComponent, ConfirmPromptComponent, EmployeeDetailsComponent, TableComponent],
+  imports: [
+    CommonModule,
+    TableComponent,
+    DocumentViewerComponent,
+    LoadingOverlayComponent,
+  ],
   templateUrl: './index-of-file.component.html',
-  styleUrl: './index-of-file.component.css'
+  styleUrl: './index-of-file.component.css',
 })
-export class IndexOfFileComponent {
+export class IndexOfFileComponent implements OnInit, OnDestroy {
   selectedStatus: string = '';
   selectedFilter: string = '';
   searchValue: string = '';
-  showModal: boolean = false;
-  successModal: boolean = false;
-  selectedEmployee: TableData | null = null;
-  selectedEmployeeRecord: TableData | null = null;
-  promptConfig: PromptConfig | null = null;
-  showEmployeeDetails: boolean = false;
-  showAppraisal: boolean = false;
+
+  // Loading states
+  isLoadingTemplates: boolean = false;
+  isCreatingTemplate: boolean = false;
+
+  // Document viewer properties
+  showDocumentViewer: boolean = false;
+  selectedDocument: TableData | null = null;
+
+  // Tab and view management
+  activeTab: 'documents' | 'training' = 'documents';
+  currentView: 'table' | 'card' = 'table';
+  showFilterDropdown: boolean = false;
+
+  // Pagination properties
+  currentPage: number = 1;
+  pageSize: number = 12; // 12 items per page for card view, 10 for table
+  totalPages: number = 1;
+
+  // Dropdown management for table actions
+  activeDropdownKey: string | null = null;
+
+  // Dropdown management for card actions
+  activeCardDropdownKey: string | null = null;
+
+  // Subscriptions for cleanup
+  private subscriptions: Subscription[] = [];
 
   tableHeader: TableHeader[] = [
-    { key: 'id', label: 'LEAVE ID' },
-    { key: 'documentName', label: 'DOCUMENT NAME' },
+    { key: 'id', label: 'TEMPLATE ID' },
+    { key: 'documentName', label: 'TEMPLATE NAME' },
     { key: 'date', label: 'DATE UPLOADED' },
-    { key: 'documentType', label: 'DOCUMENT TYPE' },
+    { key: 'documentType', label: 'TEMPLATE TYPE' },
     { key: 'action', label: 'ACTION' },
   ];
 
-  employees: TableData[] = [
-    {
-      id: '124 - 08',
-      documentName: 'John Adegoke',
-      date: '06/5/2025',
-      documentType: 'PDF',
-    },
-    {
-      id: '124 - 01',
-      documentName: 'John Adegoke',
-      date: '06/3/2025',
-      documentType: 'DOCX',
-    },
+  // Template data from API
+  templates: Template[] = [];
+  documentsData: TableData[] = [];
+  trainingData: TableData[] = [];
+
+  employees: TableData[] = [];
+  filteredEmployees: TableData[] = [];
+  paginatedEmployees: TableData[] = [];
+
+  filterTabs: FilterTab[] = [
+    { label: 'All', value: '' },
+    { label: 'PDF', value: 'pdf' },
+    { label: 'DOC', value: 'doc' },
+    { label: 'XLS', value: 'xls' },
+    { label: 'JPG', value: 'jpg' },
   ];
 
-  filteredEmployees: TableData[] = this.employees;
-
-
-  filterTabs = [
-    {
-      label: 'All',
-      value: '',
-      icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z',
-    },
-    { label: 'Sabbatical', value: 'Sabbatical', icon: 'M5 13l4 4L19 7' },
-    { label: 'Personal', value: 'Personal', icon: 'M5 13l4 4L19 7' },
+  actionButton: MenuItem[] = [
+    { label: 'View', action: 'view', icon: 'assets/svg/eyeOpen.svg' },
+    { label: 'Download', action: 'download', icon: 'assets/svg/download.svg' },
   ];
+
+  constructor(
+    private templateService: TemplateService,
+    private alertService: AlertService
+  ) {
+    this.updateCurrentData();
+  }
+
+  ngOnInit() {
+    this.loadTemplates();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
+  loadTemplates() {
+    this.isLoadingTemplates = true;
+
+    const loadSub = this.templateService.getTemplates().subscribe({
+      next: (response) => {
+        this.isLoadingTemplates = false;
+        if (response.status === 'success') {
+          this.templates = response.data;
+          this.transformTemplateData();
+          this.updateCurrentData();
+          this.applyFilters();
+        }
+      },
+      error: (error) => {
+        this.isLoadingTemplates = false;
+        console.error('Error loading templates:', error);
+        this.alertService.error('Failed to load templates. Please try again.');
+      },
+    });
+
+    this.subscriptions.push(loadSub);
+  }
+
+  transformTemplateData() {
+    this.documentsData = this.templates.map((template) => ({
+      id: template.id.toString(),
+      documentName: this.templateService.getTemplateTypeDisplayName(
+        template.type
+      ),
+      date: this.formatDate(template.createdAt),
+      documentType: this.getFileTypeFromUrl(template.downloadUrl),
+      downloadUrl: template.downloadUrl,
+      templateType: template.type,
+    }));
+
+    // For now, keeping training data empty as it's not part of the template API
+    // If you have a separate training API endpoint, you can implement it similarly
+    this.trainingData = [];
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    });
+  }
+
+  getFileTypeFromUrl(url: string): string {
+    const extension = url.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return 'PDF';
+      case 'doc':
+      case 'docx':
+        return 'DOC';
+      case 'xls':
+      case 'xlsx':
+        return 'XLS';
+      case 'jpg':
+      case 'jpeg':
+        return 'JPG';
+      case 'png':
+        return 'PNG';
+      case 'mp4':
+        return 'MP4';
+      default:
+        return 'FILE';
+    }
+  }
+
+  switchToDocuments() {
+    this.activeTab = 'documents';
+    this.updateCurrentData();
+    this.applyFilters();
+  }
+
+  switchToTraining() {
+    this.activeTab = 'training';
+    this.updateCurrentData();
+    this.applyFilters();
+  }
+
+  updateCurrentData() {
+    this.employees =
+      this.activeTab === 'documents' ? this.documentsData : this.trainingData;
+    this.filteredEmployees = this.employees;
+  }
+
+  switchToTableView() {
+    this.currentView = 'table';
+    this.pageSize = 10;
+    this.currentPage = 1;
+    this.calculatePagination();
+  }
+
+  switchToCardView() {
+    this.currentView = 'card';
+    this.pageSize = 12;
+    this.currentPage = 1;
+    this.calculatePagination();
+  }
+
+  toggleFilterDropdown() {
+    this.showFilterDropdown = !this.showFilterDropdown;
+  }
+
+  getCurrentDataCount(): number {
+    return this.filteredEmployees.length;
+  }
+
+  getCurrentTabTitle(): string {
+    return this.activeTab === 'documents' ? 'Documents' : 'Training Materials';
+  }
 
   onFilterTabChange(value: string) {
     this.selectedFilter = value;
@@ -70,29 +232,49 @@ export class IndexOfFileComponent {
   }
 
   applyFilters() {
-    let filtered = this.employees;
-    if (this.selectedStatus) {
+    let filtered = [...this.employees];
+
+    // Apply search filter
+    if (this.searchValue.trim()) {
+      const searchTerm = this.searchValue.toLowerCase();
       filtered = filtered.filter(
-        (employee) => employee.status === this.selectedStatus
+        (item) =>
+          item.documentName?.toLowerCase().includes(searchTerm) ||
+          item.id?.toLowerCase().includes(searchTerm) ||
+          item.documentType?.toLowerCase().includes(searchTerm)
       );
     }
-    if (this.selectedFilter) {
+
+    // Apply document type filter
+    if (this.selectedFilter && this.selectedFilter !== '') {
       filtered = filtered.filter(
-        (employee) => employee.role === this.selectedFilter
+        (item) =>
+          item.documentType?.toLowerCase() === this.selectedFilter.toLowerCase()
       );
     }
-    if (this.searchValue) {
-      const search = this.searchValue.toLowerCase();
-      filtered = filtered.filter(
-        (employee) =>
-          employee.name?.toLowerCase().includes(search) ||
-          employee.id.toLowerCase().includes(search) ||
-          (employee.department &&
-            employee.department.toLowerCase().includes(search)) ||
-          employee.role?.toLowerCase().includes(search)
-      );
-    }
+
     this.filteredEmployees = filtered;
+    this.currentPage = 1;
+    this.calculatePagination();
+  }
+
+  calculatePagination() {
+    this.totalPages = Math.ceil(this.filteredEmployees.length / this.pageSize);
+    this.updatePaginatedData();
+  }
+
+  updatePaginatedData() {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.paginatedEmployees = this.filteredEmployees.slice(
+      startIndex,
+      endIndex
+    );
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.updatePaginatedData();
   }
 
   onSearch(value: string) {
@@ -101,51 +283,123 @@ export class IndexOfFileComponent {
   }
 
   onMenuAction(event: { action: string; row: TableData }) {
-    console.log(event);
+    this.handleAction(event.action, event.row);
+  }
 
-    if (event.action === 'View') {
-      this.showEmployeeDetailsModal();
-      this.selectedEmployeeRecord = event.row;
+  getDropdownKey(employee: TableData, index: number): string {
+    return `${employee.id}-${index}`;
+  }
+
+  toggleDropdown(employee: TableData, index: number): void {
+    const key = this.getDropdownKey(employee, index);
+    this.activeDropdownKey = this.activeDropdownKey === key ? null : key;
+  }
+
+  handleAction(action: string, employee: TableData): void {
+    switch (action) {
+      case 'view':
+        this.viewDocument(employee);
+        break;
+      case 'download':
+        this.downloadDocument(employee);
+        break;
+      default:
+        console.log('Unknown action:', action);
     }
   }
 
-  actionButton: MenuItem[] = [
-    { label: 'View', action: 'View', icon: '/public/assets/svg/eyeOpen.svg' },
-  ];
-  showEmployeeDetailsModal() {
-    this.showEmployeeDetails = true;
+  getCardDropdownKey(employee: TableData, index: number): string {
+    return `card-${employee.id}-${index}`;
   }
 
-  actionToPerform(result: boolean) {
-    if (result) {
-      this.promptConfig = {
-        title: 'Confirm',
-        text: 'Are you sure you want to approve this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
-        yesButtonText: 'Yes',
-        noButtonText: 'No',
-      };
-      this.showModal = true;
+  toggleCardDropdown(employee: TableData, index: number): void {
+    const key = this.getCardDropdownKey(employee, index);
+    this.activeCardDropdownKey =
+      this.activeCardDropdownKey === key ? null : key;
+  }
+
+  handleCardAction(action: string, employee: TableData): void {
+    switch (action) {
+      case 'view':
+        this.viewDocument(employee);
+        break;
+      case 'download':
+        this.downloadDocument(employee);
+        break;
+      default:
+        console.log('Unknown action:', action);
+    }
+  }
+
+  viewDocument(document: TableData): void {
+    this.selectedDocument = document;
+    this.showDocumentViewer = true;
+  }
+
+  onDocumentViewerClose(): void {
+    this.showDocumentViewer = false;
+    this.selectedDocument = null;
+  }
+
+  onDocumentViewerDownload(document: TableData): void {
+    this.downloadDocument(document);
+  }
+
+  downloadDocument(doc: TableData): void {
+    if (doc.downloadUrl) {
+      this.templateService.downloadTemplate(doc.downloadUrl);
     } else {
-      this.promptConfig = {
-        title: 'Confirm',
-        text: 'Are you sure you want to reject this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
-        yesButtonText: 'Yes',
-        noButtonText: 'No',
-      };
-      this.showModal = true;
+      this.alertService.error('Download URL not available for this template.');
     }
   }
 
-  onModalConfirm(confirmed: boolean) {
-    console.log(confirmed);
-    this.showModal = false;
-    this.showAppraisal = false;
-    this.successModal = true;
+  getFileTypeClass(fileType: string): string {
+    switch (fileType?.toLowerCase()) {
+      case 'pdf':
+        return 'bg-red-100 text-red-600';
+      case 'doc':
+      case 'docx':
+        return 'bg-blue-100 text-blue-600';
+      case 'xls':
+      case 'xlsx':
+        return 'bg-green-100 text-green-600';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return 'bg-purple-100 text-purple-600';
+      case 'mp4':
+        return 'bg-orange-100 text-orange-600';
+      default:
+        return 'bg-gray-100 text-gray-600';
+    }
   }
 
-  onModalClose() {
-    this.showModal = false;
+  getFileIconClass(fileType: string): string {
+    switch (fileType?.toLowerCase()) {
+      case 'pdf':
+        return 'fa-file-pdf';
+      case 'doc':
+      case 'docx':
+        return 'fa-file-word';
+      case 'xls':
+      case 'xlsx':
+        return 'fa-file-excel';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return 'fa-file-image';
+      case 'mp4':
+        return 'fa-file-video';
+      default:
+        return 'fa-file';
+    }
+  }
+
+  onViewChange(viewType: string): void {
+    if (viewType === 'table') {
+      this.switchToTableView();
+    } else if (viewType === 'card') {
+      this.switchToCardView();
+    }
   }
 }

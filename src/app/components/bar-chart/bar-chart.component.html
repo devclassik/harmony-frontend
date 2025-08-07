@@ -1,45 +1,46 @@
 <div class="flex flex-col bg-[#fcfcfc] border border-[#f2f2f2] rounded-xl p-4">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-base font-medium text-gray-800">Leave Usage</h3>
-      <div class="relative">
-        <select
-          class="appearance-none bg-transparent border border-gray-200 rounded-lg px-3 py-1.5 pr-8 text-sm text-gray-600"
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-base font-medium text-gray-800">Leave Usage</h3>
+    <div class="relative">
+      <select
+        [(ngModel)]="selectedYear"
+        (change)="onYearChange($event)"
+        class="appearance-none bg-transparent border border-gray-200 rounded-lg px-3 py-1.5 pr-8 text-sm text-gray-600"
+      >
+        <option *ngFor="let year of availableYears" [value]="year">
+          {{ year }}
+        </option>
+      </select>
+      <div
+        class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
+      >
+        <svg
+          class="w-4 h-4 text-gray-400"
+          viewBox="0 0 20 20"
+          fill="currentColor"
         >
-          <option>Year</option>
-          <option>2024</option>
-          <option>2023</option>
-          <option>2022</option>
-        </select>
-        <div
-          class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
-        >
-          <svg
-            class="w-4 h-4 text-gray-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </div>
+          <path
+            fill-rule="evenodd"
+            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+            clip-rule="evenodd"
+          />
+        </svg>
       </div>
     </div>
-    <div class="h-[300px] rounded-lg overflow-hidden">
-      <apx-chart
-        [series]="chartOptions.series!"
-        [chart]="chartOptions.chart!"
-        [dataLabels]="chartOptions.dataLabels!"
-        [plotOptions]="chartOptions.plotOptions!"
-        [yaxis]="chartOptions.yaxis!"
-        [xaxis]="chartOptions.xaxis!"
-        [legend]="chartOptions.legend!"
-        [fill]="chartOptions.fill!"
-        [stroke]="chartOptions.stroke!"
-        [tooltip]="chartOptions.tooltip!"
-        [colors]="chartOptions.colors!"
-      ></apx-chart>
-    </div>
   </div>
+  <div class="h-[300px] rounded-lg overflow-hidden">
+    <apx-chart
+      [series]="chartOptions.series!"
+      [chart]="chartOptions.chart!"
+      [dataLabels]="chartOptions.dataLabels!"
+      [plotOptions]="chartOptions.plotOptions!"
+      [yaxis]="chartOptions.yaxis!"
+      [xaxis]="chartOptions.xaxis!"
+      [legend]="chartOptions.legend!"
+      [fill]="chartOptions.fill!"
+      [stroke]="chartOptions.stroke!"
+      [tooltip]="chartOptions.tooltip!"
+      [colors]="chartOptions.colors!"
+    ></apx-chart>
+  </div>
+</div>

@@ -1,0 +1,975 @@
+<div class="fixed inset-0 z-50 flex justify-end bg-[#7f7f7f63]" *ngIf="view">
+  <div
+    class="bg-white w-full max-w-xl h-full shadow-lg p-8 overflow-y-auto relative animate-slide-in-right"
+  >
+    <button
+      class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl"
+      (click)="onClose()"
+    >
+      &times;
+    </button>
+
+    <!-- CREATE MODE -->
+    <div *ngIf="mode === 'create'">
+      <!-- Header -->
+      <div class="flex items-center gap-2 mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">
+          {{ title }}
+        </h2>
+      </div>
+
+      <div class="border-b border-gray-200 mb-8"></div>
+
+      <!-- Form Section -->
+      <div class="space-y-6">
+        <h3 class="text-lg font-medium text-gray-900">
+          {{ leaveType }} Information
+        </h3>
+
+        <!-- Annual Leave Fields -->
+        <div *ngIf="leaveType === 'Annual Leave'">
+          <!-- Start Date and End Date -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Start Date</label
+              >
+              <input
+                type="date"
+                [(ngModel)]="formData.startDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >End Date</label
+              >
+              <input
+                type="date"
+                [(ngModel)]="formData.endDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Leave of Absence and Sick Leave Fields -->
+        <div
+          *ngIf="leaveType === 'Leave of Absence' || leaveType === 'Sick Leave'"
+        >
+          <!-- Request Type and Start Date on same line -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Request Type</label
+              >
+              <select
+                [(ngModel)]="formData.requestType"
+                name="requestType"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              >
+                <option value="">Select</option>
+                <option *ngFor="let type of requestTypes" [value]="type">
+                  {{ type }}
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Start Date</label
+              >
+              <input
+                type="date"
+                [(ngModel)]="formData.startDate"
+                name="startDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="MM-DD-YYYY"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Duration and Location on same line -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Duration</label
+              >
+              <input
+                type="number"
+                [(ngModel)]="formData.duration.value"
+                name="durationValue"
+                min="1"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter duration"
+                required
+              />
+
+              <div class="mt-3">
+                <div class="flex flex-wrap gap-2">
+                  <label
+                    *ngFor="let unit of durationUnits"
+                    class="flex items-center cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      [(ngModel)]="formData.duration.unit"
+                      name="durationUnit"
+                      [value]="unit"
+                      class="w-3 h-3 text-green-600 border-gray-300 focus:ring-green-500 focus:ring-1 appearance-none border-2 checked:bg-green-600 checked:border-green-600 relative square-checkbox"
+                    />
+                    <span class="ml-1 text-xs text-gray-700">{{ unit }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Location</label
+              >
+              <input
+                type="text"
+                [(ngModel)]="formData.location"
+                name="location"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter location"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Reason (common for both) -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Reason</label
+          >
+          <textarea
+            [(ngModel)]="formData.reason"
+            rows="4"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+            [placeholder]="
+              leaveType === 'Annual Leave'
+                ? 'Enter your reason for leave...'
+                : 'Enter your reason for leave of absence...'
+            "
+          ></textarea>
+        </div>
+
+        <!-- Upload Handover Note (for Leave of Absence and Sick Leave) -->
+        <div
+          *ngIf="leaveType === 'Leave of Absence' || leaveType === 'Sick Leave'"
+        >
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Upload Handover Note</label
+          >
+
+          <div
+            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors"
+          >
+            <input
+              type="file"
+              multiple
+              (change)="onFileSelect($event)"
+              class="hidden"
+              #fileInput
+              accept=".pdf,.doc,.docx,.txt"
+            />
+            <div class="flex flex-col items-center">
+              <svg
+                class="w-8 h-8 text-gray-400 mb-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+              <button
+                type="button"
+                (click)="fileInput.click()"
+                class="text-green-600 hover:text-green-700 font-medium"
+              >
+                Browse files to Upload
+              </button>
+              <p class="text-xs text-gray-500 mt-1">
+                PDF, DOC, DOCX, TXT up to 10MB
+              </p>
+            </div>
+          </div>
+
+          <!-- Enhanced File List with Preview and Download -->
+          <div *ngIf="uploadedFiles.length > 0" class="mt-4 space-y-2">
+            <div
+              *ngFor="let file of uploadedFiles; let i = index"
+              class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+            >
+              <!-- File Icon -->
+              <div
+                class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-medium"
+                [class]="getFileTypeColor(file.name)"
+              >
+                {{ getFileTypeIcon(file.name).toUpperCase() }}
+              </div>
+
+              <!-- File Details -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-gray-900 text-sm truncate">{{
+                    file.name
+                  }}</span>
+                  <span class="text-xs text-gray-500"
+                    >({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span
+                  >
+                  <!-- Status Badge -->
+                  <span
+                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                    [ngClass]="{
+                      'bg-blue-100 text-blue-800':
+                        file.uploadStatus === 'uploading',
+                      'bg-green-100 text-green-800':
+                        file.uploadStatus === 'completed',
+                      'bg-red-100 text-red-800': file.uploadStatus === 'error'
+                    }"
+                  >
+                    {{ file.uploadStatus | titlecase }}
+                  </span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div
+                  *ngIf="file.uploadStatus === 'uploading'"
+                  class="mt-1 w-full bg-gray-200 rounded-full h-1"
+                >
+                  <div
+                    class="bg-blue-600 h-1 rounded-full transition-all duration-300"
+                    [style.width.%]="file.progress"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex items-center gap-2">
+                <!-- Preview Button -->
+                <button
+                  *ngIf="file.uploadStatus === 'completed' && file.url"
+                  type="button"
+                  (click)="previewFile(file)"
+                  class="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
+                  title="Preview"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                </button>
+
+                <!-- Remove Button -->
+                <button
+                  type="button"
+                  (click)="removeFile(i)"
+                  class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                  title="Remove"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3 pt-4">
+          <button
+            type="button"
+            (click)="onCancel()"
+            class="flex-1 px-6 py-3 border border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="onSubmit()"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F] text-white rounded-lg font-medium transition-colors"
+            [disabled]="!isFormValid()"
+            [class.opacity-50]="!isFormValid()"
+            [class.cursor-not-allowed]="!isFormValid()"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW MODE (existing content) -->
+    <div *ngIf="mode === 'view'">
+      <!-- Header -->
+      <div class="flex items-center gap-2 mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">{{ title }}</h2>
+      </div>
+
+      <div class="border-b border-gray-200 mb-8"></div>
+
+      <!-- Leave Summary - Only show for Annual Leave -->
+      <div
+        *ngIf="!isCampMeeting && leaveType === 'Annual Leave'"
+        class="border border-green-200 rounded-lg p-4 mb-6 bg-[#12C16F26]"
+      >
+        <div class="flex items-center gap-2 mb-2">
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span class="text-lg font-semibold"
+            >{{ totalDaysForYear }} Days of {{ leaveType }}</span
+          >
+        </div>
+        <p class="text-[#353535] font-medium ml-7">
+          {{ daysRemaining }} Days Remaining
+        </p>
+      </div>
+
+      <!-- Leave History Section - Only show for non-camp meetings -->
+      <div *ngIf="!isCampMeeting" class="employee-section mb-4">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'leaveHistory'
+              ? (openSection = null)
+              : (openSection = 'leaveHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'leaveHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">{{ leaveType }} History</span>
+        </button>
+
+        <div
+          *ngIf="openSection === 'leaveHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="bg-gray-50 rounded-lg p-4">
+            <p class="text-sm text-gray-600 mb-2">Previous Leave Records</p>
+            <div class="space-y-2" *ngIf="leaveHistoryRecords.length > 0">
+              <div
+                *ngFor="let record of leaveHistoryRecords"
+                class="flex justify-between text-sm"
+              >
+                <span class="text-gray-700">{{ record.dateRange }}</span>
+                <span class="text-green-600 font-medium">{{
+                  record.status
+                }}</span>
+              </div>
+            </div>
+            <div
+              *ngIf="leaveHistoryRecords.length === 0"
+              class="text-sm text-gray-500"
+            >
+              No previous leave records found.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leave Request Section -->
+      <div class="employee-section mb-6">
+        <!-- REGULAR LEAVE REQUEST (Collapsible) -->
+        <ng-container *ngIf="!isCampMeeting">
+          <button
+            class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+            (click)="
+              openSection === 'leaveRequest'
+                ? (openSection = null)
+                : (openSection = 'leaveRequest')
+            "
+          >
+            <svg
+              class="w-5 h-5 mr-2 transition-transform duration-200"
+              [ngClass]="{ 'rotate-180': openSection === 'leaveRequest' }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+            <span class="font-medium text-black">{{ leaveType }} Request</span>
+          </button>
+
+          <div
+            *ngIf="openSection === 'leaveRequest'"
+            class="mt-4 bg-white p-6 animate-fade-in"
+          >
+            <div class="border border-[#EDEDED] rounded-lg p-4">
+              <div class="space-y-4">
+                <!-- Request Type and Start Date on same line (for Leave of Absence) -->
+                <div *ngIf="showRequestType" class="grid grid-cols-2 gap-x-8">
+                  <!-- Request Type -->
+                  <div>
+                    <div class="text-xs text-gray-400 mb-1">Request Type</div>
+                    <div class="font-medium text-gray-900">
+                      {{ leaveData.requestType }}
+                    </div>
+                  </div>
+
+                  <!-- Start Date -->
+                  <div>
+                    <div class="text-xs text-gray-400 mb-1">Start Date</div>
+                    <div class="font-medium text-gray-900">
+                      {{ leaveData.startDate }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Duration and Location on same line (for Leave of Absence) -->
+                <div *ngIf="showRequestType" class="grid grid-cols-2 gap-x-8">
+                  <!-- Duration -->
+                  <div>
+                    <div class="text-xs text-gray-400 mb-1">Duration</div>
+                    <div class="font-medium text-gray-900">
+                      {{ leaveData.duration }}
+                    </div>
+                  </div>
+
+                  <!-- Location -->
+                  <div>
+                    <div class="text-xs text-gray-400 mb-1">Location</div>
+                    <div class="font-medium text-gray-900">
+                      {{ leaveData.location || "Osborne" }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Annual Leave Layout (when NOT Leave of Absence or Sick Leave) -->
+                <div *ngIf="!showRequestType">
+                  <!-- Start Date and Duration -->
+                  <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                    <!-- Start Date -->
+                    <div>
+                      <div class="text-xs text-gray-400 mb-1">Start Date</div>
+                      <div class="font-medium text-gray-900">
+                        {{ leaveData.startDate }}
+                      </div>
+                    </div>
+
+                    <!-- Duration -->
+                    <div *ngIf="showDuration">
+                      <div class="text-xs text-gray-400 mb-1">Duration</div>
+                      <div class="font-medium text-gray-900">
+                        {{ leaveData.duration }}
+                      </div>
+                    </div>
+
+                    <!-- End Date (if needed) -->
+                    <div *ngIf="showEndDate && !showDuration">
+                      <div class="text-xs text-gray-400 mb-1">End Date</div>
+                      <div class="font-medium text-gray-900">
+                        {{ leaveData.endDate }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Reason (for sick leave - moved after start date/duration) -->
+                  <div class="mt-4">
+                    <div class="text-xs text-gray-400 mb-1">Reason</div>
+                    <div class="font-medium text-gray-900">
+                      {{
+                        leaveData.reason ||
+                          "I am requesting " +
+                            leaveType.toLowerCase() +
+                            " to take time for rest, personal renewal, and to spend quality time with family. This period of leave will provide an opportunity for [him/her] to recharge and return to [his/her] duties with renewed energy and focus."
+                      }}
+                    </div>
+                  </div>
+
+                  <!-- Attendees Section (for camp meetings) -->
+                  <div
+                    *ngIf="
+                      leaveData.attendees && leaveData.attendees.length > 0
+                    "
+                    class="mt-4"
+                  >
+                    <div class="text-xs text-gray-400 mb-1">Attendees</div>
+                    <div class="font-medium text-gray-900">
+                      <span
+                        *ngFor="
+                          let attendee of leaveData.attendees;
+                          let i = index
+                        "
+                      >
+                        {{ attendee
+                        }}<span *ngIf="i < leaveData.attendees.length - 1"
+                          >,
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Substitution and Status -->
+                  <div
+                    class="grid gap-x-8 mt-4"
+                    [ngClass]="showSubstitution ? 'grid-cols-2' : 'grid-cols-1'"
+                  >
+                    <!-- Substitution -->
+                    <div *ngIf="showSubstitution">
+                      <div class="text-xs text-gray-400 mb-1">Substitution</div>
+                      <div class="font-medium text-gray-900">
+                        {{ leaveData.substitution || "N/A" }}
+                      </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                      <div class="text-xs text-gray-400 mb-1">Status</div>
+                      <span
+                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                        [ngClass]="{
+                          'bg-green-100 text-green-700':
+                            leaveData.status === 'Approved',
+                          'bg-yellow-100 text-yellow-700':
+                            leaveData.status === 'Pending',
+                          'bg-red-100 text-red-700':
+                            leaveData.status === 'Rejected'
+                        }"
+                      >
+                        <span
+                          class="w-2 h-2 rounded-full mr-2"
+                          [ngClass]="{
+                            'bg-green-500': leaveData.status === 'Approved',
+                            'bg-yellow-500': leaveData.status === 'Pending',
+                            'bg-red-500': leaveData.status === 'Rejected'
+                          }"
+                        ></span>
+                        {{ leaveData.status }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Reason (for both types) -->
+                <div *ngIf="showRequestType">
+                  <div class="text-xs text-gray-400 mb-1">Reason</div>
+                  <div class="font-medium text-gray-900">
+                    {{ leaveData.reason }}
+                  </div>
+                </div>
+
+                <!-- Substitution and Status on same line (for Leave of Absence and Sick Leave) - MOVED BELOW REASON -->
+                <div
+                  *ngIf="showRequestType"
+                  class="grid grid-cols-2 gap-x-8 mt-4"
+                >
+                  <!-- Substitution -->
+                  <div>
+                    <div class="text-xs text-gray-400 mb-1">Substitution</div>
+                    <div class="font-medium text-gray-900">
+                      {{ leaveData.substitution || "N/A" }}
+                    </div>
+                  </div>
+
+                  <!-- Status -->
+                  <div>
+                    <div class="text-xs text-gray-400 mb-1">Status</div>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                      [ngClass]="{
+                        'bg-green-100 text-green-700':
+                          leaveData.status === 'Approved',
+                        'bg-yellow-100 text-yellow-700':
+                          leaveData.status === 'Pending',
+                        'bg-red-100 text-red-700':
+                          leaveData.status === 'Rejected'
+                      }"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full mr-2"
+                        [ngClass]="{
+                          'bg-green-500': leaveData.status === 'Approved',
+                          'bg-yellow-500': leaveData.status === 'Pending',
+                          'bg-red-500': leaveData.status === 'Rejected'
+                        }"
+                      ></span>
+                      {{ leaveData.status }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Documents Section -->
+            <div
+              class="mt-6"
+              *ngIf="leaveData.documents && leaveData.documents.length > 0"
+            >
+              <div class="text-xs text-gray-400 mb-3">Uploaded Documents</div>
+              <div class="space-y-3">
+                <div
+                  *ngFor="let document of leaveData.documents"
+                  class="border border-gray-200 rounded-lg p-3"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 flex-1">
+                      <!-- Document Thumbnail -->
+                      <div
+                        class="w-10 h-12 bg-gray-50 border border-gray-200 rounded flex items-center justify-center flex-shrink-0"
+                      >
+                        <svg
+                          class="w-5 h-5 text-gray-500"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                      </div>
+
+                      <!-- Document Details -->
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">
+                          {{ document.title }}
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                          {{ document.type }} • Uploaded on
+                          {{ document.uploadDate }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Status and Download Button -->
+                    <div class="flex items-center gap-3">
+                      <!-- Status Badge -->
+                      <span
+                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                        [ngClass]="{
+                          'bg-green-100 text-green-700':
+                            document.status === 'approved',
+                          'bg-yellow-100 text-yellow-700':
+                            document.status === 'pending',
+                          'bg-red-100 text-red-700':
+                            document.status === 'rejected'
+                        }"
+                      >
+                        <span
+                          class="w-1.5 h-1.5 rounded-full mr-1"
+                          [ngClass]="{
+                            'bg-green-500': document.status === 'approved',
+                            'bg-yellow-500': document.status === 'pending',
+                            'bg-red-500': document.status === 'rejected'
+                          }"
+                        ></span>
+                        {{ document.status | titlecase }}
+                      </span>
+
+                      <!-- Download Button -->
+                      <button
+                        class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                        (click)="downloadDocument(document)"
+                        title="Download Document"
+                        type="button"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V13"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Legacy Documents (for approved leave only) -->
+            <div
+              *ngIf="
+                leaveData.status === 'Approved' &&
+                (!leaveData.documents || leaveData.documents.length === 0)
+              "
+              class="mt-4"
+            >
+              <div class="text-xs text-gray-400 mb-1">Documents</div>
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center gap-3">
+                  <!-- Document Thumbnail -->
+                  <div
+                    class="w-12 h-16 bg-red-50 border border-red-200 rounded flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-6 h-6 text-red-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+
+                  <!-- Document Details -->
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-gray-900 truncate">
+                      {{ leaveType }}_Approval
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">
+                      PDF Document • 245 KB
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">
+                      Uploaded on {{ leaveData.startDate }}
+                    </div>
+                  </div>
+
+                  <!-- Download Button -->
+                  <button
+                    class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                    (click)="downloadDocument(leaveData)"
+                    title="Download Document"
+                    type="button"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V13"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- CAMP MEETING INFORMATION (Static) -->
+        <ng-container *ngIf="isCampMeeting">
+          <!-- Static Header -->
+          <div class="flex items-center gap-3 mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 text-gray-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-800">
+              Pre Campmeeting Information
+            </h3>
+          </div>
+
+          <!-- Details -->
+          <div class="border border-gray-200 rounded-lg p-6 space-y-6">
+            <!-- Date and Agenda -->
+            <div class="grid grid-cols-2 gap-x-8">
+              <div>
+                <div class="text-sm text-gray-500 mb-1">Date</div>
+                <div class="font-medium text-gray-900">
+                  {{ leaveData.startDate }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm text-gray-500 mb-1">Agenda</div>
+                <div class="font-medium text-gray-900">
+                  {{ leaveData.agenda || "Preparation" }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Attendees -->
+            <div>
+              <div class="text-sm text-gray-500 mb-2">Attendees</div>
+              <div class="font-medium text-gray-900 leading-relaxed">
+                <span
+                  *ngFor="let attendee of leaveData.attendees; let i = index"
+                >
+                  {{ attendee
+                  }}<span *ngIf="i < leaveData.attendees.length - 1">, </span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <!-- Documents Section -->
+          <div
+            class="mt-6"
+            *ngIf="leaveData.documents && leaveData.documents.length > 0"
+          >
+            <div class="text-xs text-gray-400 mb-1">Documents</div>
+            <div class="border border-gray-200 rounded-lg p-3">
+              <div class="flex items-center gap-3">
+                <!-- Document Thumbnail -->
+                <div
+                  class="w-12 h-16 bg-red-50 border border-red-200 rounded flex items-center justify-center flex-shrink-0"
+                >
+                  <svg
+                    class="w-6 h-6 text-red-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+
+                <!-- Document Details -->
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-medium text-gray-900 truncate">
+                    {{ leaveType }}_Approval
+                  </div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    PDF Document • 245 KB
+                  </div>
+                  <div class="text-xs text-gray-400 mt-1">
+                    Uploaded on {{ leaveData.startDate }}
+                  </div>
+                </div>
+
+                <!-- Download Button -->
+                <button
+                  class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                  (click)="downloadDocument(leaveData)"
+                  title="Download Document"
+                  type="button"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V13"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide Arrow Button - positioned to work for both create and view modes -->
+  <button
+    (click)="mode === 'create' ? onCancel() : onClose()"
+    class="fixed top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center border border-gray-200 hover:bg-green-50 z-50 transition-all duration-200"
+    [style.right.px]="590"
+    aria-label="Close"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5 text-gray-500"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M9 5l7 7-7 7"
+      />
+    </svg>
+  </button>
+</div>
+
+<!-- Confirmation Modal -->
+<app-confirm-prompt
+  *ngIf="showConfirmModal"
+  [title]="'Confirm'"
+  [text]="confirmationText"
+  [yesButtonText]="'Yes'"
+  [noButtonText]="'No'"
+  (confirmed)="onConfirmSubmit($event)"
+  (closed)="onConfirmCancel()"
+></app-confirm-prompt>
