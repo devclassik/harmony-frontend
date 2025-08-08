@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { AuthService } from './auth.service';
 import {
   NotificationResponse,
   MessageResponse,
@@ -41,7 +42,10 @@ export class NotificationService {
   private notificationsSubject = new BehaviorSubject<NotificationItem[]>([]);
   private unreadCountSubject = new BehaviorSubject<number>(0);
 
-  constructor(private apiService: ApiService) {
+  constructor(
+    private apiService: ApiService,
+    private authService: AuthService
+  ) {
     // Don't auto-load data in constructor - wait for manual trigger after auth
     // This prevents API calls before user is authenticated
 
@@ -83,7 +87,15 @@ export class NotificationService {
   private loadInboxItemsFromApi(): void {
     this.apiService.get<MessageResponse>('/message').subscribe({
       next: (response) => {
-        const inboxItems = this.mapApiMessagesToInboxItems(response.data);
+        const currentEmployeeId = this.authService.getCurrentEmployeeId();
+        const apiMessages = Array.isArray(response.data) ? response.data : [];
+        const filteredForEmployee =
+          currentEmployeeId == null
+            ? []
+            : apiMessages.filter((message) =>
+                this.isItemForEmployee(message, currentEmployeeId)
+              );
+        const inboxItems = this.mapApiMessagesToInboxItems(filteredForEmployee);
         this.inboxItemsSubject.next(inboxItems);
       },
       error: (error) => {
@@ -97,9 +109,18 @@ export class NotificationService {
   private loadNotificationsFromApi(): void {
     this.apiService.get<NotificationResponse>('/notification').subscribe({
       next: (response) => {
-        const notifications = this.mapApiNotificationsToNotificationItems(
-          response.data
-        );
+        const currentEmployeeId = this.authService.getCurrentEmployeeId();
+        const apiNotifications = Array.isArray(response.data)
+          ? response.data
+          : [];
+        const filteredForEmployee =
+          currentEmployeeId == null
+            ? []
+            : apiNotifications.filter((notification) =>
+                this.isItemForEmployee(notification, currentEmployeeId)
+              );
+        const notifications =
+          this.mapApiNotificationsToNotificationItems(filteredForEmployee);
         this.notificationsSubject.next(notifications);
       },
       error: (error) => {
@@ -176,6 +197,15 @@ export class NotificationService {
       timestamp: new Date(notification.createdAt).toLocaleDateString('en-GB'),
       isRead: notification.isRead,
     }));
+  }
+
+  private isItemForEmployee(
+    item: ApiMessageItem | ApiNotificationItem,
+    employeeId: number
+  ): boolean {
+    // Show only items authored by the current user
+    const isActionBy = (item as any).actionBy?.id === employeeId;
+    return isActionBy === true;
   }
 
   // Helper function to properly format image URLs
