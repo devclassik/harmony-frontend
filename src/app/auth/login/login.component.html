@@ -96,56 +96,23 @@
   </div>
 
   <div class="hidden sm:block sm:w-full lg:w-1/2 relative px-5">
-    <div
-      class="h-[650px] w-full bg-[url('/assets/svg/logincaption.svg')] bg-contain bg-center bg-no-repeat flex flex-col justify-center relative"
-    >
-      <img
-        src="/assets/images/ydd-logo.png"
-        alt="Overlay Image"
-        class="absolute inset-0 mx-auto my-auto w-[300px] h-[300px] object-contain z-10"
-      />
-      <div
-        class="absolute top-12 left-1/2 transform -translate-x-1/2 text-white text-lg lg:text-xl text-center font-semibold w-[70%] lg:w-[440px] px-4 py-5"
-      >
-        Lorem ipsum dolor sit amet consectetur. Et tempus quam velit amet.
-      </div>
-
-      <div
-        class="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-[#92959b] bg-opacity-20 backdrop-blur-lg rounded-lg -ml-6 px-6 py-2.5 w-[80%] lg:w-[415px] flex flex-col"
-      >
-        <div class="flex justify-between items-center">
-          <div class="flex items-center space-x-2">
-            <div
-              class="w-10 h-10 border border-white bg-transparent rounded-full"
-            ></div>
-            <p
-              class="text-white font-semibold px-6 py-2 border border-white rounded-full -ml-4"
-            >
-              Managing
-            </p>
-          </div>
-
-          <div class="flex space-x-4">
-            <button
-              class="w-10 h-10 flex items-center justify-center border border-white rounded-full text-white"
-            >
-              ←
-            </button>
-            <button
-              class="w-10 h-10 flex items-center justify-center border border-white rounded-full text-white -ml-3"
-            >
-              →
-            </button>
-          </div>
-        </div>
-
-        <!-- Description Text -->
-        <p class="text-white text-sm mt-4">
-          Lorem ipsum dolor sit amet consectetur. Diam lectus aliquam felis
-          viverra arcu libero. Vestibulum fames porttitor dapibus tristique.
-        </p>
-      </div>
-    </div>
+    <app-login-caption
+      [slides]="[
+        {
+          title: 'Secure your account with a strong password',
+          description:
+            'Choose a strong password to keep your Harmony account secure.',
+          tag: 'Security',
+          bgImage: '/assets/svg/logincaption.svg',
+          overlayImage: '/assets/images/ydd-logo.png'
+        },
+        {
+          title: 'Stay Updated',
+          description: 'Enable notifications to never miss updates.',
+          tag: 'Updates',
+        }
+      ]"
+    ></app-login-caption>
   </div>
 
   <!-- Loading Overlay -->

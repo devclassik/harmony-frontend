@@ -7,11 +7,12 @@ import { AlertService } from '../../services/alert.service';
 import { NotificationService } from '../../services/notification.service';
 import { MatIconModule } from '@angular/material/icon';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+import { LoginCaptionComponent } from "../../components/login-caption/login-caption.component";
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, LoadingOverlayComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, LoadingOverlayComponent, LoginCaptionComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
