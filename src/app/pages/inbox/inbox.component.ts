@@ -40,6 +40,9 @@ export class InboxComponent implements OnInit, OnDestroy {
   showFilterDropdown: boolean = false;
   currentFilter: 'all' | 'unread' | 'recent' | 'oldest' = 'all';
   searchTerm: string = '';
+  // Precomputed attachments for the currently selected item to avoid heavy
+  // change detection caused by calling methods from the template
+  attachments: Attachment[] = [];
 
   private subscriptions: Subscription[] = [];
 
@@ -77,6 +80,10 @@ export class InboxComponent implements OnInit, OnDestroy {
     this.notificationService.markInboxItemAsRead(itemId);
     this.notificationService.markSelectedInboxItemAsRead(itemId);
     // Optionally, you can also refresh the inbox
+
+    // Precompute attachments for the selected item to keep template light
+    const item = this.getSelectedItem();
+    this.attachments = this.buildAttachmentsFromItem(item);
   }
 
   goBack() {
@@ -137,30 +144,24 @@ export class InboxComponent implements OnInit, OnDestroy {
     });
   }
 
-  hasAttachments(): boolean {
-    // Show attachments for promotion-related messages
-    const item = this.getSelectedItem();
-    return item?.subject.toLowerCase().includes('promotion') || false;
-  }
+  // Build attachments from backend-provided message data (no hardcoding)
+  private buildAttachmentsFromItem(item: InboxItem | undefined): Attachment[] {
+    if (!item || !item.documents || item.documents.length === 0) return [];
 
-  getAttachments(): Attachment[] {
-    const item = this.getSelectedItem();
-    if (!item || !this.hasAttachments()) return [];
-
-    return [
-      {
-        name: 'Promotion Letter',
-        size: '245 KB',
-        type: 'PDF',
-        url: '/assets/documents/promotion-letter.pdf',
-      },
-      {
-        name: 'Promotion Letter',
-        size: '245 KB',
-        type: 'PDF',
-        url: '/assets/documents/promotion-letter-2.pdf',
-      },
-    ];
+    // Map plain URLs to Attachment objects; type/size best-effort
+    return item.documents
+      .filter((url) => typeof url === 'string' && url.trim() !== '')
+      .map((url) => {
+        const name = (url.split('/').pop() || 'Attachment').split('?')[0];
+        const ext = (name.split('.').pop() || '').toUpperCase();
+        const type = ext || 'FILE';
+        return {
+          name,
+          size: '',
+          type,
+          url,
+        } as Attachment;
+      });
   }
 
   downloadAttachment(attachment: Attachment) {
@@ -189,6 +190,7 @@ export class InboxComponent implements OnInit, OnDestroy {
       documentType: attachment.type,
       date: this.getCurrentDate(),
       status: 'Active',
+      downloadUrl: attachment.url,
     };
     this.showDocumentPreview = true;
   }
