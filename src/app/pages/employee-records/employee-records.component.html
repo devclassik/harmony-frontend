@@ -17,6 +17,11 @@
     [tableData]="filteredEmployees"
     [menuItems]="actionButton"
     (menuAction)="onMenuAction($event)"
+    [showPagination]="true"
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)"
   ></app-table>
 </div>
 
@@ -58,6 +63,6 @@
 <!-- Loading Overlay -->
 <app-loading-overlay
   [isVisible]="isLoading"
-  title="Loading employees..."
-  message="Please wait while we fetch employee data."
+  [title]="loadingTitle"
+  [message]="loadingMessage"
 ></app-loading-overlay>

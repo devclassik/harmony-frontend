@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { SuccessModalComponent } from '../../components/success-modal/success-modal.component';
 import {
   ConfirmPromptComponent,
@@ -26,7 +27,6 @@ import { finalize } from 'rxjs/operators';
 @Component({
   selector: 'app-sick-leave',
   imports: [
-    SuccessModalComponent,
     ConfirmPromptComponent,
     EmployeeDetailsComponent,
     TableComponent,
@@ -37,7 +37,7 @@ import { finalize } from 'rxjs/operators';
   templateUrl: './sick-leave.component.html',
   styleUrl: './sick-leave.component.css',
 })
-export class SickLeaveComponent implements OnInit {
+export class SickLeaveComponent implements OnInit, OnDestroy {
   userRole: string | null;
   selectedStatus: string = '';
   selectedFilter: string = '';
@@ -53,10 +53,24 @@ export class SickLeaveComponent implements OnInit {
   showCreateRequest = false;
   showSickLeaveDetails: boolean = false;
   selectedSickLeaveData: any = null;
+  selectedSickLeaveRecord: any = null;
   isLoading: boolean = false;
   isCreating: boolean = false;
+  isApprovingLeave: boolean = false;
+  isRejectingLeave: boolean = false;
   currentUserId: number | null = null;
   leaveDetailsMode: 'view' | 'create' = 'view';
+
+  // Properties for approve/reject functionality
+  selectedLeaveForAction: any = null;
+  pendingAction: 'approve' | 'reject' | null = null;
+
+  private subscriptions: Subscription[] = [];
+
+  // Employee details properties for accordion view
+  selectedEmployeeDetails: any = null;
+  selectedEmployeeSickLeaves: any[] = [];
+  selectedSickLeaveHistory: any[] = [];
 
   constructor(
     private authService: AuthService,
@@ -69,6 +83,10 @@ export class SickLeaveComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSickLeaves();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   loadSickLeaves(): void {
@@ -85,7 +103,7 @@ export class SickLeaveComponent implements OnInit {
           const allSickLeaves = response.data;
 
           // Filter leaves based on user role
-          if (this.userRole?.toLowerCase() === 'worker' && this.currentUserId) {
+          if (this.userRole?.toLowerCase() !== 'admin' && this.currentUserId) {
             // Workers see only their own sick leaves
             this.sickLeaveRequests = this.transformToTableData(
               this.leaveService.filterLeavesByEmployee(
@@ -277,7 +295,10 @@ export class SickLeaveComponent implements OnInit {
     console.log(event);
 
     if (event.action === 'View') {
-      if (this.userRole?.toLowerCase() === 'worker') {
+      if (
+        this.userRole?.toLowerCase() === 'worker' ||
+        this.userRole?.toLowerCase() === 'minister'
+      ) {
         this.showSickLeaveDetailsModal();
 
         // Get the original API data and transform it for the leave-details component
@@ -297,8 +318,38 @@ export class SickLeaveComponent implements OnInit {
           this.selectedSickLeaveData = event.row;
         }
       } else {
+        // For admin roles, show employee details with accordion view
         this.showEmployeeDetailsModal();
         this.selectedEmployeeRecord = event.row;
+        this.selectedSickLeaveRecord = (event.row as any).originalData;
+
+        // Set selectedSickLeaveData for the employee details component
+        const originalData = (event.row as any).originalData;
+        if (originalData) {
+          // Get all sick leave records from the current data to calculate balance and history
+          const allUserSickLeaves = this.employees
+            .map((req) => (req as any).originalData)
+            .filter(Boolean);
+          this.selectedSickLeaveData =
+            this.leaveService.transformForLeaveDetails(
+              originalData,
+              allUserSickLeaves
+            );
+        } else {
+          // Fallback to the table data if originalData is not available
+          this.selectedSickLeaveData = event.row;
+        }
+
+        // Get employee details and sick leave history
+        if (
+          this.selectedSickLeaveRecord &&
+          this.selectedSickLeaveRecord.employee
+        ) {
+          this.loadEmployeeDetails(this.selectedSickLeaveRecord.employee.id);
+          this.loadEmployeeSickLeaveHistory(
+            this.selectedSickLeaveRecord.employee.id
+          );
+        }
       }
     }
   }
@@ -311,11 +362,14 @@ export class SickLeaveComponent implements OnInit {
   }
 
   actionToPerform(result: boolean) {
+    this.pendingAction = result ? 'approve' : 'reject';
+    this.selectedLeaveForAction =
+      this.selectedSickLeaveRecord || this.selectedSickLeaveData;
+
     if (result) {
       this.promptConfig = {
         title: 'Confirm',
-        text: 'Are you sure you want to approve this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
+        text: 'Are you sure you want to approve this sick leave request?',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -323,8 +377,7 @@ export class SickLeaveComponent implements OnInit {
     } else {
       this.promptConfig = {
         title: 'Confirm',
-        text: 'Are you sure you want to reject this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
+        text: 'Are you sure you want to reject this sick leave request?',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -333,10 +386,73 @@ export class SickLeaveComponent implements OnInit {
   }
 
   onModalConfirm(confirmed: boolean) {
-    console.log(confirmed);
+    if (!confirmed) {
+      this.showModal = false;
+      return;
+    }
+
+    if (!this.selectedLeaveForAction) {
+      this.alertService.error('No sick leave request selected for action.');
+      this.showModal = false;
+      return;
+    }
+
+    const leaveId = this.selectedLeaveForAction.id;
+    const isApproving = this.pendingAction === 'approve';
+
+    // Set loading state
+    if (isApproving) {
+      this.isApprovingLeave = true;
+    } else {
+      this.isRejectingLeave = true;
+    }
+
     this.showModal = false;
-    this.showAppraisal = false;
-    this.successModal = true;
+
+    // Call the appropriate API method
+    const apiCall = isApproving
+      ? this.leaveService.approveSickLeave(leaveId)
+      : this.leaveService.rejectSickLeave(leaveId);
+
+    const actionSub = apiCall.subscribe({
+      next: (response) => {
+        // Reset loading states
+        this.isApprovingLeave = false;
+        this.isRejectingLeave = false;
+
+        if (response.status === 'success') {
+          // Show success message
+          const action = isApproving ? 'approved' : 'rejected';
+          this.alertService.success(
+            `Sick leave request ${action} successfully!`
+          );
+
+          // Close employee details modal
+          this.showEmployeeDetails = false;
+
+          // Reload sick leaves to show updated status
+          this.loadSickLeaves();
+        }
+      },
+      error: (error) => {
+        // Reset loading states
+        this.isApprovingLeave = false;
+        this.isRejectingLeave = false;
+
+        console.error(
+          `Error ${
+            isApproving ? 'approving' : 'rejecting'
+          } sick leave request:`,
+          error
+        );
+        const action = isApproving ? 'approving' : 'rejecting';
+        this.alertService.error(
+          `Failed to ${action} sick leave request. Please try again.`
+        );
+      },
+    });
+
+    this.subscriptions.push(actionSub);
   }
 
   onModalClose() {
@@ -441,5 +557,105 @@ export class SickLeaveComponent implements OnInit {
       );
     }
     this.filteredSickLeaveRequests = filtered;
+  }
+
+  // Load employee details for accordion view
+  loadEmployeeDetails(employeeId: number) {
+    // For now, we'll use the employee data from the sick leave record
+    const sickLeaveRecord = this.selectedSickLeaveRecord;
+    if (sickLeaveRecord && sickLeaveRecord.employee) {
+      this.selectedEmployeeDetails = {
+        id: sickLeaveRecord.employee.id,
+        employeeId: sickLeaveRecord.employee.employeeId,
+        title: sickLeaveRecord.employee.title || null,
+        firstName: sickLeaveRecord.employee.firstName,
+        lastName: sickLeaveRecord.employee.lastName,
+        middleName: sickLeaveRecord.employee.middleName || null,
+        gender: sickLeaveRecord.employee.gender || null,
+        profferedName: sickLeaveRecord.employee.profferedName || null,
+        primaryPhone: sickLeaveRecord.employee.primaryPhone || null,
+        primaryPhoneType: sickLeaveRecord.employee.primaryPhoneType || null,
+        altPhone: sickLeaveRecord.employee.altPhone || null,
+        altPhoneType: sickLeaveRecord.employee.altPhoneType || null,
+        dob: sickLeaveRecord.employee.dob || null,
+        maritalStatus: sickLeaveRecord.employee.maritalStatus || null,
+        nationIdNumber: null,
+        everDivorced: sickLeaveRecord.employee.everDivorced,
+        beenConvicted: sickLeaveRecord.employee.beenConvicted,
+        hasQuestionableBackground:
+          sickLeaveRecord.employee.hasQuestionableBackground,
+        hasBeenInvestigatedForMisconductOrAbuse:
+          sickLeaveRecord.employee.hasBeenInvestigatedForMisconductOrAbuse,
+        photoUrl: sickLeaveRecord.employee.photoUrl || null,
+        altEmail: sickLeaveRecord.employee.altEmail || null,
+        employeeStatus: sickLeaveRecord.employee.employeeStatus || null,
+        employmentType: sickLeaveRecord.employee.employmentType || null,
+        serviceStartDate: sickLeaveRecord.employee.serviceStartDate || null,
+        retiredDate: sickLeaveRecord.employee.retiredDate || null,
+        recentCredentialsNameArea: null,
+        createdAt: sickLeaveRecord.employee.createdAt,
+        updatedAt: sickLeaveRecord.employee.updatedAt,
+        deletedAt: sickLeaveRecord.employee.deletedAt || null,
+        user: sickLeaveRecord.employee.user
+          ? {
+              id: 1,
+              email: sickLeaveRecord.employee.user.email,
+              password: sickLeaveRecord.employee.user.password,
+              verifyEmailOTP: sickLeaveRecord.employee.user.verifyEmailOTP,
+              isEmailVerified: sickLeaveRecord.employee.user.isEmailVerified,
+              passwordResetOTP:
+                sickLeaveRecord.employee.user.passwordResetOTP || null,
+              isLoggedIn: sickLeaveRecord.employee.user.isLoggedIn,
+              createdAt: sickLeaveRecord.employee.user.createdAt,
+              updatedAt: sickLeaveRecord.employee.user.updatedAt,
+              deletedAt: sickLeaveRecord.employee.user.deletedAt || null,
+              role: {
+                id: 1,
+                name: 'Worker',
+                createdAt: '',
+                updatedAt: '',
+                deletedAt: null,
+                permissions: [],
+              },
+            }
+          : null,
+        spouse: null,
+        children: [],
+        payrolls: [],
+        documents: [],
+        credentials: [],
+        departments: [],
+        homeAddress: null,
+        mailingAddress: null,
+        departmentHeads: [],
+        previousPositions: [],
+        spiritualHistory: null,
+      };
+    }
+  }
+
+  // Load employee sick leave history for accordion view
+  loadEmployeeSickLeaveHistory(employeeId: number) {
+    // For sick leave view, we only show sick leave history
+    // Filter sick leave requests for this specific employee
+    this.selectedEmployeeSickLeaves = this.employees
+      .map((req) => (req as any).originalData)
+      .filter(
+        (leave: any) =>
+          leave && leave.employee && leave.employee.id === employeeId
+      );
+
+    // Transform to history format
+    this.selectedSickLeaveHistory = this.leaveService.getLeaveHistory(
+      this.selectedEmployeeSickLeaves
+    );
+
+    // Ensure we have at least the current sick leave request for the history section to show
+    if (
+      this.selectedSickLeaveRecord &&
+      this.selectedEmployeeSickLeaves.length === 0
+    ) {
+      this.selectedEmployeeSickLeaves = [this.selectedSickLeaveRecord];
+    }
   }
 }

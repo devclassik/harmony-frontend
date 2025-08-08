@@ -27,6 +27,7 @@ import {
 import { AlertService } from '../../services/alert.service';
 import { Subscription } from 'rxjs';
 import { FORM_OPTIONS } from '../../shared/constants/form-options';
+import { EmployeeDetails } from '../../dto/employee.dto';
 
 @Component({
   selector: 'app-leave-of-absence',
@@ -68,13 +69,25 @@ export class LeaveOfAbsenceComponent implements OnInit, OnDestroy {
   // Loading states
   isLoadingLeaves: boolean = false;
   isCreatingLeave: boolean = false;
+  isApprovingLeave: boolean = false;
+  isRejectingLeave: boolean = false;
 
   // Add mode control for leave-details component
   leaveDetailsMode: 'view' | 'create' = 'view';
 
+  // Store selected leave for approval/rejection
+  selectedLeaveForAction: any = null;
+  pendingAction: 'approve' | 'reject' | null = null;
+
   // Real data arrays
   leaveRequests: TableData[] = [];
   filteredLeaveRequests: TableData[] = [];
+
+  // Admin role properties for accordion view
+  selectedEmployeeDetails: EmployeeDetails | null = null;
+  selectedLeaveRecord: LeaveRecord | null = null;
+  selectedEmployeeLeaves: LeaveRecord[] = [];
+  selectedLeaveHistory: any[] = [];
 
   // Subscriptions for cleanup
   private subscriptions: Subscription[] = [];
@@ -250,22 +263,66 @@ export class LeaveOfAbsenceComponent implements OnInit, OnDestroy {
     console.log(event);
 
     if (event.action === 'View') {
-      this.showLeaveDetailsModal();
+      // Check if user is admin/HOD/pastor
+      const isAdminRole =
+        this.userRole?.toLowerCase() === 'admin' ||
+        this.userRole?.toLowerCase() === 'hod' ||
+        this.userRole?.toLowerCase() === 'pastor';
 
-      // Get the original API data and transform it for the leave-details component
-      const originalData = (event.row as any).originalData;
-      if (originalData) {
-        // Get all leave records from the current data to calculate balance and history
-        const allUserLeaves = this.leaveRequests
-          .map((req) => (req as any).originalData)
-          .filter(Boolean);
-        this.selectedLeaveData = this.leaveService.transformForLeaveDetails(
-          originalData,
-          allUserLeaves
-        );
+      if (isAdminRole) {
+        // For admin roles, show employee details with accordion view
+        this.showEmployeeDetailsModal();
+        this.selectedEmployeeRecord = event.row;
+        this.selectedLeaveRecord = (event.row as any).originalData;
+
+        // Set selectedLeaveData for the employee details component
+        const originalData = (event.row as any).originalData;
+        if (originalData) {
+          // Get all leave records from the current data to calculate balance and history
+          const allUserLeaves = this.leaveRequests
+            .map((req) => (req as any).originalData)
+            .filter(Boolean);
+          this.selectedLeaveData = this.leaveService.transformForLeaveDetails(
+            originalData,
+            allUserLeaves
+          );
+        } else {
+          // Fallback to the table data if originalData is not available
+          this.selectedLeaveData = event.row;
+        }
+
+        // Get employee details and leave history
+        if (this.selectedLeaveRecord && this.selectedLeaveRecord.employee) {
+          this.loadEmployeeDetails(this.selectedLeaveRecord.employee.id);
+          this.loadEmployeeLeaveHistory(this.selectedLeaveRecord.employee.id);
+
+          // Debug logging
+          console.log('Leave of Absence - Debug Info:', {
+            selectedLeaveData: this.selectedLeaveData,
+            selectedEmployeeLeaves: this.selectedEmployeeLeaves,
+            selectedLeaveHistory: this.selectedLeaveHistory,
+            leaveRequestsLength: this.leaveRequests.length,
+          });
+        }
       } else {
-        // Fallback to the table data if originalData is not available
-        this.selectedLeaveData = event.row;
+        // For worker/minister, show regular leave details
+        this.showLeaveDetailsModal();
+
+        // Get the original API data and transform it for the leave-details component
+        const originalData = (event.row as any).originalData;
+        if (originalData) {
+          // Get all leave records from the current data to calculate balance and history
+          const allUserLeaves = this.leaveRequests
+            .map((req) => (req as any).originalData)
+            .filter(Boolean);
+          this.selectedLeaveData = this.leaveService.transformForLeaveDetails(
+            originalData,
+            allUserLeaves
+          );
+        } else {
+          // Fallback to the table data if originalData is not available
+          this.selectedLeaveData = event.row;
+        }
       }
     }
   }
@@ -279,11 +336,14 @@ export class LeaveOfAbsenceComponent implements OnInit, OnDestroy {
   }
 
   actionToPerform(result: boolean) {
+    this.pendingAction = result ? 'approve' : 'reject';
+    this.selectedLeaveForAction =
+      this.selectedLeaveRecord || this.selectedLeaveData;
+
     if (result) {
       this.promptConfig = {
         title: 'Confirm',
-        text: 'Are you sure you want to approve this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
+        text: 'Are you sure you want to approve this leave of absence request?',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -291,8 +351,7 @@ export class LeaveOfAbsenceComponent implements OnInit, OnDestroy {
     } else {
       this.promptConfig = {
         title: 'Confirm',
-        text: 'Are you sure you want to reject this promotion request',
-        imageUrl: 'assets/svg/profilePix.svg',
+        text: 'Are you sure you want to reject this leave of absence request?',
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -301,10 +360,71 @@ export class LeaveOfAbsenceComponent implements OnInit, OnDestroy {
   }
 
   onModalConfirm(confirmed: boolean) {
-    console.log(confirmed);
+    if (!confirmed) {
+      this.showModal = false;
+      return;
+    }
+
+    if (!this.selectedLeaveForAction) {
+      this.alertService.error('No leave request selected for action.');
+      this.showModal = false;
+      return;
+    }
+
+    const leaveId = this.selectedLeaveForAction.id;
+    const isApproving = this.pendingAction === 'approve';
+
+    // Set loading state
+    if (isApproving) {
+      this.isApprovingLeave = true;
+    } else {
+      this.isRejectingLeave = true;
+    }
+
     this.showModal = false;
-    this.showAppraisal = false;
-    this.successModal = true;
+
+    // Call the appropriate API method
+    const apiCall = isApproving
+      ? this.leaveService.approveAbsenceLeave(leaveId)
+      : this.leaveService.rejectAbsenceLeave(leaveId);
+
+    const actionSub = apiCall.subscribe({
+      next: (response) => {
+        // Reset loading states
+        this.isApprovingLeave = false;
+        this.isRejectingLeave = false;
+
+        if (response.status === 'success') {
+          // Show success message
+          const action = isApproving ? 'approved' : 'rejected';
+          this.alertService.success(
+            `Leave of absence request ${action} successfully!`
+          );
+
+          // Close employee details modal
+          this.showEmployeeDetails = false;
+
+          // Reload leave requests to show updated status
+          this.loadLeaveRequests();
+        }
+      },
+      error: (error) => {
+        // Reset loading states
+        this.isApprovingLeave = false;
+        this.isRejectingLeave = false;
+
+        console.error(
+          `Error ${isApproving ? 'approving' : 'rejecting'} leave request:`,
+          error
+        );
+        const action = isApproving ? 'approving' : 'rejecting';
+        this.alertService.error(
+          `Failed to ${action} leave request. Please try again.`
+        );
+      },
+    });
+
+    this.subscriptions.push(actionSub);
   }
 
   onModalClose() {
@@ -381,5 +501,112 @@ export class LeaveOfAbsenceComponent implements OnInit, OnDestroy {
   onCloseLeaveDetails() {
     this.showLeaveDetails = false;
     this.leaveDetailsMode = 'view';
+  }
+
+  // Load employee details for accordion view
+  loadEmployeeDetails(employeeId: number) {
+    // For now, we'll use the employee data from the leave record
+    // In a real implementation, you might want to fetch detailed employee info
+    const leaveRecord = this.selectedLeaveRecord;
+    if (leaveRecord && leaveRecord.employee) {
+      this.selectedEmployeeDetails = {
+        id: leaveRecord.employee.id,
+        employeeId: leaveRecord.employee.employeeId,
+        title: leaveRecord.employee.title || null,
+        firstName: leaveRecord.employee.firstName,
+        lastName: leaveRecord.employee.lastName,
+        middleName: leaveRecord.employee.middleName || null,
+        gender: leaveRecord.employee.gender || null,
+        profferedName: leaveRecord.employee.profferedName || null,
+        primaryPhone: leaveRecord.employee.primaryPhone || null,
+        primaryPhoneType: leaveRecord.employee.primaryPhoneType || null,
+        altPhone: leaveRecord.employee.altPhone || null,
+        altPhoneType: leaveRecord.employee.altPhoneType || null,
+        dob: leaveRecord.employee.dob || null,
+        maritalStatus: leaveRecord.employee.maritalStatus || null,
+        nationIdNumber: null,
+        everDivorced: leaveRecord.employee.everDivorced,
+        beenConvicted: leaveRecord.employee.beenConvicted,
+        hasQuestionableBackground:
+          leaveRecord.employee.hasQuestionableBackground,
+        hasBeenInvestigatedForMisconductOrAbuse:
+          leaveRecord.employee.hasBeenInvestigatedForMisconductOrAbuse,
+        photoUrl: leaveRecord.employee.photoUrl || null,
+        altEmail: leaveRecord.employee.altEmail || null,
+        employeeStatus: leaveRecord.employee.employeeStatus || null,
+        employmentType: leaveRecord.employee.employmentType || null,
+        serviceStartDate: leaveRecord.employee.serviceStartDate || null,
+        retiredDate: leaveRecord.employee.retiredDate || null,
+        recentCredentialsNameArea: null,
+        createdAt: leaveRecord.employee.createdAt,
+        updatedAt: leaveRecord.employee.updatedAt,
+        deletedAt: leaveRecord.employee.deletedAt || null,
+        user: leaveRecord.employee.user
+          ? {
+              id: leaveRecord.employee.user.id,
+              email: leaveRecord.employee.user.email,
+              password: leaveRecord.employee.user.password,
+              verifyEmailOTP: leaveRecord.employee.user.verifyEmailOTP,
+              isEmailVerified: leaveRecord.employee.user.isEmailVerified,
+              passwordResetOTP:
+                leaveRecord.employee.user.passwordResetOTP || null,
+              isLoggedIn: leaveRecord.employee.user.isLoggedIn,
+              createdAt: leaveRecord.employee.user.createdAt,
+              updatedAt: leaveRecord.employee.user.updatedAt,
+              deletedAt: leaveRecord.employee.user.deletedAt || null,
+              role: {
+                id: 1,
+                name: 'Worker',
+                createdAt: '',
+                updatedAt: '',
+                deletedAt: null,
+                permissions: [],
+              },
+            }
+          : null,
+        spouse: null,
+        children: [],
+        payrolls: [],
+        documents: [],
+        credentials: [],
+        departments: [],
+        homeAddress: null,
+        mailingAddress: null,
+        departmentHeads: [],
+        previousPositions: [],
+        spiritualHistory: null,
+      };
+    }
+  }
+
+  // Load employee leave history for accordion view
+  loadEmployeeLeaveHistory(employeeId: number) {
+    // For leave of absence view, we only show leave of absence history
+    // Filter leave of absence requests for this specific employee
+    this.selectedEmployeeLeaves = this.leaveRequests
+      .map((req) => (req as any).originalData)
+      .filter(
+        (leave: any) =>
+          leave && leave.employee && leave.employee.id === employeeId
+      );
+
+    // Transform to history format
+    this.selectedLeaveHistory = this.leaveService.getLeaveHistory(
+      this.selectedEmployeeLeaves
+    );
+
+    // Ensure we have at least the current leave request for the history section to show
+    if (this.selectedLeaveRecord && this.selectedEmployeeLeaves.length === 0) {
+      this.selectedEmployeeLeaves = [this.selectedLeaveRecord];
+    }
+
+    // Debug logging
+    console.log('loadEmployeeLeaveHistory - Debug Info:', {
+      employeeId,
+      leaveRequestsLength: this.leaveRequests.length,
+      selectedEmployeeLeavesLength: this.selectedEmployeeLeaves.length,
+      selectedLeaveHistoryLength: this.selectedLeaveHistory.length,
+      selectedLeaveRecord: this.selectedLeaveRecord,
+    });
   }
 }

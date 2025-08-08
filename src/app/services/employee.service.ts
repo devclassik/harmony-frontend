@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import {
   EmployeeDetails,
   GetEmployeeResponse,
+  GetAllEmployeesResponse,
   CreateEmployeeRequest,
   CreateEmployeeResponse,
   UpdateEmployeeRequest,
@@ -17,11 +18,6 @@ import {
 export class EmployeeService {
   constructor(private apiService: ApiService) {}
 
-  /**
-   * Get employee by ID
-   * @param id Employee ID
-   * @returns Observable of employee details
-   */
   getEmployeeById(id: number): Observable<GetEmployeeResponse> {
     const endpoint = environment.routes.employees.getById.replace(
       '{id}',
@@ -30,21 +26,33 @@ export class EmployeeService {
     return this.apiService.get<GetEmployeeResponse>(endpoint);
   }
 
-  /**
-   * Get all employees
-   * @returns Observable of all employees
-   */
-  getAllEmployees(): Observable<GetEmployeeResponse> {
-    return this.apiService.get<GetEmployeeResponse>(
-      environment.routes.employees.getAll
+  getAllEmployees(
+    page: number = 1,
+    limit: number = 10
+  ): Observable<GetAllEmployeesResponse> {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+
+    return this.apiService.get<GetAllEmployeesResponse>(
+      `${environment.routes.employees.getAll}?${params.toString()}`
     );
   }
 
-  /**
-   * Create new employee
-   * @param employeeData Employee data to create
-   * @returns Observable of created employee
-   */
+  searchEmployeesByName(
+    name: string
+  ): Observable<{ status: string; message: string; data: EmployeeDetails[] }> {
+    const endpoint = environment.routes.employees.searchByName.replace(
+      '{name}',
+      encodeURIComponent(name)
+    );
+    return this.apiService.get<{
+      status: string;
+      message: string;
+      data: EmployeeDetails[];
+    }>(endpoint);
+  }
+
   createEmployee(
     employeeData: CreateEmployeeRequest
   ): Observable<CreateEmployeeResponse> {
@@ -54,12 +62,6 @@ export class EmployeeService {
     );
   }
 
-  /**
-   * Update employee
-   * @param id Employee ID
-   * @param employeeData Updated employee data
-   * @returns Observable of updated employee
-   */
   updateEmployee(
     id: number,
     employeeData: UpdateEmployeeRequest
@@ -159,5 +161,14 @@ export class EmployeeService {
     }
 
     return missingFields;
+  }
+
+  createRetirementRequest(employeeId: number, reason: string): Observable<any> {
+    const requestData = {
+      employeeId: employeeId,
+      reason: reason,
+    };
+
+    return this.apiService.post<any>('/retirement', requestData);
   }
 }

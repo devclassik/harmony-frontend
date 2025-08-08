@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { AuthService } from './auth.service';
 import {
   NotificationResponse,
   MessageResponse,
@@ -18,6 +19,8 @@ export interface InboxItem {
   message: string;
   time: string;
   isRead: boolean;
+  // Optional array of document URLs associated with the message
+  documents?: string[];
 }
 
 export interface NotificationItem {
@@ -41,7 +44,10 @@ export class NotificationService {
   private notificationsSubject = new BehaviorSubject<NotificationItem[]>([]);
   private unreadCountSubject = new BehaviorSubject<number>(0);
 
-  constructor(private apiService: ApiService) {
+  constructor(
+    private apiService: ApiService,
+    private authService: AuthService
+  ) {
     // Don't auto-load data in constructor - wait for manual trigger after auth
     // This prevents API calls before user is authenticated
 
@@ -83,7 +89,15 @@ export class NotificationService {
   private loadInboxItemsFromApi(): void {
     this.apiService.get<MessageResponse>('/message').subscribe({
       next: (response) => {
-        const inboxItems = this.mapApiMessagesToInboxItems(response.data);
+        const currentEmployeeId = this.authService.getCurrentEmployeeId();
+        const apiMessages = Array.isArray(response.data) ? response.data : [];
+        const filteredForEmployee =
+          currentEmployeeId == null
+            ? []
+            : apiMessages.filter((message) =>
+                this.isItemForEmployee(message, currentEmployeeId)
+              );
+        const inboxItems = this.mapApiMessagesToInboxItems(filteredForEmployee);
         this.inboxItemsSubject.next(inboxItems);
       },
       error: (error) => {
@@ -97,9 +111,18 @@ export class NotificationService {
   private loadNotificationsFromApi(): void {
     this.apiService.get<NotificationResponse>('/notification').subscribe({
       next: (response) => {
-        const notifications = this.mapApiNotificationsToNotificationItems(
-          response.data
-        );
+        const currentEmployeeId = this.authService.getCurrentEmployeeId();
+        const apiNotifications = Array.isArray(response.data)
+          ? response.data
+          : [];
+        const filteredForEmployee =
+          currentEmployeeId == null
+            ? []
+            : apiNotifications.filter((notification) =>
+                this.isItemForEmployee(notification, currentEmployeeId)
+              );
+        const notifications =
+          this.mapApiNotificationsToNotificationItems(filteredForEmployee);
         this.notificationsSubject.next(notifications);
       },
       error: (error) => {
@@ -139,23 +162,27 @@ export class NotificationService {
   private mapApiMessagesToInboxItems(
     apiMessages: ApiMessageItem[]
   ): InboxItem[] {
-    return apiMessages.map((message) => ({
-      id: message.id,
-      sender: `${message.actionBy.firstName} ${message.actionBy.lastName}`,
-      profileImage: this.formatImageUrl(message.actionBy.photoUrl),
-      subject: message.title || 'No Subject',
-      preview:
-        message.message.length > 100
-          ? message.message.substring(0, 100) + '...'
-          : message.message,
-      message: message.message,
-      time: new Date(message.createdAt).toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      }),
-      isRead: message.isRead,
-    }));
+    return apiMessages.map((message) => {
+      const documents = this.extractDocumentUrlsFromMetadata(message.metadata);
+      return {
+        id: message.id,
+        sender: `${message.actionBy.firstName} ${message.actionBy.lastName}`,
+        profileImage: this.formatImageUrl(message.actionBy.photoUrl),
+        subject: message.title || 'No Subject',
+        preview:
+          message.message.length > 100
+            ? message.message.substring(0, 100) + '...'
+            : message.message,
+        message: message.message,
+        time: new Date(message.createdAt).toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        }),
+        isRead: message.isRead,
+        documents,
+      } as InboxItem;
+    });
   }
 
   private mapApiNotificationsToNotificationItems(
@@ -176,6 +203,15 @@ export class NotificationService {
       timestamp: new Date(notification.createdAt).toLocaleDateString('en-GB'),
       isRead: notification.isRead,
     }));
+  }
+
+  private isItemForEmployee(
+    item: ApiMessageItem | ApiNotificationItem,
+    employeeId: number
+  ): boolean {
+    // Show only items authored by the current user
+    const isActionBy = (item as any).actionBy?.id === employeeId;
+    return isActionBy === true;
   }
 
   // Helper function to properly format image URLs
@@ -201,6 +237,45 @@ export class NotificationService {
     // If it's a relative path, prepend the base URL
     const baseUrl = 'https://harmoney-backend.onrender.com';
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+  }
+
+  // Attempt to extract document URLs from a flexible metadata shape
+  private extractDocumentUrlsFromMetadata(metadata: any): string[] {
+    if (!metadata) return [];
+
+    const urls: string[] = [];
+
+    const pushUrl = (value: any) => {
+      if (typeof value === 'string' && value.trim() !== '') {
+        urls.push(value);
+      } else if (value && typeof value === 'object') {
+        const maybeUrl = (value.url || value.downloadUrl || value.href) as
+          | string
+          | undefined;
+        if (typeof maybeUrl === 'string' && maybeUrl.trim() !== '') {
+          urls.push(maybeUrl);
+        }
+      }
+    };
+
+    const candidates: any[] = [];
+    if (Array.isArray(metadata.documents))
+      candidates.push(...metadata.documents);
+    if (Array.isArray(metadata.attachments))
+      candidates.push(...metadata.attachments);
+    if (Array.isArray(metadata.files)) candidates.push(...metadata.files);
+    if (Array.isArray(metadata.fileUrls)) candidates.push(...metadata.fileUrls);
+    if (Array.isArray(metadata.urls)) candidates.push(...metadata.urls);
+
+    // Single values
+    if (typeof metadata.downloadUrl === 'string')
+      candidates.push(metadata.downloadUrl);
+    if (typeof metadata.url === 'string') candidates.push(metadata.url);
+
+    candidates.forEach(pushUrl);
+
+    // Deduplicate
+    return Array.from(new Set(urls));
   }
 
   // Inbox methods

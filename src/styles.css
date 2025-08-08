@@ -23,3 +23,33 @@ body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+
+/* ApexCharts Touch Event Fixes */
+.apexcharts-canvas {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.apexcharts-canvas * {
+  touch-action: manipulation;
+}
+
+/* Prevent passive event listener warnings for chart interactions */
+.apexcharts-tooltip,
+.apexcharts-legend,
+.apexcharts-legend-marker {
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+
+/* Ensure proper touch handling on mobile devices */
+@media (max-width: 768px) {
+  .apexcharts-canvas {
+    touch-action: pan-x pan-y;
+  }
+}

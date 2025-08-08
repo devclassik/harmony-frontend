@@ -11,6 +11,7 @@ import {
   PasswordResetVerifyResponse,
   PasswordResetResendResponse,
 } from '../../dto';
+import { LoginCaptionComponent } from "../../components/login-caption/login-caption.component";
 
 @Component({
   selector: 'app-forgot-password',
@@ -20,7 +21,8 @@ import {
     FormsModule,
     LoadingOverlayComponent,
     CustomModalComponent,
-  ],
+    LoginCaptionComponent
+],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.css',
 })

@@ -76,4 +76,66 @@ export class ApiService {
       })
       .pipe(catchError(this.handleError));
   }
+
+  // Permission update method
+  updateRolePermissions(roleId: number, permissions: any): Observable<any> {
+    const payload = {
+      roleId: roleId,
+      permissions: permissions,
+    };
+    return this.put<any>(
+      environment.routes.permissions.updateRolePermissions,
+      payload
+    );
+  }
+
+  // Accommodation methods
+  getAccommodations(): Observable<any> {
+    return this.get<any>(environment.routes.accommodation.getAll);
+  }
+
+  createAccommodation(data: any): Observable<any> {
+    return this.post<any>(environment.routes.accommodation.create, data);
+  }
+
+  updateAccommodation(id: number, data: any): Observable<any> {
+    const endpoint = environment.routes.accommodation.update.replace(
+      '{id}',
+      id.toString()
+    );
+    return this.put<any>(endpoint, data);
+  }
+
+  deleteAccommodation(id: number): Observable<any> {
+    const endpoint = environment.routes.accommodation.delete.replace(
+      '{id}',
+      id.toString()
+    );
+    return this.delete<any>(endpoint);
+  }
+
+  // Template methods
+  getTemplates(): Observable<any> {
+    return this.get<any>(environment.routes.template.getAll);
+  }
+
+  createTemplate(data: any): Observable<any> {
+    return this.post<any>(environment.routes.template.create, data);
+  }
+
+  updateTemplate(id: number, data: any): Observable<any> {
+    const endpoint = environment.routes.template.update.replace(
+      '{id}',
+      id.toString()
+    );
+    return this.put<any>(endpoint, data);
+  }
+
+  deleteTemplate(id: number): Observable<any> {
+    const endpoint = environment.routes.template.delete.replace(
+      '{id}',
+      id.toString()
+    );
+    return this.delete<any>(endpoint);
+  }
 }

@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  hostingAPI: 'https://harmoney-backend.onrender.com',
   apiUrl: 'https://harmoney-backend.onrender.com/api/v1',
   routes: {
     auth: {
@@ -28,6 +29,7 @@ export const environment = {
     employees: {
       getAll: '/employee',
       getById: '/employee/{id}',
+      searchByName: '/employee/name/{name}',
       create: '/employee',
       update: '/employee/{id}',
       delete: '/employee/{id}',
@@ -59,11 +61,60 @@ export const environment = {
     },
     campMeeting: {
       getAll: '/camp-meeting',
+      create: '/camp-meeting',
+      update: '/camp-meeting',
+      delete: '/camp-meeting',
+      attendees: '/camp-meeting/attendees',
+      assignRoom: '/camp-meeting/room/assign-room',
+      unAssignRoom: '/camp-meeting/room/unassign-room',
     },
     analytics: {
       getAnalyticsOverview: '/analytics/overview',
       getLeaveStatistics: '/analytics/leave-stat',
       getEmployeeDemographics: '/analytics/employee-demographics',
+    },
+    appraisal: {
+      create: '/appraisal',
+      getAll: '/appraisal',
+      getById: '/appraisal/{id}',
+      update: '/appraisal/{id}',
+      delete: '/appraisal/{id}',
+    },
+    promotion: {
+      getAll: '/promotion',
+      getById: '/promotion/{id}',
+      create: '/promotion',
+      update: '/promotion/{id}',
+      delete: '/promotion/{id}',
+      approve: '/promotion/{id}',
+      reject: '/promotion/{id}',
+    },
+    discipline: {
+      getAll: '/discipline',
+      getById: '/discipline/{id}',
+      create: '/discipline',
+      update: '/discipline/{id}',
+      delete: '/discipline/{id}',
+      approve: '/discipline/{id}',
+      reject: '/discipline/{id}',
+    },
+    transfer: {
+      getAll: '/transfer',
+      getById: '/transfer/{id}',
+      create: '/transfer',
+      update: '/transfer/{id}',
+      delete: '/transfer/{id}',
+      approve: '/transfer/{id}',
+      reject: '/transfer/{id}',
+    },
+    retirement: {
+      getAll: '/retirement',
+      getById: '/retirement/{id}',
+      create: '/retirement',
+      update: '/retirement/{id}',
+      delete: '/retirement/{id}',
+      approve: '/retirement/{id}',
+      reject: '/retirement/{id}',
     },
     posts: {
       getAll: 'posts',
@@ -72,6 +123,24 @@ export const environment = {
       update: 'posts/{id}',
       delete: 'posts/{id}',
       getByUser: 'posts/user/{userId}',
+    },
+    permissions: {
+      getAll: '/permission',
+      updateRolePermissions: '/permission/update-role-permissions',
+    },
+    accommodation: {
+      getAll: '/accommodation',
+      getById: '/accommodation/{id}',
+      create: '/accommodation',
+      update: '/accommodation/{id}',
+      delete: '/accommodation/{id}',
+    },
+    template: {
+      getAll: '/template',
+      getById: '/template/{id}',
+      create: '/template',
+      update: '/template/{id}',
+      delete: '/template/{id}',
     },
   },
 };

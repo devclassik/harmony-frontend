@@ -9,6 +9,7 @@ import { AlertService } from '../../services/alert.service';
 import { RegisterResponse, VerifyOtpResponse } from '../../dto';
 import { AuthService } from '../../services/auth.service';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+import { LoginCaptionComponent } from "../../components/login-caption/login-caption.component";
 
 interface SignUpForm {
   firstName: string;
@@ -27,7 +28,8 @@ interface SignUpForm {
     CustomModalComponent,
     MatIconModule,
     LoadingOverlayComponent,
-  ],
+    LoginCaptionComponent
+],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css',
 })

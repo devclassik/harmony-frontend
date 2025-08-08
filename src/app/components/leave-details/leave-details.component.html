@@ -1,13 +1,68 @@
-<div class="fixed inset-0 z-50 flex justify-end bg-[#7f7f7f63]" *ngIf="view">
+<div
+  class="fixed inset-0 z-50 flex justify-end bg-[#7f7f7f63]"
+  *ngIf="view"
+  (click)="onClose()"
+>
   <div
     class="bg-white w-full max-w-xl h-full shadow-lg p-8 overflow-y-auto relative animate-slide-in-right"
+    (click)="$event.stopPropagation()"
   >
-    <button
-      class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl"
-      (click)="onClose()"
-    >
-      &times;
-    </button>
+    <!-- Close/Edit/Delete buttons -->
+    <div class="absolute top-6 right-6 flex items-center gap-2 z-10">
+      <!-- Edit and Delete buttons for camp meeting view mode -->
+      <ng-container *ngIf="isCampMeeting && mode === 'view' && canEdit">
+        <button
+          class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+          (click)="onEdit()"
+          type="button"
+          title="Edit"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+            ></path>
+          </svg>
+        </button>
+        <button
+          class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+          (click)="onDelete()"
+          type="button"
+          title="Delete"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            ></path>
+          </svg>
+        </button>
+      </ng-container>
+
+      <!-- Close button for other modes -->
+      <button
+        *ngIf="!(isCampMeeting && mode === 'view' && canEdit)"
+        class="text-gray-400 hover:text-black text-2xl font-bold cursor-pointer"
+        (click)="onClose()"
+        type="button"
+      >
+        &times;
+      </button>
+    </div>
 
     <!-- CREATE MODE -->
     <div *ngIf="mode === 'create'">
@@ -23,8 +78,712 @@
       <!-- Form Section -->
       <div class="space-y-6">
         <h3 class="text-lg font-medium text-gray-900">
-          {{ leaveType }} Information
+          {{
+            isAddEmployee
+              ? "Employee Information"
+              : isAccommodation
+              ? "Accommodation Information"
+              : isDepartment
+              ? "Department Information"
+              : isTemplate
+              ? "Template Information"
+              : leaveType + " Information"
+          }}
         </h3>
+
+        <!-- Promotion Fields -->
+        <div *ngIf="isPromotion">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Employee Name with Search -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Employee Name</label
+              >
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="searchTerm"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
+                  (focus)="showEmployeeDropdown = true"
+                  (blur)="onEmployeeInputBlur()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Type employee name and press Enter to search..."
+                />
+                <div
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                  *ngIf="searchingEmployees"
+                >
+                  <svg
+                    class="animate-spin h-4 w-4 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Employee Dropdown -->
+              <div
+                *ngIf="showEmployeeDropdown && filteredEmployees.length > 0"
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              >
+                <div
+                  *ngFor="let employee of filteredEmployees"
+                  (click)="selectEmployee(employee)"
+                  class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                >
+                  <div class="font-medium text-gray-900">
+                    {{ employee.name }}
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    ID: {{ employee.employeeId }}
+                  </div>
+                  <div class="text-xs text-gray-400">
+                    {{ employee.currentPosition }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Loading state -->
+              <div
+                *ngIf="showEmployeeDropdown && searchingEmployees"
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                <div class="flex items-center justify-center">
+                  <div
+                    class="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500 mr-2"
+                  ></div>
+                  Searching employees...
+                </div>
+              </div>
+
+              <!-- No results message -->
+              <div
+                *ngIf="
+                  showEmployeeDropdown &&
+                  filteredEmployees.length === 0 &&
+                  searchTerm.length > 2 &&
+                  !searchingEmployees
+                "
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                No employees found matching "{{ searchTerm }}"
+              </div>
+
+              <!-- Minimum search length message -->
+              <div
+                *ngIf="
+                  showEmployeeDropdown &&
+                  searchTerm.length > 0 &&
+                  searchTerm.length < 3 &&
+                  !searchingEmployees
+                "
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                Type at least 3 characters to search employees
+              </div>
+            </div>
+
+            <!-- New Position Dropdown -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >New Position</label
+              >
+              <select
+                [(ngModel)]="formData.newPosition"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="" disabled>Select new position</option>
+                <option
+                  *ngFor="let position of positions"
+                  [value]="position.value"
+                >
+                  {{ position.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discipline Fields -->
+        <div *ngIf="isDiscipline">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <!-- Employee Name with Search -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Employee Name</label
+              >
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="searchTerm"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
+                  (focus)="showEmployeeDropdown = true"
+                  (blur)="onEmployeeInputBlur()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Type employee name and press Enter to search..."
+                />
+                <div
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                  *ngIf="searchingEmployees"
+                >
+                  <div
+                    class="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Employee Dropdown -->
+              <div
+                *ngIf="showEmployeeDropdown && filteredEmployees.length > 0"
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              >
+                <div
+                  *ngFor="let employee of filteredEmployees"
+                  (click)="selectEmployee(employee)"
+                  class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                >
+                  <div class="font-medium text-gray-900">
+                    {{ employee.name }}
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    ID: {{ employee.employeeId }}
+                  </div>
+                  <div class="text-xs text-gray-400">
+                    {{ employee.currentPosition }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Loading state -->
+              <div
+                *ngIf="showEmployeeDropdown && searchingEmployees"
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                <div class="flex items-center justify-center">
+                  <div
+                    class="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500 mr-2"
+                  ></div>
+                  Searching employees...
+                </div>
+              </div>
+
+              <!-- No results message -->
+              <div
+                *ngIf="
+                  showEmployeeDropdown &&
+                  filteredEmployees.length === 0 &&
+                  searchTerm.length > 2 &&
+                  !searchingEmployees
+                "
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                No employees found matching "{{ searchTerm }}"
+              </div>
+
+              <!-- Minimum search length message -->
+              <div
+                *ngIf="
+                  showEmployeeDropdown &&
+                  searchTerm.length > 0 &&
+                  searchTerm.length < 3 &&
+                  !searchingEmployees
+                "
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                Type at least 3 characters to search employees
+              </div>
+            </div>
+
+            <!-- Type of Discipline Dropdown -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Type of Discipline</label
+              >
+              <select
+                [(ngModel)]="formData.disciplineType"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="" disabled>Select discipline type</option>
+                <option
+                  *ngFor="let type of disciplineTypes"
+                  [value]="type.value"
+                >
+                  {{ type.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Duration of Discipline -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Duration of Discipline</label
+            >
+            <div class="flex gap-2">
+              <input
+                type="number"
+                [(ngModel)]="formData.duration.value"
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter duration"
+                min="1"
+              />
+              <select
+                [(ngModel)]="formData.duration.unit"
+                class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="Days">Days</option>
+                <option value="Weeks">Weeks</option>
+                <option value="Months">Months</option>
+                <option value="Years">Years</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transfer Fields -->
+        <div *ngIf="isTransfer">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <!-- Employee Name with Search -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Employee Name</label
+              >
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="searchTerm"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
+                  (focus)="showEmployeeDropdown = true"
+                  (blur)="onEmployeeInputBlur()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Type employee name and press Enter to search..."
+                />
+                <div
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                  *ngIf="searchingEmployees"
+                >
+                  <div
+                    class="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Employee Dropdown -->
+              <div
+                *ngIf="showEmployeeDropdown && filteredEmployees.length > 0"
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              >
+                <div
+                  *ngFor="let employee of filteredEmployees"
+                  (click)="selectEmployee(employee)"
+                  class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                >
+                  <div class="font-medium text-gray-900">
+                    {{ employee.name }}
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    ID: {{ employee.employeeId }}
+                  </div>
+                  <div class="text-xs text-gray-400">
+                    {{ employee.currentPosition }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Loading state -->
+              <div
+                *ngIf="showEmployeeDropdown && searchingEmployees"
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                <div class="flex items-center justify-center">
+                  <div
+                    class="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500 mr-2"
+                  ></div>
+                  Searching employees...
+                </div>
+              </div>
+
+              <!-- No results message -->
+              <div
+                *ngIf="
+                  showEmployeeDropdown &&
+                  filteredEmployees.length === 0 &&
+                  searchTerm.length > 2 &&
+                  !searchingEmployees
+                "
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                No employees found matching "{{ searchTerm }}"
+              </div>
+
+              <!-- Minimum search length message -->
+              <div
+                *ngIf="
+                  showEmployeeDropdown &&
+                  searchTerm.length > 0 &&
+                  searchTerm.length < 3 &&
+                  !searchingEmployees
+                "
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                Type at least 3 characters to search employees
+              </div>
+            </div>
+
+            <!-- New Position Dropdown -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >New Position</label
+              >
+              <select
+                [(ngModel)]="formData.newPosition"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="" disabled>Select new position</option>
+                <option
+                  *ngFor="let position of positions"
+                  [value]="position.value"
+                >
+                  {{ position.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Transfer Type and Destination -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <!-- Transfer Type Dropdown -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Transfer Type</label
+              >
+              <select
+                [(ngModel)]="formData.transferType"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="" disabled>Select transfer type</option>
+                <option
+                  *ngFor="let type of disciplineTypes"
+                  [value]="type.value"
+                >
+                  {{ type.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Destination -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Destination</label
+              >
+              <input
+                type="text"
+                [(ngModel)]="formData.destination"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter destination"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Retirement Fields -->
+        <div *ngIf="isRetirement">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <!-- Employee Name with Search -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Employee Name</label
+              >
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="searchTerm"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
+                  (focus)="showEmployeeDropdown = true"
+                  (blur)="onEmployeeInputBlur()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Type employee name and press Enter to search..."
+                />
+                <div
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                  *ngIf="searchingEmployees"
+                >
+                  <svg
+                    class="animate-spin h-4 w-4 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Employee Dropdown -->
+              <div
+                *ngIf="showEmployeeDropdown && filteredEmployees.length > 0"
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              >
+                <div
+                  *ngFor="let employee of filteredEmployees"
+                  (click)="selectEmployee(employee)"
+                  class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                >
+                  <div class="font-medium text-gray-900">
+                    {{ employee.name }}
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    ID: {{ employee.employeeId }} •
+                    {{ employee.currentPosition }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- No results message -->
+              <div
+                *ngIf="
+                  showEmployeeDropdown &&
+                  filteredEmployees.length === 0 &&
+                  searchTerm.length > 2 &&
+                  !searchingEmployees
+                "
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                No employees found matching "{{ searchTerm }}"
+              </div>
+            </div>
+
+            <!-- Recommended Replacement with Search -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Recommended Replacement</label
+              >
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="replacementSearchTerm"
+                  (keyup)="onReplacementSearchKeyPress($event)"
+                  (focus)="showReplacementDropdown = true"
+                  (blur)="onReplacementInputBlur()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Type employee name and press Enter to search..."
+                />
+                <div
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                  *ngIf="searchingReplacementEmployees"
+                >
+                  <svg
+                    class="animate-spin h-4 w-4 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Replacement Dropdown -->
+              <div
+                *ngIf="
+                  showReplacementDropdown &&
+                  filteredReplacementEmployees.length > 0
+                "
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              >
+                <div
+                  *ngFor="let employee of filteredReplacementEmployees"
+                  (click)="selectReplacementEmployee(employee)"
+                  class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                >
+                  <div class="font-medium text-gray-900">
+                    {{ employee.name }}
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    ID: {{ employee.employeeId }} •
+                    {{ employee.currentPosition }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- No results message -->
+              <div
+                *ngIf="
+                  showReplacementDropdown &&
+                  filteredReplacementEmployees.length === 0 &&
+                  replacementSearchTerm.length > 2 &&
+                  !searchingReplacementEmployees
+                "
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                No employees found matching "{{ replacementSearchTerm }}"
+              </div>
+            </div>
+          </div>
+
+          <!-- Request Date and Destination -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <!-- Request Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Request Date</label
+              >
+              <input
+                type="date"
+                [(ngModel)]="formData.requestDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+
+            <!-- Destination -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Destination</label
+              >
+              <input
+                type="text"
+                [(ngModel)]="formData.destination"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter destination"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Retrenchment Fields -->
+        <div *ngIf="isRetrenchment">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <!-- Employee Name with Search -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Employee Name</label
+              >
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="searchTerm"
+                  (keyup)="onEmployeeSearchKeyPress($event)"
+                  (focus)="showEmployeeDropdown = true"
+                  (blur)="onEmployeeInputBlur()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Type employee name and press Enter to search..."
+                />
+                <div
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                  *ngIf="searchingEmployees"
+                >
+                  <svg
+                    class="animate-spin h-4 w-4 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Employee Dropdown -->
+              <div
+                *ngIf="showEmployeeDropdown && filteredEmployees.length > 0"
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              >
+                <div
+                  *ngFor="let employee of filteredEmployees"
+                  (click)="selectEmployee(employee)"
+                  class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                >
+                  <div class="font-medium text-gray-900">
+                    {{ employee.name }}
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    ID: {{ employee.employeeId }} •
+                    {{ employee.currentPosition }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- No results message -->
+              <div
+                *ngIf="
+                  showEmployeeDropdown &&
+                  filteredEmployees.length === 0 &&
+                  searchTerm.length > 2 &&
+                  !searchingEmployees
+                "
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500"
+              >
+                No employees found matching "{{ searchTerm }}"
+              </div>
+            </div>
+
+            <!-- Retrenchment Type Dropdown -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Retrenchment Type</label
+              >
+              <select
+                [(ngModel)]="formData.retrenchmentType"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="" disabled>Select retrenchment type</option>
+                <option
+                  *ngFor="let type of retrenchmentTypes"
+                  [value]="type.value"
+                >
+                  {{ type.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         <!-- Annual Leave Fields -->
         <div *ngIf="leaveType === 'Annual Leave'">
@@ -143,8 +902,196 @@
           </div>
         </div>
 
+        <!-- Document Fields -->
+        <div *ngIf="isDocument">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Document Name</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="formData.documentName"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Enter document name"
+            />
+          </div>
+
+          <!-- Is Training Checkbox -->
+          <div class="mb-4">
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="isTraining"
+                [(ngModel)]="formData.isTraining"
+                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              />
+              <label for="isTraining" class="ml-2 block text-sm text-gray-700">
+                This is a training document
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Upload Document</label
+            >
+
+            <div
+              class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors"
+            >
+              <input
+                type="file"
+                (change)="onFileSelect($event)"
+                class="hidden"
+                #fileInput
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.mp4,.avi,.mov"
+              />
+              <div class="flex flex-col items-center">
+                <svg
+                  class="w-8 h-8 text-gray-400 mb-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <button
+                  type="button"
+                  (click)="fileInput.click()"
+                  class="text-green-600 hover:text-green-700 font-medium"
+                >
+                  Browse files to Upload
+                </button>
+                <p class="text-xs text-gray-500 mt-1">
+                  PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, MP4, AVI, MOV up to 10MB
+                </p>
+              </div>
+            </div>
+
+            <!-- Enhanced File List with Preview and Download -->
+            <div *ngIf="uploadedFiles.length > 0" class="mt-4 space-y-2">
+              <div
+                *ngFor="let file of uploadedFiles; let i = index"
+                class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+              >
+                <!-- File Icon -->
+                <div
+                  class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-medium"
+                  [class]="getFileTypeColor(file.name)"
+                >
+                  {{ getFileTypeIcon(file.name).toUpperCase() }}
+                </div>
+
+                <!-- File Details -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-gray-900 text-sm truncate">{{
+                      file.name
+                    }}</span>
+                    <span class="text-xs text-gray-500"
+                      >({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span
+                    >
+                    <!-- Status Badge -->
+                    <span
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                      [ngClass]="{
+                        'bg-blue-100 text-blue-800':
+                          file.uploadStatus === 'uploading',
+                        'bg-green-100 text-green-800':
+                          file.uploadStatus === 'completed',
+                        'bg-red-100 text-red-800': file.uploadStatus === 'error'
+                      }"
+                    >
+                      {{ file.uploadStatus | titlecase }}
+                    </span>
+                  </div>
+
+                  <!-- Progress Bar -->
+                  <div
+                    *ngIf="file.uploadStatus === 'uploading'"
+                    class="mt-1 w-full bg-gray-200 rounded-full h-1"
+                  >
+                    <div
+                      class="bg-blue-600 h-1 rounded-full transition-all duration-300"
+                      [style.width.%]="file.progress"
+                    ></div>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-2">
+                  <!-- Preview Button -->
+                  <button
+                    *ngIf="file.uploadStatus === 'completed' && file.url"
+                    type="button"
+                    (click)="previewFile(file)"
+                    class="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
+                    title="Preview"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  </button>
+
+                  <!-- Remove Button -->
+                  <button
+                    type="button"
+                    (click)="removeFile(i)"
+                    class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                    title="Remove"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Reason (common for both) -->
-        <div>
+        <div
+          *ngIf="
+            !isDocument &&
+            !isCampMeeting &&
+            !isAddEmployee &&
+            !isAccommodation &&
+            !isTemplate &&
+            !isDepartment
+          "
+        >
           <label class="block text-sm font-medium text-gray-700 mb-2"
             >Reason</label
           >
@@ -160,13 +1107,17 @@
           ></textarea>
         </div>
 
-        <!-- Upload Handover Note (for Leave of Absence and Sick Leave) -->
+        <!-- Upload Documents (for Retirement, Leave of Absence and Sick Leave) -->
         <div
-          *ngIf="leaveType === 'Leave of Absence' || leaveType === 'Sick Leave'"
+          *ngIf="
+            isRetirement ||
+            leaveType === 'Leave of Absence' ||
+            leaveType === 'Sick Leave'
+          "
         >
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Upload Handover Note</label
-          >
+          <label class="block text-sm font-medium text-gray-700 mb-2">{{
+            isRetirement ? "Upload Documents" : "Upload Handover Note"
+          }}</label>
 
           <div
             class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors"
@@ -313,6 +1264,620 @@
           </div>
         </div>
 
+        <!-- Add Employee Fields -->
+        <div *ngIf="isAddEmployee" class="space-y-6">
+          <!-- Employee ID and First Name on same line -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Employee ID</label
+              >
+              <input
+                type="text"
+                [(ngModel)]="formData.newEmployeeId"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter employee ID"
+                [disabled]="isEditMode"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >First Name</label
+              >
+              <input
+                type="text"
+                [(ngModel)]="formData.firstName"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter first name"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Last Name and Email Address on same line -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Last Name</label
+              >
+              <input
+                type="text"
+                [(ngModel)]="formData.lastName"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter last name"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Email Address</label
+              >
+              <input
+                type="email"
+                [(ngModel)]="formData.email"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter email address"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Department and Role on same line -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Department</label
+              >
+              <select
+                [(ngModel)]="formData.departmentId"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              >
+                <option value="" disabled>Select department</option>
+                <option
+                  *ngFor="let dept of departmentOptions"
+                  [value]="dept.id"
+                >
+                  {{ dept.name }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Role</label
+              >
+              <select
+                [(ngModel)]="formData.role"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              >
+                <option value="" disabled>Select role</option>
+                <option *ngFor="let role of roleOptions" [value]="role.value">
+                  {{ role.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Employment Type and Location on same line -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Employment Type</label
+              >
+              <select
+                [(ngModel)]="formData.employmentType"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              >
+                <option value="" disabled>Select employment type</option>
+                <option
+                  *ngFor="let type of employmentTypeOptions"
+                  [value]="type.value"
+                >
+                  {{ type.label }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Location</label
+              >
+              <input
+                type="text"
+                [(ngModel)]="formData.employeeLocation"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter location"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Accommodation Create Fields -->
+        <div *ngIf="isAccommodation" class="space-y-6">
+          <!-- Accommodation Name and Type on same line -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Accommodation Name</label
+              >
+              <input
+                type="text"
+                [(ngModel)]="formData.accommodationName"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter accommodation name"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Accommodation Type</label
+              >
+              <select
+                [(ngModel)]="formData.accommodationType"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              >
+                <option value="" disabled>Select accommodation type</option>
+                <option
+                  *ngFor="let type of accommodationTypeOptions"
+                  [value]="type.value"
+                >
+                  {{ type.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Rooms Section -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3"
+              >Rooms</label
+            >
+            <div
+              *ngFor="let room of formData.rooms; let i = index"
+              class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-3"
+            >
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1"
+                  >Room Name</label
+                >
+                <input
+                  type="text"
+                  [(ngModel)]="room.name"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Enter room name"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1"
+                  >Capacity</label
+                >
+                <input
+                  type="number"
+                  [(ngModel)]="room.capacity"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Enter capacity"
+                  min="1"
+                  required
+                />
+              </div>
+              <div class="flex items-end">
+                <button
+                  *ngIf="formData.rooms.length > 1"
+                  type="button"
+                  (click)="removeRoom(i)"
+                  class="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    ></path>
+                  </svg>
+                  <span>Remove</span>
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              (click)="addRoom()"
+              class="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-green-600 bg-green-50 hover:bg-green-100 rounded-md transition-colors"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                ></path>
+              </svg>
+              <span>Add Room</span>
+            </button>
+          </div>
+
+          <!-- Pet Allowed -->
+          <div>
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                [(ngModel)]="formData.isPetAllowed"
+                class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+              />
+              <span class="ml-2 text-sm font-medium text-gray-700"
+                >Pet Allowed</span
+              >
+            </label>
+          </div>
+        </div>
+
+        <!-- Department Create Fields -->
+        <div *ngIf="isDepartment" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Department Name</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="formData.departmentName"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Enter department name"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Template Create Fields -->
+        <div *ngIf="isTemplate" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Template Type</label
+            >
+            <select
+              [(ngModel)]="formData.templateType"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              required
+            >
+              <option value="">Select template type</option>
+              <option value="TRANSFER_APPROVAL">Transfer Approval</option>
+              <option value="TRANSFER_REQUEST">Transfer Request</option>
+              <option value="TRANSFER_DECLINE">Transfer Decline</option>
+              <option value="SICK_LEAVE_APPROVAL">Sick Leave Approval</option>
+              <option value="SICK_LEAVE_REQUEST">Sick Leave Request</option>
+              <option value="SICK_LEAVE_DECLINE">Sick Leave Decline</option>
+              <option value="ANNUAL_LEAVE_APPROVAL">
+                Annual Leave Approval
+              </option>
+              <option value="ANNUAL_LEAVE_REQUEST">Annual Leave Request</option>
+              <option value="ANNUAL_LEAVE_DECLINE">Annual Leave Decline</option>
+              <option value="ABSENCE_LEAVE_APPROVAL">
+                Absence Leave Approval
+              </option>
+              <option value="ABSENCE_LEAVE_REQUEST">
+                Absence Leave Request
+              </option>
+              <option value="ABSENCE_LEAVE_DECLINE">
+                Absence Leave Decline
+              </option>
+              <option value="PROMOTION_APPROVAL">Promotion Approval</option>
+              <option value="PROMOTION_REQUEST">Promotion Request</option>
+              <option value="PROMOTION_DECLINE">Promotion Decline</option>
+              <option value="RETIREMENT_APPROVAL">Retirement Approval</option>
+              <option value="RETIREMENT_REQUEST">Retirement Request</option>
+              <option value="RETIREMENT_DECLINE">Retirement Decline</option>
+              <option value="RETRENCHMENT_APPROVAL">
+                Retrenchment Approval
+              </option>
+              <option value="RETRENCHMENT_REQUEST">Retrenchment Request</option>
+              <option value="RETRENCHMENT_DECLINE">Retrenchment Decline</option>
+              <option value="DISCIPLINE">Discipline</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Document Upload</label
+            >
+            <div
+              class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event)"
+            >
+              <input
+                type="file"
+                (change)="onFileSelect($event)"
+                class="hidden"
+                #fileInput
+                accept=".pdf,.doc,.docx"
+                required
+              />
+              <div class="flex flex-col items-center">
+                <svg
+                  class="w-8 h-8 text-gray-400 mb-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <button
+                  type="button"
+                  (click)="fileInput.click()"
+                  class="text-green-600 hover:text-green-700 font-medium"
+                >
+                  Choose files or drag and drop
+                </button>
+                <p class="text-xs text-gray-500 mt-1">
+                  PDF, DOC, DOCX up to 10MB
+                </p>
+              </div>
+            </div>
+
+            <!-- Enhanced File List with Preview and Download -->
+            <div *ngIf="uploadedFiles.length > 0" class="mt-4 space-y-2">
+              <div
+                *ngFor="let file of uploadedFiles; let i = index"
+                class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+              >
+                <!-- File Icon -->
+                <div
+                  class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-medium"
+                  [class]="getFileTypeColor(file.name)"
+                >
+                  {{ getFileTypeIcon(file.name).toUpperCase() }}
+                </div>
+
+                <!-- File Details -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-gray-900 text-sm truncate">{{
+                      file.name
+                    }}</span>
+                    <span class="text-xs text-gray-500"
+                      >({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span
+                    >
+                    <!-- Status Badge -->
+                    <span
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                      [ngClass]="{
+                        'bg-blue-100 text-blue-800':
+                          file.uploadStatus === 'uploading',
+                        'bg-green-100 text-green-800':
+                          file.uploadStatus === 'completed',
+                        'bg-red-100 text-red-800': file.uploadStatus === 'error'
+                      }"
+                    >
+                      {{ file.uploadStatus | titlecase }}
+                    </span>
+                  </div>
+
+                  <!-- Progress Bar -->
+                  <div
+                    *ngIf="file.uploadStatus === 'uploading'"
+                    class="mt-1 w-full bg-gray-200 rounded-full h-1"
+                  >
+                    <div
+                      class="bg-blue-600 h-1 rounded-full transition-all duration-300"
+                      [style.width.%]="file.progress"
+                    ></div>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-2">
+                  <!-- Preview Button -->
+                  <button
+                    *ngIf="file.uploadStatus === 'completed' && file.url"
+                    type="button"
+                    (click)="previewFile(file)"
+                    class="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-md transition-colors"
+                    title="Preview"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  </button>
+
+                  <!-- Remove Button -->
+                  <button
+                    type="button"
+                    (click)="removeFile(i)"
+                    class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                    title="Remove"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Camp Meeting Create Fields -->
+        <div *ngIf="isCampMeeting && mode === 'create'" class="space-y-8">
+          <!-- Date Range and Agenda -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Start Date
+              </label>
+              <input
+                type="date"
+                [(ngModel)]="formData.startDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                End Date
+              </label>
+              <input
+                type="date"
+                [(ngModel)]="formData.endDate"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Agenda
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="formData.agenda"
+                placeholder="Enter agenda..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Attendees Selection -->
+          <div *ngIf="showAttendees">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Attendees
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                [(ngModel)]="searchTerm"
+                (keyup)="onEmployeeSearchKeyPress($event)"
+                (focus)="showEmployeeDropdown = true"
+                (blur)="onEmployeeInputBlur()"
+                placeholder="Type employee name and press Enter to search..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <div
+                class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                *ngIf="searchingEmployees"
+              >
+                <svg
+                  class="animate-spin h-4 w-4 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Employee Dropdown -->
+            <div
+              *ngIf="showEmployeeDropdown && filteredEmployees.length > 0"
+              class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            >
+              <div
+                *ngFor="let employee of filteredEmployees"
+                (click)="selectEmployee(employee)"
+                class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+              >
+                <div class="font-medium text-gray-900">
+                  {{ employee.name }}
+                </div>
+                <div class="text-sm text-gray-500">
+                  ID: {{ employee.employeeId }}
+                </div>
+                <div class="text-xs text-gray-400">
+                  {{ employee.currentPosition }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected Attendees Tags -->
+            <div
+              class="mt-3 flex flex-wrap gap-2"
+              *ngIf="selectedAttendees.length > 0"
+            >
+              <div
+                *ngFor="let attendee of selectedAttendees"
+                class="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+              >
+                <span>{{ attendee.name }}</span>
+                <button
+                  (click)="removeAttendee(attendee.id)"
+                  class="text-green-600 hover:text-green-800"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Buttons -->
         <div class="flex gap-3 pt-4">
           <button
@@ -330,7 +1895,7 @@
             [class.opacity-50]="!isFormValid()"
             [class.cursor-not-allowed]="!isFormValid()"
           >
-            Submit
+            {{ isEditMode ? "Update" : "Submit" }}
           </button>
         </div>
       </div>
@@ -422,6 +1987,74 @@
               class="text-sm text-gray-500"
             >
               No previous leave records found.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retirement History Section - Only show for retirement -->
+      <div *ngIf="isRetirement" class="employee-section mb-4">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'retirementHistory'
+              ? (openSection = null)
+              : (openSection = 'retirementHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'retirementHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Retirement History</span>
+        </button>
+
+        <div
+          *ngIf="openSection === 'retirementHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="bg-gray-50 rounded-lg p-4">
+            <p class="text-sm text-gray-600 mb-2">
+              Previous Retirement Records
+            </p>
+            <div
+              class="space-y-2"
+              *ngIf="
+                leaveData.allRetirements && leaveData.allRetirements.length > 0
+              "
+            >
+              <div
+                *ngFor="let record of leaveData.allRetirements"
+                class="flex justify-between text-sm"
+              >
+                <span class="text-gray-700"
+                  >{{ record.createdAt | date : "mediumDate" }} -
+                  {{ record.employee?.firstName }}
+                  {{ record.employee?.lastName }}</span
+                >
+                <span class="text-green-600 font-medium">{{
+                  record.status
+                }}</span>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                !leaveData.allRetirements ||
+                leaveData.allRetirements.length === 0
+              "
+              class="text-sm text-gray-500"
+            >
+              No previous retirement records found.
             </div>
           </div>
         </div>
@@ -818,6 +2451,193 @@
           </div>
         </ng-container>
 
+        <!-- RETIREMENT REQUEST SECTION -->
+        <ng-container *ngIf="isRetirement">
+          <button
+            class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+            (click)="
+              openSection === 'retirementRequest'
+                ? (openSection = null)
+                : (openSection = 'retirementRequest')
+            "
+          >
+            <svg
+              class="w-5 h-5 mr-2 transition-transform duration-200"
+              [ngClass]="{ 'rotate-180': openSection === 'retirementRequest' }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+            <span class="font-medium text-black">Retirement Request</span>
+          </button>
+
+          <div
+            *ngIf="openSection === 'retirementRequest'"
+            class="mt-4 bg-white p-6 animate-fade-in"
+          >
+            <div class="border border-[#EDEDED] rounded-lg p-4">
+              <div class="space-y-4">
+                <!-- Leave ID and Employee Name on same line -->
+                <div class="grid grid-cols-2 gap-x-8">
+                  <!-- Leave ID -->
+                  <div>
+                    <div class="text-xs text-gray-400 mb-1">Leave ID</div>
+                    <div class="font-medium text-gray-900">
+                      {{ leaveData.retirementId || leaveData.id }}
+                    </div>
+                  </div>
+
+                  <!-- Employee Name -->
+                  <div>
+                    <div class="text-xs text-gray-400 mb-1">Employee Name</div>
+                    <div class="font-medium text-gray-900">
+                      {{ leaveData.employee?.firstName }}
+                      {{ leaveData.employee?.lastName }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Replacement Recommendation and Request Date on same line -->
+                <div class="grid grid-cols-2 gap-x-8">
+                  <!-- Replacement Recommendation -->
+                  <div>
+                    <div class="text-xs text-gray-400 mb-1">
+                      Replacement Recommendation
+                    </div>
+                    <div class="font-medium text-gray-900">
+                      {{ leaveData.recommendedReplacement?.firstName }}
+                      {{ leaveData.recommendedReplacement?.lastName }}
+                    </div>
+                  </div>
+
+                  <!-- Request Date -->
+                  <div>
+                    <div class="text-xs text-gray-400 mb-1">Request Date</div>
+                    <div class="font-medium text-gray-900">
+                      {{ leaveData.createdAt | date : "mediumDate" }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Reason -->
+                <div>
+                  <div class="text-xs text-gray-400 mb-1">Reason</div>
+                  <div class="font-medium text-gray-900">
+                    {{ leaveData.reason }}
+                  </div>
+                </div>
+
+                <!-- Status -->
+                <div>
+                  <div class="text-xs text-gray-400 mb-1">Status</div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                    [ngClass]="{
+                      'bg-green-100 text-green-700':
+                        leaveData.status === 'APPROVED',
+                      'bg-yellow-100 text-yellow-700':
+                        leaveData.status === 'PENDING',
+                      'bg-red-100 text-red-700': leaveData.status === 'REJECTED'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-green-500': leaveData.status === 'APPROVED',
+                        'bg-yellow-500': leaveData.status === 'PENDING',
+                        'bg-red-500': leaveData.status === 'REJECTED'
+                      }"
+                    ></span>
+                    {{ leaveData.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Documents Section - Only show if status is not REJECTED -->
+            <div
+              class="mt-6"
+              *ngIf="
+                leaveData.status !== 'REJECTED' &&
+                leaveData.documents &&
+                leaveData.documents.length > 0
+              "
+            >
+              <div class="text-xs text-gray-400 mb-3">Documents</div>
+              <div class="space-y-3">
+                <div
+                  *ngFor="let document of leaveData.documents"
+                  class="border border-gray-200 rounded-lg p-3"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 flex-1">
+                      <!-- Document Thumbnail -->
+                      <div
+                        class="w-10 h-12 bg-gray-50 border border-gray-200 rounded flex items-center justify-center flex-shrink-0"
+                      >
+                        <svg
+                          class="w-5 h-5 text-gray-500"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                      </div>
+
+                      <!-- Document Details -->
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">
+                          {{ document.title || "Document" }}
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                          PDF Document • Uploaded on
+                          {{
+                            document.uploadDate || leaveData.createdAt
+                              | date : "mediumDate"
+                          }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Download Button -->
+                    <button
+                      class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                      (click)="downloadDocument(document)"
+                      title="Download Document"
+                      type="button"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V13"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
         <!-- CAMP MEETING INFORMATION (Static) -->
         <ng-container *ngIf="isCampMeeting">
           <!-- Static Header -->
@@ -860,7 +2680,7 @@
             </div>
 
             <!-- Attendees -->
-            <div>
+            <!-- <div>
               <div class="text-sm text-gray-500 mb-2">Attendees</div>
               <div class="font-medium text-gray-900 leading-relaxed">
                 <span
@@ -870,7 +2690,7 @@
                   }}<span *ngIf="i < leaveData.attendees.length - 1">, </span>
                 </span>
               </div>
-            </div>
+            </div> -->
           </div>
           <!-- Documents Section -->
           <div
@@ -936,40 +2756,281 @@
           </div>
         </ng-container>
       </div>
+
+      <!-- PERMISSION MODE -->
+      <div *ngIf="isPermission && mode === 'view'">
+        <!-- Header -->
+        <div class="flex items-center gap-2 mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            {{ title }}
+          </h2>
+        </div>
+
+        <div class="border-b border-gray-200 mb-8"></div>
+
+        <!-- Permission Information Section -->
+        <div class="space-y-6">
+          <!-- Permission Information Accordion -->
+          <div class="border border-gray-200 rounded-lg">
+            <button
+              type="button"
+              class="w-full px-4 py-3 text-left flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+              (click)="togglePermissionInfo()"
+            >
+              <span class="text-lg font-medium text-gray-900"
+                >Permission Information</span
+              >
+              <svg
+                class="w-5 h-5 text-gray-500 transition-transform"
+                [class.rotate-180]="showPermissionInfo"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
+
+            <div *ngIf="showPermissionInfo" class="p-4 space-y-4">
+              <!-- Role -->
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-1"
+                  >Role</label
+                >
+                <p class="text-sm font-medium text-gray-900">
+                  {{ permissionData?.roleName }}
+                </p>
+              </div>
+
+              <!-- Permissions Table -->
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-2"
+                  >Permissions</label
+                >
+
+                <!-- Search Filter -->
+                <div class="mb-4">
+                  <div class="relative">
+                    <input
+                      type="text"
+                      placeholder="Filter by features..."
+                      class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                    />
+                    <svg
+                      class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      ></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Permissions Grid -->
+                <div class="overflow-x-auto">
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Feature
+                        </th>
+                        <th
+                          class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Create
+                        </th>
+                        <th
+                          class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          View
+                        </th>
+                        <th
+                          class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Edit
+                        </th>
+                        <th
+                          class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Delete
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      <tr
+                        *ngFor="let permission of permissionData?.permissions"
+                      >
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                        >
+                          {{ permission.feature }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                          <div class="flex justify-center">
+                            <svg
+                              *ngIf="permission.canCreate"
+                              class="w-5 h-5 text-green-500"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                            <svg
+                              *ngIf="!permission.canCreate"
+                              class="w-5 h-5 text-gray-300"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                          <div class="flex justify-center">
+                            <svg
+                              *ngIf="permission.canView"
+                              class="w-5 h-5 text-green-500"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                            <svg
+                              *ngIf="!permission.canView"
+                              class="w-5 h-5 text-gray-300"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                          <div class="flex justify-center">
+                            <svg
+                              *ngIf="permission.canEdit"
+                              class="w-5 h-5 text-green-500"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                            <svg
+                              *ngIf="!permission.canEdit"
+                              class="w-5 h-5 text-gray-300"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                          <div class="flex justify-center">
+                            <svg
+                              *ngIf="permission.canDelete"
+                              class="w-5 h-5 text-green-500"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                            <svg
+                              *ngIf="!permission.canDelete"
+                              class="w-5 h-5 text-gray-300"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Slide Arrow Button - positioned to work for both create and view modes -->
+    <button
+      (click)="mode === 'create' ? onCancel() : onClose()"
+      class="fixed top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center border border-gray-200 hover:bg-green-50 z-50 transition-all duration-200"
+      [style.right.px]="590"
+      aria-label="Close"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5 text-gray-500"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 5l7 7-7 7"
+        />
+      </svg>
+    </button>
   </div>
 
-  <!-- Slide Arrow Button - positioned to work for both create and view modes -->
-  <button
-    (click)="mode === 'create' ? onCancel() : onClose()"
-    class="fixed top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center border border-gray-200 hover:bg-green-50 z-50 transition-all duration-200"
-    [style.right.px]="590"
-    aria-label="Close"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5 text-gray-500"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M9 5l7 7-7 7"
-      />
-    </svg>
-  </button>
+  <!-- Confirmation Modal -->
+  <app-confirm-prompt
+    *ngIf="showConfirmModal"
+    [title]="'Confirm'"
+    [text]="confirmationText"
+    [yesButtonText]="'Yes'"
+    [noButtonText]="'No'"
+    (confirmed)="onConfirmSubmit($event)"
+    (closed)="onConfirmCancel()"
+  ></app-confirm-prompt>
 </div>
-
-<!-- Confirmation Modal -->
-<app-confirm-prompt
-  *ngIf="showConfirmModal"
-  [title]="'Confirm'"
-  [text]="confirmationText"
-  [yesButtonText]="'Yes'"
-  [noButtonText]="'No'"
-  (confirmed)="onConfirmSubmit($event)"
-  (closed)="onConfirmCancel()"
-></app-confirm-prompt>

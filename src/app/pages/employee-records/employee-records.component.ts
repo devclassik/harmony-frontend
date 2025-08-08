@@ -16,9 +16,12 @@ import { SuccessModalComponent } from '../../components/success-modal/success-mo
 import { AppraisalComponent } from '../../components/appraisal/appraisal.component';
 import { EmployeeDetailsComponent } from '../../components/employee-details/employee-details.component';
 import { EmployeeService } from '../../services/employee.service';
+import { AppraisalService } from '../../services/appraisal.service';
 import { AlertService } from '../../services/alert.service';
 import { EmployeeDetails } from '../../dto/employee.dto';
+import { CreateAppraisalRequest } from '../../dto/appraisal.dto';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+
 @Component({
   selector: 'app-employee-records',
   imports: [
@@ -47,10 +50,41 @@ export class EmployeeRecordsComponent implements OnInit {
   selectedEmployee: TableData | null = null;
   promptConfig: PromptConfig | null = null;
   isLoading: boolean = false;
+  loadingOperation: 'loading' | 'deleting' | null = null;
   allEmployees: EmployeeDetails[] = [];
+
+  // Pagination state
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalPages: number = 1;
+  totalEmployees: number = 0;
+
+  // Dynamic loading properties
+  get loadingTitle(): string {
+    switch (this.loadingOperation) {
+      case 'deleting':
+        return 'Deleting Employee...';
+      case 'loading':
+      default:
+        return 'Loading Employees...';
+    }
+  }
+
+  get loadingMessage(): string {
+    switch (this.loadingOperation) {
+      case 'deleting':
+        return 'Please wait while we remove the employee from the system.';
+      case 'loading':
+      default:
+        return 'Please wait while we fetch employee data.';
+    }
+  }
+
+  currentAppraisalForm: any = null; // Store the appraisal form data
 
   constructor(
     private employeeService: EmployeeService,
+    private appraisalService: AppraisalService,
     private alertService: AlertService
   ) {}
 
@@ -105,28 +139,40 @@ export class EmployeeRecordsComponent implements OnInit {
     this.loadEmployees();
   }
 
-  loadEmployees() {
+  loadEmployees(page: number = 1) {
     this.isLoading = true;
-    this.employeeService.getAllEmployees().subscribe({
+    this.loadingOperation = 'loading';
+    this.employeeService.getAllEmployees(page, this.pageSize).subscribe({
       next: (response) => {
         if (response.status === 'success' && response.data) {
-          this.allEmployees = Array.isArray(response.data)
-            ? response.data
-            : [response.data];
+          // Handle the new nested structure with pagination
+          this.allEmployees = response.data.data || [];
+          const paginationMeta = response.data.pagination;
+
           this.employees = this.transformEmployeesToTableData(
             this.allEmployees
           );
+
+          // Update pagination state
+          if (paginationMeta) {
+            this.currentPage = paginationMeta.page;
+            this.totalPages = paginationMeta.totalPages;
+            this.totalEmployees = paginationMeta.total;
+          }
+
           this.updateFilterTabs();
           this.applyFilters();
         } else {
           this.alertService.error('Failed to load employees');
         }
         this.isLoading = false;
+        this.loadingOperation = null;
       },
       error: (error) => {
         console.error('Error loading employees:', error);
         this.alertService.error('Failed to load employees');
         this.isLoading = false;
+        this.loadingOperation = null;
       },
     });
   }
@@ -257,8 +303,7 @@ export class EmployeeRecordsComponent implements OnInit {
       this.selectedEmployee = event.row;
       this.promptConfig = {
         title: 'Delete',
-        text: 'Are you sure you want to delete this employee?',
-        imageUrl: 'assets/svg/profilePix.svg',
+        text: `Are you sure you want to delete ${event.row.name}?`,
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
@@ -312,17 +357,20 @@ export class EmployeeRecordsComponent implements OnInit {
     }
 
     this.isLoading = true;
+    this.loadingOperation = 'deleting';
     this.employeeService.deleteEmployee(employeeId).subscribe({
       next: (response) => {
         this.alertService.success('Employee deleted successfully');
-        this.loadEmployees(); // Reload the employee list
+        this.loadEmployees(this.currentPage); // Reload the current page
         this.isLoading = false;
+        this.loadingOperation = null;
         this.successModal = true;
       },
       error: (error) => {
         console.error('Error deleting employee:', error);
         this.alertService.error('Failed to delete employee');
         this.isLoading = false;
+        this.loadingOperation = null;
       },
     });
   }
@@ -398,6 +446,7 @@ export class EmployeeRecordsComponent implements OnInit {
     }
 
     this.isLoading = true;
+    this.loadingOperation = 'loading';
     this.employeeService.getEmployeeById(employeeId).subscribe({
       next: (response) => {
         if (response.status === 'success' && response.data) {
@@ -409,21 +458,23 @@ export class EmployeeRecordsComponent implements OnInit {
           this.alertService.error('Failed to load employee details');
         }
         this.isLoading = false;
+        this.loadingOperation = null;
       },
       error: (error) => {
         console.error('Error fetching employee details:', error);
         this.alertService.error('Failed to load employee details');
         this.isLoading = false;
+        this.loadingOperation = null;
       },
     });
   }
 
   handleAppraisal(form: any) {
     console.log(form);
+    this.currentAppraisalForm = form; // Store the form data
     this.promptConfig = {
       title: 'Confirm',
-      text: 'Are you sure you want to submit this appraisal?',
-      imageUrl: 'assets/svg/profilePix.svg',
+      text: `Are you sure you want to submit this appraisal for ${this.selectedEmployee?.name}?`,
       yesButtonText: 'Yes',
       noButtonText: 'No',
     };
@@ -433,6 +484,11 @@ export class EmployeeRecordsComponent implements OnInit {
   submitAppraisal(employee: TableData) {
     if (!employee.id) {
       this.alertService.error('Employee ID not found');
+      return;
+    }
+
+    if (!this.currentAppraisalForm) {
+      this.alertService.error('Appraisal form data not found');
       return;
     }
 
@@ -468,27 +524,82 @@ export class EmployeeRecordsComponent implements OnInit {
     }
 
     this.isLoading = true;
+    this.loadingOperation = 'loading';
 
-    // For now, just show success since we don't have the appraisal service implementation
-    // TODO: Replace with actual appraisal service call
-    setTimeout(() => {
-      this.alertService.success('Appraisal submitted successfully');
-      this.isLoading = false;
-      this.successModal = true;
-    }, 1000);
+    // Map period to dates
+    const getPeriodDates = (period: string) => {
+      const currentYear = new Date().getFullYear();
+      switch (period) {
+        case 'Apr-Jul':
+          return {
+            startDate: `${currentYear}-04-01`,
+            endDate: `${currentYear}-07-31`,
+          };
+        case 'Aug-Nov':
+          return {
+            startDate: `${currentYear}-08-01`,
+            endDate: `${currentYear}-11-30`,
+          };
+        case 'Dec-Mar':
+          return {
+            startDate: `${currentYear}-12-01`,
+            endDate: `${currentYear + 1}-03-31`,
+          };
+        default:
+          return {
+            startDate: `${currentYear}-01-01`,
+            endDate: `${currentYear}-12-31`,
+          };
+      }
+    };
 
-    // Uncomment and implement when appraisal service is ready:
-    // this.appraisalService.submitAppraisal(employeeId, appraisalData).subscribe({
-    //   next: (response) => {
-    //     this.alertService.success('Appraisal submitted successfully');
-    //     this.isLoading = false;
-    //     this.successModal = true;
-    //   },
-    //   error: (error) => {
-    //     console.error('Error submitting appraisal:', error);
-    //     this.alertService.error('Failed to submit appraisal');
-    //     this.isLoading = false;
-    //   },
-    // });
+    // Map criteria names to API format
+    const mapCriteriaToApi = (
+      criteria: string
+    ): 'ATTENDANCE' | 'EVANGELISM' | 'VOLUNTARY_WORK' => {
+      switch (criteria.toLowerCase()) {
+        case 'attendance':
+          return 'ATTENDANCE';
+        case 'evangelism':
+          return 'EVANGELISM';
+        case 'voluntary work':
+          return 'VOLUNTARY_WORK';
+        default:
+          return 'ATTENDANCE'; // fallback
+      }
+    };
+
+    // Use actual form data
+    const dates = getPeriodDates(this.currentAppraisalForm.period);
+    const appraisalData: CreateAppraisalRequest = {
+      startDate: dates.startDate,
+      endDate: dates.endDate,
+      averageScore: parseFloat(this.currentAppraisalForm.average) || 0,
+      scores: this.currentAppraisalForm.details.map((detail: any) => ({
+        criterial: mapCriteriaToApi(detail.criteria),
+        score: parseInt(detail.score) || 0,
+      })),
+    };
+
+    this.appraisalService.submitAppraisal(employeeId, appraisalData).subscribe({
+      next: (response) => {
+        this.alertService.success('Appraisal submitted successfully');
+        this.isLoading = false;
+        this.loadingOperation = null;
+        this.currentAppraisalForm = null; // Clear the form data
+      },
+      error: (error) => {
+        console.error('Error submitting appraisal:', error);
+        this.alertService.error('Failed to submit appraisal');
+        this.isLoading = false;
+        this.loadingOperation = null;
+      },
+    });
+  }
+
+  onPageChange(page: number) {
+    console.log('Page changed to:', page);
+    this.currentPage = page;
+    this.loadEmployees(page);
   }
 }

@@ -37,6 +37,7 @@ export interface Employee {
   updatedAt: string;
   deletedAt: string | null;
   departments: Department[];
+  user: WorkerData;
 }
 
 export interface WorkerData {

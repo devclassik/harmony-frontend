@@ -21,7 +21,7 @@ import { TableData } from '../../interfaces/employee.interface';
       (click)="onBackdropClick($event)"
     >
       <div
-        class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col"
+        class="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col"
       >
         <!-- Header -->
         <div
@@ -43,7 +43,8 @@ import { TableData } from '../../interfaces/employee.interface';
                 {{ document?.documentName }}
               </h2>
               <p class="text-sm text-gray-500">
-                {{ document?.documentType }} • {{ document?.date }}
+                {{ document?.documentType }} •
+                {{ formatUploadDate(document?.date) }}
               </p>
             </div>
           </div>
@@ -138,14 +139,14 @@ import { TableData } from '../../interfaces/employee.interface';
 
         <!-- Document Content -->
         <div class="flex-1 overflow-auto bg-gray-100 p-4">
-          <div class="flex justify-center">
+          <div class="h-full">
             <div
-              class="bg-white shadow-lg"
+              class="bg-white shadow-lg h-full"
               [style.transform]="'scale(' + zoomLevel / 100 + ')'"
               [style.transform-origin]="'top center'"
             >
               <!-- PDF Viewer -->
-              <div *ngIf="isPDF()" class="w-full">
+              <div *ngIf="isPDF() && getDocumentUrl()" class="w-full">
                 <iframe
                   [src]="getSafeDocumentUrl()"
                   class="w-full h-[800px] border-0"
@@ -154,17 +155,107 @@ import { TableData } from '../../interfaces/employee.interface';
               </div>
 
               <!-- Image Viewer -->
-              <div *ngIf="isImage()" class="p-4">
+              <div *ngIf="isImage() && getDocumentUrl()" class="p-4">
                 <img
-                  [src]="getSafeDocumentUrl()"
+                  [src]="getRawDocumentUrl()"
                   [alt]="document?.documentName"
                   class="max-w-full h-auto"
                 />
               </div>
 
-              <!-- Document Preview for other types or when URL is not available -->
+              <!-- Video Viewer -->
+              <div *ngIf="isVideo() && getDocumentUrl()" class="p-4">
+                <video
+                  [src]="getRawDocumentUrl()"
+                  controls
+                  class="max-w-full h-auto"
+                  preload="metadata"
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+
+              <!-- Text Document Preview -->
+              <div *ngIf="isTextDocument()" class="w-full h-full">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold">
+                    {{ document?.documentName }}
+                  </h3>
+                  <div class="flex gap-2">
+                    <button
+                      (click)="onDownload()"
+                      class="bg-[#12C16F] text-white px-3 py-1 rounded hover:bg-[#0ea860] transition-colors text-sm"
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Office Online Preview -->
+                <iframe
+                  *ngIf="getDocumentUrl()"
+                  [src]="getOfficeOnlineEmbedUrl()"
+                  class="w-full h-full min-h-[600px] border border-gray-200 rounded"
+                  title="Office Online Preview"
+                  frameborder="0"
+                ></iframe>
+              </div>
+
+              <!-- Spreadsheet Preview -->
+              <div *ngIf="isSpreadsheet()" class="w-full h-full">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold">
+                    {{ document?.documentName }}
+                  </h3>
+                  <div class="flex gap-2">
+                    <button
+                      (click)="onDownload()"
+                      class="bg-[#12C16F] text-white px-3 py-1 rounded hover:bg-[#0ea860] transition-colors text-sm"
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Office Online Preview -->
+                <iframe
+                  *ngIf="getDocumentUrl()"
+                  [src]="getOfficeOnlineEmbedUrl()"
+                  class="w-full h-full min-h-[600px] border border-gray-200 rounded"
+                  title="Office Online Preview"
+                  frameborder="0"
+                ></iframe>
+              </div>
+
+              <!-- Presentation Preview -->
+              <div *ngIf="isPresentation()" class="w-full h-full">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold">
+                    {{ document?.documentName }}
+                  </h3>
+                  <div class="flex gap-2">
+                    <button
+                      (click)="onDownload()"
+                      class="bg-[#12C16F] text-white px-3 py-1 rounded hover:bg-[#0ea860] transition-colors text-sm"
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Office Online Preview -->
+                <iframe
+                  *ngIf="getDocumentUrl()"
+                  [src]="getOfficeOnlineEmbedUrl()"
+                  class="w-full h-full min-h-[600px] border border-gray-200 rounded"
+                  title="Office Online Preview"
+                  frameborder="0"
+                ></iframe>
+              </div>
+
+              <!-- Document Preview for unsupported types or when URL is not available -->
               <div
-                *ngIf="(!isPDF() && !isImage()) || !getDocumentUrl()"
+                *ngIf="!canPreviewDirectly() || !getDocumentUrl()"
                 class="p-8 text-center"
               >
                 <div
@@ -188,9 +279,10 @@ import { TableData } from '../../interfaces/employee.interface';
                 </p>
                 <p
                   class="text-sm text-gray-500 mb-6"
-                  *ngIf="getDocumentUrl() && !isPDF() && !isImage()"
+                  *ngIf="getDocumentUrl() && !canPreviewDirectly()"
                 >
-                  This document type cannot be previewed directly.
+                  This document type ({{ document?.documentType }}) cannot be
+                  previewed directly in the browser.
                 </p>
                 <button
                   (click)="onDownload()"
@@ -213,7 +305,7 @@ import { TableData } from '../../interfaces/employee.interface';
             <div class="flex items-center gap-4">
               <span>Document ID: {{ document?.id }}</span>
               <span>•</span>
-              <span>Uploaded: {{ document?.date }}</span>
+              <span>Uploaded: {{ formatUploadDate(document?.date) }}</span>
             </div>
             <div class="flex items-center gap-2">
               <span
@@ -263,6 +355,57 @@ export class DocumentViewerComponent implements OnChanges {
     }
   }
 
+  openInNewTab() {
+    const url = this.getDocumentUrl();
+    if (url) {
+      window.open(url, '_blank');
+    }
+  }
+
+  openInGoogleDocs() {
+    const url = this.getDocumentUrl();
+    if (url) {
+      // Google Docs viewer URL
+      const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(
+        url
+      )}&embedded=true`;
+      window.open(googleDocsUrl, '_blank');
+    }
+  }
+
+  openInOfficeOnline() {
+    const url = this.getDocumentUrl();
+    if (url) {
+      // Microsoft Office Online viewer URL
+      const officeUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
+        url
+      )}`;
+      window.open(officeUrl, '_blank');
+    }
+  }
+
+  getGoogleDocsEmbedUrl(): SafeResourceUrl {
+    const url = this.getDocumentUrl();
+    if (url) {
+      const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(
+        url
+      )}&embedded=true`;
+      return this.sanitizer.bypassSecurityTrustResourceUrl(googleDocsUrl);
+    }
+    return '';
+  }
+
+  getOfficeOnlineEmbedUrl(): SafeResourceUrl {
+    const url = this.getDocumentUrl();
+    if (url) {
+      const officeUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
+        url
+      )}`;
+      return this.sanitizer.bypassSecurityTrustResourceUrl(officeUrl);
+    }
+    return '';
+  }
+
   onBackdropClick(event: MouseEvent) {
     if (event.target === event.currentTarget) {
       this.onClose();
@@ -292,23 +435,79 @@ export class DocumentViewerComponent implements OnChanges {
     );
   }
 
+  isVideo(): boolean {
+    const videoTypes = ['MP4', 'AVI', 'MOV', 'WMV', 'FLV'];
+    return videoTypes.includes(
+      this.document?.documentType?.toUpperCase() || ''
+    );
+  }
+
+  isTextDocument(): boolean {
+    const textTypes = ['DOC', 'DOCX', 'TXT', 'RTF'];
+    return textTypes.includes(this.document?.documentType?.toUpperCase() || '');
+  }
+
+  isSpreadsheet(): boolean {
+    const spreadsheetTypes = ['XLS', 'XLSX', 'CSV'];
+    return spreadsheetTypes.includes(
+      this.document?.documentType?.toUpperCase() || ''
+    );
+  }
+
+  isPresentation(): boolean {
+    const presentationTypes = ['PPT', 'PPTX'];
+    return presentationTypes.includes(
+      this.document?.documentType?.toUpperCase() || ''
+    );
+  }
+
+  canPreviewDirectly(): boolean {
+    return (
+      this.isPDF() ||
+      this.isImage() ||
+      this.isVideo() ||
+      this.isTextDocument() ||
+      this.isSpreadsheet() ||
+      this.isPresentation()
+    );
+  }
+
   getDocumentUrl(): string {
     if (!this.document || !this.document.downloadUrl) {
       return '';
     }
 
-    // Use the actual download URL from the API response
-    return this.document.downloadUrl;
+    // If the URL is already absolute, use it directly
+    if (
+      this.document.downloadUrl.startsWith('http://') ||
+      this.document.downloadUrl.startsWith('https://')
+    ) {
+      return this.document.downloadUrl;
+    } else {
+      // If it's a relative URL, construct the full URL
+      // Allow assets served by the frontend directly
+      if (this.document.downloadUrl.startsWith('/assets/')) {
+        return this.document.downloadUrl;
+      }
+      const baseUrl = 'https://harmoney-backend.onrender.com';
+      return `${baseUrl}${
+        this.document.downloadUrl.startsWith('/') ? '' : '/'
+      }${this.document.downloadUrl}`;
+    }
   }
 
-  getSafeDocumentUrl(): SafeResourceUrl | string {
+  getSafeDocumentUrl(): SafeResourceUrl | null {
     const url = this.getDocumentUrl();
     if (!url) {
-      return '';
+      return null;
     }
 
     // Sanitize the URL to make it safe for use in resource contexts
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  getRawDocumentUrl(): string {
+    return this.getDocumentUrl();
   }
 
   getFileTypeClass(fileType: string): string {
@@ -321,6 +520,9 @@ export class DocumentViewerComponent implements OnChanges {
       case 'XLS':
       case 'XLSX':
         return 'bg-green-100 text-green-800';
+      case 'PPT':
+      case 'PPTX':
+        return 'bg-orange-100 text-orange-800';
       case 'JPG':
       case 'JPEG':
       case 'PNG':
@@ -344,6 +546,9 @@ export class DocumentViewerComponent implements OnChanges {
       case 'XLS':
       case 'XLSX':
         return 'bg-green-500';
+      case 'PPT':
+      case 'PPTX':
+        return 'bg-orange-500';
       case 'JPG':
       case 'JPEG':
       case 'PNG':
@@ -354,6 +559,55 @@ export class DocumentViewerComponent implements OnChanges {
         return 'bg-orange-500';
       default:
         return 'bg-gray-500';
+    }
+  }
+
+  formatUploadDate(dateString: string | undefined): string {
+    if (!dateString) {
+      return 'Date not available';
+    }
+
+    try {
+      const date = new Date(dateString);
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+
+      const now = new Date();
+      const diffInMs = now.getTime() - date.getTime();
+      const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+
+      // Format the date
+      const formattedDate = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+
+      const formattedTime = date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+
+      // Return relative time for recent uploads
+      if (diffInMinutes < 1) {
+        return 'Just now';
+      } else if (diffInMinutes < 60) {
+        return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+      } else if (diffInHours < 24) {
+        return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+      } else if (diffInDays < 7) {
+        return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+      } else {
+        return `${formattedDate} at ${formattedTime}`;
+      }
+    } catch (error) {
+      return 'Date not available';
     }
   }
 }

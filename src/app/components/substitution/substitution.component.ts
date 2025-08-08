@@ -1,37 +1,93 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output,
+  ViewChild,
+  OnInit,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { EmployeeService } from '../../services/employee.service';
+import { EmployeeDetails } from '../../dto/employee.dto';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-substitution',
   imports: [CommonModule, FormsModule],
   templateUrl: './substitution.component.html',
-  styleUrl: './substitution.component.css'
+  styleUrl: './substitution.component.css',
 })
-export class SubstitutionComponent {
+export class SubstitutionComponent implements OnInit {
   @Input() open = false;
   @Output() closed = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<any>();
   @ViewChild('dropdownWrapper') dropdownWrapper!: ElementRef;
 
-
   searchTerm = '';
   dropdownOpen = false;
-  selectedName: string | null = null;
-  allNames = ['John Adegoke', 'Jane Adesanya', 'John Adegoke', 'Jane Adesanya'];
-  filteredList = [...this.allNames];
+  selectedEmployee: EmployeeDetails | null = null;
+  filteredEmployees: EmployeeDetails[] = [];
+  searchingEmployees = false;
+  private subscriptions: Subscription[] = [];
+
+  constructor(private employeeService: EmployeeService) {}
+
+  ngOnInit() {
+    // Initialize with empty filtered list
+    this.filteredEmployees = [];
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
 
   onSearch(term: string) {
-    // 👇 Replace this with your API call or function
-    this.filteredList = this.allNames.filter(name =>
-      name.toLowerCase().includes(term.toLowerCase())
-    );
+    this.searchTerm = term;
 
-    // Example API call placeholder:
-    // this.apiService.searchNames(term).subscribe(res => this.filteredList = res);
+    // Only search if term is at least 3 characters
+    if (term.length < 3) {
+      this.filteredEmployees = [];
+      this.dropdownOpen = false;
+      return;
+    }
+
+    this.searchingEmployees = true;
+    this.dropdownOpen = true;
+
+    const searchSub = this.employeeService
+      .searchEmployeesByName(term)
+      .subscribe({
+        next: (response) => {
+          this.searchingEmployees = false;
+          if (response.status === 'success' && response.data) {
+            this.filteredEmployees = response.data;
+          } else {
+            this.filteredEmployees = [];
+          }
+        },
+        error: (error) => {
+          console.error('Error searching employees:', error);
+          this.searchingEmployees = false;
+          this.filteredEmployees = [];
+        },
+      });
+
+    this.subscriptions.push(searchSub);
   }
-  selectName(name: string) {
-    this.selectedName = name;
+
+  onEmployeeInputBlur() {
+    // Delay closing dropdown to allow for click events
+    setTimeout(() => {
+      this.dropdownOpen = false;
+    }, 200);
+  }
+
+  selectEmployee(employee: EmployeeDetails) {
+    this.selectedEmployee = employee;
+    this.searchTerm = `${employee.firstName} ${employee.lastName}`;
     this.dropdownOpen = false;
   }
 
@@ -50,41 +106,24 @@ export class SubstitutionComponent {
     }
   }
 
-  quarters = ['Apr-Jul', 'Aug-Nov', 'Dec-Mar'];
-  criteria = ['Attendance', 'Voluntary Work', 'Evangelism'];
-  scores = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-  form = {
-    period: '',
-    average: '',
-    details: [
-      { criteria: 'Attendance', score: '' },
-      { criteria: 'Voluntary Work', score: '' },
-      { criteria: 'Evangelism', score: '' }
-    ]
-  };
-
   onClose() {
     this.closed.emit();
   }
 
   onSubmit() {
-    this.submitted.emit(this.form);
+    if (this.selectedEmployee) {
+      this.submitted.emit({
+        employeeId: this.selectedEmployee.id,
+        employeeName: `${this.selectedEmployee.firstName} ${this.selectedEmployee.lastName}`,
+        employeeIdNumber: this.selectedEmployee.employeeId,
+      });
+    }
   }
 
-  calculateAverage() {
-    // Extract scores, convert to numbers, and filter out empty or invalid entries
-    const scores = this.form.details
-      .map(avg => Number(avg.score))
-      .filter(score => !isNaN(score));
-
-    if (scores.length === 0) {
-      this.form.average = '';
-      return;
+  // Handle Enter key press for search
+  onSearchKeyPress(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.onSearch(this.searchTerm);
     }
-
-    // Calculate average
-    const avg = scores.reduce((sum, val) => sum + val, 0) / scores.length;
-    this.form.average = avg.toFixed(2); // or just avg if you want a number
   }
 }

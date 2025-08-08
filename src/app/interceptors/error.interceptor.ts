@@ -23,10 +23,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       } else if (error.status === 403) {
         // Handle forbidden error
         router.navigate(['/forbidden']);
-      } else if (error.status === 404) {
-        // Handle not found error
-        router.navigate(['/not-found']);
       }
+      // Note: 404 errors are not routed to not-found page to allow components to handle them
 
       return throwError(() => error);
     })

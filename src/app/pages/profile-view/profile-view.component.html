@@ -16,427 +16,122 @@
       >
         <span class="material-icons text-2xl cursor-pointer">arrow_back</span>
       </button>
-      <h2 class="text-lg font-semibold text-gray-900">Profile</h2>
+      <h2 class="text-lg font-semibold text-gray-900">
+        {{ workerName }}'s Profile
+      </h2>
     </div>
-    <button
-      (click)="editProfile()"
-      class="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F] text-white font-medium px-6 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#12C16F] focus:ring-offset-2"
-    >
-      Edit Profile
-    </button>
-  </div>
-
-  <!-- Profile Content -->
-  <div *ngIf="!isLoadingProfile && employeeData" class="space-y-6">
-    <!-- Employee Name Header -->
-    <div class="bg-white rounded-xl shadow-sm p-8">
-      <div class="flex items-center space-x-6">
-        <div
-          class="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden"
+    <div class="flex items-center gap-4">
+      <!-- Edit Profile Icon -->
+      <button
+        (click)="editProfile()"
+        class="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F] text-white p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#12C16F] focus:ring-offset-2"
+        title="Edit Profile"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          <img
-            *ngIf="employeeData.photoUrl; else defaultAvatar"
-            [src]="employeeData.photoUrl"
-            alt="Profile"
-            class="w-full h-full object-cover rounded-full"
-          />
-          <ng-template #defaultAvatar>
-            <img
-              src="assets/svg/gender.svg"
-              alt="Default Profile"
-              class="w-12 h-12 text-gray-400"
-            />
-          </ng-template>
-        </div>
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">{{ getFullName() }}</h1>
-          <p class="text-gray-600 mt-1">
-            {{ employeeData.profferedName || "No preferred name" }}
-          </p>
-          <p class="text-sm text-gray-500 mt-1">
-            Employee ID: {{ employeeData.employeeId }}
-          </p>
-        </div>
-      </div>
-    </div>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          ></path>
+        </svg>
+      </button>
 
-    <!-- Personal Information Section -->
-    <div class="bg-white rounded-xl shadow-sm">
-      <div class="p-6 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900">
-            Personal Information
-          </h3>
-          <button
-            (click)="editSection('personal')"
-            class="text-[#12C16F] hover:text-[#0A8754] font-medium text-sm flex items-center space-x-1"
-          >
-            <span class="material-icons text-sm">edit</span>
-            <span>Edit</span>
-          </button>
-        </div>
-      </div>
-      <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Gender</label
-            >
-            <p class="text-gray-900">
-              {{ employeeData.gender || "Not specified" }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Date of Birth</label
-            >
-            <p class="text-gray-900">
-              {{ getFormattedDate(employeeData.dob) }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Marital Status</label
-            >
-            <p class="text-gray-900">
-              {{ employeeData.maritalStatus || "Not specified" }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Ever Divorced</label
-            >
-            <p class="text-gray-900">
-              {{ employeeData.everDivorced ? "Yes" : "No" }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Contact Information Section -->
-    <div class="bg-white rounded-xl shadow-sm">
-      <div class="p-6 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900">
-            Contact Information
-          </h3>
-          <button
-            (click)="editSection('contact')"
-            class="text-[#12C16F] hover:text-[#0A8754] font-medium text-sm flex items-center space-x-1"
-          >
-            <span class="material-icons text-sm">edit</span>
-            <span>Edit</span>
-          </button>
-        </div>
-      </div>
-      <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Primary Phone</label
-            >
-            <p class="text-gray-900">{{ getFormattedPhone() }}</p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Alternative Phone</label
-            >
-            <p class="text-gray-900">
-              {{ employeeData.altPhone || "Not provided" }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Primary Email</label
-            >
-            <p class="text-gray-900">
-              {{ employeeData.user?.email || "Not provided" }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Alternative Email</label
-            >
-            <p class="text-gray-900">
-              {{ employeeData.altEmail || "Not provided" }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Address Information Section -->
-    <div class="bg-white rounded-xl shadow-sm">
-      <div class="p-6 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900">
-            Address Information
-          </h3>
-          <button
-            (click)="editSection('address')"
-            class="text-[#12C16F] hover:text-[#0A8754] font-medium text-sm flex items-center space-x-1"
-          >
-            <span class="material-icons text-sm">edit</span>
-            <span>Edit</span>
-          </button>
-        </div>
-      </div>
-      <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Home Address</label
-            >
-            <p class="text-gray-900">
-              {{ getFormattedAddress(employeeData.homeAddress) }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Mailing Address</label
-            >
-            <p class="text-gray-900">
-              {{ getFormattedAddress(employeeData.mailingAddress) }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Employment Information Section -->
-    <div class="bg-white rounded-xl shadow-sm">
-      <div class="p-6 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900">
-            Employment Information
-          </h3>
-          <button
-            (click)="editSection('employment')"
-            class="text-[#12C16F] hover:text-[#0A8754] font-medium text-sm flex items-center space-x-1"
-          >
-            <span class="material-icons text-sm">edit</span>
-            <span>Edit</span>
-          </button>
-        </div>
-      </div>
-      <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Employment Status</label
-            >
-            <p class="text-gray-900">{{ getEmploymentStatus() }}</p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Employment Type</label
-            >
-            <p class="text-gray-900">{{ getEmploymentType() }}</p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Service Start Date</label
-            >
-            <p class="text-gray-900">
-              {{ getFormattedDate(employeeData.serviceStartDate) }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Departments</label
-            >
-            <p class="text-gray-900">{{ getDepartments() }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Spiritual History Section -->
-    <div
-      class="bg-white rounded-xl shadow-sm"
-      *ngIf="employeeData.spiritualHistory"
-    >
-      <div class="p-6 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900">Spiritual History</h3>
-          <button
-            (click)="editSection('spiritual')"
-            class="text-[#12C16F] hover:text-[#0A8754] font-medium text-sm flex items-center space-x-1"
-          >
-            <span class="material-icons text-sm">edit</span>
-            <span>Edit</span>
-          </button>
-        </div>
-      </div>
-      <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Baptism Date</label
-            >
-            <p class="text-gray-900">
-              {{ getFormattedDate(employeeData.spiritualHistory.baptismDate) }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Baptism Location</label
-            >
-            <p class="text-gray-900">
-              {{
-                employeeData.spiritualHistory.baptismLocation || "Not provided"
-              }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Confirmation Date</label
-            >
-            <p class="text-gray-900">
-              {{
-                getFormattedDate(employeeData.spiritualHistory.confirmationDate)
-              }}
-            </p>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Confirmation Location</label
-            >
-            <p class="text-gray-900">
-              {{
-                employeeData.spiritualHistory.confirmationLocation ||
-                  "Not provided"
-              }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Family Information Section -->
-    <div
-      class="bg-white rounded-xl shadow-sm"
-      *ngIf="
-        employeeData &&
-        (employeeData.spouse ||
-          (employeeData.children && employeeData.children.length > 0))
-      "
-    >
-      <div class="p-6 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900">
-            Family Information
-          </h3>
-          <button
-            (click)="editSection('family')"
-            class="text-[#12C16F] hover:text-[#0A8754] font-medium text-sm flex items-center space-x-1"
-          >
-            <span class="material-icons text-sm">edit</span>
-            <span>Edit</span>
-          </button>
-        </div>
-      </div>
-      <div class="p-6">
-        <!-- Spouse Information -->
-        <div *ngIf="employeeData.spouse" class="mb-6">
-          <h4 class="text-md font-medium text-gray-800 mb-3">Spouse</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Name</label
-              >
-              <p class="text-gray-900">
-                {{ employeeData.spouse.firstName }}
-                {{ employeeData.spouse.middleName }}
-                {{ employeeData.spouse.lastName }}
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Date of Birth</label
-              >
-              <p class="text-gray-900">
-                {{ getFormattedDate(employeeData.spouse.dob) }}
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Gender</label
-              >
-              <p class="text-gray-900">{{ employeeData.spouse.gender }}</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Occupation</label
-              >
-              <p class="text-gray-900">
-                {{ employeeData.spouse.occupation || "Not provided" }}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Children Information -->
-        <div *ngIf="employeeData.children && employeeData.children.length > 0">
-          <h4 class="text-md font-medium text-gray-800 mb-3">Children</h4>
-          <div class="space-y-4">
-            <div
-              *ngFor="let child of employeeData.children"
-              class="border border-gray-200 rounded-lg p-4"
-            >
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Name</label
-                  >
-                  <p class="text-gray-900">
-                    {{ child.firstName }}
-                    {{ child.middleName }}
-                    {{ child.lastName }}
-                  </p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Date of Birth</label
-                  >
-                  <p class="text-gray-900">{{ getFormattedDate(child.dob) }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >Gender</label
-                  >
-                  <p class="text-gray-900">{{ child.gender }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Retire Text -->
+      <span
+        (click)="retireProfile()"
+        class="text-red-600 hover:text-red-800 cursor-pointer font-medium transition-colors duration-200"
+        title="Retire Profile"
+      >
+        Retire
+      </span>
     </div>
   </div>
 
-  <!-- Empty State -->
+  <!-- Employee Information Section -->
+  <div class="py-4" *ngIf="employeeInfo">
+    <app-dashboard-information
+      [title]="'Employee Information'"
+      [employeeData]="employeeInfo"
+      [isProfileMode]="true"
+      [personalTitle]="employeeInfo.title"
+    ></app-dashboard-information>
+  </div>
+
+  <!-- Contact Information Section -->
+  <div class="py-4" *ngIf="otherInformationData.length > 0">
+    <app-info-section
+      title="Contact Information"
+      [data]="otherInformationData"
+      [columns]="3"
+      [isExpanded]="true"
+    ></app-info-section>
+  </div>
+
   <div
-    *ngIf="!isLoadingProfile && !employeeData"
-    class="flex flex-col items-center justify-center py-12"
+    class="py-4"
+    *ngIf="familyInformationData.length > 0 && currentUserRole !== 'worker'"
   >
-    <img
-      src="assets/animations/profile.gif"
-      alt="No profile"
-      class="w-32 h-32 mb-4"
-    />
-    <h3 class="text-lg font-semibold text-gray-900 mb-2">
-      No Profile Data Available
-    </h3>
-    <p class="text-gray-600 mb-4">
-      Your profile information could not be loaded.
-    </p>
-    <button
-      (click)="editProfile()"
-      class="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F] text-white font-medium px-8 py-3 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#12C16F] focus:ring-offset-2"
-    >
-      Create Profile
-    </button>
+    <app-info-section
+      title="Family Information"
+      [data]="familyInformationData"
+      [columns]="3"
+      [isExpanded]="true"
+    ></app-info-section>
+  </div>
+
+  <!-- Personal Information Section -->
+  <div
+    class="py-4"
+    *ngIf="personalInformationData.length > 0 && currentUserRole === 'worker'"
+  >
+    <app-info-section
+      title="Personal Information"
+      [data]="personalInformationData"
+      [columns]="3"
+      [isExpanded]="true"
+    ></app-info-section>
+  </div>
+
+  <!-- Spiritual History Section -->
+  <div class="py-4" *ngIf="spiritualHistoryData.length > 0">
+    <app-info-section
+      title="Spiritual History"
+      [data]="spiritualHistoryData"
+      [columns]="3"
+      [isExpanded]="true"
+    ></app-info-section>
+  </div>
+
+  <!-- Legal Questions Section -->
+  <div class="py-4" *ngIf="legalQuestionsData.length > 0">
+    <app-info-section
+      title="Legal Questions"
+      [data]="legalQuestionsData"
+      [columns]="3"
+      [isExpanded]="true"
+    ></app-info-section>
+  </div>
+
+  <!-- Upload Documents Section -->
+  <div class="py-4" *ngIf="uploadDocumentsData.length > 0">
+    <app-info-section
+      title="Upload Documents"
+      [data]="uploadDocumentsData"
+      [columns]="3"
+      [isExpanded]="true"
+    ></app-info-section>
   </div>
 </div>
+
+<!-- Retirement Request Modal -->
+<app-create-retirement-request
+  [show]="showRetirementModal"
+  (close)="onRetirementModalClose()"
+  (submitted)="onRetirementSubmit($event)"
+></app-create-retirement-request>

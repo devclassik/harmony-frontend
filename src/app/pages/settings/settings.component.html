@@ -1,0 +1,589 @@
+<div class="bg-gray-50 min-h-screen">
+  <!-- Loading Overlay -->
+  <app-loading-overlay
+    [isVisible]="
+      isLoading ||
+      isLoadingEmployees ||
+      isLoadingPermissions ||
+      isLoadingAccommodations ||
+      isLoadingTemplates ||
+      isUpdatingPermissions ||
+      isCreatingAccommodation ||
+      isUpdatingAccommodation ||
+      isDeletingAccommodation ||
+      isCreatingTemplate ||
+      isUpdatingTemplate ||
+      isDeletingTemplate
+    "
+    [title]="getLoadingTitle()"
+    [message]="getLoadingMessage()"
+  ></app-loading-overlay>
+  <!-- Navigation Tabs -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="flex space-x-8 px-6 py-3">
+      <button
+        [class]="
+          activeTab === 'organization-structure'
+            ? 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg border border-green-200'
+            : 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors'
+        "
+        (click)="setActiveTab('organization-structure')"
+      >
+        <mat-icon class="w-4 h-4">dashboard</mat-icon>
+        <span>Organization Structure</span>
+      </button>
+      <button
+        [class]="
+          activeTab === 'user-management'
+            ? 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg border border-green-200'
+            : 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors'
+        "
+        (click)="setActiveTab('user-management')"
+      >
+        <mat-icon class="w-4 h-4">people</mat-icon>
+        <span>User Management</span>
+      </button>
+      <button
+        [class]="
+          activeTab === 'access-control'
+            ? 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg border border-green-200'
+            : 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors'
+        "
+        (click)="setActiveTab('access-control')"
+      >
+        <mat-icon class="w-4 h-4">security</mat-icon>
+        <span>Access Control</span>
+      </button>
+      <button
+        [class]="
+          activeTab === 'accommodation'
+            ? 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg border border-green-200'
+            : 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors'
+        "
+        (click)="setActiveTab('accommodation')"
+      >
+        <mat-icon class="w-4 h-4">home</mat-icon>
+        <span>Accommodation</span>
+      </button>
+      <button
+        [class]="
+          activeTab === 'letter-template'
+            ? 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg border border-green-200'
+            : 'flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors'
+        "
+        (click)="setActiveTab('letter-template')"
+      >
+        <mat-icon class="w-4 h-4">description</mat-icon>
+        <span>Letter Template</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Organization Structure Tab Content -->
+  <div
+    *ngIf="activeTab === 'organization-structure'"
+    class="bg-white min-h-screen"
+  >
+    <!-- Header Section -->
+    <div
+      class="flex items-center justify-between px-6 py-4 border-b border-gray-200"
+    >
+      <h2 class="text-lg font-semibold text-gray-900">
+        Showing Organization Structure
+      </h2>
+      <button
+        (click)="openCreateDepartmentModal()"
+        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+      >
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <span>Add Department</span>
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="px-6 py-6">
+      <!-- Organization Structure Display -->
+      <div *ngIf="organizations.length > 0" class="space-y-8">
+        <!-- Director Level -->
+        <div class="flex flex-col items-center space-y-4">
+          <!-- Director Title Card -->
+          <div class="w-64 bg-[#353535] text-white rounded-lg p-3 text-center">
+            <div class="font-semibold text-sm">
+              Director Superintendent Admin
+            </div>
+            <div class="text-xs opacity-90">
+              {{ getDirectorDepartmentName() }}
+            </div>
+          </div>
+
+          <!-- Director Profile Card -->
+          <div
+            *ngIf="getDirector()"
+            class="w-64 bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="relative w-12 h-12">
+                <img
+                  *ngIf="
+                    hasValidPhotoUrl(getDirector());
+                    else directorFallbackIcon
+                  "
+                  [src]="formatImageUrl(getDirector()?.photoUrl || null)"
+                  [alt]="
+                    getDirector()
+                      ? getEmployeeFullName(getDirector()!)
+                      : 'Director'
+                  "
+                  class="w-12 h-12 rounded-full object-cover border border-gray-200"
+                  (error)="onImageError($event)"
+                />
+                <ng-template #directorFallbackIcon>
+                  <img
+                    [src]="getDefaultImage(getDirector())"
+                    [alt]="
+                      getDirector()
+                        ? getEmployeeFullName(getDirector()!)
+                        : 'Director'
+                    "
+                    class="w-12 h-12 rounded-full object-cover border border-gray-200"
+                  />
+                </ng-template>
+              </div>
+              <div class="flex-1 text-left">
+                <div class="font-semibold text-gray-900 text-sm">
+                  {{
+                    getDirector()
+                      ? getEmployeeFullName(getDirector()!)
+                      : "Director"
+                  }}
+                </div>
+                <div class="text-xs text-gray-500">
+                  {{ getDirectorDepartmentName() }}
+                </div>
+                <div class="text-xs text-gray-400">Director</div>
+              </div>
+            </div>
+
+            <!-- Team Management Buttons -->
+            <div class="flex justify-between pt-3 border-t border-gray-200">
+              <button
+                class="flex items-center space-x-1 text-green-600 hover:text-green-700 text-xs"
+                (click)="openViewTeamModal(organizations[0].headDepartment)"
+              >
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    d="M13 6a3 3 0 11-6 0 3 3 0 616 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
+                  />
+                </svg>
+                <span>View Team ({{ getDirectorTeamCount() }})</span>
+              </button>
+              <button
+                class="text-green-600 hover:text-green-700 text-xs"
+                (click)="openCreateDepartmentModal()"
+              >
+                + Add
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connection Lines to Departments -->
+        <div *ngIf="getAllDepartments().length > 0" class="flex justify-center">
+          <div class="w-px h-12 bg-gray-300"></div>
+        </div>
+
+        <!-- Departments Level -->
+        <div
+          *ngIf="getAllDepartments().length > 0"
+          class="flex flex-wrap justify-center gap-8"
+        >
+          <div
+            *ngFor="let department of getAllDepartments()"
+            class="flex flex-col items-center space-y-4"
+          >
+            <!-- Vertical line from center to department -->
+            <div class="w-px h-8 bg-gray-300"></div>
+
+            <!-- Department Title Card -->
+            <div
+              class="w-64 bg-[#353535] text-white rounded-lg p-3 text-center"
+            >
+              <div class="font-semibold text-sm">{{ department.name }}</div>
+              <div class="text-xs opacity-90">Department</div>
+            </div>
+
+            <!-- Department HOD Profile Card -->
+            <div
+              class="w-64 bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="relative w-12 h-12">
+                  <img
+                    *ngIf="
+                      hasValidPhotoUrl(department.hod);
+                      else departmentFallbackIcon
+                    "
+                    [src]="formatImageUrl(department.hod?.photoUrl || null)"
+                    [alt]="
+                      department.hod
+                        ? getEmployeeFullName(department.hod)
+                        : 'Department HOD'
+                    "
+                    class="w-12 h-12 rounded-full object-cover border border-gray-200"
+                    (error)="onImageError($event)"
+                  />
+                  <ng-template #departmentFallbackIcon>
+                    <img
+                      [src]="getDefaultImage(department.hod)"
+                      [alt]="
+                        department.hod
+                          ? getEmployeeFullName(department.hod)
+                          : 'Department HOD'
+                      "
+                      class="w-12 h-12 rounded-full object-cover border border-gray-200"
+                    />
+                  </ng-template>
+                </div>
+                <div class="flex-1 text-left">
+                  <div class="font-semibold text-gray-900 text-sm">
+                    {{
+                      department.hod
+                        ? getEmployeeFullName(department.hod)
+                        : "No HOD Assigned"
+                    }}
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    {{ department.name }}
+                  </div>
+                  <div class="text-xs text-gray-400">Head of Department</div>
+                </div>
+              </div>
+
+              <!-- Team Management Buttons -->
+              <!-- <div class="flex justify-between pt-3 border-t border-gray-200">
+                <button
+                  class="flex items-center space-x-1 text-green-600 hover:text-green-700 text-xs"
+                  (click)="openViewTeamModal(department)"
+                >
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      d="M13 6a3 3 0 11-6 0 3 3 0 616 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
+                    />
+                  </svg>
+                  <span>View Team ({{ department.members.length }})</span>
+                </button>
+                <button class="text-green-600 hover:text-green-700 text-xs">
+                  + Add
+                </button>
+              </div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        *ngIf="organizations.length === 0 && !isLoading"
+        class="text-center py-12"
+      >
+        <svg
+          class="w-16 h-16 text-gray-400 mx-auto mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+          />
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          No Organization Structure Found
+        </h3>
+        <p class="text-gray-500">
+          Get started by creating your first department.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Management Tab Content -->
+  <div *ngIf="activeTab === 'user-management'" class="bg-white min-h-screen">
+    <!-- Table View using Table Component -->
+
+    <app-table
+      [tableTitle]="'Showing All Employees (' + getCurrentDataCount() + ')'"
+      [tableHeader]="tableHeader"
+      [searchValue]="searchValue"
+      (search)="onSearch($event)"
+      [tableData]="getEmployeeTableData()"
+      [menuItems]="actionButton"
+      [showFilter]="false"
+      [showPagination]="true"
+      [showViewAll]="false"
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      [pageSize]="pageSize"
+      [showButton]="true"
+      showButtonText="Add Employee"
+      showButtonIcon="assets/svg/add.svg"
+      showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+      (showButtonActionClick)="openAddEmployeeModal()"
+      (menuAction)="onMenuAction($event)"
+      (pageChange)="onPageChange($event)"
+    ></app-table>
+  </div>
+
+  <!-- Letter Template Tab Content -->
+  <div *ngIf="activeTab === 'letter-template'" class="bg-white min-h-screen">
+    <div class="px-6 py-4">
+      <app-table
+        [tableTitle]="'Showing All Templates (' + templates.length + ')'"
+        [searchValue]="searchValue"
+        (search)="onSearch($event)"
+        [tableHeader]="templateTableHeader"
+        [tableData]="templatesTableData"
+        [menuItems]="templateActionButton"
+        [showFilter]="false"
+        [showPagination]="false"
+        [showViewAll]="false"
+        [currentView]="'table'"
+        [showButton]="true"
+        showButtonText="Add Template"
+        showButtonIcon="assets/svg/add.svg"
+        showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+        (showButtonActionClick)="openCreateTemplateModal()"
+        (menuAction)="handleTemplateTableAction($event)"
+      ></app-table>
+    </div>
+  </div>
+
+  <!-- Create Department Modal using leave-details component -->
+  <app-leave-details
+    [view]="showCreateDepartmentModal"
+    [mode]="'create'"
+    [isDepartment]="true"
+    [isEditMode]="isEditMode"
+    [preFilledDepartmentData]="isEditMode ? newDepartment : null"
+    [title]="isEditMode ? 'Edit Department' : 'Create Department'"
+    (close)="closeCreateDepartmentModal()"
+    (submit)="onDepartmentSubmitted($event)"
+  ></app-leave-details>
+
+  <!-- Create Template Modal using leave-details component -->
+  <app-leave-details
+    [view]="showCreateTemplateModal"
+    [mode]="'create'"
+    [isTemplate]="true"
+    [isEditMode]="isEditMode"
+    [preFilledTemplateData]="selectedTemplateData"
+    [title]="isEditMode ? 'Edit Template' : 'Add Letter Template'"
+    (close)="closeCreateTemplateModal()"
+    (submit)="onTemplateSubmitted($event)"
+  ></app-leave-details>
+
+  <!-- Confirmation Prompt -->
+  <app-confirm-prompt
+    *ngIf="showConfirmPrompt"
+    [title]="promptConfig?.title || 'Confirm Action'"
+    [text]="
+      promptConfig?.text ||
+      'Are you sure you want to create the department ' +
+        newDepartment.name +
+        '?'
+    "
+    [yesButtonText]="promptConfig?.yesButtonText || 'Yes, Create'"
+    [noButtonText]="promptConfig?.noButtonText || 'Cancel'"
+    (confirmed)="onConfirmCreate()"
+    (closed)="onCancelCreate()"
+  ></app-confirm-prompt>
+
+  <!-- Loading Overlay for Creation -->
+  <app-loading-overlay
+    *ngIf="isCreatingDepartment"
+    [isVisible]="isCreatingDepartment"
+    title="Creating Department..."
+    message="Please wait while we create the department."
+  ></app-loading-overlay>
+
+  <!-- Team Details Modal for Organization Structure -->
+  <app-employee-details
+    [view]="showTeamDetails"
+    [employee]="selectedTeamData"
+    [employeeDetails]="
+      createEmployeeDetailsFromDepartment(selectedTeamDepartment)
+    "
+    [teamMembers]="selectedTeamDepartment?.members || []"
+    [departmentName]="selectedTeamDepartment?.name || ''"
+    (close)="closeViewTeamModal()"
+  ></app-employee-details>
+
+  <!-- User Details Modal for User Management -->
+  <app-employee-details
+    [view]="showUserDetails"
+    [employee]="selectedUserData"
+    [employeeDetails]="selectedUserEmployee"
+    [showOnlyContactInfo]="true"
+    (close)="closeUserDetailsModal()"
+    (edit)="editEmployeeFromDetails()"
+    (delete)="deleteEmployeeFromDetails()"
+  ></app-employee-details>
+
+  <!-- Template Details Modal -->
+  <app-employee-details
+    [view]="showTemplateDetails"
+    [employee]="selectedTemplateData"
+    [isTemplateView]="true"
+    [templateData]="selectedTemplateData"
+    (close)="closeTemplateDetails()"
+    (edit)="editTemplateFromDetails()"
+    (delete)="deleteTemplateFromDetails()"
+  ></app-employee-details>
+
+  <!-- Add Employee Modal using leave-details component -->
+  <app-leave-details
+    [view]="showAddEmployeeModal"
+    [mode]="'create'"
+    [isAddEmployee]="true"
+    [isEditMode]="isEditMode"
+    [preFilledEmployeeData]="isEditMode ? newEmployee : null"
+    [title]="isEditMode ? 'Edit Employee' : 'Add Employee'"
+    (close)="closeAddEmployeeModal()"
+    (submit)="onAddEmployeeSubmitted($event)"
+  ></app-leave-details>
+
+  <!-- Add Employee Confirmation Prompt -->
+  <app-confirm-prompt
+    *ngIf="showAddEmployeeConfirmPrompt"
+    [text]="'Are you sure you want to add this employee?'"
+    [yesButtonText]="'Yes, Add Employee'"
+    [noButtonText]="'Cancel'"
+    (confirmed)="onConfirmAddEmployee()"
+    (closed)="onCancelAddEmployee()"
+  ></app-confirm-prompt>
+
+  <!-- Loading Overlay for Add Employee -->
+  <app-loading-overlay
+    *ngIf="isAddingEmployee"
+    [isVisible]="isAddingEmployee"
+    title="Adding Employee..."
+    message="Please wait while we add the employee."
+  ></app-loading-overlay>
+
+  <!-- Permission Details using employee-details component -->
+  <app-employee-details
+    [view]="showPermissionDetails"
+    [employee]="null"
+    [employeeDetails]="null"
+    [showOnlyContactInfo]="false"
+    [isPermissionView]="true"
+    [permissionData]="selectedPermissionData"
+    (close)="closePermissionDetails()"
+    (edit)="onPermissionUpdateSubmitted($event)"
+  ></app-employee-details>
+
+  <!-- Permission Update Confirmation Prompt -->
+  <app-confirm-prompt
+    *ngIf="showPermissionUpdateConfirmPrompt"
+    [title]="'Update Permissions'"
+    [text]="
+      'Are you sure you want to update the permissions for this role? This action will modify the access rights for all users with this role.'
+    "
+    [yesButtonText]="'Yes, Update'"
+    [noButtonText]="'Cancel'"
+    (confirmed)="onConfirmPermissionUpdate()"
+    (closed)="onCancelPermissionUpdate()"
+  ></app-confirm-prompt>
+
+  <!-- Access Control Tab Content -->
+  <div *ngIf="activeTab === 'access-control'" class="bg-white min-h-screen">
+    <!-- Permissions Table -->
+    <div class="px-6 py-4">
+      <app-table
+        [tableTitle]="'Showing All Permissions'"
+        [tableHeader]="permissionsTableHeader"
+        [tableData]="permissionsTableData"
+        [menuItems]="permissionsActionButton"
+        [showFilter]="false"
+        [showSearch]="false"
+        [showPagination]="false"
+        [showViewAll]="false"
+        [currentView]="'table'"
+        (menuAction)="handlePermissionTableAction($event)"
+      ></app-table>
+    </div>
+  </div>
+
+  <!-- Accommodation Tab Content -->
+  <div *ngIf="activeTab === 'accommodation'" class="bg-white min-h-screen">
+    <!-- Accommodations Table -->
+    <div class="px-6 py-4">
+      <app-table
+        [tableTitle]="
+          'Showing All Accommodations (' + accommodations.length + ')'
+        "
+        [searchValue]="searchValue"
+        (search)="onSearch($event)"
+        [tableHeader]="accommodationTableHeader"
+        [tableData]="accommodationsTableData"
+        [menuItems]="accommodationActionButton"
+        [showFilter]="false"
+        [showPagination]="false"
+        [showViewAll]="false"
+        [currentView]="'table'"
+        [showButton]="true"
+        showButtonText="Add Accommodation"
+        showButtonIcon="assets/svg/add.svg"
+        showButtonStyle="bg-gradient-to-r from-[#12C16F] to-[#0A8754] hover:from-[#0A8754] hover:to-[#12C16F]"
+        (showButtonActionClick)="openCreateAccommodationModal()"
+        (menuAction)="handleAccommodationTableAction($event)"
+      ></app-table>
+    </div>
+  </div>
+
+  <!-- Accommodation Details Modal -->
+  <app-employee-details
+    [view]="showAccommodationDetails"
+    [employee]="null"
+    [employeeDetails]="null"
+    [showOnlyContactInfo]="false"
+    [isAccommodationView]="true"
+    [accommodationData]="selectedAccommodationData"
+    (close)="closeAccommodationDetails()"
+    (edit)="editAccommodationFromDetails()"
+    (delete)="deleteAccommodationFromDetails()"
+  ></app-employee-details>
+
+  <!-- Create/Edit Accommodation Modal using leave-details component -->
+  <app-leave-details
+    [view]="showCreateAccommodationModal"
+    [mode]="'create'"
+    [isAccommodation]="true"
+    [isEditMode]="isEditMode"
+    [preFilledAccommodationData]="isEditMode ? newAccommodation : null"
+    [title]="isEditMode ? 'Edit Accommodation' : 'Create Accommodation'"
+    (close)="closeCreateAccommodationModal()"
+    (submit)="onAccommodationSubmitted($event)"
+  ></app-leave-details>
+
+  <!-- Accommodation Delete Confirmation Prompt -->
+  <app-confirm-prompt
+    *ngIf="showAccommodationDeleteConfirmPrompt"
+    [title]="'Delete Accommodation'"
+    [text]="
+      'Are you sure you want to delete this accommodation? This action cannot be undone.'
+    "
+    [yesButtonText]="'Yes, Delete'"
+    [noButtonText]="'Cancel'"
+    (confirmed)="performAccommodationDeletion()"
+    (closed)="showAccommodationDeleteConfirmPrompt = false"
+  ></app-confirm-prompt>
+</div>

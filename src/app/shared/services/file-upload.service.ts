@@ -49,14 +49,26 @@ export class FileUploadService {
       };
     }
 
-    // Check file type
-    const allowedTypes = ['.pdf', '.doc', '.docx', '.xls', '.xlsx'];
+    // Check file type - now includes video files
+    const allowedTypes = [
+      '.pdf',
+      '.doc',
+      '.docx',
+      '.xls',
+      '.xlsx',
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.mp4',
+      '.avi',
+      '.mov',
+    ];
     const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
 
     if (!allowedTypes.includes(fileExtension)) {
       return {
         isValid: false,
-        error: `File type not allowed. Please upload PDF, DOC, DOCX, XLS, or XLSX files.`,
+        error: `File type not allowed. Please upload PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, MP4, AVI, or MOV files.`,
       };
     }
 
@@ -108,6 +120,14 @@ export class FileUploadService {
       case 'xls':
       case 'xlsx':
         return 'excel';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return 'image';
+      case 'mp4':
+      case 'avi':
+      case 'mov':
+        return 'video';
       default:
         return 'file';
     }

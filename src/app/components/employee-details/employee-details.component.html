@@ -8,8 +8,175 @@
     >
       &times;
     </button>
+
+    <!-- Edit and Delete icons for User Management (only when showOnlyContactInfo is true) -->
+    <div
+      *ngIf="showOnlyContactInfo"
+      class="absolute top-6 right-16 flex space-x-2"
+    >
+      <button
+        type="button"
+        (click)="onEdit()"
+        class="text-blue-600 hover:text-blue-700 transition-colors"
+        title="Edit Employee"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          ></path>
+        </svg>
+      </button>
+      <button
+        type="button"
+        (click)="onDelete()"
+        class="text-red-600 hover:text-red-700 transition-colors"
+        title="Delete Employee"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Edit button for Permission View -->
+    <div
+      *ngIf="isPermissionView && !isEditingPermissions"
+      class="absolute top-6 right-16 flex space-x-2"
+    >
+      <button
+        type="button"
+        (click)="onEditPermissions()"
+        class="text-blue-600 hover:text-blue-700 transition-colors"
+        title="Edit Permissions"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Edit and Delete buttons for Accommodation View -->
+    <div
+      *ngIf="isAccommodationView"
+      class="absolute top-6 right-16 flex space-x-2"
+    >
+      <button
+        type="button"
+        (click)="onEdit()"
+        class="text-blue-600 hover:text-blue-700 transition-colors"
+        title="Edit Accommodation"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          ></path>
+        </svg>
+      </button>
+      <button
+        type="button"
+        (click)="onDelete()"
+        class="text-red-600 hover:text-red-700 transition-colors"
+        title="Delete Accommodation"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Edit and Delete buttons for Template View -->
+    <div *ngIf="isTemplateView" class="absolute top-6 right-16 flex space-x-2">
+      <button
+        type="button"
+        (click)="onEdit()"
+        class="text-blue-600 hover:text-blue-700 transition-colors"
+        title="Edit Template"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          ></path>
+        </svg>
+      </button>
+      <button
+        type="button"
+        (click)="onDelete()"
+        class="text-red-600 hover:text-red-700 transition-colors"
+        title="Delete Template"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          ></path>
+        </svg>
+      </button>
+    </div>
     <div class="flex items-center gap-4 pb-6 border-b border-gray-100">
+      <!-- Employee Image (show only if not permission view, not accommodation view, and not template view) -->
       <img
+        *ngIf="!isPermissionView && !isAccommodationView && !isTemplateView"
         class="size-32 rounded-full object-cover"
         [src]="formatImageUrl(employeeDetails?.photoUrl)"
         [alt]="
@@ -19,23 +186,124 @@
         "
         (error)="handleImageError($event)"
       />
+
+      <!-- Permission Icon (show only if permission view) -->
+      <div
+        *ngIf="isPermissionView"
+        class="w-32 h-32 bg-green-100 rounded-full flex items-center justify-center"
+      >
+        <svg
+          class="w-16 h-16 text-green-600"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z"
+            clip-rule="evenodd"
+          ></path>
+        </svg>
+      </div>
+
+      <!-- Accommodation Icon (show only if accommodation view) -->
+      <div
+        *ngIf="isAccommodationView"
+        class="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center"
+      >
+        <mat-icon class="w-16 h-16 text-blue-600">home</mat-icon>
+      </div>
+
+      <!-- Template Icon (show only if template view) -->
+      <div
+        *ngIf="isTemplateView"
+        class="w-32 h-32 bg-green-100 rounded-full flex items-center justify-center"
+      >
+        <mat-icon class="w-16 h-16 text-green-600">description</mat-icon>
+      </div>
+
       <div>
         <div
           class="font-semibold text-sm text-gray-900 flex items-center gap-2"
         >
-          {{ employeeDetails?.firstName }} {{ employeeDetails?.lastName }}
-          <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-2"
-            >Employee ID:
-            <span class="font-medium">{{
-              employeeDetails?.employeeId || employeeDetails?.id
-            }}</span></span
+          <!-- Employee Name (show only if not permission view, not accommodation view, and not template view) -->
+          <span
+            *ngIf="!isPermissionView && !isAccommodationView && !isTemplateView"
           >
+            {{ employeeDetails?.firstName }} {{ employeeDetails?.lastName }}
+            <span
+              class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-2"
+              >Employee ID:
+              <span class="font-medium">{{
+                employeeDetails?.employeeId || employeeDetails?.id
+              }}</span></span
+            >
+          </span>
+
+          <!-- Role Name (show only if permission view) -->
+          <span *ngIf="isPermissionView">
+            {{ permissionData?.roleName }}
+            <span
+              class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-2"
+              >Role Permissions</span
+            >
+          </span>
+
+          <!-- Accommodation Name (show only if accommodation view) -->
+          <span *ngIf="isAccommodationView">
+            {{ accommodationData?.name }}
+            <span
+              class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-2"
+              >Accommodation ID:
+              <span class="font-medium">{{ accommodationData?.id }}</span></span
+            >
+          </span>
+
+          <!-- Template Name (show only if template view) -->
+          <span *ngIf="isTemplateView">
+            {{ formatTemplateType(templateData?.type) }}
+            <span
+              class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-2"
+              >Template ID:
+              <span class="font-medium">{{ templateData?.id }}</span></span
+            >
+          </span>
         </div>
         <div class="text-xs text-gray-600">
-          {{ employeeDetails?.departments?.[0]?.name || "N/A" }}
+          <!-- Department (show only if not permission view and not accommodation view) -->
+          <span
+            *ngIf="!isPermissionView && !isAccommodationView && !isTemplateView"
+          >
+            {{ employeeDetails?.departments?.[0]?.name || "N/A" }}
+          </span>
+
+          <!-- Permission description (show only if permission view) -->
+          <span *ngIf="isPermissionView"> Access Control Management </span>
+
+          <!-- Accommodation type (show only if accommodation view) -->
+          <span *ngIf="isAccommodationView">
+            {{ accommodationData?.type?.replace("_", " ") || "Accommodation" }}
+          </span>
+
+          <!-- Template type (show only if template view) -->
+          <span *ngIf="isTemplateView"> Letter Template </span>
         </div>
         <div class="text-xs text-gray-500">
-          {{ employeeDetails?.user?.role?.name || "N/A" }}
+          <!-- Role (show only if not permission view and not accommodation view) -->
+          <span
+            *ngIf="!isPermissionView && !isAccommodationView && !isTemplateView"
+          >
+            {{ employeeDetails?.user?.role?.name || "N/A" }}
+          </span>
+
+          <!-- Permission count (show only if permission view) -->
+          <span *ngIf="isPermissionView">
+            {{ permissionData?.permissions?.length || 0 }} permissions
+          </span>
+
+          <!-- Room count (show only if accommodation view) -->
+          <span *ngIf="isAccommodationView">
+            {{ accommodationData?.rooms?.length || 0 }} rooms
+          </span>
         </div>
       </div>
     </div>
@@ -43,7 +311,16 @@
     <hr class="text-[#ededed] mb-6" />
     <div class="employee-sections mt-6">
       <!-- Employee Information Section -->
-      <div class="employee-section mb-4">
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          (!teamMembers &&
+            !isPermissionView &&
+            !isAccommodationView &&
+            !isTemplateView) ||
+          isAttendeeView
+        "
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -184,8 +461,115 @@
           </div>
         </div>
       </div>
-      <!-- Other sections -->
-      <div class="employee-section mb-4">
+
+      <!-- Accommodation Section for Attendees -->
+      <div *ngIf="isAttendeeView" class="employee-section mb-4">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'accommodationInfo'
+              ? (openSection = null)
+              : (openSection = 'accommodationInfo')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'accommodationInfo' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Accommodation Details</span>
+        </button>
+        <div
+          *ngIf="openSection === 'accommodationInfo'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <!-- Show accommodation details if assigned -->
+          <div *ngIf="hasAssignedRoom" class="space-y-4">
+            <!-- Accommodation Name and Type on same line -->
+            <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+              <div>
+                <div class="text-xs text-gray-400">Accommodation Name</div>
+                <div class="font-medium text-gray-900">
+                  {{ accommodationName }}
+                </div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-400">Accommodation Type</div>
+                <div class="font-medium text-gray-900">
+                  {{ accommodationType }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Room Number and Pets Allowed on same line -->
+            <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+              <div>
+                <div class="text-xs text-gray-400">Room Number</div>
+                <div class="font-medium text-gray-900">
+                  {{ roomNumber }}
+                </div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-400">Pets Allowed</div>
+                <div class="font-medium text-gray-900">
+                  {{ petsAllowed }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Show assignment buttons if not assigned -->
+          <div *ngIf="!hasAssignedRoom" class="space-y-4">
+            <div class="text-center text-gray-500 mb-4">
+              No accommodation assigned yet
+            </div>
+            <div class="flex justify-end space-x-3">
+              <button
+                (click)="onClose()"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                (click)="onAssignAccommodation()"
+                class="px-4 py-2 bg-gradient-to-r from-[#12C16F] to-[#0A8754] text-white rounded-lg hover:from-[#0A8754] hover:to-[#12C16F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                Assign
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Information Section - Hidden in promotion view -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData &&
+          !teamMembers &&
+          !showOnlyContactInfo &&
+          !isPermissionView &&
+          !isTemplateView &&
+          !isAccommodationView &&
+          !isAttendeeView
+        "
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -286,7 +670,25 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4">
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !showOnlyContactInfo &&
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData &&
+          !teamMembers &&
+          !isPermissionView &&
+          !isTemplateView &&
+          !isAccommodationView &&
+          !isAttendeeView
+        "
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -350,7 +752,25 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4">
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !showOnlyContactInfo &&
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData &&
+          !teamMembers &&
+          !isPermissionView &&
+          !isTemplateView &&
+          !isAccommodationView &&
+          !isAttendeeView
+        "
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -399,7 +819,25 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4">
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !showOnlyContactInfo &&
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData &&
+          !teamMembers &&
+          !isPermissionView &&
+          !isTemplateView &&
+          !isAccommodationView &&
+          !isAttendeeView
+        "
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -458,7 +896,25 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4">
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !showOnlyContactInfo &&
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData &&
+          !teamMembers &&
+          !isPermissionView &&
+          !isTemplateView &&
+          !isAccommodationView &&
+          !isAttendeeView
+        "
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -507,7 +963,25 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4">
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !showOnlyContactInfo &&
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData &&
+          !teamMembers &&
+          !isPermissionView &&
+          !isTemplateView &&
+          !isAccommodationView &&
+          !isAttendeeView
+        "
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -555,7 +1029,25 @@
           </div>
         </div>
       </div>
-      <div class="employee-section mb-4">
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !showOnlyContactInfo &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !promotionData &&
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData &&
+          !teamMembers &&
+          !isPermissionView &&
+          !isTemplateView &&
+          !isAccommodationView &&
+          !isAttendeeView
+        "
+      >
         <button
           class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
           (click)="
@@ -578,41 +1070,2172 @@
               d="M19 9l-7 7-7-7"
             />
           </svg>
-          <span class="font-medium text-black">Appraisal History</span>
+          <span class="font-medium text-black">Evaluation History</span>
         </button>
         <div
           *ngIf="openSection === 'appraisalHistory'"
           class="mt-4 bg-white p-6 animate-fade-in"
         >
-          <div class="grid grid-cols-2 gap-x-8 gap-y-4">
-            <div>
-              <div class="text-xs text-gray-400">Last Appraisal Date</div>
-              <div class="font-medium text-gray-900">N/A</div>
+          <div
+            *ngIf="appraisalData && appraisalData.length > 0; else noAppraisals"
+          >
+            <div
+              *ngFor="let appraisal of appraisalData; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4"
+            >
+              <div class="grid grid-cols-2 gap-x-8 gap-y-4 mb-4">
+                <div>
+                  <div class="text-xs text-gray-400">Start Date</div>
+                  <div class="font-medium text-gray-900">
+                    {{ appraisal.startDate | date : "shortDate" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400">End Date</div>
+                  <div class="font-medium text-gray-900">
+                    {{ appraisal.endDate | date : "shortDate" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400">Average Score</div>
+                  <div class="font-medium text-gray-900">
+                    {{ appraisal.averageScore }}%
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-400">Total Criteria</div>
+                  <div class="font-medium text-gray-900">
+                    {{ appraisal.scores?.length || 0 }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Individual Scores -->
+              <div
+                *ngIf="appraisal.scores && appraisal.scores.length > 0"
+                class="mt-4"
+              >
+                <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                  Individual Scores
+                </h4>
+                <div class="grid grid-cols-3 gap-4">
+                  <div
+                    *ngFor="let score of appraisal.scores"
+                    class="bg-gray-50 p-3 rounded-lg"
+                  >
+                    <div class="text-xs text-gray-500 mb-1">
+                      {{ formatCriteria(score.criterial) }}
+                    </div>
+                    <div class="text-lg font-semibold text-gray-900">
+                      {{ score.score }}%
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <div class="text-xs text-gray-400">Overall Rating</div>
-              <div class="font-medium text-gray-900">N/A</div>
+          </div>
+
+          <ng-template #noAppraisals>
+            <div class="text-center py-8 text-gray-500">
+              <p>No evaluation history available</p>
             </div>
-            <div>
-              <div class="text-xs text-gray-400">Next Appraisal Due</div>
-              <div class="font-medium text-gray-900">N/A</div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Discipline History Section - Shows discipline history for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          disciplineData &&
+          ((allDisciplines && allDisciplines.length > 0) ||
+            (disciplineHistory && disciplineHistory.length > 0))
+        "
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'disciplineHistory'
+              ? (openSection = null)
+              : (openSection = 'disciplineHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'disciplineHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Discipline History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'disciplineHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="
+              allDisciplines && allDisciplines.length > 0;
+              else noDisciplineHistory
+            "
+          >
+            <div
+              *ngFor="let discipline of allDisciplines; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+              [class.border-blue-500]="discipline.id === disciplineData.id"
+            >
+              <div class="grid grid-cols-2 gap-4">
+                <!-- Left Column - New Position -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">Date</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ discipline.createdAt | date : "shortDate" }}
+                  </div>
+                </div>
+
+                <!-- Right Column - Status -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Type of Discipline
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ formatDisciplineType(discipline.disciplineType) }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <!-- Left Column - New Position -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Status
+                  </div>
+                  <div>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-amber-100 text-amber-800':
+                          discipline.status === 'PENDING',
+                        'bg-green-100 text-green-800':
+                          discipline.status === 'APPROVED',
+                        'bg-orange-100 text-orange-800':
+                          discipline.status === 'REJECTED'
+                      }"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full mr-2"
+                        [ngClass]="{
+                          'bg-amber-500': discipline.status === 'PENDING',
+                          'bg-green-500': discipline.status === 'APPROVED',
+                          'bg-orange-500': discipline.status === 'REJECTED'
+                        }"
+                      ></span>
+                      {{
+                        discipline.status === "PENDING"
+                          ? "Pending"
+                          : discipline.status === "APPROVED"
+                          ? "Approved"
+                          : "Rejected"
+                      }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Right Column - Status -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Duration of Discipline
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ discipline.duration }}
+                    {{ formatDurationUnit(discipline.durationUnit) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reason -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ discipline.reason }}
+                </div>
+              </div>
             </div>
-            <div>
-              <div class="text-xs text-gray-400">Performance Goals</div>
-              <div class="font-medium text-gray-900">N/A</div>
+          </div>
+
+          <ng-template #noDisciplineHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No discipline history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Promotion Request Section - Shows all promotion requests for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="allPromotions && allPromotions.length > 0"
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'promotionRequest'
+              ? (openSection = null)
+              : (openSection = 'promotionRequest')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'promotionRequest' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Promotion Request</span>
+        </button>
+        <div
+          *ngIf="openSection === 'promotionRequest'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            class="space-y-4"
+            *ngFor="let promotion of allPromotions; let i = index"
+          >
+            <div
+              class="border border-gray-200 rounded-lg p-4"
+              [class.border-blue-500]="promotion.id === promotionData?.id"
+            >
+              <!-- Two-column layout -->
+              <div class="grid grid-cols-2 gap-4">
+                <!-- Left Column - New Position -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    New Position
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ formatPosition(promotion.newPosition) }}
+                  </div>
+                </div>
+
+                <!-- Right Column - Status -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Status
+                  </div>
+                  <div>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-amber-100 text-amber-800':
+                          promotion.status === 'PENDING',
+                        'bg-green-100 text-green-800':
+                          promotion.status === 'APPROVED',
+                        'bg-orange-100 text-orange-800':
+                          promotion.status === 'REJECTED'
+                      }"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full mr-2"
+                        [ngClass]="{
+                          'bg-amber-500': promotion.status === 'PENDING',
+                          'bg-green-500': promotion.status === 'APPROVED',
+                          'bg-orange-500': promotion.status === 'REJECTED'
+                        }"
+                      ></span>
+                      {{
+                        promotion.status === "PENDING"
+                          ? "Pending"
+                          : promotion.status === "APPROVED"
+                          ? "Approved"
+                          : "Rejected"
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="flex gap-4 w-1/2 m-auto" *ngIf="showButton">
+
+      <!-- Transfer History Section - Shows transfer history for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !retirementData &&
+          !retrenchmentData &&
+          !promotionData &&
+          !disciplineData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData &&
+          !teamMembers &&
+          !showOnlyContactInfo &&
+          !isPermissionView &&
+          !isTemplateView &&
+          !isAccommodationView &&
+          !isAttendeeView
+        "
+      >
         <button
-          class="flex-1 border border-green-600 text-green-600 rounded-lg py-2 font-medium transition hover:bg-green-50 cursor-pointer"
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'transferHistory'
+              ? (openSection = null)
+              : (openSection = 'transferHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'transferHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Transfer History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'transferHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="
+              transferHistory && transferHistory.length > 0;
+              else noTransferHistory
+            "
+          >
+            <div
+              *ngFor="let transfer of transferHistory; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+              [class.border-blue-500]="transfer.id === transferData?.id"
+            >
+              <!-- Date and Transfer Type on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">Date</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ transfer.createdAt | date : "shortDate" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Transfer Type
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ formatTransferType(transfer.transferType) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Destination on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Destination
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ transfer.destination || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Reason on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ transfer.reason || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Status on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        transfer.status === 'PENDING',
+                      'bg-green-100 text-green-800':
+                        transfer.status === 'APPROVED',
+                      'bg-orange-100 text-orange-800':
+                        transfer.status === 'REJECTED'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': transfer.status === 'PENDING',
+                        'bg-green-500': transfer.status === 'APPROVED',
+                        'bg-orange-500': transfer.status === 'REJECTED'
+                      }"
+                    ></span>
+                    {{
+                      transfer.status === "PENDING"
+                        ? "Pending"
+                        : transfer.status === "APPROVED"
+                        ? "Approved"
+                        : "Rejected"
+                    }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noTransferHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No transfer history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Transfer Request Section - Shows all transfer requests for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="allTransfers && allTransfers.length > 0"
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'transferRequest'
+              ? (openSection = null)
+              : (openSection = 'transferRequest')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'transferRequest' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Transfer Request</span>
+        </button>
+        <div
+          *ngIf="openSection === 'transferRequest'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            class="space-y-4"
+            *ngFor="let transfer of allTransfers; let i = index"
+          >
+            <div
+              class="border border-gray-200 rounded-lg p-4"
+              [class.border-blue-500]="transfer.id === transferData?.id"
+            >
+              <!-- Date and Transfer Type on same line -->
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">Date</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ transfer.createdAt | date : "shortDate" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Transfer Type
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ formatTransferType(transfer.transferType) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Destination on next line -->
+              <div class="mb-4">
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Destination
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ transfer.destination || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Reason on next line -->
+              <div class="mb-4">
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ transfer.reason || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Status on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        transfer.status === 'PENDING',
+                      'bg-green-100 text-green-800':
+                        transfer.status === 'APPROVED',
+                      'bg-orange-100 text-orange-800':
+                        transfer.status === 'REJECTED'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': transfer.status === 'PENDING',
+                        'bg-green-500': transfer.status === 'APPROVED',
+                        'bg-orange-500': transfer.status === 'REJECTED'
+                      }"
+                    ></span>
+                    {{
+                      transfer.status === "PENDING"
+                        ? "Pending"
+                        : transfer.status === "APPROVED"
+                        ? "Approved"
+                        : "Rejected"
+                    }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retirement History Section - Shows retirement history for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !retrenchmentData &&
+          !transferData &&
+          !promotionData &&
+          !disciplineData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData &&
+          !teamMembers &&
+          !showOnlyContactInfo &&
+          !isPermissionView &&
+          !isTemplateView &&
+          !isAccommodationView &&
+          !isAttendeeView
+        "
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'retirementHistory'
+              ? (openSection = null)
+              : (openSection = 'retirementHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'retirementHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Retirement History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'retirementHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="
+              allRetirements && allRetirements.length > 0;
+              else noRetirementHistory
+            "
+          >
+            <div
+              *ngFor="let retirement of allRetirements; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+              [class.border-blue-500]="retirement.id === retirementData?.id"
+            >
+              <!-- Leave ID and Employee Name on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Leave ID
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ retirement.retirementId || "N/A" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Employee Name
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ retirement.employee.firstName }}
+                    {{ retirement.employee.lastName }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Replacement Recommendation and Request Date on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Replacement Recommendation
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ retirement.recommendedReplacement.firstName }}
+                    {{ retirement.recommendedReplacement.lastName }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Request Date
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ retirement.createdAt | date : "shortDate" }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reason on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ retirement.reason || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Status on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        retirement.status === 'PENDING',
+                      'bg-green-100 text-green-800':
+                        retirement.status === 'APPROVED',
+                      'bg-orange-100 text-orange-800':
+                        retirement.status === 'REJECTED'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': retirement.status === 'PENDING',
+                        'bg-green-500': retirement.status === 'APPROVED',
+                        'bg-orange-500': retirement.status === 'REJECTED'
+                      }"
+                    ></span>
+                    {{
+                      retirement.status === "PENDING"
+                        ? "Pending"
+                        : retirement.status === "APPROVED"
+                        ? "Approved"
+                        : "Rejected"
+                    }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Documents section - only show if status is not rejected -->
+              <div
+                *ngIf="
+                  retirement.status !== 'REJECTED' &&
+                  retirement.documents &&
+                  retirement.documents.length > 0
+                "
+              >
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Documents
+                </div>
+                <div class="space-y-2">
+                  <div
+                    *ngFor="
+                      let document of retirement.documents;
+                      let docIndex = index
+                    "
+                    class="flex items-center justify-between p-2 bg-gray-50 rounded border"
+                  >
+                    <span class="text-sm text-gray-700">
+                      Document {{ docIndex + 1 }}
+                    </span>
+                    <button
+                      class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      (click)="openPdfModal(document)"
+                    >
+                      View
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noRetirementHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No retirement history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Retrenchment History Section - Shows retrenchment history for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          !retirementData &&
+          !transferData &&
+          !promotionData &&
+          !disciplineData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData &&
+          !teamMembers &&
+          !showOnlyContactInfo &&
+          !isPermissionView &&
+          !isTemplateView &&
+          !isAccommodationView &&
+          !isAttendeeView
+        "
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'retrenchmentHistory'
+              ? (openSection = null)
+              : (openSection = 'retrenchmentHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'retrenchmentHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Retrenchment History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'retrenchmentHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="
+              allRetrenchments && allRetrenchments.length > 0;
+              else noRetrenchmentHistory
+            "
+          >
+            <div
+              *ngFor="let retrenchment of allRetrenchments; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+              [class.border-blue-500]="retrenchment.id === retrenchmentData?.id"
+            >
+              <!-- Employee Name and Retrenchment Type on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Employee Name
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ retrenchment.employee.firstName }}
+                    {{ retrenchment.employee.lastName }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Retrenchment Type
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ formatRetrenchmentType(retrenchment.retrenchmentType) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reason on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ retrenchment.reason || "N/A" }}
+                </div>
+              </div>
+
+              <!-- Status on next line -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        retrenchment.status === 'PENDING',
+                      'bg-green-100 text-green-800':
+                        retrenchment.status === 'APPROVED',
+                      'bg-orange-100 text-orange-800':
+                        retrenchment.status === 'REJECTED'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': retrenchment.status === 'PENDING',
+                        'bg-green-500': retrenchment.status === 'APPROVED',
+                        'bg-orange-500': retrenchment.status === 'REJECTED'
+                      }"
+                    ></span>
+                    {{
+                      retrenchment.status === "PENDING"
+                        ? "Pending"
+                        : retrenchment.status === "APPROVED"
+                        ? "Approved"
+                        : "Rejected"
+                    }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noRetrenchmentHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No retrenchment history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Leave History Section -->
+      <div class="employee-section mb-4" *ngIf="leaveData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'leaveHistory'
+              ? (openSection = null)
+              : (openSection = 'leaveHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'leaveHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">{{ leaveType }} History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'leaveHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div *ngIf="allLeaves && allLeaves.length > 0; else noLeaveHistory">
+            <div
+              *ngFor="let leave of allLeaves; let i = index"
+              class="border border-gray-200 rounded-lg p-4 mb-4 space-y-4"
+              [class.border-blue-500]="leave.id === leaveData?.id"
+            >
+              <!-- Leave Type and Status on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Leave Type
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leave.type || "Annual Leave" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Status
+                  </div>
+                  <div>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-amber-100 text-amber-800':
+                          leave.status === 'PENDING',
+                        'bg-green-100 text-green-800':
+                          leave.status === 'APPROVED',
+                        'bg-red-100 text-red-800': leave.status === 'REJECTED'
+                      }"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full mr-2"
+                        [ngClass]="{
+                          'bg-amber-500': leave.status === 'PENDING',
+                          'bg-green-500': leave.status === 'APPROVED',
+                          'bg-red-500': leave.status === 'REJECTED'
+                        }"
+                      ></span>
+                      {{
+                        leave.status === "PENDING"
+                          ? "Pending"
+                          : leave.status === "APPROVED"
+                          ? "Approved"
+                          : "Rejected"
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Start Date and Duration on same line -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Start Date
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leave.startDate | date : "shortDate" }}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Duration
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leave.duration }} {{ leave.durationUnit }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reason -->
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+                <div class="font-semibold text-gray-900">
+                  {{ leave.reason || "N/A" }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noLeaveHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No leave history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Annual Leave Request Section -->
+      <div class="employee-section mb-4" *ngIf="leaveData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'leaveRequest'
+              ? (openSection = null)
+              : (openSection = 'leaveRequest')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'leaveRequest' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">{{ leaveType }} Request</span>
+        </button>
+        <div
+          *ngIf="openSection === 'leaveRequest'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="space-y-4">
+            <!-- Employee Name and Leave Type on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Employee Name
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ leaveData.employeeName || "N/A" }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Leave Type
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ leaveData.requestType || leaveType }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Start Date and End Date on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Start Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ leaveData.startDate }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  End Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ leaveData.endDate }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Duration and Status on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Duration
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ leaveData.duration }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        leaveData.status === 'Pending',
+                      'bg-green-100 text-green-800':
+                        leaveData.status === 'Approved',
+                      'bg-red-100 text-red-800': leaveData.status === 'Rejected'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': leaveData.status === 'Pending',
+                        'bg-green-500': leaveData.status === 'Approved',
+                        'bg-red-500': leaveData.status === 'Rejected'
+                      }"
+                    ></span>
+                    {{ leaveData.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reason -->
+            <div>
+              <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+              <div class="font-semibold text-gray-900">
+                {{ leaveData.reason || "N/A" }}
+              </div>
+            </div>
+
+            <!-- Leave Balance Information -->
+            <div
+              *ngIf="leaveData.totalLeaveDays !== undefined"
+              class="bg-gray-50 p-4 rounded-lg"
+            >
+              <div class="text-sm font-medium text-gray-600 mb-3">
+                Leave Balance
+              </div>
+              <div class="grid grid-cols-3 gap-4">
+                <div>
+                  <div class="text-xs text-gray-500">Total Allowance</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leaveData.totalLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Used Days</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leaveData.usedLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Remaining</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ leaveData.remainingLeaveDays }} days
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leave of Absence History Section -->
+      <div class="employee-section mb-4" *ngIf="absenceData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'absenceHistory'
+              ? (openSection = null)
+              : (openSection = 'absenceHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'absenceHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Leave of Absence History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'absenceHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="allAbsences && allAbsences.length > 0; else noAbsenceHistory"
+          >
+            <div class="space-y-4">
+              <div
+                *ngFor="let absence of allAbsences"
+                class="border border-gray-200 rounded-lg p-4 cursor-pointer transition-colors"
+                [class.border-blue-500]="absence.id === absenceData?.id"
+              >
+                <!-- Start Date and Duration on same line -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="text-sm font-medium text-gray-600 mb-2">
+                      Start Date
+                    </div>
+                    <div class="font-semibold text-gray-900">
+                      {{ absence.startDate | date : "shortDate" }}
+                    </div>
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium text-gray-600 mb-2">
+                      Duration
+                    </div>
+                    <div class="font-semibold text-gray-900">
+                      {{ absence.duration }} {{ absence.durationUnit }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Reason -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Reason
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ absence.reason || "N/A" }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noAbsenceHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No leave of absence history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Leave of Absence Request Section -->
+      <div class="employee-section mb-4" *ngIf="absenceData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'absenceRequest'
+              ? (openSection = null)
+              : (openSection = 'absenceRequest')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'absenceRequest' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Leave of Absence Request</span>
+        </button>
+        <div
+          *ngIf="openSection === 'absenceRequest'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="space-y-4">
+            <!-- Employee Name and Leave Type on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Employee Name
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ absenceData.employeeName || "N/A" }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Leave Type
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ absenceData.requestType || "Leave of Absence" }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Start Date and End Date on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Start Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ absenceData.startDate }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  End Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ absenceData.endDate }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Duration and Status on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Duration
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ absenceData.duration }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        absenceData.status === 'Pending',
+                      'bg-green-100 text-green-800':
+                        absenceData.status === 'Approved',
+                      'bg-red-100 text-red-800':
+                        absenceData.status === 'Rejected'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': absenceData.status === 'Pending',
+                        'bg-green-500': absenceData.status === 'Approved',
+                        'bg-red-500': absenceData.status === 'Rejected'
+                      }"
+                    ></span>
+                    {{ absenceData.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reason -->
+            <div>
+              <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+              <div class="font-semibold text-gray-900">
+                {{ absenceData.reason || "N/A" }}
+              </div>
+            </div>
+
+            <!-- Leave Balance Information -->
+            <div
+              *ngIf="absenceData.totalLeaveDays !== undefined"
+              class="bg-gray-50 p-4 rounded-lg"
+            >
+              <div class="text-sm font-medium text-gray-600 mb-3">
+                Leave Balance
+              </div>
+              <div class="grid grid-cols-3 gap-4">
+                <div>
+                  <div class="text-xs text-gray-500">Total Allowance</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ absenceData.totalLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Used Days</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ absenceData.usedLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Remaining</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ absenceData.remainingLeaveDays }} days
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sick Leave History Section -->
+      <div class="employee-section mb-4" *ngIf="sickData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'sickHistory'
+              ? (openSection = null)
+              : (openSection = 'sickHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'sickHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Sick Leave History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'sickHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            *ngIf="
+              allSickLeaves && allSickLeaves.length > 0;
+              else noSickHistory
+            "
+          >
+            <div class="space-y-4">
+              <div
+                *ngFor="let sickLeave of allSickLeaves"
+                class="border border-gray-200 rounded-lg p-4 cursor-pointer transition-colors"
+                [class.border-blue-500]="sickLeave.id === sickData?.id"
+              >
+                <!-- Start Date and Duration on same line -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="text-sm font-medium text-gray-600 mb-2">
+                      Start Date
+                    </div>
+                    <div class="font-semibold text-gray-900">
+                      {{ sickLeave.startDate | date : "shortDate" }}
+                    </div>
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium text-gray-600 mb-2">
+                      Duration
+                    </div>
+                    <div class="font-semibold text-gray-900">
+                      {{ sickLeave.duration }} {{ sickLeave.durationUnit }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Reason -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Reason
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ sickLeave.reason || "N/A" }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noSickHistory>
+            <div class="text-center py-8 text-gray-500">
+              <p>No sick leave history available</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Sick Leave Request Section -->
+      <div class="employee-section mb-4" *ngIf="sickData">
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'sickRequest'
+              ? (openSection = null)
+              : (openSection = 'sickRequest')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'sickRequest' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Sick Leave Request</span>
+        </button>
+        <div
+          *ngIf="openSection === 'sickRequest'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="space-y-4">
+            <!-- Employee Name and Leave Type on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Employee Name
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ sickData.employeeName || "N/A" }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Leave Type
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ sickData.requestType || "Sick Leave" }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Start Date and End Date on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Start Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ sickData.startDate }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  End Date
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ sickData.endDate }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Duration and Status on same line -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">
+                  Duration
+                </div>
+                <div class="font-semibold text-gray-900">
+                  {{ sickData.duration }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-600 mb-2">Status</div>
+                <div>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-amber-100 text-amber-800':
+                        sickData.status === 'Pending',
+                      'bg-green-100 text-green-800':
+                        sickData.status === 'Approved',
+                      'bg-red-100 text-red-800': sickData.status === 'Rejected'
+                    }"
+                  >
+                    <span
+                      class="w-2 h-2 rounded-full mr-2"
+                      [ngClass]="{
+                        'bg-amber-500': sickData.status === 'Pending',
+                        'bg-green-500': sickData.status === 'Approved',
+                        'bg-red-500': sickData.status === 'Rejected'
+                      }"
+                    ></span>
+                    {{ sickData.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reason -->
+            <div>
+              <div class="text-sm font-medium text-gray-600 mb-2">Reason</div>
+              <div class="font-semibold text-gray-900">
+                {{ sickData.reason || "N/A" }}
+              </div>
+            </div>
+
+            <!-- Leave Balance Information -->
+            <div
+              *ngIf="sickData.totalLeaveDays !== undefined"
+              class="bg-gray-50 p-4 rounded-lg"
+            >
+              <div class="text-sm font-medium text-gray-600 mb-3">
+                Leave Balance
+              </div>
+              <div class="grid grid-cols-3 gap-4">
+                <div>
+                  <div class="text-xs text-gray-500">Total Allowance</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ sickData.totalLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Used Days</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ sickData.usedLeaveDays }} days
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500">Remaining</div>
+                  <div class="font-semibold text-gray-900">
+                    {{ sickData.remainingLeaveDays }} days
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Members Section -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="
+          teamMembers &&
+          teamMembers.length > 0 &&
+          !promotionData &&
+          !disciplineData &&
+          !transferData &&
+          !retirementData &&
+          !retrenchmentData &&
+          !leaveData &&
+          !absenceData &&
+          !sickData
+        "
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'teamMembers'
+              ? (openSection = null)
+              : (openSection = 'teamMembers')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'teamMembers' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">
+            {{ departmentName }} Team ({{ teamMembers.length }})
+          </span>
+        </button>
+        <div
+          *ngIf="openSection === 'teamMembers'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="space-y-3">
+            <div
+              *ngFor="let member of teamMembers"
+              class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+            >
+              <!-- Profile Image -->
+              <div class="relative w-12 h-12">
+                <img
+                  *ngIf="hasValidPhotoUrl(member); else memberFallbackIcon"
+                  [src]="formatImageUrl(member.photoUrl)"
+                  [alt]="getEmployeeFullName(member)"
+                  class="w-12 h-12 rounded-full object-cover border border-gray-200"
+                  (error)="handleImageError($event)"
+                />
+                <ng-template #memberFallbackIcon>
+                  <img
+                    [src]="getDefaultImage(member)"
+                    [alt]="getEmployeeFullName(member)"
+                    class="w-12 h-12 rounded-full object-cover border border-gray-200"
+                  />
+                </ng-template>
+              </div>
+
+              <!-- Member Info -->
+              <div class="flex-1 text-left">
+                <div class="font-medium text-gray-900 text-sm">
+                  {{ getEmployeeFullName(member) }}
+                </div>
+                <div class="text-xs text-gray-500">
+                  {{ departmentName }}
+                </div>
+                <div class="text-xs text-gray-400">
+                  {{ member.title || "Team Member" }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State for Team -->
+          <div *ngIf="teamMembers.length === 0" class="text-center py-8">
+            <svg
+              class="w-12 h-12 text-gray-400 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 616 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM9 9a2 2 0 11-4 0 2 2 0 014 0z"
+              ></path>
+            </svg>
+            <p class="text-gray-500">No team members in this department yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Permission View Section -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="isPermissionView && permissionData"
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'permissionInfo'
+              ? (openSection = null)
+              : (openSection = 'permissionInfo')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'permissionInfo' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Permission Information</span>
+        </button>
+        <div
+          *ngIf="openSection === 'permissionInfo'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <!-- Role -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-500 mb-1"
+              >Role</label
+            >
+            <p class="text-sm font-medium text-gray-900">
+              {{ permissionData?.roleName }}
+            </p>
+          </div>
+
+          <!-- Permissions Table -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-500 mb-2"
+              >Permissions</label
+            >
+
+            <!-- Permissions Grid -->
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200 text-xs">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th
+                      class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/2"
+                    >
+                      Feature
+                    </th>
+                    <th
+                      class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8"
+                    >
+                      Create
+                    </th>
+                    <th
+                      class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8"
+                    >
+                      View
+                    </th>
+                    <th
+                      class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8"
+                    >
+                      Edit
+                    </th>
+                    <th
+                      class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8"
+                    >
+                      Delete
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr
+                    *ngFor="
+                      let permission of isEditingPermissions
+                        ? editedPermissionData?.permissions
+                        : permissionData?.permissions
+                    "
+                  >
+                    <td class="px-3 py-2 text-xs font-medium text-gray-900">
+                      {{ permission.feature }}
+                    </td>
+
+                    <!-- Create Permission -->
+                    <td class="px-2 py-2 text-center">
+                      <div class="flex justify-center">
+                        <!-- Show checkbox when editing -->
+                        <input
+                          *ngIf="isEditingPermissions"
+                          type="checkbox"
+                          [checked]="permission.canCreate"
+                          (change)="onPermissionChange(permission, 'create')"
+                          class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                        />
+                        <!-- Show icon when not editing -->
+                        <svg
+                          *ngIf="!isEditingPermissions && permission.canCreate"
+                          class="w-4 h-4 text-green-500"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                        <svg
+                          *ngIf="!isEditingPermissions && !permission.canCreate"
+                          class="w-4 h-4 text-gray-300"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                      </div>
+                    </td>
+
+                    <!-- View Permission -->
+                    <td class="px-2 py-2 text-center">
+                      <div class="flex justify-center">
+                        <!-- Show checkbox when editing -->
+                        <input
+                          *ngIf="isEditingPermissions"
+                          type="checkbox"
+                          [checked]="permission.canView"
+                          (change)="onPermissionChange(permission, 'view')"
+                          class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                        />
+                        <!-- Show icon when not editing -->
+                        <svg
+                          *ngIf="!isEditingPermissions && permission.canView"
+                          class="w-4 h-4 text-green-500"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                        <svg
+                          *ngIf="!isEditingPermissions && !permission.canView"
+                          class="w-4 h-4 text-gray-300"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                      </div>
+                    </td>
+
+                    <!-- Edit Permission -->
+                    <td class="px-2 py-2 text-center">
+                      <div class="flex justify-center">
+                        <!-- Show checkbox when editing -->
+                        <input
+                          *ngIf="isEditingPermissions"
+                          type="checkbox"
+                          [checked]="permission.canEdit"
+                          (change)="onPermissionChange(permission, 'edit')"
+                          class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                        />
+                        <!-- Show icon when not editing -->
+                        <svg
+                          *ngIf="!isEditingPermissions && permission.canEdit"
+                          class="w-4 h-4 text-green-500"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                        <svg
+                          *ngIf="!isEditingPermissions && !permission.canEdit"
+                          class="w-4 h-4 text-gray-300"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                      </div>
+                    </td>
+
+                    <!-- Delete Permission -->
+                    <td class="px-2 py-2 text-center">
+                      <div class="flex justify-center">
+                        <!-- Show checkbox when editing -->
+                        <input
+                          *ngIf="isEditingPermissions"
+                          type="checkbox"
+                          [checked]="permission.canDelete"
+                          (change)="onPermissionChange(permission, 'delete')"
+                          class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                        />
+                        <!-- Show icon when not editing -->
+                        <svg
+                          *ngIf="!isEditingPermissions && permission.canDelete"
+                          class="w-4 h-4 text-green-500"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                        <svg
+                          *ngIf="!isEditingPermissions && !permission.canDelete"
+                          class="w-4 h-4 text-gray-300"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Cancel and Save buttons when editing -->
+            <div *ngIf="isEditingPermissions" class="flex gap-3 mt-6">
+              <button
+                type="button"
+                (click)="onCancelEditPermissions()"
+                class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                (click)="onSavePermissions()"
+                class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accommodation Information Section -->
+      <div *ngIf="isAccommodationView && accommodationData" class="mt-6">
+        <button
+          type="button"
+          (click)="
+            openSection =
+              openSection === 'accommodationInfo' ? null : 'accommodationInfo'
+          "
+          class="flex items-center w-full p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors rounded-lg"
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'accommodationInfo' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Accommodation Information</span>
+        </button>
+        <div
+          *ngIf="openSection === 'accommodationInfo'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="space-y-4">
+            <!-- Accommodation Name and Type on same line -->
+            <div class="flex space-x-4">
+              <div class="flex-1">
+                <div class="text-sm font-medium text-gray-500 mb-1">
+                  Accommodation Name
+                </div>
+                <div class="text-sm text-gray-900">
+                  {{ accommodationData.name }}
+                </div>
+              </div>
+              <div class="flex-1">
+                <div class="text-sm font-medium text-gray-500 mb-1">
+                  Accommodation Type
+                </div>
+                <div class="text-sm text-gray-900">
+                  {{ accommodationData.type.replace("_", " ") }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Number of Rooms -->
+            <div>
+              <div class="text-sm font-medium text-gray-500 mb-1">
+                Number of Rooms
+              </div>
+              <div class="text-sm text-gray-900">
+                {{ accommodationData.rooms.length }}
+              </div>
+            </div>
+
+            <!-- Rooms Array -->
+            <div>
+              <div class="text-sm font-medium text-gray-500 mb-2">Rooms</div>
+              <div class="space-y-2">
+                <div
+                  *ngFor="let room of accommodationData.rooms"
+                  class="flex items-center justify-between p-2 bg-gray-50 rounded"
+                >
+                  <span class="text-sm text-gray-900">{{ room.name }}</span>
+                  <span class="text-sm text-gray-500"
+                    >Capacity: {{ room.capacity }}</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Pets Allowed -->
+            <div>
+              <div class="text-sm font-medium text-gray-500 mb-1">
+                Pets Allowed
+              </div>
+              <div class="text-sm text-gray-900">
+                {{ accommodationData.isPetAllowed ? "Yes" : "No" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Template Information Section -->
+      <div *ngIf="isTemplateView && templateData" class="mt-6">
+        <button
+          type="button"
+          (click)="
+            openSection = openSection === 'templateInfo' ? null : 'templateInfo'
+          "
+          class="flex items-center w-full p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors rounded-lg"
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'templateInfo' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Template Information</span>
+        </button>
+        <div
+          *ngIf="openSection === 'templateInfo'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div class="space-y-4">
+            <!-- Template Type -->
+            <div>
+              <div class="text-sm font-medium text-gray-500 mb-1">
+                Template Type
+              </div>
+              <div class="text-sm text-gray-900">
+                {{ formatTemplateType(templateData.type) }}
+              </div>
+            </div>
+
+            <!-- Template (Document Preview) -->
+            <div>
+              <div class="text-sm font-medium text-gray-500 mb-2">Template</div>
+              <div class="p-3 bg-gray-50 rounded">
+                <div class="flex items-center space-x-3">
+                  <svg
+                    class="w-8 h-8 text-gray-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">
+                      {{
+                        templateData.downloadUrl.split("/").pop() || "Document"
+                      }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      {{ templateData.downloadUrl }}
+                    </p>
+                  </div>
+                  <a
+                    [href]="templateData.downloadUrl"
+                    target="_blank"
+                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    View
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-3 w-2/3 m-auto" *ngIf="showButton">
+        <button
+          class="flex-1 px-4 py-3 border border-green-600 text-green-600 rounded-lg font-medium transition-colors"
+          [class.opacity-50]="noButtonDisabled"
+          [class.cursor-not-allowed]="noButtonDisabled"
+          [class.hover:bg-green-50]="!noButtonDisabled"
+          [disabled]="noButtonDisabled"
           (click)="onConfirm(false)"
         >
           {{ noButtonText }}
         </button>
         <button
-          class="flex-1 bg-green-600 text-white rounded-lg py-2 font-medium transition hover:bg-green-700 cursor-pointer"
+          class="flex-1 px-4 py-3 bg-gradient-to-r from-[#12C16F] to-[#0A8754] text-white rounded-lg font-medium transition-colors"
+          [class.opacity-50]="yesButtonDisabled"
+          [class.cursor-not-allowed]="yesButtonDisabled"
+          [class.hover:from-[#0A8754]]="!yesButtonDisabled"
+          [class.hover:to-[#12C16F]]="!yesButtonDisabled"
+          [disabled]="yesButtonDisabled"
           (click)="onConfirm(true)"
         >
           {{ yesButtonText }}
