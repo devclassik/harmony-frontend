@@ -274,13 +274,16 @@
           </div>
 
           <!-- Attachments Section -->
-          <div *ngIf="hasAttachments()" class="border-t border-gray-200 pt-6">
+          <div
+            *ngIf="attachments.length > 0"
+            class="border-t border-gray-200 pt-6"
+          >
             <h4 class="text-lg font-semibold text-gray-900 mb-4">
               Attachments
             </h4>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               <div
-                *ngFor="let attachment of getAttachments()"
+                *ngFor="let attachment of attachments"
                 class="border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors"
               >
                 <!-- Document Preview -->
@@ -302,7 +305,9 @@
                         />
                       </svg>
                     </div>
-                    <div class="text-xs text-gray-600">PDF</div>
+                    <div class="text-xs text-gray-600">
+                      {{ attachment.type }}
+                    </div>
                   </div>
                 </div>
 

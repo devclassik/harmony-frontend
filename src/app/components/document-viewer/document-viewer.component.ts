@@ -146,7 +146,7 @@ import { TableData } from '../../interfaces/employee.interface';
               [style.transform-origin]="'top center'"
             >
               <!-- PDF Viewer -->
-              <div *ngIf="isPDF()" class="w-full">
+              <div *ngIf="isPDF() && getDocumentUrl()" class="w-full">
                 <iframe
                   [src]="getSafeDocumentUrl()"
                   class="w-full h-[800px] border-0"
@@ -155,18 +155,18 @@ import { TableData } from '../../interfaces/employee.interface';
               </div>
 
               <!-- Image Viewer -->
-              <div *ngIf="isImage()" class="p-4">
+              <div *ngIf="isImage() && getDocumentUrl()" class="p-4">
                 <img
-                  [src]="getSafeDocumentUrl()"
+                  [src]="getRawDocumentUrl()"
                   [alt]="document?.documentName"
                   class="max-w-full h-auto"
                 />
               </div>
 
               <!-- Video Viewer -->
-              <div *ngIf="isVideo()" class="p-4">
+              <div *ngIf="isVideo() && getDocumentUrl()" class="p-4">
                 <video
-                  [src]="getSafeDocumentUrl()"
+                  [src]="getRawDocumentUrl()"
                   controls
                   class="max-w-full h-auto"
                   preload="metadata"
@@ -193,6 +193,7 @@ import { TableData } from '../../interfaces/employee.interface';
 
                 <!-- Office Online Preview -->
                 <iframe
+                  *ngIf="getDocumentUrl()"
                   [src]="getOfficeOnlineEmbedUrl()"
                   class="w-full h-full min-h-[600px] border border-gray-200 rounded"
                   title="Office Online Preview"
@@ -218,6 +219,7 @@ import { TableData } from '../../interfaces/employee.interface';
 
                 <!-- Office Online Preview -->
                 <iframe
+                  *ngIf="getDocumentUrl()"
                   [src]="getOfficeOnlineEmbedUrl()"
                   class="w-full h-full min-h-[600px] border border-gray-200 rounded"
                   title="Office Online Preview"
@@ -243,6 +245,7 @@ import { TableData } from '../../interfaces/employee.interface';
 
                 <!-- Office Online Preview -->
                 <iframe
+                  *ngIf="getDocumentUrl()"
                   [src]="getOfficeOnlineEmbedUrl()"
                   class="w-full h-full min-h-[600px] border border-gray-200 rounded"
                   title="Office Online Preview"
@@ -482,20 +485,29 @@ export class DocumentViewerComponent implements OnChanges {
       return this.document.downloadUrl;
     } else {
       // If it's a relative URL, construct the full URL
-      // Remove /api/v1 from the base URL since file URLs are typically served from the root
+      // Allow assets served by the frontend directly
+      if (this.document.downloadUrl.startsWith('/assets/')) {
+        return this.document.downloadUrl;
+      }
       const baseUrl = 'https://harmoney-backend.onrender.com';
-      return `${baseUrl}${this.document.downloadUrl}`;
+      return `${baseUrl}${
+        this.document.downloadUrl.startsWith('/') ? '' : '/'
+      }${this.document.downloadUrl}`;
     }
   }
 
-  getSafeDocumentUrl(): SafeResourceUrl | string {
+  getSafeDocumentUrl(): SafeResourceUrl | null {
     const url = this.getDocumentUrl();
     if (!url) {
-      return '';
+      return null;
     }
 
     // Sanitize the URL to make it safe for use in resource contexts
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  getRawDocumentUrl(): string {
+    return this.getDocumentUrl();
   }
 
   getFileTypeClass(fileType: string): string {
