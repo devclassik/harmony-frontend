@@ -31,6 +31,7 @@ import {
   ConfirmPromptComponent,
   PromptConfig,
 } from '../../components/confirm-prompt/confirm-prompt.component';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-profile-create',
@@ -226,7 +227,7 @@ export class ProfileCreateComponent implements OnInit, OnChanges {
       }
 
       // If it's a relative path, prepend the base URL
-      const baseUrl = 'https://harmoney-backend.onrender.com';
+      const baseUrl =environment.hostingAPI;
       return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
     };
 

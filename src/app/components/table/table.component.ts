@@ -23,6 +23,7 @@ import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction'; // 
 
 import { CalendarEvent, CalendarModule, DateAdapter } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
+import { environment } from '../../../environments/environment.development';
 
 export interface MenuItem {
   label: string;
@@ -167,7 +168,7 @@ export class TableComponent implements OnInit, OnChanges {
     }
 
     // If it's a relative path, prepend the base URL
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl =environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 
@@ -478,8 +479,8 @@ export class TableComponent implements OnInit, OnChanges {
         const eventHtml = document.createElement('div');
         eventHtml.className = 'custom-event-content';
         eventHtml.innerHTML = `
-          <img src="${this.formatImageUrl(imageUrl)}" 
-               alt="Employee" 
+          <img src="${this.formatImageUrl(imageUrl)}"
+               alt="Employee"
                class="w-12 h-12 rounded-full object-cover border border-gray-200 flex-shrink-0"
                onerror="this.src='assets/images/default-avatar.png'">
         `;

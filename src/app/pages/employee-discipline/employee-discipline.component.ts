@@ -27,6 +27,7 @@ import {
 } from '../../dto/discipline.dto';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-employee-discipline',
@@ -246,7 +247,7 @@ export class EmployeeDisciplineComponent implements OnInit, OnDestroy {
       return url;
     }
 
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

@@ -23,6 +23,7 @@ import {
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
 import { AlertService } from '../../services/alert.service';
 import { finalize } from 'rxjs/operators';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-sick-leave',
@@ -185,7 +186,7 @@ export class SickLeaveComponent implements OnInit, OnDestroy {
     }
 
     // If it's a relative path, prepend the base URL
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

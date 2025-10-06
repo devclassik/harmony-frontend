@@ -17,6 +17,7 @@ import { AlertService } from '../../services/alert.service';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { finalize } from 'rxjs/operators';
 import { ConfirmPromptComponent } from '../confirm-prompt/confirm-prompt.component';
+import { environment } from '../../../environments/environment.development';
 
 interface Employee {
   id: number;
@@ -787,7 +788,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     }
 
     // If it's a relative path, prepend the base URL
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

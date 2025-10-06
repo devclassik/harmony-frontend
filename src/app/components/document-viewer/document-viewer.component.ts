@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TableData } from '../../interfaces/employee.interface';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-document-viewer',
@@ -336,7 +337,7 @@ export class DocumentViewerComponent implements OnChanges {
 
   zoomLevel: number = 100;
 
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(private sanitizer: DomSanitizer) { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['document'] && changes['document'].currentValue) {
@@ -489,10 +490,10 @@ export class DocumentViewerComponent implements OnChanges {
       if (this.document.downloadUrl.startsWith('/assets/')) {
         return this.document.downloadUrl;
       }
-      const baseUrl = 'https://harmoney-backend.onrender.com';
-      return `${baseUrl}${
-        this.document.downloadUrl.startsWith('/') ? '' : '/'
-      }${this.document.downloadUrl}`;
+      // 'https://harmoney-backend.onrender.com';
+      const baseUrl = environment.hostingAPI;
+      return `${baseUrl}${this.document.downloadUrl.startsWith('/') ? '' : '/'
+        }${this.document.downloadUrl}`;
     }
   }
 

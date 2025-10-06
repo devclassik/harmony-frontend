@@ -21,6 +21,7 @@ import { AlertService } from '../../services/alert.service';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { CreateAppraisalRequest } from '../../dto/appraisal.dto';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-employee-records',
@@ -210,7 +211,7 @@ export class EmployeeRecordsComponent implements OnInit {
     }
 
     // If it's a relative path, prepend the base URL
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

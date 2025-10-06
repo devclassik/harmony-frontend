@@ -24,6 +24,7 @@ import {
 } from '../../dto/promotion.dto';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
 
 interface Position {
   label: string;
@@ -245,7 +246,7 @@ export class EmployeePromotionComponent implements OnInit, OnDestroy {
       return url;
     }
 
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

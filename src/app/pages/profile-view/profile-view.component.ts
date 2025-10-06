@@ -14,6 +14,7 @@ import {
 } from '../../components/info-section/info-section.component';
 import { CreateRetirementRequestComponent } from '../../components/create-retirement-request/create-retirement-request.component';
 import { AlertService } from '../../services/alert.service';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-profile-view',
@@ -142,7 +143,7 @@ export class ProfileViewComponent implements OnInit, OnDestroy {
     }
 
     // If it's a relative path, prepend the base URL
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

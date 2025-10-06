@@ -156,6 +156,18 @@
   [data]="selectedEmployeeRecord"
 ></app-confirm-prompt>
 
+<app-reject-confirm-prompt
+  *ngIf="showRejectModal"
+  [title]="promptConfig?.title || ''"
+  [text]="promptConfig?.text || ''"
+  [imageUrl]="promptConfig?.imageUrl || null"
+  [yesButtonText]="promptConfig?.yesButtonText || ''"
+  [noButtonText]="promptConfig?.noButtonText || ''"
+  (confirmed)="onModalRejectConfirm($event)"
+  (closed)="onModalClose()"
+  [data]="selectedEmployeeRecord"
+></app-reject-confirm-prompt>
+
 <app-substitution
   [open]="showSubstitution"
   (closed)="showSubstitution = false"

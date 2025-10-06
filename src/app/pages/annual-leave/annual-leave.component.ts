@@ -25,6 +25,7 @@ import {
 import { AlertService } from '../../services/alert.service';
 import { Subscription } from 'rxjs';
 import { EmployeeDetails } from '../../dto/employee.dto';
+import { RejectConfirmPromptComponent } from "../../components/reject-confirm-prompt/reject-confirm-prompt.component";
 
 @Component({
   selector: 'app-annual-leave',
@@ -37,6 +38,7 @@ import { EmployeeDetails } from '../../dto/employee.dto';
     SubstitutionComponent,
     LeaveDetailsComponent,
     LoadingOverlayComponent,
+    RejectConfirmPromptComponent
   ],
   templateUrl: './annual-leave.component.html',
   styleUrl: './annual-leave.component.css',
@@ -48,6 +50,7 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
   selectedFilter: string = '';
   searchValue: string = '';
   showModal: boolean = false;
+  showRejectModal: boolean = false;
   successModal: boolean = false;
   selectedEmployee: TableData | null = null;
   selectedEmployeeRecord: TableData | null = null;
@@ -309,7 +312,7 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
   }
 
   onMenuAction(event: { action: string; row: TableData }) {
-    console.log(event);
+    // console.log(event);
 
     if (event.action === 'View') {
       // Check if user is admin/HOD/pastor
@@ -466,17 +469,55 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
         yesButtonText: 'Yes',
         noButtonText: 'No',
       };
-      this.showModal = true;
+      this.showRejectModal = true;
     }
   }
 
   onModalConfirm(confirmed: boolean) {
-    console.log(confirmed);
+    console.log('Modal confirmed:', confirmed);
+
     this.showModal = false;
     this.showAppraisal = false;
     // this.successModal = true;
     confirmed ? this.onSubstitutionModalEvent() : '';
   }
+
+  onModalRejectConfirm(confirmed: boolean) {
+    if (!confirmed) return;
+
+    if (!this.selectedLeaveForAction) {
+      this.alertService.error('No leave request selected for rejection.');
+      this.showRejectModal = false;
+      return;
+    }
+
+    const leaveId = this.selectedLeaveForAction.id;
+    this.isRejectingLeave = true;
+    this.showRejectModal = false;
+    this.showAppraisal = false;
+
+    const rejectSub = this.leaveService.rejectLeave(leaveId).subscribe({
+      next: (response) => {
+        this.isRejectingLeave = false;
+
+        if (response.status === 'success') {
+          this.alertService.success('Annual leave request rejected successfully!');
+          this.showEmployeeDetails = false;
+          this.loadLeaveRequests(); // Refresh list
+        } else {
+          this.alertService.error('Failed to reject leave request. Please try again.');
+        }
+      },
+      error: (error) => {
+        this.isRejectingLeave = false;
+        console.error('Error rejecting leave request:', error);
+        this.alertService.error('Failed to reject leave request. Please try again.');
+      },
+    });
+
+    this.subscriptions.push(rejectSub);
+  }
+
 
   onSubstitutionModalEvent() {
     this.showSubstitution = this.showSubstitution ? false : true;
@@ -484,6 +525,7 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
 
   onModalClose() {
     this.showModal = false;
+    this.showRejectModal = false;
   }
 
   handleSubstitution(form: any) {
@@ -658,26 +700,26 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
         deletedAt: leaveRecord.employee.deletedAt || null,
         user: leaveRecord.employee.user
           ? {
-              id: leaveRecord.employee.user.id,
-              email: leaveRecord.employee.user.email,
-              password: leaveRecord.employee.user.password,
-              verifyEmailOTP: leaveRecord.employee.user.verifyEmailOTP,
-              isEmailVerified: leaveRecord.employee.user.isEmailVerified,
-              passwordResetOTP:
-                leaveRecord.employee.user.passwordResetOTP || null,
-              isLoggedIn: leaveRecord.employee.user.isLoggedIn,
-              createdAt: leaveRecord.employee.user.createdAt,
-              updatedAt: leaveRecord.employee.user.updatedAt,
-              deletedAt: leaveRecord.employee.user.deletedAt || null,
-              role: {
-                id: 1,
-                name: 'Worker',
-                createdAt: '',
-                updatedAt: '',
-                deletedAt: null,
-                permissions: [],
-              },
-            }
+            id: leaveRecord.employee.user.id,
+            email: leaveRecord.employee.user.email,
+            password: leaveRecord.employee.user.password,
+            verifyEmailOTP: leaveRecord.employee.user.verifyEmailOTP,
+            isEmailVerified: leaveRecord.employee.user.isEmailVerified,
+            passwordResetOTP:
+              leaveRecord.employee.user.passwordResetOTP || null,
+            isLoggedIn: leaveRecord.employee.user.isLoggedIn,
+            createdAt: leaveRecord.employee.user.createdAt,
+            updatedAt: leaveRecord.employee.user.updatedAt,
+            deletedAt: leaveRecord.employee.user.deletedAt || null,
+            role: {
+              id: 1,
+              name: 'Worker',
+              createdAt: '',
+              updatedAt: '',
+              deletedAt: null,
+              permissions: [],
+            },
+          }
           : null,
         spouse: null,
         children: [],

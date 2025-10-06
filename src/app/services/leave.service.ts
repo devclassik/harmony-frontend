@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.development';
 
 // Interfaces for Leave API
 export interface CreateLeaveRequest {
@@ -122,7 +122,7 @@ export interface LeaveListApiResponse {
   providedIn: 'root',
 })
 export class LeaveService {
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) { }
 
   // Create a new annual leave request
   createAnnualLeave(request: CreateLeaveRequest): Observable<LeaveApiResponse> {
@@ -229,11 +229,10 @@ export class LeaveService {
       .map((leave) => ({
         dateRange: leave.endDate
           ? `${this.formatDateForDisplay(
-              leave.startDate
-            )} - ${this.formatDateForDisplay(leave.endDate)}`
-          : `${this.formatDateForDisplay(leave.startDate)} (${
-              leave.duration
-            } ${leave.durationUnit.toLowerCase()})`,
+            leave.startDate
+          )} - ${this.formatDateForDisplay(leave.endDate)}`
+          : `${this.formatDateForDisplay(leave.startDate)} (${leave.duration
+          } ${leave.durationUnit.toLowerCase()})`,
         status: this.transformStatus(leave.status),
         duration: `${leave.duration} ${leave.durationUnit.toLowerCase()}`,
       }));
@@ -380,7 +379,7 @@ export class LeaveService {
     }
 
     // If it's a relative path, prepend the base URL
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 
@@ -463,17 +462,17 @@ export class LeaveService {
     leaveId: number,
     substitutionData?: any
   ): Observable<LeaveApiResponse> {
-    const endpoint = `${environment.routes.leave.getAll}/${leaveId}/approve`;
+    const endpoint = `${environment.routes.leave.getAll}/${leaveId}`;
     const requestData = substitutionData
-      ? { substitution: substitutionData }
+      ? { substitutionId: substitutionData.employeeId, status: 'APPROVED' }
       : {};
     return this.apiService.put<LeaveApiResponse>(endpoint, requestData);
   }
 
   // Reject leave request
   rejectLeave(leaveId: number): Observable<LeaveApiResponse> {
-    const endpoint = `${environment.routes.leave.getAll}/${leaveId}/reject`;
-    return this.apiService.put<LeaveApiResponse>(endpoint, {});
+    const endpoint = `${environment.routes.leave.getAll}/${leaveId}`;
+    return this.apiService.put<LeaveApiResponse>(endpoint, { status: 'REJECTED' });
   }
 
   // Approve sick leave request

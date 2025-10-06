@@ -26,6 +26,7 @@ import {
 } from '../../dto/transfer.dto';
 import { LeaveDetailsComponent } from '../../components/leave-details/leave-details.component';
 import { LoadingOverlayComponent } from '../../components/loading-overlay/loading-overlay.component';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-employee-transfer',
@@ -237,7 +238,7 @@ export class EmployeeTransferComponent implements OnInit, OnDestroy {
       return url;
     }
 
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

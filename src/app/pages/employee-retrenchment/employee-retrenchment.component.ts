@@ -24,6 +24,7 @@ import {
 } from '../../dto/retrenchment.dto';
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-employee-retrenchment',
@@ -263,7 +264,7 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl =environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

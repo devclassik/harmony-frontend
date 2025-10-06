@@ -9,6 +9,7 @@ import {
   MessageItem as ApiMessageItem,
 } from '../dto/notification.dto';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment.development';
 
 export interface InboxItem {
   id: number;
@@ -235,7 +236,7 @@ export class NotificationService {
     }
 
     // If it's a relative path, prepend the base URL
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

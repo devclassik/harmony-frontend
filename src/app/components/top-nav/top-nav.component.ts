@@ -17,6 +17,7 @@ import {
 import { ConfirmPromptComponent } from '../confirm-prompt/confirm-prompt.component';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-top-nav',
@@ -144,7 +145,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
     }
 
     // If it's a relative path, prepend the base URL
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

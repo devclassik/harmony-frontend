@@ -29,6 +29,7 @@ import {
 } from '../../dto/analytics.dto';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-dashboard',
@@ -218,7 +219,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     // If it's a relative path, prepend the base URL
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

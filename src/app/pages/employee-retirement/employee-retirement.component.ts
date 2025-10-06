@@ -24,6 +24,7 @@ import {
 import { EmployeeDetails } from '../../dto/employee.dto';
 import { Subscription } from 'rxjs';
 import { RetirementService } from '../../services/retirement.service';
+import { environment } from '../../../environments/environment.development';
 
 @Component({
   selector: 'app-employee-retirement',
@@ -252,7 +253,7 @@ export class EmployeeRetirementComponent implements OnInit, OnDestroy {
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
-    const baseUrl = 'https://harmoney-backend.onrender.com';
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 

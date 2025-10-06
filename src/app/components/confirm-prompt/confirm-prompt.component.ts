@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { EmployeeRecordsComponent } from '../../pages/employee-records/employee-records.component';
 
 export interface PromptConfig {
   title?: string;

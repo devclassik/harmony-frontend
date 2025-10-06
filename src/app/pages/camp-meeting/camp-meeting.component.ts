@@ -327,7 +327,6 @@ export class CampMeetingComponent implements OnInit, OnDestroy {
 
     // If it's a relative path, prepend the base URL
 
-    // 'https://harmoney-backend.onrender.com';
     const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
