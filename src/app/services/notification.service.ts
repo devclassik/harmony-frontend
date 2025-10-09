@@ -24,6 +24,51 @@ export interface InboxItem {
   documents?: string[];
 }
 
+export interface Employee  {
+  id: number;
+  employeeId: string;
+  title: string;
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+  gender: string | null;
+  profferedName: string | null;
+  primaryPhone: string | null;
+  primaryPhoneType: string | null;
+  altPhone: string | null;
+  altPhoneType: string | null;
+  dob: string | null;
+  maritalStatus: string | null;
+  everDivorced: boolean;
+  beenConvicted: boolean;
+  hasQuestionableBackground: boolean;
+  hasBeenInvestigatedForMisconductOrAbuse: boolean;
+  photoUrl: string;
+  altEmail: string | null;
+  employeeStatus: string | null;
+  employmentType: string | null;
+  serviceStartDate: string | null;
+  retiredDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  nationIdNumber: string | null;
+};
+
+export interface LeaveRequest {
+  id: number;
+  title: string;
+  message: string;
+  feature: string;
+  isRead: boolean;
+  metadata: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+  actionTo: Employee[];
+  actionBy: Employee;
+  actionFor: Employee;
+};
+
 export interface NotificationItem {
   id: number;
   worker: {
@@ -41,27 +86,29 @@ export interface NotificationItem {
   providedIn: 'root',
 })
 export class NotificationService {
-  private inboxItemsSubject = new BehaviorSubject<InboxItem[]>([]);
-  private notificationsSubject = new BehaviorSubject<NotificationItem[]>([]);
+  private inboxItemsSubject = new BehaviorSubject<LeaveRequest[]>([]);
+  private notificationsSubject = new BehaviorSubject<LeaveRequest[]>([]);
   private unreadCountSubject = new BehaviorSubject<number>(0);
+  private hasLoaded = false;
+
 
   constructor(
     private apiService: ApiService,
     private authService: AuthService
   ) {
-    // Don't auto-load data in constructor - wait for manual trigger after auth
-    // This prevents API calls before user is authenticated
 
-    // Update unread count whenever inbox items or notifications change
     this.inboxItemsSubject.subscribe(() => this.updateUnreadCount());
     this.notificationsSubject.subscribe(() => this.updateUnreadCount());
   }
 
   // Public method to initialize data after authentication
   initializeNotifications(): void {
+    if (this.hasLoaded) return;
+    this.hasLoaded = true;
     this.loadInboxItemsFromApi();
     this.loadNotificationsFromApi();
   }
+
 
   // Public method to check if notifications are loaded
   hasNotifications(): boolean {
@@ -77,9 +124,9 @@ export class NotificationService {
     const inboxItems = this.inboxItemsSubject.value;
     const notifications = this.notificationsSubject.value;
 
-    const unreadInboxCount = inboxItems.filter((item) => !item.isRead).length;
+    const unreadInboxCount = inboxItems.filter((item: any) => !item.isRead).length;
     const unreadNotificationsCount = notifications.filter(
-      (item) => !item.isRead
+      (item: any) => !item.isRead
     ).length;
 
     const totalUnreadCount = unreadInboxCount;
@@ -92,14 +139,15 @@ export class NotificationService {
       next: (response) => {
         const currentEmployeeId = this.authService.getCurrentEmployeeId();
         const apiMessages = Array.isArray(response.data) ? response.data : [];
-        const filteredForEmployee =
-          currentEmployeeId == null
-            ? []
-            : apiMessages.filter((message) =>
-                this.isItemForEmployee(message, currentEmployeeId)
-              );
-        const inboxItems = this.mapApiMessagesToInboxItems(filteredForEmployee);
-        this.inboxItemsSubject.next(inboxItems);
+
+        // const filteredForEmployee =
+        //   currentEmployeeId == null
+        //     ? []
+        //     : apiMessages.filter((message) =>
+        //       this.isItemForEmployee(message, currentEmployeeId)
+        //     );
+        // const inboxItems = this.mapApiMessagesToInboxItems(filteredForEmployee);
+        this.inboxItemsSubject.next(apiMessages);
       },
       error: (error) => {
         console.error('Error loading inbox items:', error);
@@ -116,15 +164,15 @@ export class NotificationService {
         const apiNotifications = Array.isArray(response.data)
           ? response.data
           : [];
-        const filteredForEmployee =
-          currentEmployeeId == null
-            ? []
-            : apiNotifications.filter((notification) =>
-                this.isItemForEmployee(notification, currentEmployeeId)
-              );
-        const notifications =
-          this.mapApiNotificationsToNotificationItems(filteredForEmployee);
-        this.notificationsSubject.next(notifications);
+        // const filteredForEmployee =
+        //   currentEmployeeId == null
+        //     ? []
+        //     : apiNotifications.filter((notification) =>
+        //       this.isItemForEmployee(notification, currentEmployeeId)
+        //     );
+        // const notifications =
+        //   this.mapApiNotificationsToNotificationItems(filteredForEmployee);
+        this.notificationsSubject.next(apiNotifications);
       },
       error: (error) => {
         console.error('Error loading notifications:', error);
@@ -162,7 +210,7 @@ export class NotificationService {
 
   private mapApiMessagesToInboxItems(
     apiMessages: ApiMessageItem[]
-  ): InboxItem[] {
+  ): LeaveRequest[] {
     return apiMessages.map((message) => {
       const documents = this.extractDocumentUrlsFromMetadata(message.metadata);
       return {
@@ -182,38 +230,38 @@ export class NotificationService {
         }),
         isRead: message.isRead,
         documents,
-      } as InboxItem;
+      } as any;
     });
   }
 
-  private mapApiNotificationsToNotificationItems(
-    apiNotifications: ApiNotificationItem[]
-  ): NotificationItem[] {
-    return apiNotifications.map((notification) => ({
-      id: notification.id,
-      worker: {
-        name: `${notification.actionBy.firstName} ${notification.actionBy.lastName}`,
-        image: this.formatImageUrl(notification.actionBy.photoUrl),
-      },
-      type: notification.title || notification.feature,
-      message: notification.message,
-      targetWorker:
-        notification.actionTo.length > 0
-          ? `${notification.actionTo[0].firstName} ${notification.actionTo[0].lastName}`
-          : 'Unknown',
-      timestamp: new Date(notification.createdAt).toLocaleDateString('en-GB'),
-      isRead: notification.isRead,
-    }));
-  }
+  // private mapApiNotificationsToNotificationItems(
+  //   apiNotifications: ApiNotificationItem[]
+  // ): NotificationItem[] {
+  //   return apiNotifications.map((notification) => ({
+  //     id: notification.id,
+  //     worker: {
+  //       name: `${notification.actionBy.firstName} ${notification.actionBy.lastName}`,
+  //       image: this.formatImageUrl(notification.actionBy.photoUrl),
+  //     },
+  //     type: notification.title || notification.feature,
+  //     message: notification.message,
+  //     targetWorker:
+  //       notification.actionTo.length > 0
+  //         ? `${notification.actionTo[0].firstName} ${notification.actionTo[0].lastName}`
+  //         : 'Unknown',
+  //     timestamp: new Date(notification.createdAt).toLocaleDateString('en-GB'),
+  //     isRead: notification.isRead,
+  //   }));
+  // }
 
-  private isItemForEmployee(
-    item: ApiMessageItem | ApiNotificationItem,
-    employeeId: number
-  ): boolean {
-    // Show only items authored by the current user
-    const isActionBy = (item as any).actionBy?.id === employeeId;
-    return isActionBy === true;
-  }
+  // private isItemForEmployee(
+  //   item: ApiMessageItem | ApiNotificationItem,
+  //   employeeId: number
+  // ): boolean {
+  //   // Show only items authored by the current user
+  //   const isActionBy = (item as any).actionBy?.id === employeeId;
+  //   return isActionBy === true;
+  // }
 
   // Helper function to properly format image URLs
   private formatImageUrl(url: string | null): string {
@@ -280,7 +328,7 @@ export class NotificationService {
   }
 
   // Inbox methods
-  getInboxItems(): Observable<InboxItem[]> {
+  getInboxItems(): Observable<LeaveRequest[]> {
     return this.inboxItemsSubject.asObservable();
   }
 
@@ -293,7 +341,7 @@ export class NotificationService {
   }
 
   // Notification methods
-  getNotifications(): Observable<NotificationItem[]> {
+  getNotifications(): Observable<LeaveRequest[]> {
     return this.notificationsSubject.asObservable();
   }
 

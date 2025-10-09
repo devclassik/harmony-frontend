@@ -372,7 +372,7 @@ export class AnnualLeaveComponent implements OnInit, OnDestroy {
   }
 
   actionButton: MenuItem[] = [
-    { label: 'View', action: 'View', icon: '/public/assets/svg/eyeOpen.svg' },
+    {label: 'View', action: 'View', icon:'/public/assets/svg/eyeOpen.svg'},
   ];
 
   // View change handler

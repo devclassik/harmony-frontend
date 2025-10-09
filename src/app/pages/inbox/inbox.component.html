@@ -108,21 +108,22 @@
             [class.bg-transparent]="item.isRead"
           ></div>
           <img
-            [src]="item.profileImage"
-            [alt]="item.sender"
+            [src]="item.actionFor.photoUrl"
+            [alt]="item.actionFor.firstName"
             class="w-10 h-10 rounded-full flex-shrink-0"
           />
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-1">
               <span class="font-medium text-gray-900 text-sm capitalize">{{
-                item.sender
+                item.actionFor.firstName + ' ' + item.actionFor.lastName
               }}</span>
-              <span class="text-xs text-gray-500">{{ item.time }}</span>
+              <span class="text-xs text-gray-500">{{ item.updatedAt | date: 'mediumDate' }}</span>
             </div>
             <p class="font-medium text-gray-900 text-sm mb-1">
-              {{ item.subject }}
+              {{ item.actionFor.firstName }} your leave
+              request.
             </p>
-            <p class="text-xs text-gray-600 line-clamp-2">{{ item.preview }}</p>
+            <p class="text-xs text-gray-600 line-clamp-2">{{ item.title }}</p>
           </div>
         </div>
       </div>
@@ -227,8 +228,8 @@
           <!-- Sender Info -->
           <div class="flex items-start gap-4 mb-6">
             <img
-              [src]="getSelectedItem()?.profileImage"
-              [alt]="getSelectedItem()?.sender"
+              [src]="getSelectedItem()?.actionBy?.photoUrl"
+              [alt]="getSelectedItem()?.actionBy?.firstName"
               class="w-12 h-12 rounded-full flex-shrink-0"
             />
             <div class="flex-1">
@@ -240,7 +241,7 @@
                 <span>To: Me</span>
                 <span>•</span>
                 <span
-                  >{{ getSelectedItem()?.time }} {{ getCurrentDate() }}</span
+                  >{{ getSelectedItem()?.actionBy?.firstName }} {{ getCurrentDate() }}</span
                 >
               </div>
             </div>
@@ -263,7 +264,7 @@
           <!-- Message Body -->
           <div class="mb-6">
             <p class="text-gray-900 leading-relaxed capitalize">
-              Hi {{ getSelectedItem()?.sender }}
+              Hi {{ getSelectedItem()?.actionBy?.firstName }}
             </p>
             <br />
             <div class="prose prose-gray max-w-none">

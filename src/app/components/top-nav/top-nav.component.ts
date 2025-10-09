@@ -13,6 +13,7 @@ import { AuthService } from '../../services/auth.service';
 import {
   NotificationService,
   NotificationItem,
+  LeaveRequest,
 } from '../../services/notification.service';
 import { ConfirmPromptComponent } from '../confirm-prompt/confirm-prompt.component';
 import { filter } from 'rxjs/operators';
@@ -51,7 +52,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
   pageTitle = '';
 
   private subscriptions: Subscription[] = [];
-  notifications: NotificationItem[] = [];
+  notifications: LeaveRequest[] = [];
 
   // Notification truncation properties
   expandedNotifications: Set<number> = new Set();
@@ -272,11 +273,11 @@ export class TopNavComponent implements OnInit, OnDestroy {
   }
 
   // Notification message truncation methods
-  getFullMessage(notification: NotificationItem): string {
-    return `${notification.message} ${notification.targetWorker}`;
+  getFullMessage(notification: LeaveRequest): string {
+    return `${notification.message} ${notification.title}`;
   }
 
-  shouldShowTruncated(notification: NotificationItem): boolean {
+  shouldShowTruncated(notification: LeaveRequest): boolean {
     const fullMessage = this.getFullMessage(notification);
     return (
       fullMessage.length > this.MAX_MESSAGE_LENGTH &&
@@ -284,7 +285,7 @@ export class TopNavComponent implements OnInit, OnDestroy {
     );
   }
 
-  getTruncatedMessage(notification: NotificationItem): string {
+  getTruncatedMessage(notification: LeaveRequest): string {
     const fullMessage = this.getFullMessage(notification);
     if (fullMessage.length <= this.MAX_MESSAGE_LENGTH) {
       return fullMessage;

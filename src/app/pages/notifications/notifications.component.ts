@@ -5,6 +5,7 @@ import { ClickOutsideDirective } from '../../directives/click-outside.directive'
 import {
   NotificationService,
   NotificationItem,
+  LeaveRequest,
 } from '../../services/notification.service';
 import { Subscription } from 'rxjs';
 
@@ -16,8 +17,8 @@ import { Subscription } from 'rxjs';
   styleUrl: './notifications.component.css',
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
-  notifications: NotificationItem[] = [];
-  filteredNotifications: NotificationItem[] = [];
+  notifications: LeaveRequest[] = [];
+  filteredNotifications: LeaveRequest[] = [];
   currentPage: number = 1;
   pageSize: number = 10;
   totalPages: number = 1;
@@ -67,11 +68,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     if (this.searchTerm) {
       filtered = filtered.filter(
         (item) =>
-          item.worker.name
+          item.title
             ?.toLowerCase()
             .includes(this.searchTerm.toLowerCase()) ||
-          item.type?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          item.targetWorker
+          item.message?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          item.title
             ?.toLowerCase()
             .includes(this.searchTerm.toLowerCase())
       );
@@ -97,7 +98,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.currentPage = 1; // Reset to first page when filtering
   }
 
-  get paginatedNotifications(): NotificationItem[] {
+  get paginatedNotifications(): LeaveRequest[] {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     return this.filteredNotifications.slice(startIndex, endIndex);

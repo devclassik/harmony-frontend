@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import {
   NotificationService,
   InboxItem,
+  LeaveRequest,
 } from '../../services/notification.service';
 import { DocumentViewerComponent } from '../../components/document-viewer/document-viewer.component';
 import { TableData } from '../../interfaces/employee.interface';
@@ -31,8 +32,8 @@ interface Attachment {
 })
 export class InboxComponent implements OnInit, OnDestroy {
   selectedItem: number | null = null;
-  inboxItems: InboxItem[] = [];
-  filteredItems: InboxItem[] = [];
+  inboxItems: LeaveRequest[] = [];
+  filteredItems: LeaveRequest[] = [];
   unreadCount: number = 0;
   showDocumentPreview: boolean = false;
   selectedAttachment: Attachment | null = null;
@@ -46,7 +47,7 @@ export class InboxComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription[] = [];
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(private notificationService: NotificationService) { }
 
   ngOnInit() {
     // Check if inbox items are already loaded, if not initialize them
@@ -68,6 +69,7 @@ export class InboxComponent implements OnInit, OnDestroy {
         this.unreadCount = count;
       })
     );
+
   }
 
   ngOnDestroy() {
@@ -83,14 +85,14 @@ export class InboxComponent implements OnInit, OnDestroy {
 
     // Precompute attachments for the selected item to keep template light
     const item = this.getSelectedItem();
-    this.attachments = this.buildAttachmentsFromItem(item);
+    // this.attachments = this.buildAttachmentsFromItem(item);
   }
 
   goBack() {
     this.selectedItem = null;
   }
 
-  getSelectedItem(): InboxItem | undefined {
+  getSelectedItem(): LeaveRequest | undefined {
     return this.filteredItems.find((item) => item.id === this.selectedItem);
   }
 
@@ -166,11 +168,9 @@ export class InboxComponent implements OnInit, OnDestroy {
 
   downloadAttachment(attachment: Attachment) {
     // Create a simple text file download for demonstration
-    const content = `${attachment.name}\n\nThis is a sample ${
-      attachment.type
-    } document for ${
-      this.getSelectedItem()?.subject
-    }.\n\nGenerated on: ${new Date().toISOString()}`;
+    const content = `${attachment.name}\n\nThis is a sample ${attachment.type
+      } document for ${this.getSelectedItem()?.actionFor?.firstName
+      }.\n\nGenerated on: ${new Date().toISOString()}`;
     const blob = new Blob([content], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -202,11 +202,9 @@ export class InboxComponent implements OnInit, OnDestroy {
 
   onDocumentDownload(doc: TableData) {
     // Create a simple text file download for demonstration
-    const content = `${doc.documentName}\n\nThis is a sample ${
-      doc.documentType
-    } document for ${
-      this.getSelectedItem()?.subject
-    }.\n\nGenerated on: ${new Date().toISOString()}`;
+    const content = `${doc.documentName}\n\nThis is a sample ${doc.documentType
+      } document for ${this.getSelectedItem()?.message
+      }.\n\nGenerated on: ${new Date().toISOString()}`;
     const blob = new Blob([content], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -228,7 +226,7 @@ export class InboxComponent implements OnInit, OnDestroy {
 
   getSelectedItemTitle(): string {
     const item = this.inboxItems.find((item) => item.id === this.selectedItem);
-    return item ? item.subject : '';
+    return item ? item.title : '';
   }
 
   getSelectedItemContent(): string {
@@ -251,10 +249,10 @@ export class InboxComponent implements OnInit, OnDestroy {
       const searchLower = this.searchTerm.toLowerCase().trim();
       filtered = filtered.filter(
         (item) =>
-          item.sender.toLowerCase().includes(searchLower) ||
-          item.subject.toLowerCase().includes(searchLower) ||
+          item.title.toLowerCase().includes(searchLower) ||
           item.message.toLowerCase().includes(searchLower) ||
-          item.preview.toLowerCase().includes(searchLower)
+          item.message.toLowerCase().includes(searchLower) ||
+          item.updatedAt.toLowerCase().includes(searchLower)
       );
     }
 

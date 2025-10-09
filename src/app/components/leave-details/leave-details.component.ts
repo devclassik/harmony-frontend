@@ -153,7 +153,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     private employeeService: EmployeeService,
     private departmentService: DepartmentService,
     private alertService: AlertService
-  ) {}
+  ) { }
 
   // Add form data structure for create mode
   formData = {
@@ -207,6 +207,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     // Department-specific fields
     departmentName: '',
     templateType: '',
+    letterUrl: '',
   };
 
   // Track uploaded files with progress
@@ -329,6 +330,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
 
     // For camp meetings
     if (this.isCampMeeting) {
+      this.formData.letterUrl = this.leaveData.letterUrl || '';
       this.formData.agenda = this.leaveData.agenda || '';
 
       // Format start date for HTML date input (YYYY-MM-DD)
@@ -374,6 +376,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       this.formData.endDate = this.leaveData.endDate || '';
       this.formData.reason = this.leaveData.reason || '';
       this.formData.location = this.leaveData.location || '';
+      this.formData.letterUrl = this.leaveData.letterUrl || '';
 
       // Handle duration
       if (this.leaveData.duration) {
@@ -391,12 +394,15 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
         this.formData.employeeId = this.leaveData.employeeId?.toString() || '';
         this.formData.employeeName = this.leaveData.employeeName || '';
         this.formData.newPosition = this.leaveData.newPosition || '';
+        this.formData.letterUrl = this.leaveData.letterUrl || '';
       }
 
       if (this.isDiscipline) {
         this.formData.employeeId = this.leaveData.employeeId?.toString() || '';
         this.formData.employeeName = this.leaveData.employeeName || '';
         this.formData.disciplineType = this.leaveData.disciplineType || '';
+        this.formData.letterUrl = this.leaveData.letterUrl || '';
+
       }
 
       if (this.isTransfer) {
@@ -405,6 +411,8 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
         this.formData.transferType = this.leaveData.transferType || '';
         this.formData.destination = this.leaveData.destination || '';
         this.formData.newPosition = this.leaveData.newPosition || '';
+        this.formData.letterUrl = this.leaveData.letterUrl || '';
+
       }
 
       if (this.isRetirement) {
@@ -415,12 +423,16 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
         this.formData.replacementName = this.leaveData.replacementName || '';
         this.formData.requestDate = this.leaveData.requestDate || '';
         this.formData.destination = this.leaveData.destination || '';
+        this.formData.letterUrl = this.leaveData.letterUrl || '';
+
       }
 
       if (this.isRetrenchment) {
         this.formData.employeeId = this.leaveData.employeeId?.toString() || '';
         this.formData.employeeName = this.leaveData.employeeName || '';
         this.formData.retrenchmentType = this.leaveData.retrenchmentType || '';
+        this.formData.letterUrl = this.leaveData.letterUrl || '';
+
       }
     }
   }
@@ -446,6 +458,8 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       this.preFilledEmployeeData.employmentType || '';
     this.formData.employeeLocation =
       this.preFilledEmployeeData.mailingAddress?.address || '';
+    this.formData.letterUrl =
+      this.preFilledEmployeeData.letterUrl || '';
   }
 
   // Populate accommodation form data for Accommodation mode
@@ -1362,20 +1376,17 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       return `Are you sure you want to create this employee "${this.formData.firstName} ${this.formData.lastName}"?`;
     }
     if (this.isAccommodation) {
-      return `Are you sure you want to ${
-        this.isEditMode ? 'update' : 'create'
-      } this accommodation "${this.formData.accommodationName}"?`;
+      return `Are you sure you want to ${this.isEditMode ? 'update' : 'create'
+        } this accommodation "${this.formData.accommodationName}"?`;
     }
     if (this.isDepartment) {
-      return `Are you sure you want to ${
-        this.isEditMode ? 'update' : 'create'
-      } this department "${this.formData.departmentName}"?`;
+      return `Are you sure you want to ${this.isEditMode ? 'update' : 'create'
+        } this department "${this.formData.departmentName}"?`;
     }
 
     if (this.isTemplate) {
-      return `Are you sure you want to ${
-        this.isEditMode ? 'update' : 'create'
-      } this template "${this.formData.templateType}"?`;
+      return `Are you sure you want to ${this.isEditMode ? 'update' : 'create'
+        } this template "${this.formData.templateType}"?`;
     }
     if (this.isCampMeeting && this.mode === 'create') {
       return `Are you sure you want to create this camp meeting?`;
@@ -1457,6 +1468,7 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
       departmentName: '',
       // Template-specific fields
       templateType: '',
+      letterUrl: '',
     };
     this.uploadedFiles = [];
     this.searchTerm = '';
@@ -1469,8 +1481,9 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
   }
 
   downloadDocument(doc: any) {
-    if (!doc || !doc.downloadUrl) {
-      console.error('No download URL found for document:', doc);
+    console.log('Downloading document:', doc.letterUrl);
+    if (!doc || (!doc.downloadUrl && !doc.letterUrl)) {
+      console.error('No download URL found for document as:', doc);
       return;
     }
 
@@ -1484,6 +1497,11 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     } else if (doc.url) {
       downloadUrl = doc.url;
       filename = doc.name || doc.documentName || 'document';
+    } else if (doc.letterUrl) {
+      downloadUrl = doc.letterUrl;
+      console.log('i fond e');
+
+      filename = doc.letterName || 'document';
     } else {
       console.error('No download URL found for document:', doc);
       return;

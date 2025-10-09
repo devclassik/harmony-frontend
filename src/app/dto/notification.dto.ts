@@ -1,3 +1,4 @@
+import { LeaveRequest } from '../services/notification.service';
 import { ApiResponse } from './common.dto';
 
 export interface NotificationEmployee {
@@ -58,5 +59,5 @@ export interface MessageItem {
   actionFor: NotificationEmployee;
 }
 
-export type NotificationResponse = ApiResponse<NotificationItem[]>;
-export type MessageResponse = ApiResponse<MessageItem[]>;
+export type NotificationResponse = ApiResponse<LeaveRequest[]>;
+export type MessageResponse = ApiResponse<LeaveRequest[]>;

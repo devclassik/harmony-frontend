@@ -96,6 +96,7 @@ export interface LeaveRecord {
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   reason: string;
   location?: string;
+  letterUrl?: string;
   duration: number;
   durationUnit: string;
   createdAt: string;
@@ -261,23 +262,24 @@ export class LeaveService {
       remainingDays = Math.max(0, totalLeaveDays - usedDays);
     }
 
-    console.log('Transforming leave details:', {
-      currentLeave: {
-        id: leave.id,
-        duration: leave.duration,
-        unit: leave.durationUnit,
-        status: leave.status,
-        type: leave.type,
-      },
-      totalAllowance: totalLeaveDays,
-      usedDays: usedDays,
-      remainingDays: remainingDays,
-      calculationMethod:
-        leave.status.toUpperCase() === 'APPROVED'
-          ? 'approved'
-          : 'pending-no-subtraction',
-      allUserLeavesCount: allUserLeaves.length,
-    });
+    // console.log('Transforming leave details:', {
+    //   currentLeave: {
+    //     id: leave.id,
+    //     duration: leave.duration,
+    //     unit: leave.durationUnit,
+    //     status: leave.status,
+    //     type: leave.type,
+    //   },
+    //   totalAllowance: totalLeaveDays,
+    //   usedDays: usedDays,
+    //   remainingDays: remainingDays,
+    //   calculationMethod:
+    //     leave.status.toUpperCase() === 'APPROVED'
+    //       ? 'approved'
+    //       : 'pending-no-subtraction',
+    //   allUserLeavesCount: allUserLeaves.length,
+    //   letterUrl: leave.letterUrl || '',
+    // });
 
     // Calculate consistent end date (same logic as table)
     const startDate = new Date(leave.startDate);
@@ -312,6 +314,7 @@ export class LeaveService {
       leaveNotesUrls: leave.leaveNotesUrls || [],
       // Transform leave notes to documents format for template compatibility
       documents: this.transformLeaveNotesToDocuments(leave.leaveNotes || []),
+      letterUrl: leave.letterUrl || '',
     };
   }
 

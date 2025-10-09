@@ -172,8 +172,8 @@
 
                   <!-- Profile Image -->
                   <img
-                    [src]="notification.worker.image"
-                    [alt]="notification.worker.name"
+                    [src]="notification.actionFor.photoUrl"
+                    [alt]="notification.actionFor.firstName"
                     class="w-12 h-12 rounded-full flex-shrink-0"
                   />
 
@@ -181,15 +181,15 @@
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between">
                       <span class="font-semibold text-gray-900 text-sm">
-                        {{ notification.type }}
+                        {{ notification.title }}
                       </span>
                       <span class="text-xs text-gray-500">
-                        {{ notification.timestamp }}
+                        {{ notification.updatedAt }}
                       </span>
                     </div>
                     <div class="text-sm text-gray-600 mt-1">
                       <span class="font-medium">{{
-                        notification.worker.name
+                        notification.actionFor.firstName
                       }}</span>
                       <span>
                         <ng-container *ngIf="shouldShowTruncated(notification)">
