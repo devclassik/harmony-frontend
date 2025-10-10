@@ -20,6 +20,7 @@ import { RetrenchmentRecord } from '../../dto/retrenchment.dto';
 import { Employee } from '../../dto';
 import { ApiService } from '../../services/api.service';
 import { environment } from '../../../environments/environment';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-employee-details',
@@ -101,7 +102,9 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   pdfModalOpen = false;
   selectedPdfUrl: string | null = null;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService,
+    private alertService: AlertService,
+  ) { }
 
   ngOnInit() {
     // Removed debug logging
@@ -302,5 +305,87 @@ export class EmployeeDetailsComponent implements OnInit, OnChanges {
   formatTemplateType(type: string): string {
     if (!type) return '';
     return type.replace(/_/g, ' ');
+  }
+
+  downloadLetter(doc: any) {
+    if (!doc || !doc.letterUrl) {
+      return;
+    }
+
+
+    // Try to find the actual download URL
+    let downloadUrl = '';
+    let filename = 'document';
+
+    if (doc.letterUrl) {
+      downloadUrl = doc.letterUrl;
+      filename = doc.letterUrl || 'document';
+    } else {
+      this.alertService.info('No document attached');
+      console.error('No download URL found for document:', doc);
+      return;
+    }
+    try {
+      if (downloadUrl.includes('firebasestorage.googleapis.com')) {
+        // Method 1: Try adding download parameter to Firebase URL
+        const firebaseDownloadUrl = this.getFirebaseDownloadUrl(
+          downloadUrl,
+          filename
+        );
+        const link = document.createElement('a');
+        link.href = firebaseDownloadUrl;
+        link.target = '_blank';
+        link.click();
+      } else {
+        // Method 2: For other URLs, use fetch and blob
+        this.downloadFileViaFetch(downloadUrl, filename);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: Just open in new tab
+      window.open(downloadUrl, '_blank');
+    }
+  }
+
+  private getFirebaseDownloadUrl(url: string, filename: string): string {
+    try {
+      const urlObj = new URL(url);
+      // Add response-content-disposition parameter to force download with correct filename
+      urlObj.searchParams.set(
+        'response-content-disposition',
+        `attachment; filename="${filename}"`
+      );
+      return urlObj.toString();
+    } catch (error) {
+      console.error('Error creating download URL:', error);
+      return url;
+    }
+  }
+
+  // Alternative download method using fetch
+  private async downloadFileViaFetch(url: string, filename: string) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up the object URL
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Fetch download failed:', error);
+      // Fallback: Just open in new tab
+      window.open(url, '_blank');
+    }
   }
 }

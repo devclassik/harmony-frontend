@@ -379,6 +379,7 @@ export class EmployeeDisciplineComponent implements OnInit, OnDestroy {
       createdAt: detailed.createdAt,
       updatedAt: detailed.updatedAt,
       deletedAt: detailed.deletedAt,
+      letterUrl: detailed.letterUrl,
       employee: {
         id: detailed.employee.id,
         employeeId: detailed.employee.employeeId,

@@ -64,6 +64,7 @@ export interface RetirementRecord {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  letterUrl: string;
   employee: RetirementEmployee;
   recommendedReplacement: RetirementEmployee;
 }
@@ -78,6 +79,7 @@ export interface RetirementRecordDetailed {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  letterUrl: string;
   employee: RetirementEmployee;
   recommendedReplacement: RetirementEmployee;
   history: any[]; // Can be more specific if history structure is known

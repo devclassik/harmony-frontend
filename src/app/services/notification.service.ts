@@ -24,7 +24,7 @@ export interface InboxItem {
   documents?: string[];
 }
 
-export interface Employee  {
+export interface Employee {
   id: number;
   employeeId: string;
   title: string;
@@ -135,7 +135,7 @@ export class NotificationService {
   }
 
   private loadInboxItemsFromApi(): void {
-    this.apiService.get<MessageResponse>('/message').subscribe({
+    this.apiService.get<MessageResponse>(environment.routes.messages.getAll).subscribe({
       next: (response) => {
         const currentEmployeeId = this.authService.getCurrentEmployeeId();
         const apiMessages = Array.isArray(response.data) ? response.data : [];
@@ -150,7 +150,7 @@ export class NotificationService {
         this.inboxItemsSubject.next(apiMessages);
       },
       error: (error) => {
-        console.error('Error loading inbox items:', error);
+        // console.error('Error loading inbox items:', error);
         // Show empty list when API fails to ensure accurate unread count
         this.inboxItemsSubject.next([]);
       },
@@ -158,7 +158,7 @@ export class NotificationService {
   }
 
   private loadNotificationsFromApi(): void {
-    this.apiService.get<NotificationResponse>('/notification').subscribe({
+    this.apiService.get<NotificationResponse>(environment.routes.notification.getAll).subscribe({
       next: (response) => {
         const currentEmployeeId = this.authService.getCurrentEmployeeId();
         const apiNotifications = Array.isArray(response.data)
@@ -175,7 +175,7 @@ export class NotificationService {
         this.notificationsSubject.next(apiNotifications);
       },
       error: (error) => {
-        console.error('Error loading notifications:', error);
+        // console.error('Error loading notifications:', error);
         // Show empty list when API fails to ensure accurate unread count
         this.notificationsSubject.next([]);
       },
@@ -184,26 +184,26 @@ export class NotificationService {
 
   markSelectedInboxItemAsRead(itemId: number) {
     this.apiService
-      .put(`/message/mark-read`, { messageIds: [itemId] })
+      .put(environment.routes.messages.markAsRead, { messageIds: [itemId] })
       .subscribe({
         next: () => {
           this.markInboxItemAsRead(itemId);
         },
         error: (error) => {
-          console.error('Error marking inbox item as read:', error);
+          // console.error('Error marking inbox item as read:', error);
         },
       });
   }
 
   markSelectedNotificationItemAsRead(itemId: number) {
     this.apiService
-      .put(`/notification/mark-read`, { notificationIds: [itemId] })
+      .put(environment.routes.messages.markAsRead, { messageIds: [itemId] })
       .subscribe({
         next: () => {
           this.markNotificationAsRead(itemId);
         },
         error: (error) => {
-          console.error('Error marking notification item as read:', error);
+          // console.error('Error marking notification item as read:', error);
         },
       });
   }

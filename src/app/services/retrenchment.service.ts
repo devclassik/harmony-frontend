@@ -8,6 +8,7 @@ import {
   GetRetrenchmentsResponse,
   GetRetrenchmentDetailResponse,
   UpdateRetrenchmentResponse,
+  UpdateRetrenchmentStatusRequest,
 } from '../dto/retrenchment.dto';
 
 @Injectable({
@@ -16,20 +17,21 @@ import {
 export class RetrenchmentService {
   private baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   createRetrenchment(
     data: CreateRetrenchmentRequest
   ): Observable<CreateRetrenchmentResponse> {
     return this.http.post<CreateRetrenchmentResponse>(
-      `${this.baseUrl}/retrenchment`,
+      `${this.baseUrl}${environment.routes.retrenchment.getAll}`,
       data
     );
   }
 
   getAllRetrenchments(): Observable<GetRetrenchmentsResponse> {
     return this.http.get<GetRetrenchmentsResponse>(
-      `${this.baseUrl}/retrenchment`
+      `${this.baseUrl}${environment.routes.retrenchment.getAll}`,
+
     );
   }
 
@@ -37,21 +39,21 @@ export class RetrenchmentService {
     id: number
   ): Observable<GetRetrenchmentDetailResponse> {
     return this.http.get<GetRetrenchmentDetailResponse>(
-      `${this.baseUrl}/retrenchment/${id}`
+      `${this.baseUrl}${environment.routes.retrenchment.getAll}/${id}`
     );
   }
 
-  approveRetrenchment(id: number): Observable<UpdateRetrenchmentResponse> {
-    return this.http.patch<UpdateRetrenchmentResponse>(
-      `${this.baseUrl}/retrenchment/${id}/approve`,
-      {}
+  approveRetrenchment(id: number, data: UpdateRetrenchmentStatusRequest): Observable<UpdateRetrenchmentResponse> {
+    return this.http.put<UpdateRetrenchmentResponse>(
+      `${this.baseUrl}${environment.routes.retrenchment.getAll}/${id}`,
+      data
     );
   }
 
-  rejectRetrenchment(id: number): Observable<UpdateRetrenchmentResponse> {
-    return this.http.patch<UpdateRetrenchmentResponse>(
-      `${this.baseUrl}/retrenchment/${id}/reject`,
-      {}
+  rejectRetrenchment(id: number, data: UpdateRetrenchmentStatusRequest): Observable<UpdateRetrenchmentResponse> {
+    return this.http.put<UpdateRetrenchmentResponse>(
+      `${this.baseUrl}${environment.routes.retrenchment.getAll}/${id}`,
+      data
     );
   }
 }

@@ -27,6 +27,7 @@ export interface TransferRecord {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  letterUrl: string;
   employee: TransferEmployee;
 }
 
@@ -47,6 +48,7 @@ export interface TransferRecordDetailed {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  letterUrl: string;
   employee: TransferEmployee;
   history: any[]; // Can be more specific if history structure is known
 }

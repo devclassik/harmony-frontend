@@ -84,6 +84,7 @@ export interface PromotionRecordDetailed {
   deletedAt: string | null;
   employee: PromotionEmployeeDetailed;
   history: any[]; // Can be more specific if history structure is known
+  letterUrl: string; // Can be more specific if history structure is known
 }
 
 export interface PromotionEmployee {
@@ -138,6 +139,7 @@ export interface PromotionRecord {
   updatedAt: string;
   deletedAt: string | null;
   employee: PromotionEmployee;
+  letterUrl: string;
 }
 
 export interface CreatePromotionResponse {

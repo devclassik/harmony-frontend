@@ -78,6 +78,7 @@ export interface DisciplineRecord {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  letterUrl: string;
   employee: DisciplineEmployee;
 }
 
@@ -99,6 +100,7 @@ export interface DisciplineRecordDetailed {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  letterUrl: string;
   employee: DisciplineEmployee;
   history: any[]; // Can be more specific if history structure is known
 }

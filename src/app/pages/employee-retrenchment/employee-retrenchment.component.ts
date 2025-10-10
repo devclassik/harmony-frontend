@@ -19,7 +19,6 @@ import { AlertService } from '../../services/alert.service';
 import { AuthService } from '../../services/auth.service';
 import {
   RetrenchmentRecord,
-  RetrenchmentEmployee,
   RetrenchmentRecordDetailed,
 } from '../../dto/retrenchment.dto';
 import { EmployeeDetails } from '../../dto/employee.dto';
@@ -40,99 +39,31 @@ import { environment } from '../../../environments/environment.development';
   styleUrl: './employee-retrenchment.component.css',
 })
 export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
-  selectedStatus: string = '';
-  selectedFilter: string = '';
-  searchValue: string = '';
-  showModal: boolean = false;
-  showCreateRetrenchmentRequest: boolean = false;
+  selectedStatus = '';
+  selectedFilter = '';
+  searchValue = '';
+  showModal = false;
+  showCreateRetrenchmentRequest = false;
   selectedEmployee: TableData | null = null;
   selectedEmployeeRecord: TableData | null = null;
   selectedEmployeeDetails: EmployeeDetails | null = null;
   selectedRetrenchmentRecord: RetrenchmentRecord | null = null;
   promptConfig: PromptConfig | null = null;
-  showEmployeeDetails: boolean = false;
-  isLoading: boolean = false;
-  loadingOperation: 'loading' | 'approving' | 'rejecting' | 'creating' | null =
-    null;
+  showEmployeeDetails = false;
+  isLoading = false;
+  loadingOperation: 'loading' | 'approving' | 'rejecting' | 'creating' | null = null;
   pendingAction: 'approve' | 'reject' | null = null;
-
-  // Store all retrenchments and raw data
   allRetrenchments: RetrenchmentRecord[] = [];
-
-  // Role-based button visibility - only show for HOD/Pastor
-  get shouldShowCreateButton(): boolean {
-    const userRole = this.authService.getWorkerRole()?.toLowerCase();
-    return (
-      userRole === 'pastor' ||
-      userRole === 'hod' ||
-      userRole === 'zonal_pastor' ||
-      userRole === 'district_pastor'
-    );
-  }
-
-  // Separate visibility logic for approve/reject buttons in modal
-  get shouldShowModalButtons(): boolean {
-    const userRole = this.authService.getWorkerRole()?.toLowerCase();
-    console.log('Current user role for modal buttons:', userRole);
-    console.log('Available roles for comparison:', [
-      'pastor',
-      'hod',
-      'zonal_pastor',
-      'district_pastor',
-    ]);
-    const hasPermission =
-      userRole === 'pastor' ||
-      userRole === 'hod' ||
-      userRole === 'zonal_pastor' ||
-      userRole === 'district_pastor';
-    console.log('Has permission for modal buttons:', hasPermission);
-    // Temporarily return true to test functionality
-    return true;
-  }
-
-  // Filter retrenchments to show only those for the selected employee
-  get selectedEmployeeRetrenchments(): RetrenchmentRecord[] {
-    if (!this.selectedRetrenchmentRecord || !this.allRetrenchments) {
-      return [];
-    }
-
-    // Get the selected employee's ID
-    const selectedEmployeeId = this.selectedRetrenchmentRecord.employee.id;
-
-    // Filter retrenchments to only show those for this employee
-    return this.allRetrenchments.filter(
-      (retrenchment) => retrenchment.employee.id === selectedEmployeeId
-    );
-  }
 
   private subscriptions: Subscription[] = [];
 
-  // Dynamic loading properties
-  get loadingTitle(): string {
-    switch (this.loadingOperation) {
-      case 'approving':
-        return 'Approving Retrenchment...';
-      case 'rejecting':
-        return 'Rejecting Retrenchment...';
-      case 'loading':
-      default:
-        return 'Loading Retrenchments...';
-    }
-  }
-
-  get getLoadingMessage(): string {
-    switch (this.loadingOperation) {
-      case 'approving':
-        return 'Please wait while we approve the retrenchment request.';
-      case 'rejecting':
-        return 'Please wait while we reject the retrenchment request.';
-      case 'creating':
-        return 'Please wait while we create the retrenchment request.';
-      case 'loading':
-      default:
-        return 'Please wait while we fetch retrenchment data.';
-    }
-  }
+  // --- Cached Getter Values ---
+  private _shouldShowCreateButton?: boolean;
+  private _shouldShowModalButtons?: boolean;
+  private _loadingTitleCache?: string;
+  private _loadingMessageCache?: string;
+  private _selectedEmployeeRetrenchmentsCache?: RetrenchmentRecord[];
+  private lastSelectedEmployeeId?: number;
 
   constructor(
     private retrenchmentService: RetrenchmentService,
@@ -142,11 +73,80 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadRetrenchments();
+    this.cacheRoleBasedValues();
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.subscriptions.forEach((s) => s.unsubscribe());
   }
+
+  // =====================================================
+  // CACHED GETTERS
+  // =====================================================
+
+  get shouldShowCreateButton(): boolean {
+    if (this._shouldShowCreateButton === undefined) {
+      const userRole = this.authService.getWorkerRole()?.toLowerCase();
+      this._shouldShowCreateButton = ['pastor', 'hod', 'zonal_pastor', 'district_pastor'].includes(userRole ?? '');
+    }
+    return this._shouldShowCreateButton;
+  }
+
+  get shouldShowModalButtons(): boolean {
+    if (this._shouldShowModalButtons === undefined) {
+      const userRole = this.authService.getWorkerRole()?.toLowerCase();
+      this._shouldShowModalButtons = ['pastor', 'hod', 'zonal_pastor', 'district_pastor'].includes(userRole ?? '');
+    }
+    return this._shouldShowModalButtons;
+  }
+
+  get selectedEmployeeRetrenchments(): RetrenchmentRecord[] {
+    if (
+      this.selectedRetrenchmentRecord?.employee?.id !== this.lastSelectedEmployeeId
+    ) {
+      this.lastSelectedEmployeeId = this.selectedRetrenchmentRecord?.employee?.id;
+      if (this.lastSelectedEmployeeId && this.allRetrenchments) {
+        this._selectedEmployeeRetrenchmentsCache = this.allRetrenchments.filter(
+          (r) => r.employee.id === this.lastSelectedEmployeeId
+        );
+      } else {
+        this._selectedEmployeeRetrenchmentsCache = [];
+      }
+    }
+    return this._selectedEmployeeRetrenchmentsCache ?? [];
+  }
+
+  get loadingTitle(): string {
+    if (this._loadingTitleCache && this.loadingOperation === null) {
+      return this._loadingTitleCache;
+    }
+    const value = {
+      approving: 'Approving Retrenchment...',
+      rejecting: 'Rejecting Retrenchment...',
+      loading: 'Loading Retrenchments...',
+      creating: 'Creating Retrenchment...',
+    }[this.loadingOperation ?? 'loading'];
+    this._loadingTitleCache = value;
+    return value;
+  }
+
+  get getLoadingMessage(): string {
+    if (this._loadingMessageCache && this.loadingOperation === null) {
+      return this._loadingMessageCache;
+    }
+    const value = {
+      approving: 'Please wait while we approve the retrenchment request.',
+      rejecting: 'Please wait while we reject the retrenchment request.',
+      creating: 'Please wait while we create the retrenchment request.',
+      loading: 'Please wait while we fetch retrenchment data.',
+    }[this.loadingOperation ?? 'loading'];
+    this._loadingMessageCache = value;
+    return value;
+  }
+
+  // =====================================================
+  // TABLE SETUP
+  // =====================================================
 
   tableHeader: TableHeader[] = [
     { key: 'id', label: 'RETRENCHMENT ID' },
@@ -167,11 +167,7 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
   ];
 
   filterTabs = [
-    {
-      label: 'All',
-      value: '',
-      icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z',
-    },
+    { label: 'All', value: '', icon: 'M12 2C6.48 2 2 6.48...' },
     { label: 'Pastor', value: 'PASTOR', icon: 'M5 13l4 4L19 7' },
     { label: 'Senior Pastor', value: 'SENIOR_PASTOR', icon: 'M5 13l4 4L19 7' },
     { label: 'Cleaner', value: 'CLEANER', icon: 'M5 13l4 4L19 7' },
@@ -181,49 +177,48 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
     { label: 'Overseer', value: 'OVERSEER', icon: 'M5 13l4 4L19 7' },
   ];
 
+  // =====================================================
+  // MAIN METHODS
+  // =====================================================
+
+  private cacheRoleBasedValues() {
+    this._shouldShowCreateButton = undefined;
+    this._shouldShowModalButtons = undefined;
+  }
+
   loadRetrenchments() {
     this.isLoading = true;
     this.loadingOperation = 'loading';
 
-    const retrenchmentsSub = this.retrenchmentService
-      .getAllRetrenchments()
-      .subscribe({
-        next: (response) => {
-          if (response.status === 'success' && response.data) {
-            this.allRetrenchments = response.data;
-            this.employees = this.transformRetrenchmentsToTableData(
-              response.data
-            );
-            this.applyFilters();
-          } else {
-            this.alertService.error('Failed to load retrenchments');
-          }
-          this.isLoading = false;
-          this.loadingOperation = null;
-        },
-        error: (error) => {
-          console.error('Error loading retrenchments:', error);
+    const retrenchmentsSub = this.retrenchmentService.getAllRetrenchments().subscribe({
+      next: (response) => {
+        if (response.status === 'success' && response.data) {
+          this.allRetrenchments = response.data;
+          this.employees = this.transformRetrenchmentsToTableData(response.data);
+          this.applyFilters();
+        } else {
           this.alertService.error('Failed to load retrenchments');
-          this.isLoading = false;
-          this.loadingOperation = null;
-        },
-      });
+        }
+        this.isLoading = false;
+        this.loadingOperation = null;
+      },
+      error: () => {
+        this.alertService.error('Failed to load retrenchments');
+        this.isLoading = false;
+        this.loadingOperation = null;
+      },
+    });
 
     this.subscriptions.push(retrenchmentsSub);
   }
 
-  transformRetrenchmentsToTableData(
-    retrenchments: RetrenchmentRecord[]
-  ): TableData[] {
+  transformRetrenchmentsToTableData(retrenchments: RetrenchmentRecord[]): TableData[] {
     return retrenchments.map((retrenchment) => ({
       id: retrenchment.id.toString(),
       name: `${retrenchment.employee.firstName} ${retrenchment.employee.lastName}`,
-      retrenchmentType: this.formatRetrenchmentType(
-        retrenchment.retrenchmentType
-      ),
-      status: this.mapRetrenchmentStatus(retrenchment.status),
+      retrenchmentType: this.formatRetrenchmentType(retrenchment.retrenchmentType),
+      status: this.mapRetrenchmentStatus(retrenchment.status) as 'Pending' | 'Approved' | 'Rejected' | 'Active' | 'On leave' | 'Retired' | 'On Discipline' | 'Assigned' | 'Unassigned',
       imageUrl: this.formatImageUrl(retrenchment.employee.photoUrl),
-      // Store the original retrenchment record for later use
       originalData: retrenchment,
     }));
   }
@@ -235,36 +230,19 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
       .join(' ');
   }
 
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric',
-    });
-  }
-
-  mapRetrenchmentStatus(status: string): TableData['status'] {
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-        return 'Pending';
-      case 'APPROVED':
-        return 'Approved';
-      case 'REJECTED':
-        return 'Rejected';
-      default:
-        return 'Pending';
-    }
+  mapRetrenchmentStatus(status: string): string {
+    const map: Record<string, string> = {
+      PENDING: 'Pending',
+      APPROVED: 'Approved',
+      REJECTED: 'Rejected',
+    };
+    return map[status.toUpperCase()] || 'Pending';
   }
 
   formatImageUrl(url: string | null): string {
-    if (!url || url === '') {
-      return 'assets/svg/gender.svg';
-    }
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return url;
-    }
-    const baseUrl =environment.hostingAPI;
+    if (!url) return 'assets/svg/gender.svg';
+    if (url.startsWith('http')) return url;
+    const baseUrl = environment.hostingAPI;
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 
@@ -281,31 +259,19 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
   applyFilters() {
     let filtered = this.employees;
     if (this.selectedStatus) {
-      filtered = filtered.filter((employee) => {
-        // Convert back to API format for comparison
-        const apiStatus =
-          this.selectedStatus === 'Pending'
-            ? 'PENDING'
-            : this.selectedStatus === 'Approved'
-            ? 'APPROVED'
-            : 'REJECTED';
-        return employee.status === this.selectedStatus;
-      });
+      filtered = filtered.filter((e) => e.status === this.selectedStatus);
     }
     if (this.selectedFilter) {
-      filtered = filtered.filter((employee) => {
-        // Filter by retrenchment type
-        return employee.retrenchmentType === this.selectedFilter;
-      });
+      filtered = filtered.filter((e) => e.retrenchmentType === this.selectedFilter);
     }
     if (this.searchValue) {
       const search = this.searchValue.toLowerCase();
       filtered = filtered.filter(
-        (employee) =>
-          employee.name?.toLowerCase().includes(search) ||
-          employee.id.toLowerCase().includes(search) ||
-          employee.retrenchmentType?.toLowerCase().includes(search) ||
-          employee.status?.toLowerCase().includes(search)
+        (e) =>
+          e.name?.toLowerCase().includes(search) ||
+          e.id.toLowerCase().includes(search) ||
+          e.retrenchmentType?.toLowerCase().includes(search) ||
+          e.status?.toLowerCase().includes(search)
       );
     }
     this.filteredEmployees = filtered;
@@ -317,11 +283,7 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
   }
 
   onMenuAction(event: { action: string; row: TableData }) {
-    console.log(event);
-
-    if (event.action === 'View') {
-      this.loadRetrenchmentDetails(event.row);
-    }
+    if (event.action === 'View') this.loadRetrenchmentDetails(event.row);
   }
 
   loadRetrenchmentDetails(row: TableData) {
@@ -334,8 +296,7 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.status === 'success' && response.data) {
-            this.selectedRetrenchmentRecord =
-              this.convertDetailedToRetrenchmentRecord(response.data);
+            this.selectedRetrenchmentRecord = this.convertDetailedToRetrenchmentRecord(response.data);
             this.selectedEmployeeDetails = response.data.employee as any;
             this.selectedEmployeeRecord = row;
             this.showEmployeeDetails = true;
@@ -345,8 +306,7 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.loadingOperation = null;
         },
-        error: (error) => {
-          console.error('Error loading retrenchment details:', error);
+        error: () => {
           this.alertService.error('Failed to load retrenchment details');
           this.isLoading = false;
           this.loadingOperation = null;
@@ -356,29 +316,24 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
     this.subscriptions.push(detailsSub);
   }
 
-  convertDetailedToRetrenchmentRecord(
-    detailed: RetrenchmentRecordDetailed
-  ): RetrenchmentRecord {
+  convertDetailedToRetrenchmentRecord(d: RetrenchmentRecordDetailed): RetrenchmentRecord {
     return {
-      id: detailed.id,
-      retrenchmentId: detailed.retrenchmentId,
-      retrenchmentType: detailed.retrenchmentType,
-      reason: detailed.reason,
-      status: detailed.status,
-      createdAt: detailed.createdAt,
-      updatedAt: detailed.updatedAt,
-      deletedAt: detailed.deletedAt,
-      employee: detailed.employee,
+      id: d.id,
+      retrenchmentId: d.retrenchmentId,
+      retrenchmentType: d.retrenchmentType,
+      reason: d.reason,
+      status: d.status,
+      createdAt: d.createdAt,
+      updatedAt: d.updatedAt,
+      deletedAt: d.deletedAt,
+      employee: d.employee,
     };
   }
 
-  actionButton: MenuItem[] = [
-    { label: 'View', action: 'View', icon: '/public/assets/svg/eyeOpen.svg' },
-  ];
+  actionButton: MenuItem[] = [{ label: 'View', action: 'View', icon: '/public/assets/svg/eyeOpen.svg' }];
 
   actionToPerform(result: boolean) {
     if (!this.selectedRetrenchmentRecord) return;
-
     this.pendingAction = result ? 'approve' : 'reject';
     this.promptConfig = {
       title: 'Confirm',
@@ -392,12 +347,10 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
   }
 
   onModalConfirm(confirmed: boolean) {
-    if (confirmed && this.pendingAction && this.selectedRetrenchmentRecord) {
-      if (this.pendingAction === 'approve') {
-        this.approveRetrenchment();
-      } else {
-        this.rejectRetrenchment();
-      }
+    if (confirmed && this.pendingAction) {
+      this.pendingAction === 'approve'
+        ? this.approveRetrenchment()
+        : this.rejectRetrenchment();
     }
     this.showModal = false;
     this.pendingAction = null;
@@ -405,68 +358,52 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
 
   approveRetrenchment() {
     if (!this.selectedRetrenchmentRecord) return;
-
     this.isLoading = true;
     this.loadingOperation = 'approving';
-
-    const approveSub = this.retrenchmentService
-      .approveRetrenchment(this.selectedRetrenchmentRecord.id)
+    const sub = this.retrenchmentService
+      .approveRetrenchment(this.selectedRetrenchmentRecord.id, { status: 'APPROVED' })
       .subscribe({
-        next: (response) => {
-          if (response.status === 'success') {
-            this.alertService.success(
-              'Retrenchment request approved successfully'
-            );
+        next: (res) => {
+          if (res.status === 'success') {
+            this.alertService.success('Retrenchment approved successfully');
             this.showEmployeeDetails = false;
-            this.loadRetrenchments(); // Reload the list
-          } else {
-            this.alertService.error('Failed to approve retrenchment request');
-          }
+            this.loadRetrenchments();
+          } else this.alertService.error('Approval failed');
           this.isLoading = false;
           this.loadingOperation = null;
         },
-        error: (error) => {
-          console.error('Error approving retrenchment:', error);
-          this.alertService.error('Failed to approve retrenchment request');
+        error: () => {
+          this.alertService.error('Approval failed');
           this.isLoading = false;
           this.loadingOperation = null;
         },
       });
-
-    this.subscriptions.push(approveSub);
+    this.subscriptions.push(sub);
   }
 
   rejectRetrenchment() {
     if (!this.selectedRetrenchmentRecord) return;
-
     this.isLoading = true;
     this.loadingOperation = 'rejecting';
-
-    const rejectSub = this.retrenchmentService
-      .rejectRetrenchment(this.selectedRetrenchmentRecord.id)
+    const sub = this.retrenchmentService
+      .rejectRetrenchment(this.selectedRetrenchmentRecord.id, { status: 'REJECTED' })
       .subscribe({
-        next: (response) => {
-          if (response.status === 'success') {
-            this.alertService.success(
-              'Retrenchment request rejected successfully'
-            );
+        next: (res) => {
+          if (res.status === 'success') {
+            this.alertService.success('Retrenchment rejected successfully');
             this.showEmployeeDetails = false;
-            this.loadRetrenchments(); // Reload the list
-          } else {
-            this.alertService.error('Failed to reject retrenchment request');
-          }
+            this.loadRetrenchments();
+          } else this.alertService.error('Rejection failed');
           this.isLoading = false;
           this.loadingOperation = null;
         },
-        error: (error) => {
-          console.error('Error rejecting retrenchment:', error);
-          this.alertService.error('Failed to reject retrenchment request');
+        error: () => {
+          this.alertService.error('Rejection failed');
           this.isLoading = false;
           this.loadingOperation = null;
         },
       });
-
-    this.subscriptions.push(rejectSub);
+    this.subscriptions.push(sub);
   }
 
   onModalClose() {
@@ -479,45 +416,33 @@ export class EmployeeRetrenchmentComponent implements OnInit, OnDestroy {
   }
 
   onCloseCreateRetrenchmentRequest() {
-    console.log('Closing retrenchment request form');
     this.showCreateRetrenchmentRequest = false;
   }
 
   onCreateRetrenchmentRequestSubmitted(data: any) {
     this.isLoading = true;
     this.loadingOperation = 'creating';
-
-    // Transform the data from leave-details component to match API expectations
     const retrenchmentData = {
       employeeId: parseInt(data.employeeId),
       reason: data.reason,
       retrenchmentType: data.retrenchmentType,
     };
-
-    const createSub = this.retrenchmentService
-      .createRetrenchment(retrenchmentData)
-      .subscribe({
-        next: (response) => {
-          if (response.status === 'success') {
-            this.alertService.success(
-              'Retrenchment request created successfully'
-            );
-            this.showCreateRetrenchmentRequest = false;
-            this.loadRetrenchments(); // Reload the list
-          } else {
-            this.alertService.error('Failed to create retrenchment request');
-          }
-          this.isLoading = false;
-          this.loadingOperation = null;
-        },
-        error: (error) => {
-          console.error('Error creating retrenchment:', error);
-          this.alertService.error('Failed to create retrenchment request');
-          this.isLoading = false;
-          this.loadingOperation = null;
-        },
-      });
-
-    this.subscriptions.push(createSub);
+    const sub = this.retrenchmentService.createRetrenchment(retrenchmentData).subscribe({
+      next: (res) => {
+        if (res.status === 'success') {
+          this.alertService.success('Retrenchment created successfully');
+          this.showCreateRetrenchmentRequest = false;
+          this.loadRetrenchments();
+        } else this.alertService.error('Creation failed');
+        this.isLoading = false;
+        this.loadingOperation = null;
+      },
+      error: () => {
+        this.alertService.error('Creation failed');
+        this.isLoading = false;
+        this.loadingOperation = null;
+      },
+    });
+    this.subscriptions.push(sub);
   }
 }

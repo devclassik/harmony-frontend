@@ -14,7 +14,7 @@ import { environment } from '../../environments/environment';
   providedIn: 'root',
 })
 export class AnalyticsService {
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) { }
 
   getOverview(): Observable<GetAnalyticsOverviewResponse> {
     return this.apiService.get<GetAnalyticsOverviewResponse>(
@@ -28,9 +28,8 @@ export class AnalyticsService {
       status: 'APPROVED',
     });
 
-    const url = `${
-      environment.routes.analytics.getLeaveStatistics
-    }?${params.toString()}`;
+    const url = `${environment.routes.analytics.getLeaveStatistics
+      }?${params.toString()}`;
 
     return this.apiService.get<GetLeaveStatisticsResponse>(url);
   }
@@ -48,7 +47,7 @@ export class AnalyticsService {
       year: year.toString(),
     });
 
-    const url = `/analytics/discipline-stat?${params.toString()}`;
+    const url = `${environment.routes.analytics.getDisciplineStatistics}?${params.toString()}`;
     return this.apiService.get<GetDisciplineStatisticsResponse>(url);
   }
 
@@ -61,7 +60,7 @@ export class AnalyticsService {
       year: year.toString(),
     });
 
-    const url = `/analytics/performance-stat?${params.toString()}`;
+    const url = `${environment.routes.analytics.getPerformanceStatistics}?${params.toString()}`;
     return this.apiService.get<GetPerformanceStatisticsResponse>(url);
   }
 }

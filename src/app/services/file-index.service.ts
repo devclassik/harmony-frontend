@@ -45,7 +45,7 @@ export class FileIndexService {
    * Get all file-index items
    */
   getFileIndex(): Observable<FileIndexResponse> {
-    return this.http.get<FileIndexResponse>(`${this.apiUrl}/file-index`);
+    return this.http.get<FileIndexResponse>(`${this.apiUrl}/${environment.routes.files.fileIndex}`);
   }
 
   /**
@@ -55,7 +55,7 @@ export class FileIndexService {
     request: CreateFileIndexRequest
   ): Observable<CreateFileIndexResponse> {
     return this.http.post<CreateFileIndexResponse>(
-      `${this.apiUrl}/file-index`,
+      `${this.apiUrl}${environment.routes.files.fileIndex}`,
       request
     );
   }
@@ -67,7 +67,7 @@ export class FileIndexService {
     fileIndexId: number
   ): Observable<{ status: string; message: string }> {
     return this.http.delete<{ status: string; message: string }>(
-      `${this.apiUrl}/file-index/${fileIndexId}`
+      `${this.apiUrl}${environment.routes.files.fileIndex}/${fileIndexId}`
     );
   }
 
@@ -84,7 +84,7 @@ export class FileIndexService {
     } else {
       // If it's a relative URL, construct the full URL
       const fullUrl = `${this.apiUrl.replace('/api/v1', '')}${downloadUrl}`;
-      console.log('Constructed download URL:', fullUrl);
+      // console.log('Constructed download URL:', fullUrl);
       window.open(fullUrl, '_blank');
     }
   }

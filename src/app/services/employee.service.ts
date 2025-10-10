@@ -102,7 +102,7 @@ export class EmployeeService {
    * @returns boolean indicating if profile is complete
    */
   isProfileComplete(employee: EmployeeDetails): boolean {
-    console.log('🔍 Checking profile completion for employee:', employee);
+    // console.log('🔍 Checking profile completion for employee:', employee);
 
     // Define essential fields that should not be null for a complete profile
     // Based on the current form structure we've implemented (Employee Information section)
@@ -118,15 +118,15 @@ export class EmployeeService {
     // Check if any essential field is null or empty
     for (const field of essentialFields) {
       const value = employee[field as keyof EmployeeDetails];
-      console.log(`📝 Field ${field}:`, value, `(type: ${typeof value})`);
+      // console.log(`📝 Field ${field}:`, value, `(type: ${typeof value})`);
 
       if (value === null || value === undefined || value === '') {
-        console.log(`❌ Profile incomplete - missing field: ${field}`);
+        // console.log(`❌ Profile incomplete - missing field: ${field}`);
         return false;
       }
     }
 
-    console.log('✅ Profile is complete!');
+    // console.log('✅ Profile is complete!');
     // Profile is considered complete if basic personal information is filled
     // We've relaxed the requirements to match the current form implementation
     return true;
@@ -169,6 +169,6 @@ export class EmployeeService {
       reason: reason,
     };
 
-    return this.apiService.post<any>('/retirement', requestData);
+    return this.apiService.post<any>(environment.routes.retirement.getAll, requestData);
   }
 }

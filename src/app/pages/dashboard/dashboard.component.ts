@@ -86,7 +86,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ) {
     this.workerRole = this.authService.getWorkerRole();
 
-    console.log('workerRole', this.workerRole);
+    // console.log('workerRole', this.workerRole);
     this.currentWorker = this.authService.getCurrentWorker();
     this.currentEmployeeId = this.authService.getCurrentEmployeeId();
     // Initialize worker name from auth service
@@ -130,7 +130,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     if (!employeeId) {
       this.isLoadingProfile = false;
-      console.error('No employee ID available for current worker');
+      // console.error('No employee ID available for current worker');
       // Show animation if there's no employee ID (assume incomplete)
       this.showWelcomeAnimation = true;
       return;
@@ -146,21 +146,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.updateEmployeeInfo();
 
             // Check if profile is complete and show animation if not
-            console.log('🔍 Dashboard: About to check profile completion');
-            console.log(
-              '📊 Dashboard: Employee data being passed:',
-              response.data
-            );
+            // console.log('🔍 Dashboard: About to check profile completion');
+            // console.log(
+            //   '📊 Dashboard: Employee data being passed:',
+            //   response.data
+            // );
 
             const isComplete = this.employeeService.isProfileComplete(
               response.data
             );
 
-            console.log('📊 Dashboard: Profile complete result:', isComplete);
-            console.log(
-              '📊 Dashboard: Setting showWelcomeAnimation to:',
-              !isComplete
-            );
+            // console.log('📊 Dashboard: Profile complete result:', isComplete);
+            // console.log(
+            //   '📊 Dashboard: Setting showWelcomeAnimation to:',
+            //   !isComplete
+            // );
 
             this.showWelcomeAnimation = !isComplete;
           }
@@ -178,7 +178,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private updateEmployeeInfo() {
     if (this.employeeData) {
-      console.log('Employee photoUrl from API:', this.employeeData.photoUrl); // Debug log
+      // console.log('Employee photoUrl from API:', this.employeeData.photoUrl); // Debug log
 
       this.employeeInfo = {
         id: this.employeeData.employeeId,
@@ -199,10 +199,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
             | 'On Discipline') || 'Active',
       };
 
-      console.log(
-        'Updated employeeInfo profileImage:',
-        this.employeeInfo.profileImage
-      ); // Debug log
+      // console.log(
+      //   'Updated employeeInfo profileImage:',
+      //   this.employeeInfo.profileImage
+      // );
 
       // Update worker name when employee data is available
       this.updateWorkerName();
@@ -226,7 +226,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Update worker name property (called only when data actually changes)
   private updateWorkerName(): void {
     if (this.employeeData) {
-      console.log('Employee data loaded:', this.employeeData); // This will log only once when data is actually loaded
+      // console.log('Employee data loaded:', this.employeeData); // This will log only once when data is actually loaded
 
       this.workerName =
         this.employeeData.profferedName ||
@@ -356,8 +356,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ];
 
   onMenuAction(event: { action: string; row: TableData }) {
-    console.log(event);
-
     if (event.action === 'View') {
       // Find the raw leave data for this row
       const rawLeave = this.rawLeaveData.find(
@@ -390,7 +388,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   onYearChange(year: number) {
     this.selectedYear = year;
-    console.log('Year changed to:', this.selectedYear);
+    // console.log('Year changed to:', this.selectedYear);
     this.loadLeaveStatistics();
   }
 
@@ -399,10 +397,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .getLeaveStatistics(this.selectedYear)
       .subscribe({
         next: (response) => {
-          console.log('Leave Statistics Response:', response);
+          // console.log('Leave Statistics Response:', response);
           if (response.status === 'success' && response.data) {
             this.leaveStatisticsData = response.data;
-            console.log('Leave Statistics Data:', response.data);
+            // console.log('Leave Statistics Data:', response.data);
           }
         },
         error: (error) => {
@@ -417,10 +415,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .getEmployeeDemographics()
       .subscribe({
         next: (response) => {
-          console.log('Employee Demographics Response:', response);
+          // console.log('Employee Demographics Response:', response);
           if (response.status === 'success' && response.data) {
             this.demographicsData = response.data;
-            console.log('Employee Demographics Data:', response.data);
+            // console.log('Employee Demographics Data:', response.data);
           }
         },
         error: (error) => {

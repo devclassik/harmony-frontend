@@ -44,7 +44,7 @@ export class AuthService {
       )
       .pipe(
         catchError((error) => {
-          console.error('Registration error:', error);
+          // console.error('Registration error:', error);
           return of({
             success: false,
             message:
@@ -62,7 +62,7 @@ export class AuthService {
       )
       .pipe(
         catchError((error) => {
-          console.error('OTP verification error:', error);
+          // console.error('OTP verification error:', error);
           return of({
             success: false,
             message:
@@ -104,7 +104,7 @@ export class AuthService {
           }
         }),
         catchError((error) => {
-          console.error('Login error:', error);
+          // console.error('Login error:', error);
           const errorMessage =
             error?.error?.message ||
             'Login failed: Please check your credentials';
@@ -243,7 +243,7 @@ export class AuthService {
         try {
           this.currentPermissions = JSON.parse(permissionsStr);
         } catch (error) {
-          console.error('Error parsing permissions from localStorage:', error);
+          // console.error('Error parsing permissions from localStorage:', error);
           this.currentPermissions = [];
         }
       }

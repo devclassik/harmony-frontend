@@ -343,7 +343,7 @@
               d="M19 9l-7 7-7-7"
             />
           </svg>
-          <span class="font-medium text-black">Employee Information</span>
+          <span class="font-medium text-black">Employee Information </span>
         </button>
         <div
           *ngIf="openSection === 'employeeInfo'"
@@ -1087,7 +1087,7 @@
                 <div>
                   <div class="text-xs text-gray-400">Start Date</div>
                   <div class="font-medium text-gray-900">
-                    {{ appraisal.startDate | date : "shortDate" }}
+                    {{ appraisal?.startDate | date : "shortDate" }}
                   </div>
                 </div>
                 <div>
@@ -1267,6 +1267,68 @@
                   {{ discipline.reason }}
                 </div>
               </div>
+
+              <div
+                *ngIf="
+                  discipline?.status === 'APPROVED' && discipline?.letterUrl
+                "
+                class="mt-4"
+              >
+                <div class="text-xs text-gray-400 mb-1">Documents</div>
+                <div class="border border-gray-200 rounded-lg p-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-12 h-16 bg-red-50 border border-red-200 rounded flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-6 h-6 text-red-500"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-medium text-gray-900 truncate">
+                        {{ discipline?.status }} letter
+                      </div>
+                      <div class="text-xs text-gray-500 mt-1">
+                        PDF Document • 245 KB
+                      </div>
+                      <div class="text-xs text-gray-400 mt-1">
+                        Uploaded on
+                        {{ discipline?.createdAt | date : "medium" }}
+                      </div>
+                    </div>
+
+                    <button
+                      class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                      (click)="downloadLetter(discipline)"
+                      title="Download Document"
+                      type="button"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V13"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1279,6 +1341,159 @@
       </div>
 
       <!-- Promotion Request Section - Shows all promotion requests for this employee -->
+      <div
+        class="employee-section mb-4"
+        *ngIf="allPromotions && allPromotions.length > 0"
+      >
+        <button
+          class="flex items-center w-full text-left py-2 px-1 focus:outline-none"
+          (click)="
+            openSection === 'promotionHistory'
+              ? (openSection = null)
+              : (openSection = 'promotionHistory')
+          "
+        >
+          <svg
+            class="w-5 h-5 mr-2 transition-transform duration-200"
+            [ngClass]="{ 'rotate-180': openSection === 'promotionHistory' }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+          <span class="font-medium text-black">Promotion History</span>
+        </button>
+        <div
+          *ngIf="openSection === 'promotionHistory'"
+          class="mt-4 bg-white p-6 animate-fade-in"
+        >
+          <div
+            class="space-y-4"
+            *ngFor="let promotion of allPromotions; let i = index"
+          >
+            <div
+              class="border border-gray-200 rounded-lg p-4"
+              [class.border-blue-500]="promotion.id === promotionData?.id"
+            >
+              <!-- Two-column layout -->
+              <div class="grid grid-cols-2 gap-4">
+                <!-- Left Column - New Position -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    New Position
+                  </div>
+                  <div class="font-semibold text-gray-900">
+                    {{ formatPosition(promotion.newPosition) }}
+                  </div>
+                </div>
+
+                <!-- Right Column - Status -->
+                <div>
+                  <div class="text-sm font-medium text-gray-600 mb-2">
+                    Status
+                  </div>
+                  <div>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-amber-100 text-amber-800':
+                          promotion.status === 'PENDING',
+                        'bg-green-100 text-green-800':
+                          promotion.status === 'APPROVED',
+                        'bg-orange-100 text-orange-800':
+                          promotion.status === 'REJECTED'
+                      }"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full mr-2"
+                        [ngClass]="{
+                          'bg-amber-500': promotion.status === 'PENDING',
+                          'bg-green-500': promotion.status === 'APPROVED',
+                          'bg-orange-500': promotion.status === 'REJECTED'
+                        }"
+                      ></span>
+                      {{
+                        promotion.status === "PENDING"
+                          ? "Pending"
+                          : promotion.status === "APPROVED"
+                          ? "Approved"
+                          : "Rejected"
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                promotionData?.status === 'APPROVED' && promotionData?.letterUrl
+              "
+              class="mt-4"
+            >
+              <div class="text-xs text-gray-400 mb-1">Documents</div>
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-12 h-16 bg-red-50 border border-red-200 rounded flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-6 h-6 text-red-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-gray-900 truncate">
+                      {{ promotionData?.status }} letter
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">
+                      PDF Document • 245 KB
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">
+                      Uploaded on
+                      {{ promotionData?.createdAt | date : "medium" }}
+                    </div>
+                  </div>
+
+                  <button
+                    class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                    (click)="downloadLetter(promotionData)"
+                    title="Download Document"
+                    type="button"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V13"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div
         class="employee-section mb-4"
         *ngIf="allPromotions && allPromotions.length > 0"
@@ -1365,6 +1580,67 @@
                       }}
                     </span>
                   </div>
+                </div>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                promotionData?.status === 'APPROVED' && promotionData?.letterUrl
+              "
+              class="mt-4"
+            >
+              <div class="text-xs text-gray-400 mb-1">Documents</div>
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-12 h-16 bg-red-50 border border-red-200 rounded flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-6 h-6 text-red-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-gray-900 truncate">
+                      {{ promotionData?.status }} letter
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">
+                      PDF Document • 245 KB
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">
+                      Uploaded on
+                      {{ promotionData?.createdAt | date : "medium" }}
+                    </div>
+                  </div>
+
+                  <button
+                    class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                    (click)="downloadLetter(promotionData)"
+                    title="Download Document"
+                    type="button"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V13"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1499,6 +1775,65 @@
                   </span>
                 </div>
               </div>
+              <div
+                *ngIf="transfer?.status === 'APPROVED' && transfer?.letterUrl"
+                class="mt-4"
+              >
+                <div class="text-xs text-gray-400 mb-1">Documents</div>
+                <div class="border border-gray-200 rounded-lg p-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-12 h-16 bg-red-50 border border-red-200 rounded flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-6 h-6 text-red-500"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-medium text-gray-900 truncate">
+                        {{ transfer?.status }} letter
+                      </div>
+                      <div class="text-xs text-gray-500 mt-1">
+                        PDF Document • 245 KB
+                      </div>
+                      <div class="text-xs text-gray-400 mt-1">
+                        Uploaded on
+                        {{ transfer?.createdAt | date : "medium" }}
+                      </div>
+                    </div>
+
+                    <button
+                      class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                      (click)="downloadLetter(transfer)"
+                      title="Download Document"
+                      type="button"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V13"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1618,6 +1953,66 @@
                         : "Rejected"
                     }}
                   </span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              *ngIf="transfer?.status === 'APPROVED' && transfer?.letterUrl"
+              class="mt-4"
+            >
+              <div class="text-xs text-gray-400 mb-1">Documents</div>
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-12 h-16 bg-red-50 border border-red-200 rounded flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      class="w-6 h-6 text-red-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-gray-900 truncate">
+                      {{ transfer?.status }} letter
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">
+                      PDF Document • 245 KB
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">
+                      Uploaded on
+                      {{ transfer?.createdAt | date : "medium" }}
+                    </div>
+                  </div>
+
+                  <button
+                    class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                    (click)="downloadLetter(transfer)"
+                    title="Download Document"
+                    type="button"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V13"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1798,6 +2193,69 @@
                   </div>
                 </div>
               </div>
+              <div
+                *ngIf="
+                  retirement?.status !== 'REJECTED' &&
+                  retirement?.letterUrl
+                "
+                class="mt-4"
+              >
+                <div class="text-xs text-gray-400 mb-1">Documents</div>
+                <div class="border border-gray-200 rounded-lg p-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-12 h-16 bg-red-50 border border-red-200 rounded flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-6 h-6 text-red-500"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-medium text-gray-900 truncate">
+                        {{ retirement?.status }} letter
+                      </div>
+                      <div class="text-xs text-gray-500 mt-1">
+                        PDF Document • 245 KB
+                      </div>
+                      <div class="text-xs text-gray-400 mt-1">
+                        Uploaded on
+                        {{ retirement?.createdAt | date : "medium" }}
+                      </div>
+                    </div>
+
+                    <button
+                      class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                      (click)="downloadLetter(retirement)"
+                      title="Download Document"
+                      type="button"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V13"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -2028,7 +2486,7 @@
                     Start Date
                   </div>
                   <div class="font-semibold text-gray-900">
-                    {{ leave.startDate | date : "shortDate" }}
+                    {{ leave?.startDate | date : "shortDate" }}
                   </div>
                 </div>
                 <div>
@@ -2117,7 +2575,7 @@
                   Start Date
                 </div>
                 <div class="font-semibold text-gray-900">
-                  {{ leaveData.startDate }}
+                  {{ leaveData?.startDate }}
                 </div>
               </div>
               <div>
@@ -2254,7 +2712,7 @@
                       Start Date
                     </div>
                     <div class="font-semibold text-gray-900">
-                      {{ absence.startDate | date : "shortDate" }}
+                      {{ absence?.startDate | date : "shortDate" }}
                     </div>
                   </div>
                   <div>
@@ -2346,7 +2804,7 @@
                   Start Date
                 </div>
                 <div class="font-semibold text-gray-900">
-                  {{ absenceData.startDate }}
+                  {{ absenceData?.startDate }}
                 </div>
               </div>
               <div>
@@ -2487,7 +2945,7 @@
                       Start Date
                     </div>
                     <div class="font-semibold text-gray-900">
-                      {{ sickLeave.startDate | date : "shortDate" }}
+                      {{ sickLeave?.startDate | date : "shortDate" }}
                     </div>
                   </div>
                   <div>
@@ -2579,7 +3037,7 @@
                   Start Date
                 </div>
                 <div class="font-semibold text-gray-900">
-                  {{ sickData.startDate }}
+                  {{ sickData?.startDate }}
                 </div>
               </div>
               <div>
@@ -3218,7 +3676,7 @@
         </div>
       </div>
 
-      <div class="flex gap-3 w-2/3 m-auto" *ngIf="showButton">
+      <div class="flex gap-4 w-2/3 m-auto" *ngIf="showButton">
         <button
           class="flex-1 px-4 py-3 border border-green-600 text-green-600 rounded-lg font-medium transition-colors"
           [class.opacity-50]="noButtonDisabled"

@@ -42,7 +42,7 @@ export class TemplateService {
    * Get all templates
    */
   getTemplates(): Observable<TemplateResponse> {
-    return this.http.get<TemplateResponse>(`${this.apiUrl}/template`);
+    return this.http.get<TemplateResponse>(`${this.apiUrl}${environment.routes.template.getAll}`);
   }
 
   /**
@@ -74,7 +74,7 @@ export class TemplateService {
     formData.append('file', request.file);
 
     return this.http.post<CreateTemplateResponse>(
-      `${this.apiUrl}/template`,
+      `${this.apiUrl}${environment.routes.template.getAll}`,
       formData
     );
   }
@@ -86,7 +86,7 @@ export class TemplateService {
     templateId: number
   ): Observable<{ status: string; message: string }> {
     return this.http.delete<{ status: string; message: string }>(
-      `${this.apiUrl}/template/${templateId}`
+      `${this.apiUrl}${environment.routes.template.getAll}/${templateId}`
     );
   }
 }

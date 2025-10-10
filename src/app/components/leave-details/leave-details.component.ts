@@ -1480,12 +1480,53 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     this.selectedAttendees = [];
   }
 
-  downloadDocument(doc: any) {
-    console.log('Downloading document:', doc.letterUrl);
-    if (!doc || (!doc.downloadUrl && !doc.letterUrl)) {
+  downloadLetter(doc: any) {
+    if (!doc || !doc.letterUrl) {
       console.error('No download URL found for document as:', doc);
       return;
     }
+
+
+    // Try to find the actual download URL
+    let downloadUrl = '';
+    let filename = 'document';
+
+    if (doc.letterUrl) {
+      downloadUrl = doc.letterUrl;
+      filename = doc.letterUrl || 'document';
+    } else {
+      this.alertService.info('No document attached');
+      console.error('No download URL found for document:', doc);
+      return;
+    }
+      try {
+      if (downloadUrl.includes('firebasestorage.googleapis.com')) {
+        // Method 1: Try adding download parameter to Firebase URL
+        const firebaseDownloadUrl = this.getFirebaseDownloadUrl(
+          downloadUrl,
+          filename
+        );
+        const link = document.createElement('a');
+        link.href = firebaseDownloadUrl;
+        link.target = '_blank';
+        link.click();
+      } else {
+        // Method 2: For other URLs, use fetch and blob
+        this.downloadFileViaFetch(downloadUrl, filename);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: Just open in new tab
+      window.open(downloadUrl, '_blank');
+    }
+  }
+
+  downloadDocument(doc: any) {
+    if (!doc || !doc.downloadUrl) {
+      console.error('No download URL found for document as:', doc);
+      return;
+    }
+
 
     // Try to find the actual download URL
     let downloadUrl = '';
@@ -1497,12 +1538,8 @@ export class LeaveDetailsComponent implements OnInit, OnChanges {
     } else if (doc.url) {
       downloadUrl = doc.url;
       filename = doc.name || doc.documentName || 'document';
-    } else if (doc.letterUrl) {
-      downloadUrl = doc.letterUrl;
-      console.log('i fond e');
-
-      filename = doc.letterName || 'document';
     } else {
+      this.alertService.info('No document attached');
       console.error('No download URL found for document:', doc);
       return;
     }

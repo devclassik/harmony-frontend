@@ -192,17 +192,17 @@ export class LeaveService {
       0
     );
 
-    console.log('Calculating used leave days:', {
-      totalLeaves: leaves.length,
-      approvedLeaves: approvedLeaves.length,
-      totalUsedDays: totalUsed,
-      approvedLeavesDetail: approvedLeaves.map((l) => ({
-        id: l.id,
-        duration: l.duration,
-        status: l.status,
-        startDate: l.startDate,
-      })),
-    });
+    // console.log('Calculating used leave days:', {
+    //   totalLeaves: leaves.length,
+    //   approvedLeaves: approvedLeaves.length,
+    //   totalUsedDays: totalUsed,
+    //   approvedLeavesDetail: approvedLeaves.map((l) => ({
+    //     id: l.id,
+    //     duration: l.duration,
+    //     status: l.status,
+    //     startDate: l.startDate,
+    //   })),
+    // });
 
     return totalUsed;
   }
@@ -480,7 +480,7 @@ export class LeaveService {
 
   // Approve sick leave request
   approveSickLeave(leaveId: number): Observable<LeaveApiResponse> {
-    const endpoint = `/leave/sick/${leaveId}`;
+    const endpoint = `${environment.routes.leave.sick}/${leaveId}`;
     return this.apiService.put<LeaveApiResponse>(endpoint, {
       status: 'APPROVED',
     });
@@ -488,7 +488,7 @@ export class LeaveService {
 
   // Reject sick leave request
   rejectSickLeave(leaveId: number): Observable<LeaveApiResponse> {
-    const endpoint = `/leave/sick/${leaveId}`;
+    const endpoint = `${environment.routes.leave.sick}/${leaveId}`;
     return this.apiService.put<LeaveApiResponse>(endpoint, {
       status: 'REJECTED',
     });
@@ -496,7 +496,7 @@ export class LeaveService {
 
   // Approve leave of absence request
   approveAbsenceLeave(leaveId: number): Observable<LeaveApiResponse> {
-    const endpoint = `/leave/absence/${leaveId}`;
+    const endpoint = `${environment.routes.leave.absence}/${leaveId}`;
     return this.apiService.put<LeaveApiResponse>(endpoint, {
       status: 'APPROVED',
     });
@@ -504,7 +504,7 @@ export class LeaveService {
 
   // Reject leave of absence request
   rejectAbsenceLeave(leaveId: number): Observable<LeaveApiResponse> {
-    const endpoint = `/leave/absence/${leaveId}`;
+    const endpoint = `${environment.routes.leave.absence}/${leaveId}`;
     return this.apiService.put<LeaveApiResponse>(endpoint, {
       status: 'REJECTED',
     });

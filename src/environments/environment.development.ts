@@ -58,6 +58,7 @@ export const environment = {
       uploadMultiple: '/upload/multiple',
       uploadAll: '/upload/all',
       delete: '/upload/delete',
+      fileIndex: '/file-index',
     },
     campMeeting: {
       getAll: '/camp-meeting',
@@ -71,6 +72,8 @@ export const environment = {
     analytics: {
       getAnalyticsOverview: '/analytics/overview',
       getLeaveStatistics: '/analytics/leave-stat',
+      getDisciplineStatistics: '/analytics/leave-stat',
+      getPerformanceStatistics: '/analytics/performance-stat',
       getEmployeeDemographics: '/analytics/employee-demographics',
     },
     appraisal: {
@@ -116,6 +119,15 @@ export const environment = {
       approve: '/retirement/{id}',
       reject: '/retirement/{id}',
     },
+    retrenchment: {
+      getAll: '/retrenchment',
+      getById: '/retirement/{id}',
+      create: '/retirement',
+      update: '/retirement/{id}',
+      delete: '/retirement/{id}',
+      approve: '/retirement/{id}',
+      reject: '/retirement/{id}',
+    },
     posts: {
       getAll: 'posts',
       getById: 'posts/{id}',
@@ -126,6 +138,15 @@ export const environment = {
     },
     permissions: {
       getAll: '/permission',
+      updateRolePermissions: '/permission/update-role-permissions',
+    },
+    messages: {
+      getAll: '/message',
+      markAsRead: '/message/mark-read',
+      updateRolePermissions: '/permission/update-role-permissions',
+    },
+    notification: {
+      getAll: '/notification',
       updateRolePermissions: '/permission/update-role-permissions',
     },
     accommodation: {

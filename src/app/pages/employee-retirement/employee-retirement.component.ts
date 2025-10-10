@@ -362,6 +362,7 @@ export class EmployeeRetirementComponent implements OnInit, OnDestroy {
       createdAt: detailed.createdAt,
       updatedAt: detailed.updatedAt,
       deletedAt: detailed.deletedAt,
+      letterUrl: detailed.letterUrl,
       employee: detailed.employee,
       recommendedReplacement: detailed.recommendedReplacement,
     };
